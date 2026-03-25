@@ -1,7 +1,4 @@
 import { Bot, Clock, ChevronRight, Cpu, Flame, Pause, CheckCircle2, XCircle } from "lucide-react";
-import { useOrionData } from "@/hooks/useOrionData";
-import { OrionDataWrapper } from "@/components/orion/DataWrapper";
-import { fetchSessions } from "@/domains/sessions/fetcher";
 import type { Session, SessionStatus, SessionType } from "@/domains/sessions/types";
 
 const statusConfig: Record<SessionStatus, { icon: React.ElementType; dot: string; text: string; bg: string; border: string; statusLabel: string }> = {
@@ -74,13 +71,11 @@ function SessionRow({ session }: { session: Session }) {
   );
 }
 
-export function SessionsList() {
-  const { state, data, source, lastUpdated, refetch } = useOrionData<Session[]>({
-    key: "sessions-list",
-    fetcher: fetchSessions,
-  });
+interface Props {
+  sessions: Session[];
+}
 
-  const sessions = data || [];
+export function SessionsList({ sessions }: Props) {
   const order: Record<SessionStatus, number> = { running: 0, paused: 1, failed: 2, completed: 3 };
   const sorted = [...sessions].sort((a, b) => order[a.status] - order[b.status]);
   const runningCount = sessions.filter(s => s.status === "running").length;
@@ -96,13 +91,11 @@ export function SessionsList() {
         <span className="text-xs font-mono text-primary animate-pulse-glow font-medium">● AO VIVO</span>
       </div>
 
-      <OrionDataWrapper state={state} source={source} lastUpdated={lastUpdated} onRetry={refetch}>
-        <div className="space-y-3">
-          {sorted.map((session) => (
-            <SessionRow key={session.id} session={session} />
-          ))}
-        </div>
-      </OrionDataWrapper>
+      <div className="space-y-3">
+        {sorted.map((session) => (
+          <SessionRow key={session.id} session={session} />
+        ))}
+      </div>
     </section>
   );
 }
