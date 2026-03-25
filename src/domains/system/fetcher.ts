@@ -1,19 +1,20 @@
 /**
- * System Domain — Data Fetchers
+ * System Domain — Fetcher (real-first + fallback-safe)
  *
- * Currently backed by fallback data. To integrate with a real API:
+ * Unified page model: a single fetch returns all data needed by SystemPage.
  *
- *   export const fetchCommandStatus: DomainFetcher<CommandData> = async () => {
- *     const res = await api.get('/system/status');
- *     return { data: res.data, source: 'api', timestamp: new Date() };
- *   };
+ * === INTEGRATION GUIDE ===
+ * 1. Set VITE_ORION_API_URL in .env
+ * 2. Ensure GET /system returns SystemPageData JSON
+ * 3. If your API returns a different shape, add a transform.
  */
 
-import { createFallbackFetcher } from "../createFallbackFetcher";
-import { FALLBACK_COMMAND, FALLBACK_HEALTH, FALLBACK_SERVICES } from "./mocks";
-import type { CommandData, HealthService, SystemService } from "./types";
+import { createRealFirstFetcher } from "../createRealFirstFetcher";
+import { FALLBACK_SYSTEM_PAGE } from "./mocks";
+import type { SystemPageData } from "./types";
 import type { DomainFetcher } from "../types";
 
-export const fetchCommandStatus: DomainFetcher<CommandData> = createFallbackFetcher(FALLBACK_COMMAND);
-export const fetchHealthServices: DomainFetcher<HealthService[]> = createFallbackFetcher(FALLBACK_HEALTH);
-export const fetchSystemServices: DomainFetcher<SystemService[]> = createFallbackFetcher(FALLBACK_SERVICES);
+export const fetchSystemPage: DomainFetcher<SystemPageData> = createRealFirstFetcher<SystemPageData, SystemPageData>({
+  endpoint: "/system",
+  fallbackData: FALLBACK_SYSTEM_PAGE,
+});
