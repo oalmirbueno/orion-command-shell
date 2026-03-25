@@ -52,7 +52,7 @@ function NavGroup({ label, items }: { label: string; items: typeof operationsIte
 
   return (
     <SidebarGroup>
-      <SidebarGroupLabel className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground/40 font-mono px-4 mb-1">
+      <SidebarGroupLabel className="text-xs uppercase tracking-[0.18em] text-muted-foreground/40 font-mono px-4 mb-1">
         {label}
       </SidebarGroupLabel>
       <SidebarGroupContent>
@@ -91,7 +91,7 @@ export function OrionSidebar() {
         {!collapsed && (
           <div className="flex flex-col">
             <span className="text-xs font-bold tracking-wider text-foreground">ORION</span>
-            <span className="text-[9px] text-muted-foreground/50 font-mono tracking-widest">MISSION CONTROL</span>
+            <span className="text-xs text-muted-foreground/50 font-mono tracking-widest">MISSION CONTROL</span>
           </div>
         )}
       </div>
@@ -104,12 +104,12 @@ export function OrionSidebar() {
       <SidebarFooter className="border-t border-border p-4">
         <div className="flex items-center gap-3">
           <div className="w-7 h-7 rounded-full surface-2 border border-border flex items-center justify-center">
-            <span className="text-[10px] font-mono text-muted-foreground/60">OP</span>
+            <span className="text-xs font-mono text-muted-foreground/60">OP</span>
           </div>
           {!collapsed && (
             <div className="flex flex-col">
               <span className="text-sm text-foreground/80 font-medium">Operador</span>
-              <span className="text-[10px] text-muted-foreground/40 font-mono">Nível 5</span>
+              <span className="text-xs text-muted-foreground/40 font-mono">Nível 5</span>
             </div>
           )}
         </div>

@@ -31,10 +31,10 @@ function SessionRow({ session }: { session: Session }) {
           <div className="flex items-center gap-3 flex-1 min-w-0">
             <Icon className={`h-5 w-5 shrink-0 ${cfg.text} ${isLive ? "animate-pulse-glow" : ""}`} />
             <h3 className="text-base font-semibold text-foreground truncate">{session.title}</h3>
-            <span className={`text-[10px] font-mono uppercase px-2 py-1 rounded border shrink-0 ${badge.color}`}>{badge.label}</span>
+            <span className={`text-xs font-mono uppercase px-2 py-1 rounded border shrink-0 ${badge.color}`}>{badge.label}</span>
           </div>
           <div className="flex items-center gap-3 shrink-0 ml-4">
-            <span className={`text-[11px] font-mono uppercase font-medium ${cfg.text}`}>{cfg.statusLabel}</span>
+            <span className={`text-xs font-mono uppercase font-medium ${cfg.text}`}>{cfg.statusLabel}</span>
             <div className={`status-dot ${cfg.dot}`} />
             <ChevronRight className="h-5 w-5 text-muted-foreground/20 group-hover:text-muted-foreground/50 transition-colors" />
           </div>
@@ -85,7 +85,7 @@ export function SessionsList({ sessions }: Props) {
       <div className="flex items-center gap-3 mb-4">
         <h2 className="text-xs font-mono uppercase tracking-[0.15em] text-muted-foreground">Registro de Sessões</h2>
         <div className="flex items-center gap-2 ml-2 px-3 py-1 rounded-full bg-status-online/10 border border-status-online/20">
-          <span className="text-[11px] font-mono text-status-online font-semibold">{runningCount} ao vivo</span>
+          <span className="text-xs font-mono text-status-online font-semibold">{runningCount} ao vivo</span>
         </div>
         <div className="flex-1 h-px bg-border/40" />
         <span className="text-xs font-mono text-primary animate-pulse-glow font-medium">● AO VIVO</span>

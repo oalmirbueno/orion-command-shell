@@ -15,7 +15,7 @@ const NotFound = () => {
         <div className="text-center space-y-4">
           <div className="text-6xl font-bold text-primary/30 font-mono">404</div>
           <p className="text-sm text-muted-foreground">Página não encontrada</p>
-          <p className="text-[10px] font-mono text-muted-foreground/50">
+          <p className="text-xs font-mono text-muted-foreground/50">
             A rota <code className="text-primary/60">{location.pathname}</code> não existe
           </p>
           <Link

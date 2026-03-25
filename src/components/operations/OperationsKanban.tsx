@@ -52,7 +52,7 @@ function TaskCard({ task }: { task: OperationTask }) {
     )}>
       <div className="flex items-start justify-between gap-2 mb-2">
         <h4 className="text-sm font-medium text-foreground leading-snug line-clamp-2">{task.title}</h4>
-        <span className={cn("text-[9px] font-mono uppercase px-2 py-1 rounded border shrink-0 mt-0.5", pri.cls)}>
+        <span className={cn("text-xs font-mono uppercase px-2 py-1 rounded border shrink-0 mt-0.5", pri.cls)}>
           {pri.label}
         </span>
       </div>
@@ -73,32 +73,32 @@ function TaskCard({ task }: { task: OperationTask }) {
               style={{ width: `${task.progress}%` }}
             />
           </div>
-          <span className="text-[11px] font-mono text-muted-foreground/50 w-10 text-right">{task.progress}%</span>
+          <span className="text-xs font-mono text-muted-foreground/50 w-10 text-right">{task.progress}%</span>
         </div>
       )}
 
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Bot className="h-3.5 w-3.5 text-muted-foreground/30" />
-          <span className="text-[11px] font-mono text-muted-foreground/50">{task.agent}</span>
+          <span className="text-xs font-mono text-muted-foreground/50">{task.agent}</span>
         </div>
         <div className="flex items-center gap-2">
           <Clock className="h-3.5 w-3.5 text-muted-foreground/25" />
-          <span className="text-[11px] font-mono text-muted-foreground/40">{task.elapsed}</span>
+          <span className="text-xs font-mono text-muted-foreground/40">{task.elapsed}</span>
         </div>
       </div>
 
       {isActive && (
         <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border/20">
           <div className="w-2 h-2 rounded-full bg-status-online animate-pulse" />
-          <span className="text-[10px] font-mono text-status-online/60 uppercase tracking-wider">Processando</span>
+          <span className="text-xs font-mono text-status-online/60 uppercase tracking-wider">Processando</span>
         </div>
       )}
 
       {isFailed && (
         <div className="flex items-center gap-2 mt-3 pt-3 border-t border-status-critical/15">
           <RotateCcw className="h-3.5 w-3.5 text-status-critical/50" />
-          <span className="text-[10px] font-mono text-status-critical/60 uppercase tracking-wider">Retry disponível</span>
+          <span className="text-xs font-mono text-status-critical/60 uppercase tracking-wider">Retry disponível</span>
         </div>
       )}
     </div>
@@ -116,7 +116,7 @@ function KanbanColumn({ column, tasks }: { column: ColumnDef; tasks: OperationTa
           <div className="flex items-center gap-2.5">
             <div className={cn("w-2 h-2 rounded-full", column.accentDot)} />
             <Icon className={cn("h-4 w-4", column.accentText)} />
-            <span className="text-[11px] font-mono uppercase tracking-[0.12em] text-foreground/80 font-medium">{column.label}</span>
+            <span className="text-xs font-mono uppercase tracking-[0.12em] text-foreground/80 font-medium">{column.label}</span>
           </div>
           <span className={cn("text-sm font-mono font-bold", column.accentText)}>{tasks.length}</span>
         </div>
@@ -163,7 +163,7 @@ function KanbanSummaryBar({ tasks }: { tasks: OperationTask[] }) {
             <Icon className={cn("h-5 w-5 shrink-0", s.color)} />
             <div>
               <p className={cn("text-xl font-bold font-mono leading-none", s.color)}>{s.value}</p>
-              <span className="text-[11px] font-mono text-muted-foreground/50 uppercase tracking-wider">{s.label}</span>
+              <span className="text-xs font-mono text-muted-foreground/50 uppercase tracking-wider">{s.label}</span>
             </div>
           </div>
         );

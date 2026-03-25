@@ -30,7 +30,7 @@ function MiniNode({ agent, variant = "default" }: { agent: Agent; variant?: "orc
         <div className={`status-dot ${statusDot[agent.status]}`} />
         <span className={`text-sm font-semibold ${isOrch ? "text-primary" : "text-foreground"}`}>{agent.name}</span>
         {agent.sessions > 0 && (
-          <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 ml-auto">
+           <span className="text-xs font-mono px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 ml-auto">
             {agent.sessions}s
           </span>
         )}
@@ -42,7 +42,7 @@ function MiniNode({ agent, variant = "default" }: { agent: Agent; variant?: "orc
           <div className="flex-1 h-2 bg-surface-3 rounded-full overflow-hidden">
             <div className={`h-full rounded-full ${loadColor}`} style={{ width: `${agent.load}%` }} />
           </div>
-          <span className="text-[10px] font-mono text-muted-foreground/40">{agent.load}%</span>
+          <span className="text-xs font-mono text-muted-foreground/40">{agent.load}%</span>
         </div>
       )}
     </div>
@@ -54,7 +54,7 @@ function FlowArrow({ label }: { label?: string }) {
     <div className="flex flex-col items-center py-2">
       <div className="w-px h-6 bg-border/30" />
       <ArrowDown className="h-4 w-4 text-border/40" />
-      {label && <span className="text-[10px] font-mono text-muted-foreground/30 mt-1">{label}</span>}
+      {label && <span className="text-xs font-mono text-muted-foreground/30 mt-1">{label}</span>}
     </div>
   );
 }
@@ -84,7 +84,7 @@ export function AgentArchitectureMap({ agents }: AgentArchitectureMapProps) {
             <div className="flex flex-col items-center mb-2">
               <div className="flex items-center gap-2 mb-3">
                 <Crown className="h-4 w-4 text-primary" />
-                <span className="text-[10px] font-mono uppercase tracking-widest text-primary/70">Orquestrador</span>
+                <span className="text-xs font-mono uppercase tracking-widest text-primary/70">Orquestrador</span>
               </div>
               <div className="w-full max-w-sm">
                 <MiniNode agent={orchestrators[0]} variant="orchestrator" />
@@ -103,7 +103,7 @@ export function AgentArchitectureMap({ agents }: AgentArchitectureMapProps) {
             <div className="mb-2">
               <div className="flex items-center gap-2 mb-3 justify-center">
                 <Cpu className="h-4 w-4 text-foreground/50" />
-                <span className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground/50">
+                <span className="text-xs font-mono uppercase tracking-widest text-muted-foreground/50">
                   Núcleo · {activeCore}/{coreAgents.length} ativos
                 </span>
               </div>
@@ -127,7 +127,7 @@ export function AgentArchitectureMap({ agents }: AgentArchitectureMapProps) {
           <div>
             <div className="flex items-center gap-2 mb-3 justify-center">
               <Users className="h-4 w-4 text-muted-foreground/40" />
-              <span className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground/40">
+              <span className="text-xs font-mono uppercase tracking-widest text-muted-foreground/40">
                 Suporte · {activeSupport}/{supportAgents.length} ativos
               </span>
             </div>

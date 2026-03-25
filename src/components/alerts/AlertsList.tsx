@@ -34,10 +34,10 @@ function AlertRow({ alert }: { alert: Alert }) {
           </div>
           <div className="flex items-center gap-3 shrink-0 ml-4 mt-1">
             {!alert.acknowledged && !isResolved && (
-              <span className="text-[10px] font-mono uppercase px-2 py-1 rounded bg-status-warning/15 text-status-warning border border-status-warning/20">Pendente</span>
+              <span className="text-xs font-mono uppercase px-2 py-1 rounded bg-status-warning/15 text-status-warning border border-status-warning/20">Pendente</span>
             )}
             {alert.occurrences > 1 && (
-              <span className="text-[11px] font-mono px-2 py-1 rounded bg-surface-2 border border-border/40 text-muted-foreground/60">×{alert.occurrences}</span>
+              <span className="text-xs font-mono px-2 py-1 rounded bg-surface-2 border border-border/40 text-muted-foreground/60">×{alert.occurrences}</span>
             )}
             <ChevronRight className="h-5 w-5 text-muted-foreground/15 group-hover:text-muted-foreground/40 transition-colors" />
           </div>
@@ -48,14 +48,14 @@ function AlertRow({ alert }: { alert: Alert }) {
             <div className="flex items-start gap-2">
               <ExternalLink className="h-4 w-4 text-muted-foreground/30 shrink-0 mt-0.5" />
               <p className="text-xs text-foreground/60 leading-relaxed">
-                <span className="text-muted-foreground/50 font-mono text-[10px] mr-1.5">AÇÃO:</span>
+                <span className="text-muted-foreground/50 font-mono text-xs mr-1.5">AÇÃO:</span>
                 {alert.action}
               </p>
             </div>
           </div>
         )}
 
-        <div className="flex items-center gap-4 ml-[52px] text-[11px] font-mono text-muted-foreground/50">
+        <div className="flex items-center gap-4 ml-[52px] text-xs font-mono text-muted-foreground/50">
           <span>{alert.source}</span>
           <div className="h-4 w-px bg-border/30" />
           <div className="flex items-center gap-1.5">
@@ -94,7 +94,7 @@ export function AlertsList({ alerts }: Props) {
       <div className="flex items-center gap-3 mb-5">
         <h2 className="text-xs font-mono uppercase tracking-[0.15em] text-muted-foreground">Feed de Alertas</h2>
         <div className="flex items-center gap-2 ml-2 px-3 py-1 rounded-full bg-status-critical/10 border border-status-critical/20">
-          <span className="text-[11px] font-mono text-status-critical font-semibold">{activeCount} ativos</span>
+          <span className="text-xs font-mono text-status-critical font-semibold">{activeCount} ativos</span>
         </div>
         <div className="flex-1 h-px bg-border/40" />
       </div>
@@ -106,8 +106,8 @@ export function AlertsList({ alerts }: Props) {
             <div key={group.severity}>
               <div className="flex items-center gap-2.5 mb-3">
                 <div className={`status-dot ${cfg.dot}`} />
-                <span className={`text-[11px] font-mono uppercase tracking-widest ${cfg.text}`}>{group.label}</span>
-                <span className="text-[11px] font-mono text-muted-foreground/30">{group.alerts.length}</span>
+                <span className={`text-xs font-mono uppercase tracking-widest ${cfg.text}`}>{group.label}</span>
+                <span className="text-xs font-mono text-muted-foreground/30">{group.alerts.length}</span>
                 <div className="flex-1 h-px bg-border/20" />
               </div>
               <div className="space-y-3">

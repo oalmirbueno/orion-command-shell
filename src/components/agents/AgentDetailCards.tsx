@@ -70,7 +70,7 @@ function AgentCard({ agent }: { agent: Agent }) {
           <div className="flex items-center gap-5 mb-4 ml-[60px] flex-wrap">
             {agent.dependsOn.length > 0 && (
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-mono text-muted-foreground/35 uppercase">Recebe de</span>
+                <span className="text-xs font-mono text-muted-foreground/35 uppercase">Recebe de</span>
                 {agent.dependsOn.map(dep => (
                   <span key={dep} className="text-xs font-mono px-2 py-1 rounded bg-surface-2 border border-border/30 text-foreground/60">{dep}</span>
                 ))}
@@ -79,7 +79,7 @@ function AgentCard({ agent }: { agent: Agent }) {
             {agent.feeds.length > 0 && (
               <div className="flex items-center gap-2">
                 <ArrowRight className="h-4 w-4 text-muted-foreground/20" />
-                <span className="text-[10px] font-mono text-muted-foreground/35 uppercase">Alimenta</span>
+                <span className="text-xs font-mono text-muted-foreground/35 uppercase">Alimenta</span>
                 {agent.feeds.map(f => (
                   <span key={f} className="text-xs font-mono px-2 py-1 rounded bg-surface-2 border border-border/30 text-foreground/60">{f}</span>
                 ))}

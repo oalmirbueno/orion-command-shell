@@ -43,7 +43,7 @@ export function AgentsHierarchy({ agents = [] }: AgentsHierarchyProps) {
             <div key={tier}>
               <div className="flex items-center gap-2.5 mb-2 px-1">
                 <TierIcon className={`h-4 w-4 ${cfg.color}`} />
-                <span className={`text-[10px] font-mono uppercase tracking-widest font-semibold ${cfg.color}`}>{cfg.label}</span>
+                <span className={`text-xs font-mono uppercase tracking-widest font-semibold ${cfg.color}`}>{cfg.label}</span>
                 <div className="flex-1 h-px bg-border/25" />
               </div>
 
