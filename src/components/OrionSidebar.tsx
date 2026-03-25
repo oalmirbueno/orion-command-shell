@@ -4,14 +4,13 @@ import {
   Activity,
   Target,
   GitBranch,
-  Shield,
   Settings,
-  Zap,
   Radio,
   Bot,
   Timer,
   Brain,
   Bell,
+  Box,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -29,20 +28,21 @@ import {
 } from "@/components/ui/sidebar";
 
 const operationsItems = [
-  { title: "Command", url: "/", icon: LayoutDashboard },
-  { title: "Missions", url: "/missions", icon: Target },
-  { title: "Agents", url: "/agents", icon: Bot },
-  { title: "Sessions", url: "/sessions", icon: Activity },
-  { title: "Activity", url: "/activity", icon: Radio },
-  { title: "Memory", url: "/memory", icon: Brain },
+  { title: "Comando", url: "/", icon: LayoutDashboard },
+  { title: "Missões", url: "/missions", icon: Target },
+  { title: "Agentes", url: "/agents", icon: Bot },
+  { title: "Sessões", url: "/sessions", icon: Activity },
+  { title: "Atividade", url: "/activity", icon: Radio },
+  { title: "Memória", url: "/memory", icon: Brain },
 ];
 
 const systemItems = [
-  { title: "System", url: "/system", icon: Monitor },
+  { title: "Sistema", url: "/system", icon: Monitor },
   { title: "Cron", url: "/cron", icon: Timer },
-  { title: "Alerts", url: "/alerts", icon: Bell },
+  { title: "Alertas", url: "/alerts", icon: Bell },
   { title: "Pipelines", url: "/pipelines", icon: GitBranch },
-  { title: "Settings", url: "/settings", icon: Settings },
+  { title: "Office 3D", url: "/office3d", icon: Box },
+  { title: "Configurações", url: "/settings", icon: Settings },
 ];
 
 function NavGroup({ label, items }: { label: string; items: typeof operationsItems }) {
@@ -97,8 +97,8 @@ export function OrionSidebar() {
       </div>
 
       <SidebarContent className="pt-2">
-        <NavGroup label="Operations" items={operationsItems} />
-        <NavGroup label="System" items={systemItems} />
+        <NavGroup label="Operações" items={operationsItems} />
+        <NavGroup label="Sistema" items={systemItems} />
       </SidebarContent>
 
       <SidebarFooter className="border-t border-border/50 p-3">
@@ -109,7 +109,7 @@ export function OrionSidebar() {
           {!collapsed && (
             <div className="flex flex-col">
               <span className="text-xs text-foreground font-medium">Operador</span>
-              <span className="text-[10px] text-muted-foreground font-mono">Level 5</span>
+              <span className="text-[10px] text-muted-foreground font-mono">Nível 5</span>
             </div>
           )}
         </div>
