@@ -1,4 +1,4 @@
-import type { CronJob } from "./types";
+import type { CronJob, CronPageData, CronSummaryData } from "./types";
 
 export const FALLBACK_CRON_JOBS: CronJob[] = [
   { id: "j-01", name: "Health Check Global", schedule: "*/5 * * * *", scheduleHuman: "Every 5 min", enabled: true, status: "healthy", lastRun: "09:45", lastRunAgo: "2min ago", lastDuration: "4s", lastResult: "success", nextRun: "09:50", nextRunIn: "in 3min", consecutiveSuccess: 847, consecutiveFails: 0 },
@@ -13,3 +13,17 @@ export const FALLBACK_CRON_JOBS: CronJob[] = [
   { id: "j-10", name: "Report Semanal (Deprecated)", schedule: "0 8 * * 1", scheduleHuman: "Mon 08:00", enabled: false, status: "disabled", lastRun: "—", lastRunAgo: "—", lastDuration: "—", lastResult: "—", nextRun: "—", nextRunIn: "—", consecutiveSuccess: 0, consecutiveFails: 0 },
   { id: "j-11", name: "Purge Expired Tokens", schedule: "0 4 * * *", scheduleHuman: "Daily 04:00", enabled: false, status: "disabled", lastRun: "04:00 (3d ago)", lastRunAgo: "3d ago", lastDuration: "1s", lastResult: "success", nextRun: "—", nextRunIn: "—", consecutiveSuccess: 0, consecutiveFails: 0 },
 ];
+
+function deriveSummary(jobs: CronJob[]): CronSummaryData {
+  return {
+    active: jobs.filter((j) => j.enabled).length,
+    healthy: jobs.filter((j) => j.status === "healthy").length,
+    failed: jobs.filter((j) => j.status === "failed").length,
+    disabled: jobs.filter((j) => !j.enabled).length,
+  };
+}
+
+export const FALLBACK_CRON_PAGE: CronPageData = {
+  jobs: FALLBACK_CRON_JOBS,
+  summary: deriveSummary(FALLBACK_CRON_JOBS),
+};

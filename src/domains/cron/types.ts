@@ -17,3 +17,15 @@ export interface CronJob {
   consecutiveFails: number;
   error?: string;
 }
+
+export interface CronSummaryData {
+  active: number;
+  healthy: number;
+  failed: number;
+  disabled: number;
+}
+
+export interface CronPageData {
+  jobs: CronJob[];
+  summary: CronSummaryData;
+}

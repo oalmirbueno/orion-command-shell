@@ -1,10 +1,7 @@
 import {
-  CheckCircle2, XCircle, Clock, AlertTriangle, ChevronRight, Timer,
+  CheckCircle2, XCircle, AlertTriangle, ChevronRight, Timer,
   ToggleLeft, ToggleRight,
 } from "lucide-react";
-import { useOrionData } from "@/hooks/useOrionData";
-import { OrionDataWrapper } from "@/components/orion/DataWrapper";
-import { fetchCronJobs } from "@/domains/cron/fetcher";
 import type { CronJob, JobStatus } from "@/domains/cron/types";
 
 const statusConfig: Record<JobStatus, { dot: string; text: string; border: string; bg: string }> = {
@@ -80,13 +77,11 @@ function JobRow({ job }: { job: CronJob }) {
   );
 }
 
-export function CronJobsList() {
-  const { state, data, source, lastUpdated, refetch } = useOrionData<CronJob[]>({
-    key: "cron-jobs",
-    fetcher: fetchCronJobs,
-  });
+interface Props {
+  jobs: CronJob[];
+}
 
-  const jobs = data || [];
+export function CronJobsList({ jobs }: Props) {
   const order: Record<JobStatus, number> = { failed: 0, warning: 1, healthy: 2, disabled: 3 };
   const sorted = [...jobs].sort((a, b) => order[a.status] - order[b.status]);
   const enabledCount = jobs.filter(j => j.enabled).length;
@@ -100,14 +95,11 @@ export function CronJobsList() {
         </div>
         <div className="flex-1 h-px bg-border/40" />
       </div>
-
-      <OrionDataWrapper state={state} source={source} lastUpdated={lastUpdated} onRetry={refetch}>
-        <div className="space-y-3">
-          {sorted.map((job) => (
-            <JobRow key={job.id} job={job} />
-          ))}
-        </div>
-      </OrionDataWrapper>
+      <div className="space-y-3">
+        {sorted.map((job) => (
+          <JobRow key={job.id} job={job} />
+        ))}
+      </div>
     </section>
   );
 }
