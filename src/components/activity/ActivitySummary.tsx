@@ -30,7 +30,7 @@ export function ActivitySummary({ summary }: ActivitySummaryProps) {
               <p className="text-2xl font-bold text-foreground leading-none">{summary[m.key]}</p>
               <div className="flex items-center gap-2 mt-1.5">
                 <div className={`status-dot ${m.dot}`} />
-                <span className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground/60">{m.label}</span>
+                <span className="text-xs font-mono uppercase tracking-wider text-muted-foreground/60">{m.label}</span>
               </div>
             </div>
           </div>

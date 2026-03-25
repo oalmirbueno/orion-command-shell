@@ -29,7 +29,7 @@ const Office3DPage = () => {
               <h2 className="text-sm font-semibold text-foreground">Visão 3D — Arquitetura Operacional</h2>
               <span className="orion-badge orion-badge-success">Ativo</span>
             </div>
-            <p className="text-[10px] font-mono text-muted-foreground mt-0.5">
+            <p className="text-xs font-mono text-muted-foreground mt-0.5">
               Representação espacial dos agentes, conexões e fluxo operacional
             </p>
           </div>
@@ -40,19 +40,19 @@ const Office3DPage = () => {
           {/* Toolbar */}
           <div className="flex items-center justify-between px-4 py-2.5 border-b border-border/50 bg-card">
             <div className="flex items-center gap-3">
-              <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">Viewport 3D</span>
+              <span className="text-xs font-mono text-muted-foreground uppercase tracking-wider">Viewport 3D</span>
               <div className="h-3 w-px bg-border/30" />
               <div className="flex items-center gap-1.5">
                 <Eye className="h-3 w-3 text-muted-foreground/60" />
-                <span className="text-[9px] font-mono text-muted-foreground/60">Perspectiva · Auto-Rotate</span>
+                <span className="text-xs font-mono text-muted-foreground/60">Perspectiva · Auto-Rotate</span>
               </div>
             </div>
             <div className="flex items-center gap-1.5">
               <button
                 onClick={() => setFullscreen((f) => !f)}
-                className="text-[8px] font-mono px-2.5 py-1 rounded bg-card border border-border/30 text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+                className="text-xs font-mono px-2.5 py-1 rounded bg-card border border-border/30 text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
               >
-                <Maximize2 className="h-2.5 w-2.5" />
+                <Maximize2 className="h-3 w-3" />
                 {fullscreen ? "Sair" : "Expandir"}
               </button>
             </div>
@@ -65,7 +65,7 @@ const Office3DPage = () => {
                 <div className="w-full h-full flex items-center justify-center bg-[#0a0a0f]">
                   <div className="text-center space-y-3">
                     <RotateCcw className="h-6 w-6 text-primary/40 animate-spin mx-auto" />
-                    <p className="text-[10px] font-mono text-muted-foreground/40">Carregando viewport…</p>
+                    <p className="text-xs font-mono text-muted-foreground/40">Carregando viewport…</p>
                   </div>
                 </div>
               }
@@ -80,17 +80,17 @@ const Office3DPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Layers */}
             <div className="orion-card p-4">
-              <h3 className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-1.5">
-                <Layers className="h-3 w-3" /> Camadas
+              <h3 className="text-xs font-mono text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                <Layers className="h-3.5 w-3.5" /> Camadas
               </h3>
               <div className="space-y-2">
                 {layerItems.map((layer) => (
                   <div key={layer.label} className="flex items-center gap-2.5 py-1">
                     <div className={`w-2.5 h-2.5 rounded-full ${layer.color} ${layer.active ? "" : "opacity-25"}`} />
-                    <span className={`text-[11px] ${layer.active ? "text-foreground/80" : "text-muted-foreground/40 line-through"}`}>
+                    <span className={`text-xs ${layer.active ? "text-foreground/80" : "text-muted-foreground/40 line-through"}`}>
                       {layer.label}
                     </span>
-                    <span className="ml-auto text-[8px] font-mono text-muted-foreground/30">
+                    <span className="ml-auto text-xs font-mono text-muted-foreground/30">
                       {layer.active ? "ON" : "OFF"}
                     </span>
                   </div>
@@ -100,8 +100,8 @@ const Office3DPage = () => {
 
             {/* Controls */}
             <div className="orion-card p-4">
-              <h3 className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider mb-3">Controles</h3>
-              <div className="space-y-1.5 text-[10px] font-mono text-muted-foreground/50">
+              <h3 className="text-xs font-mono text-muted-foreground uppercase tracking-wider mb-3">Controles</h3>
+              <div className="space-y-1.5 text-xs font-mono text-muted-foreground/50">
                 <p>Arrastar → Orbitar câmera</p>
                 <p>Scroll → Zoom (4x – 16x)</p>
                 <p>Shift + Arrastar → Pan</p>
@@ -112,7 +112,7 @@ const Office3DPage = () => {
 
             {/* Legend */}
             <div className="orion-card p-4">
-              <h3 className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider mb-3">Legenda</h3>
+              <h3 className="text-xs font-mono text-muted-foreground uppercase tracking-wider mb-3">Legenda</h3>
               <div className="space-y-2">
                 {[
                   { label: "Orquestrador", color: "bg-[#a78bfa]", desc: "Coordenação central" },
@@ -122,15 +122,15 @@ const Office3DPage = () => {
                   <div key={item.label} className="flex items-center gap-2.5">
                     <div className={`w-2.5 h-2.5 rounded-sm ${item.color}`} />
                     <div>
-                      <span className="text-[10px] text-foreground/70">{item.label}</span>
-                      <span className="text-[9px] text-muted-foreground/40 ml-1.5">— {item.desc}</span>
+                      <span className="text-xs text-foreground/70">{item.label}</span>
+                      <span className="text-xs text-muted-foreground/40 ml-1.5">— {item.desc}</span>
                     </div>
                   </div>
                 ))}
                 <div className="pt-1.5 border-t border-border/20 mt-2">
                   <div className="flex items-center gap-2">
                     <div className="w-4 h-px bg-muted-foreground/20" />
-                    <span className="text-[9px] text-muted-foreground/30">Linhas = dependências</span>
+                    <span className="text-xs text-muted-foreground/30">Linhas = dependências</span>
                   </div>
                 </div>
               </div>

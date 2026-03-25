@@ -229,7 +229,7 @@ export function OrionGroupHeader({
   return (
     <div className="orion-group-header">
       {dotClass && <div className={cn("status-dot", dotClass)} />}
-      <span className={cn("text-[10px] font-mono uppercase tracking-widest font-semibold", textClass || "text-muted-foreground/50")}>
+      <span className={cn("text-xs font-mono uppercase tracking-widest font-semibold", textClass || "text-muted-foreground/50")}>
         {label}
       </span>
       {count !== undefined && (

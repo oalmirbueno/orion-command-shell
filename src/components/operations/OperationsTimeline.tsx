@@ -46,7 +46,7 @@ function TimelineRow({ event, isLast }: { event: TimelineEvent; isLast: boolean 
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0 flex-1">
             <span className="text-xs font-mono text-primary/60 shrink-0 w-12 font-medium">{event.time}</span>
-            <span className={cn("text-[9px] font-mono uppercase px-2 py-1 rounded border shrink-0",
+            <span className={cn("text-xs font-mono uppercase px-2 py-1 rounded border shrink-0",
               isUrgent ? "bg-status-critical/10 text-status-critical border-status-critical/20" : "bg-surface-2 text-muted-foreground/60 border-border/30"
             )}>
               {cfg.label}
@@ -55,7 +55,7 @@ function TimelineRow({ event, isLast }: { event: TimelineEvent; isLast: boolean 
           </div>
           <div className="flex items-center gap-2.5 shrink-0">
             <Bot className="h-4 w-4 text-muted-foreground/25" />
-            <span className="text-[11px] font-mono text-muted-foreground/40">{event.agent}</span>
+            <span className="text-xs font-mono text-muted-foreground/40">{event.agent}</span>
           </div>
         </div>
         <p className="text-xs text-foreground/40 leading-relaxed mt-1.5 ml-12 line-clamp-1">{event.detail}</p>

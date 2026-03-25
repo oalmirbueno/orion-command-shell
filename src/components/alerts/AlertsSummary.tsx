@@ -30,7 +30,7 @@ export function AlertsSummary({ summary }: Props) {
               <p className={`text-2xl font-bold leading-none ${isCriticalCell ? "text-status-critical" : "text-foreground"}`}>{value}</p>
               <div className="flex items-center gap-2 mt-1.5">
                 <div className={`status-dot ${cell.dot} ${isCriticalCell ? "animate-pulse-glow" : ""}`} />
-                <span className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground/60">{cell.label}</span>
+                <span className="text-xs font-mono uppercase tracking-wider text-muted-foreground/60">{cell.label}</span>
               </div>
             </div>
           </div>
