@@ -30,7 +30,7 @@ const operationsItems = [
   { title: "Missions", url: "/missions", icon: Target },
   { title: "Agents", url: "/agents", icon: Bot },
   { title: "Sessions", url: "/sessions", icon: Activity },
-  { title: "Telemetry", url: "/telemetry", icon: Radio },
+  { title: "Activity", url: "/activity", icon: Radio },
 ];
 
 const systemItems = [
