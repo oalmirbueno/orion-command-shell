@@ -152,23 +152,23 @@ function KanbanColumn({ column, tasks }: { column: ColumnDef; tasks: OperationTa
   return (
     <div className="flex flex-col min-w-0">
       {/* Column Header */}
-      <div className={cn("rounded-t-lg px-4 py-2.5 border border-b-0 border-border/30", column.headerBg)}>
+      <div className={cn("rounded-t-lg px-5 py-3.5 border border-b-0 border-border/40", column.headerBg)}>
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className={cn("w-1.5 h-1.5 rounded-full", column.accentDot)} />
-            <Icon className={cn("h-3.5 w-3.5", column.accentText)} />
-            <span className="text-[10px] font-mono uppercase tracking-[0.12em] text-foreground/80">{column.label}</span>
+          <div className="flex items-center gap-2.5">
+            <div className={cn("w-2 h-2 rounded-full", column.accentDot)} />
+            <Icon className={cn("h-4 w-4", column.accentText)} />
+            <span className="text-[11px] font-mono uppercase tracking-[0.12em] text-foreground/80 font-medium">{column.label}</span>
           </div>
-          <span className={cn("text-[11px] font-mono font-semibold", column.accentText)}>{tasks.length}</span>
+          <span className={cn("text-sm font-mono font-bold", column.accentText)}>{tasks.length}</span>
         </div>
       </div>
 
-      {/* Column Body — scrollable */}
-      <div className="rounded-b-lg border border-border/30 bg-surface-0/50 max-h-[420px] overflow-y-auto orion-thin-scroll">
-        <div className="p-2 space-y-2">
+      {/* Column Body */}
+      <div className="rounded-b-lg border border-border/40 bg-surface-0/50 max-h-[500px] overflow-y-auto orion-thin-scroll">
+        <div className="p-2.5 space-y-2.5">
           {tasks.length === 0 ? (
-            <div className="flex items-center justify-center min-h-[120px]">
-              <span className="text-[10px] font-mono text-muted-foreground/30">{column.emptyLabel}</span>
+            <div className="flex items-center justify-center min-h-[140px]">
+              <span className="text-xs font-mono text-muted-foreground/30">{column.emptyLabel}</span>
             </div>
           ) : (
             tasks.map(task => <TaskCard key={task.id} task={task} />)
