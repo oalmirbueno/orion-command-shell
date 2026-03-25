@@ -79,7 +79,7 @@ function TaskCard({ task }: { task: OperationTask }) {
 
   return (
     <div className={cn(
-      "group rounded-lg border px-4 py-3.5 transition-all cursor-pointer",
+      "group rounded-lg border px-5 py-4 transition-all cursor-pointer",
       "hover:border-primary/30 hover:shadow-[0_0_15px_-3px_hsl(var(--primary)/0.15)]",
       isFailed && "border-status-critical/25 bg-status-critical/[0.03]",
       isActive && "border-status-online/20 bg-status-online/[0.02]",
