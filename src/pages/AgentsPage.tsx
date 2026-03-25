@@ -1,7 +1,8 @@
 import { OrionLayout } from "@/components/OrionLayout";
 import { OrionBreadcrumb } from "@/components/orion";
 import { AgentsSummaryBar } from "@/components/agents/AgentsSummaryBar";
-import { AgentsList } from "@/components/agents/AgentsList";
+import { AgentArchitectureMap } from "@/components/agents/AgentArchitectureMap";
+import { AgentDetailCards } from "@/components/agents/AgentDetailCards";
 
 const AgentsPage = () => {
   return (
@@ -9,7 +10,8 @@ const AgentsPage = () => {
       <div className="max-w-7xl mx-auto space-y-8">
         <OrionBreadcrumb items={["Mission Control", "Agentes"]} />
         <AgentsSummaryBar />
-        <AgentsList />
+        <AgentArchitectureMap />
+        <AgentDetailCards />
       </div>
     </OrionLayout>
   );
