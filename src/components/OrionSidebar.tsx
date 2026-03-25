@@ -29,8 +29,8 @@ const operationsItems = [
   { title: "Command", url: "/", icon: LayoutDashboard },
   { title: "Missions", url: "/missions", icon: Target },
   { title: "Agents", url: "/agents", icon: Bot },
-  { title: "Telemetry", url: "/telemetry", icon: Activity },
-  { title: "Comms", url: "/comms", icon: Radio },
+  { title: "Sessions", url: "/sessions", icon: Activity },
+  { title: "Telemetry", url: "/telemetry", icon: Radio },
 ];
 
 const systemItems = [
