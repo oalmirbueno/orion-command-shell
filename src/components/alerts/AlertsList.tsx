@@ -199,13 +199,13 @@ function AlertRow({ alert }: { alert: Alert }) {
 }
 
 export function AlertsList() {
-  // Group by severity
-  const groups: { severity: Severity; label: string; alerts: Alert[] }[] = [
-    { severity: "critical", label: "Critical", alerts: MOCK_ALERTS.filter(a => a.severity === "critical") },
-    { severity: "warning", label: "Warning", alerts: MOCK_ALERTS.filter(a => a.severity === "warning") },
-    { severity: "info", label: "Informational", alerts: MOCK_ALERTS.filter(a => a.severity === "info") },
-    { severity: "resolved", label: "Resolved", alerts: MOCK_ALERTS.filter(a => a.severity === "resolved") },
-  ].filter(g => g.alerts.length > 0);
+  const allGroups = [
+    { severity: "critical" as Severity, label: "Critical", alerts: MOCK_ALERTS.filter(a => a.severity === "critical") },
+    { severity: "warning" as Severity, label: "Warning", alerts: MOCK_ALERTS.filter(a => a.severity === "warning") },
+    { severity: "info" as Severity, label: "Informational", alerts: MOCK_ALERTS.filter(a => a.severity === "info") },
+    { severity: "resolved" as Severity, label: "Resolved", alerts: MOCK_ALERTS.filter(a => a.severity === "resolved") },
+  ];
+  const groups = allGroups.filter(g => g.alerts.length > 0);
 
   const activeCount = MOCK_ALERTS.filter(a => a.severity !== "resolved").length;
 
