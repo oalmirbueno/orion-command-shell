@@ -17,7 +17,7 @@ interface StateProps {
 
 /* ── Loading ── */
 
-export function OrionLoading({ title = "Loading...", description, className, compact }: StateProps) {
+export function OrionLoading({ title = "Carregando...", description, className, compact }: StateProps) {
   return (
     <div className={cn(
       "flex flex-col items-center justify-center text-center",
@@ -35,7 +35,7 @@ export function OrionLoading({ title = "Loading...", description, className, com
 
 /* ── Empty ── */
 
-export function OrionEmpty({ title = "No data", description = "Nothing to display yet", className, compact }: StateProps) {
+export function OrionEmpty({ title = "Sem dados", description = "Nada para exibir ainda", className, compact }: StateProps) {
   return (
     <div className={cn(
       "flex flex-col items-center justify-center text-center",
@@ -54,7 +54,7 @@ export function OrionEmpty({ title = "No data", description = "Nothing to displa
 /* ── Error ── */
 
 export function OrionError({
-  title = "Something went wrong",
+  title = "Algo deu errado",
   description,
   className,
   compact,
@@ -76,7 +76,7 @@ export function OrionError({
           onClick={onRetry}
           className="mt-3 text-xs font-mono text-primary hover:text-primary/80 transition-colors px-3 py-1.5 rounded-md border border-primary/20 hover:bg-primary/5"
         >
-          Retry
+          Tentar novamente
         </button>
       )}
     </div>
@@ -85,7 +85,7 @@ export function OrionError({
 
 /* ── Stale ── */
 
-export function OrionStale({ title = "Data may be outdated", description, className, compact }: StateProps) {
+export function OrionStale({ title = "Dados podem estar desatualizados", description, className, compact }: StateProps) {
   return (
     <div className={cn(
       "flex flex-col items-center justify-center text-center",
@@ -103,7 +103,7 @@ export function OrionStale({ title = "Data may be outdated", description, classN
 
 /* ── Ready / Connected ── */
 
-export function OrionReady({ title = "Connected", description = "Awaiting data stream", className, compact }: StateProps) {
+export function OrionReady({ title = "Conectado", description = "Aguardando fluxo de dados", className, compact }: StateProps) {
   return (
     <div className={cn(
       "flex flex-col items-center justify-center text-center",

@@ -10,19 +10,19 @@ interface Agent {
 }
 
 const MOCK_AGENTS: Agent[] = [
-  { id: "1", name: "Classifier-01", role: "Lead Scoring", status: "active", load: 72, lastPing: "2s" },
-  { id: "2", name: "Enricher-01", role: "Data Enrichment", status: "active", load: 45, lastPing: "1s" },
-  { id: "3", name: "Router-01", role: "Task Routing", status: "active", load: 63, lastPing: "3s" },
-  { id: "4", name: "Analyzer-01", role: "Pattern Detection", status: "idle", load: 8, lastPing: "5s" },
-  { id: "5", name: "Sync-01", role: "Data Sync", status: "active", load: 91, lastPing: "1s" },
-  { id: "6", name: "Monitor-01", role: "Health Check", status: "active", load: 34, lastPing: "2s" },
-  { id: "7", name: "Validator-01", role: "Data Validation", status: "offline", load: 0, lastPing: "14min" },
-  { id: "8", name: "Exporter-01", role: "Report Export", status: "idle", load: 2, lastPing: "8s" },
+  { id: "1", name: "Classifier-01", role: "Classificação de Leads", status: "active", load: 72, lastPing: "2s" },
+  { id: "2", name: "Enricher-01", role: "Enriquecimento de Dados", status: "active", load: 45, lastPing: "1s" },
+  { id: "3", name: "Router-01", role: "Roteamento de Tarefas", status: "active", load: 63, lastPing: "3s" },
+  { id: "4", name: "Analyzer-01", role: "Detecção de Padrões", status: "idle", load: 8, lastPing: "5s" },
+  { id: "5", name: "Sync-01", role: "Sincronização de Dados", status: "active", load: 91, lastPing: "1s" },
+  { id: "6", name: "Monitor-01", role: "Verificação de Saúde", status: "active", load: 34, lastPing: "2s" },
+  { id: "7", name: "Validator-01", role: "Validação de Dados", status: "offline", load: 0, lastPing: "14min" },
+  { id: "8", name: "Exporter-01", role: "Exportação de Relatórios", status: "idle", load: 2, lastPing: "8s" },
 ];
 
 const statusConfig = {
   active: { dot: "status-online", label: "Ativo" },
-  idle: { dot: "bg-muted-foreground/40", label: "Idle" },
+  idle: { dot: "bg-muted-foreground/40", label: "Ocioso" },
   offline: { dot: "status-critical", label: "Offline" },
 };
 
@@ -46,7 +46,7 @@ export function AgentsOverview() {
           Agentes
         </h2>
         <div className="flex items-center gap-1.5 ml-2 px-2 py-0.5 rounded-full bg-primary/10 border border-primary/20">
-          <span className="text-[9px] font-mono text-primary font-medium">{activeCount}/{total} active</span>
+          <span className="text-[9px] font-mono text-primary font-medium">{activeCount}/{total} ativos</span>
         </div>
         <div className="flex-1 h-px bg-border/40" />
       </div>
@@ -69,7 +69,7 @@ export function AgentsOverview() {
               <p className="text-[9px] font-mono text-muted-foreground/50 mb-2">{agent.role}</p>
               <LoadBar load={agent.load} status={agent.status} />
               <div className="flex items-center justify-between mt-2">
-                <span className="text-[9px] font-mono text-muted-foreground/40">Load {agent.load}%</span>
+                <span className="text-[9px] font-mono text-muted-foreground/40">Carga {agent.load}%</span>
                 <span className="text-[9px] font-mono text-muted-foreground/40">Ping {agent.lastPing}</span>
               </div>
             </div>
