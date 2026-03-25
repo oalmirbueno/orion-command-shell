@@ -1,4 +1,5 @@
 import { OrionLayout } from "@/components/OrionLayout";
+import { OrionBreadcrumb } from "@/components/orion";
 import { SystemPulse } from "@/components/home/SystemPulse";
 import { AttentionRequired } from "@/components/home/AttentionRequired";
 import { ActiveSessions } from "@/components/home/ActiveSessions";
@@ -10,12 +11,7 @@ const Index = () => {
   return (
     <OrionLayout title="Command">
       <div className="max-w-7xl mx-auto space-y-8">
-        {/* Breadcrumb */}
-        <div className="flex items-center gap-3 text-[10px] font-mono text-muted-foreground uppercase tracking-wider">
-          <span>Mission Control</span>
-          <span className="text-border">/</span>
-          <span className="text-foreground">Overview</span>
-        </div>
+        <OrionBreadcrumb items={["Mission Control", "Overview"]} />
 
         {/* 1. System Pulse — estado geral rápido */}
         <SystemPulse />
