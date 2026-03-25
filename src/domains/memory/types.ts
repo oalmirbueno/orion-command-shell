@@ -12,3 +12,15 @@ export interface MemorySnapshot {
   tags: string[];
   relevance: "high" | "medium" | "low";
 }
+
+export interface MemorySummaryData {
+  totalSnapshots: number;
+  totalCategories: number;
+  lastCapture: string;
+  totalSize: string;
+}
+
+export interface MemoryPageData {
+  snapshots: MemorySnapshot[];
+  summary: MemorySummaryData;
+}
