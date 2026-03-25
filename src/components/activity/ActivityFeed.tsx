@@ -119,11 +119,11 @@ const priorityConfig: Record<EventPriority, { icon: React.ElementType; dot: stri
 };
 
 const categoryConfig: Record<EventCategory, { icon: React.ElementType; label: string; color: string }> = {
-  agent: { icon: Bot, label: "Agent", color: "bg-primary/10 text-primary border-primary/20" },
-  system: { icon: Server, label: "System", color: "bg-status-online/10 text-status-online border-status-online/20" },
+  agent: { icon: Bot, label: "Agente", color: "bg-primary/10 text-primary border-primary/20" },
+  system: { icon: Server, label: "Sistema", color: "bg-status-online/10 text-status-online border-status-online/20" },
   pipeline: { icon: GitBranch, label: "Pipeline", color: "bg-status-warning/10 text-status-warning border-status-warning/20" },
-  security: { icon: Shield, label: "Security", color: "bg-status-critical/10 text-status-critical border-status-critical/20" },
-  session: { icon: Zap, label: "Session", color: "bg-muted-foreground/10 text-muted-foreground border-muted-foreground/20" },
+  security: { icon: Shield, label: "Segurança", color: "bg-status-critical/10 text-status-critical border-status-critical/20" },
+  session: { icon: Zap, label: "Sessão", color: "bg-muted-foreground/10 text-muted-foreground border-muted-foreground/20" },
   deploy: { icon: GitBranch, label: "Deploy", color: "bg-primary/10 text-primary border-primary/20" },
 };
 
@@ -135,11 +135,11 @@ function groupByTimeBlock(events: ActivityEvent[]): { label: string; events: Act
   for (const event of events) {
     const hour = parseInt(event.time.split(":")[0]);
     let blockLabel: string;
-    if (event.timeAgo.includes("Just now") || event.timeAgo.includes("min ago")) {
+    if (event.timeAgo.includes("Agora") || event.timeAgo.includes("min ago")) {
       const mins = parseInt(event.timeAgo) || 0;
-      blockLabel = mins <= 10 || event.timeAgo === "Just now" ? "Right Now" : "Last 30 Minutes";
+      blockLabel = mins <= 10 || event.timeAgo === "Agora" ? "Agora" : "Últimos 30 Minutos";
     } else {
-      blockLabel = hour >= 9 ? "Earlier Today" : "This Morning";
+      blockLabel = hour >= 9 ? "Mais Cedo" : "Esta Manhã";
     }
 
     if (!currentBlock || currentBlock.label !== blockLabel) {

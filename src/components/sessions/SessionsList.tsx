@@ -125,7 +125,7 @@ function SessionRow({ session }: { session: Session }) {
             </span>
           </div>
           <div className="flex items-center gap-2 shrink-0 ml-3">
-            <span className={`text-[9px] font-mono uppercase ${cfg.text}`}>{session.status}</span>
+            <span className={`text-[9px] font-mono uppercase ${cfg.text}`}>{session.status === "running" ? "Em execução" : session.status === "paused" ? "Pausada" : session.status === "completed" ? "Concluída" : "Falha"}</span>
             <div className={`status-dot ${cfg.dot}`} />
             <ChevronRight className="h-4 w-4 text-muted-foreground/20 group-hover:text-muted-foreground/50 transition-colors" />
           </div>
@@ -157,7 +157,7 @@ function SessionRow({ session }: { session: Session }) {
           </div>
           <div className="h-3 w-px bg-border/30" />
           <span>{session.tokens} tokens</span>
-          <span className="ml-auto text-muted-foreground/30">Started {session.startedAt}</span>
+          <span className="ml-auto text-muted-foreground/30">Início {session.startedAt}</span>
         </div>
       </div>
     </div>
@@ -175,13 +175,13 @@ export function SessionsList() {
     <section>
       <div className="flex items-center gap-2 mb-3">
         <h2 className="text-[10px] font-mono uppercase tracking-[0.15em] text-muted-foreground">
-          Session Log
+          Registro de Sessões
         </h2>
         <div className="flex items-center gap-1.5 ml-2 px-2 py-0.5 rounded-full bg-status-online/10 border border-status-online/20">
-          <span className="text-[9px] font-mono text-status-online font-medium">{runningCount} live</span>
+          <span className="text-[9px] font-mono text-status-online font-medium">{runningCount} ao vivo</span>
         </div>
         <div className="flex-1 h-px bg-border/40" />
-        <span className="text-[10px] font-mono text-primary animate-pulse-glow">● LIVE</span>
+        <span className="text-[10px] font-mono text-primary animate-pulse-glow">● AO VIVO</span>
       </div>
 
       <div className="space-y-2">
