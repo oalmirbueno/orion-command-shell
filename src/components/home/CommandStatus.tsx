@@ -29,6 +29,7 @@ interface CommandStatusProps {
 }
 
 export function CommandStatus({ data }: CommandStatusProps) {
+  if (!data) return null;
   const cfg = stateConfig[data.systemState];
   const Icon = cfg.icon;
 

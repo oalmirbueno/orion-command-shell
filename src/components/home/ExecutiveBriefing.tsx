@@ -5,7 +5,7 @@ interface ExecutiveBriefingProps {
   items: BriefingItem[];
 }
 
-export function ExecutiveBriefing({ items }: ExecutiveBriefingProps) {
+export function ExecutiveBriefing({ items = [] }: ExecutiveBriefingProps) {
   return (
     <section className="rounded-lg border border-border overflow-hidden h-full">
       <div className="orion-panel-header">
