@@ -2,11 +2,8 @@ import {
   Clock, CheckCircle2, AlertCircle, Bot, Flame,
   Pause, RotateCcw, Zap,
 } from "lucide-react";
-import { useOrionData } from "@/hooks/useOrionData";
-import { OrionDataWrapper } from "@/components/orion/DataWrapper";
 import { OrionSectionHeader } from "@/components/orion/primitives";
 import { cn } from "@/lib/utils";
-import { fetchOperationTasks } from "@/domains/operations/fetcher";
 import type { OperationTask, TaskStatus, TaskPriority } from "@/domains/operations/types";
 
 /* ── Column Config ── */
@@ -177,14 +174,11 @@ function KanbanSummaryBar({ tasks }: { tasks: OperationTask[] }) {
 
 /* ── Main Export ── */
 
-export function OperationsKanban() {
-  const { state, data, source, lastUpdated, refetch } = useOrionData<OperationTask[]>({
-    key: "operations-kanban",
-    fetcher: fetchOperationTasks,
-  });
+interface OperationsKanbanProps {
+  tasks: OperationTask[];
+}
 
-  const tasks = data || [];
-
+export function OperationsKanban({ tasks }: OperationsKanbanProps) {
   return (
     <section className="space-y-4">
       <OrionSectionHeader
@@ -193,19 +187,17 @@ export function OperationsKanban() {
         live
       />
 
-      <OrionDataWrapper state={state} source={source} lastUpdated={lastUpdated} onRetry={refetch}>
-        <KanbanSummaryBar tasks={tasks} />
+      <KanbanSummaryBar tasks={tasks} />
 
-        <div className="mt-4 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-2.5">
-          {COLUMNS.map(col => (
-            <KanbanColumn
-              key={col.key}
-              column={col}
-              tasks={tasks.filter(t => t.status === col.key)}
-            />
-          ))}
-        </div>
-      </OrionDataWrapper>
+      <div className="mt-4 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-2.5">
+        {COLUMNS.map(col => (
+          <KanbanColumn
+            key={col.key}
+            column={col}
+            tasks={tasks.filter(t => t.status === col.key)}
+          />
+        ))}
+      </div>
     </section>
   );
 }

@@ -1,12 +1,9 @@
 import {
-  CheckCircle2, AlertCircle, Loader2, Pause, Play, RotateCcw,
-  Bot, Clock, ArrowRight,
+  CheckCircle2, AlertCircle, Pause, Play, RotateCcw,
+  Bot, Clock,
 } from "lucide-react";
-import { useOrionData } from "@/hooks/useOrionData";
-import { OrionDataWrapper } from "@/components/orion/DataWrapper";
 import { OrionSectionHeader } from "@/components/orion/primitives";
 import { cn } from "@/lib/utils";
-import { fetchTimeline } from "@/domains/operations/fetcher";
 import type { TimelineEvent, ActionType } from "@/domains/operations/types";
 
 /* ── Action config ── */
@@ -69,14 +66,11 @@ function TimelineRow({ event, isLast }: { event: TimelineEvent; isLast: boolean 
 
 /* ── Main Export ── */
 
-export function OperationsTimeline() {
-  const { state, data, source, lastUpdated, refetch } = useOrionData<TimelineEvent[]>({
-    key: "operations-timeline",
-    fetcher: fetchTimeline,
-  });
+interface OperationsTimelineProps {
+  events: TimelineEvent[];
+}
 
-  const events = data || [];
-
+export function OperationsTimeline({ events }: OperationsTimelineProps) {
   return (
     <section className="space-y-4">
       <OrionSectionHeader
@@ -85,13 +79,11 @@ export function OperationsTimeline() {
         live
       />
 
-      <OrionDataWrapper state={state} source={source} lastUpdated={lastUpdated} onRetry={refetch}>
-        <div className="max-w-5xl max-h-[500px] overflow-y-auto orion-thin-scroll pr-2">
-          {events.map((event, i) => (
-            <TimelineRow key={event.id} event={event} isLast={i === events.length - 1} />
-          ))}
-        </div>
-      </OrionDataWrapper>
+      <div className="max-w-5xl max-h-[500px] overflow-y-auto orion-thin-scroll pr-2">
+        {events.map((event, i) => (
+          <TimelineRow key={event.id} event={event} isLast={i === events.length - 1} />
+        ))}
+      </div>
     </section>
   );
 }
