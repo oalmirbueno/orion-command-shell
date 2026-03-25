@@ -11,6 +11,7 @@ import SessionsPage from "./pages/SessionsPage.tsx";
 import ActivityPage from "./pages/ActivityPage.tsx";
 import CronPage from "./pages/CronPage.tsx";
 import MemoryPage from "./pages/MemoryPage.tsx";
+import AlertsPage from "./pages/AlertsPage.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -31,8 +32,8 @@ const App = () => (
           <Route path="/telemetry" element={<PlaceholderPage title="Telemetry" description="Real-time system telemetry" />} />
           <Route path="/system" element={<SystemPage />} />
           <Route path="/cron" element={<CronPage />} />
+          <Route path="/alerts" element={<AlertsPage />} />
           <Route path="/pipelines" element={<PlaceholderPage title="Pipelines" description="Data pipeline management" />} />
-          <Route path="/security" element={<PlaceholderPage title="Security" description="Security monitoring and controls" />} />
           <Route path="/settings" element={<PlaceholderPage title="Settings" description="System configuration" />} />
           <Route path="*" element={<NotFound />} />
         </Routes>

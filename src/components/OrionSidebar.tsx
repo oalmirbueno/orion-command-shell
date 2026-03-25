@@ -11,6 +11,7 @@ import {
   Bot,
   Timer,
   Brain,
+  Bell,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -39,8 +40,8 @@ const operationsItems = [
 const systemItems = [
   { title: "System", url: "/system", icon: Monitor },
   { title: "Cron", url: "/cron", icon: Timer },
+  { title: "Alerts", url: "/alerts", icon: Bell },
   { title: "Pipelines", url: "/pipelines", icon: GitBranch },
-  { title: "Security", url: "/security", icon: Shield },
   { title: "Settings", url: "/settings", icon: Settings },
 ];
 
