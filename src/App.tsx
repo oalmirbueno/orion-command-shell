@@ -10,6 +10,7 @@ import AgentsPage from "./pages/AgentsPage.tsx";
 import SessionsPage from "./pages/SessionsPage.tsx";
 import ActivityPage from "./pages/ActivityPage.tsx";
 import CronPage from "./pages/CronPage.tsx";
+import MemoryPage from "./pages/MemoryPage.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -26,6 +27,7 @@ const App = () => (
           <Route path="/missions" element={<PlaceholderPage title="Missions" description="Mission tracking and orchestration" />} />
           <Route path="/sessions" element={<SessionsPage />} />
           <Route path="/activity" element={<ActivityPage />} />
+          <Route path="/memory" element={<MemoryPage />} />
           <Route path="/telemetry" element={<PlaceholderPage title="Telemetry" description="Real-time system telemetry" />} />
           <Route path="/system" element={<SystemPage />} />
           <Route path="/cron" element={<CronPage />} />

@@ -10,6 +10,7 @@ import {
   Radio,
   Bot,
   Timer,
+  Brain,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -32,6 +33,7 @@ const operationsItems = [
   { title: "Agents", url: "/agents", icon: Bot },
   { title: "Sessions", url: "/sessions", icon: Activity },
   { title: "Activity", url: "/activity", icon: Radio },
+  { title: "Memory", url: "/memory", icon: Brain },
 ];
 
 const systemItems = [
