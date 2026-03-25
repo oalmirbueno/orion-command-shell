@@ -20,9 +20,9 @@ const MOCK_ITEMS: AttentionItem[] = [
 ];
 
 const priorityConfig = {
-  critical: { icon: AlertCircle, border: "border-l-status-critical", bg: "bg-status-critical/5", dot: "status-critical", label: "CRÍTICO" },
-  warning: { icon: AlertTriangle, border: "border-l-status-warning", bg: "bg-status-warning/5", dot: "status-warning", label: "ATENÇÃO" },
-  info: { icon: Info, border: "border-l-primary", bg: "bg-primary/5", dot: "bg-primary/60", label: "INFO" },
+  critical: { icon: AlertCircle, border: "border-l-status-critical", bg: "bg-status-critical/[0.04]", dot: "status-critical" },
+  warning: { icon: AlertTriangle, border: "border-l-status-warning", bg: "bg-status-warning/[0.04]", dot: "status-warning" },
+  info: { icon: Info, border: "border-l-primary/40", bg: "bg-primary/[0.03]", dot: "bg-primary/50" },
 };
 
 export function AttentionRequired() {
@@ -33,31 +33,32 @@ export function AttentionRequired() {
   });
 
   return (
-    <section>
-      <div className="flex items-center gap-3 mb-4">
-        <h2 className="text-xs font-mono uppercase tracking-[0.15em] text-muted-foreground">Atenção Necessária</h2>
+    <section className="rounded-md border border-border/50 overflow-hidden">
+      {/* Section header — OS panel style with border-bottom */}
+      <div className="flex items-center justify-between px-4 py-2.5 surface-2 border-b border-border/40">
+        <div className="flex items-center gap-2.5">
+          <div className="w-5 h-0.5 bg-status-warning rounded-full" />
+          <h2 className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground font-medium">Atenção Necessária</h2>
+        </div>
         {data && (
-          <div className="flex items-center gap-2 ml-2 px-3 py-1 rounded-full bg-status-warning/10 border border-status-warning/20">
-            <span className="text-[11px] font-mono text-status-warning font-semibold">{data.length}</span>
-          </div>
+          <span className="text-[10px] font-mono text-status-warning font-semibold">{data.length} itens</span>
         )}
-        <div className="flex-1 h-px bg-border/40" />
       </div>
 
       <OrionDataWrapper state={state} source={source} lastUpdated={lastUpdated} onRetry={refetch} compact>
-        <div className="space-y-2">
+        <div className="divide-y divide-border/20">
           {(data || []).map((item) => {
             const config = priorityConfig[item.priority];
             const Icon = config.icon;
             return (
-              <div key={item.id} className={`flex items-center gap-4 px-5 py-4 rounded-lg border border-border/50 ${config.bg} border-l-[3px] ${config.border} cursor-pointer hover:bg-accent/40 transition-colors group`}>
-                <Icon className="h-5 w-5 shrink-0 text-muted-foreground" />
+              <div key={item.id} className={`flex items-center gap-3 px-4 py-3 ${config.bg} border-l-2 ${config.border} cursor-pointer hover:bg-accent/30 transition-colors group`}>
+                <Icon className="h-4 w-4 shrink-0 text-muted-foreground/60" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground truncate">{item.title}</p>
-                  <p className="text-xs font-mono text-muted-foreground/60 mt-1">{item.context}</p>
+                  <p className="text-[13px] font-medium text-foreground truncate">{item.title}</p>
+                  <p className="text-[10px] font-mono text-muted-foreground/50 mt-0.5">{item.context}</p>
                 </div>
-                <span className="text-[11px] font-mono text-muted-foreground/50 shrink-0">{item.timestamp}</span>
-                <ChevronRight className="h-4 w-4 text-muted-foreground/30 group-hover:text-muted-foreground transition-colors shrink-0" />
+                <span className="text-[10px] font-mono text-muted-foreground/40 shrink-0">{item.timestamp}</span>
+                <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/20 group-hover:text-muted-foreground/50 transition-colors shrink-0" />
               </div>
             );
           })}

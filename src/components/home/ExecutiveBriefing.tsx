@@ -24,32 +24,33 @@ export function ExecutiveBriefing() {
   });
 
   return (
-    <section>
-      <div className="flex items-center gap-3 mb-4">
-        <h2 className="text-xs font-mono uppercase tracking-[0.15em] text-muted-foreground">Leitura Executiva</h2>
-        <div className="flex items-center gap-2 ml-2 px-3 py-1 rounded-full bg-accent border border-border/50">
-          <FileText className="h-3.5 w-3.5 text-muted-foreground/60" />
-          <span className="text-[11px] font-mono text-muted-foreground">Hoje</span>
+    <section className="rounded-md border border-border/50 overflow-hidden h-full">
+      {/* Panel header */}
+      <div className="flex items-center justify-between px-4 py-2.5 surface-2 border-b border-border/40">
+        <div className="flex items-center gap-2.5">
+          <div className="w-5 h-0.5 bg-muted-foreground/40 rounded-full" />
+          <h2 className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground font-medium">Leitura Executiva</h2>
         </div>
-        <div className="flex-1 h-px bg-border/40" />
+        <div className="flex items-center gap-1.5">
+          <FileText className="h-3 w-3 text-muted-foreground/40" />
+          <span className="text-[10px] font-mono text-muted-foreground/40">Hoje</span>
+        </div>
       </div>
 
       <OrionDataWrapper state={state} source={source} lastUpdated={lastUpdated} onRetry={refetch} compact>
-        <div className="rounded-lg border border-border/50 bg-card overflow-hidden">
-          <div className="divide-y divide-border/30">
-            {(data || []).map((item, i) => (
-              <div key={i} className="flex gap-5 px-5 py-4 hover:bg-accent/20 transition-colors">
-                <div className="flex flex-col items-center pt-0.5">
-                  <span className="text-xs font-mono text-primary/70 font-medium">{item.time}</span>
-                  {i < (data || []).length - 1 && <div className="w-px flex-1 bg-border/30 mt-2" />}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm text-foreground/90 leading-relaxed">{item.content}</p>
-                  <p className="text-[11px] font-mono text-muted-foreground/50 mt-1.5">{item.source}</p>
-                </div>
+        <div className="divide-y divide-border/15">
+          {(data || []).map((item, i) => (
+            <div key={i} className="flex gap-4 px-4 py-3 hover:bg-accent/15 transition-colors">
+              <div className="flex flex-col items-center pt-0.5 shrink-0">
+                <span className="text-[10px] font-mono text-primary/60 font-medium">{item.time}</span>
+                {i < (data || []).length - 1 && <div className="w-px flex-1 bg-border/20 mt-1.5" />}
               </div>
-            ))}
-          </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[12px] text-foreground/80 leading-relaxed">{item.content}</p>
+                <p className="text-[9px] font-mono text-muted-foreground/40 mt-1">{item.source}</p>
+              </div>
+            </div>
+          ))}
         </div>
       </OrionDataWrapper>
     </section>
