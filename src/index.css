@@ -4,13 +4,19 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ═══════════════════════════════════════════════════
+   ORION MISSION CONTROL — DESIGN SYSTEM
+   All tokens, typography, components defined here.
+   Components MUST use these tokens — no ad-hoc colors.
+   ═══════════════════════════════════════════════════ */
+
 @layer base {
   :root {
-    /* Orion Mission Control — Command Center Dark Theme */
+    /* ── Fonts ── */
     --font-display: 'Space Grotesk', system-ui, sans-serif;
     --font-mono: 'JetBrains Mono', monospace;
 
-    /* Deep space backgrounds */
+    /* ── Core Palette ── */
     --background: 220 20% 7%;
     --foreground: 210 20% 90%;
 
@@ -20,7 +26,6 @@
     --popover: 220 18% 10%;
     --popover-foreground: 210 20% 90%;
 
-    /* Cyan operational accent */
     --primary: 185 70% 50%;
     --primary-foreground: 220 20% 7%;
 
@@ -39,26 +44,30 @@
     --border: 220 15% 16%;
     --input: 220 15% 16%;
     --ring: 185 70% 50%;
-
     --radius: 0.375rem;
 
-    /* Status colors */
+    /* ── Status System ── */
     --status-online: 145 70% 50%;
     --status-warning: 38 92% 55%;
     --status-critical: 0 72% 55%;
     --status-info: 185 70% 50%;
 
-    /* Surface layers */
+    /* ── Surface Elevation ── */
     --surface-0: 220 20% 7%;
     --surface-1: 220 18% 10%;
     --surface-2: 220 15% 13%;
     --surface-3: 220 15% 16%;
 
-    /* Glow effects */
+    /* ── Effects ── */
     --glow-primary: 185 70% 50%;
     --shadow-command: 0 4px 24px -4px hsla(220, 20%, 0%, 0.6);
 
-    /* Sidebar */
+    /* ── Spacing Scale (rem) ── */
+    --space-section: 2rem;    /* Between major sections */
+    --space-block: 1rem;      /* Between blocks within a section */
+    --space-element: 0.5rem;  /* Between elements within a block */
+
+    /* ── Sidebar ── */
     --sidebar-background: 220 20% 8%;
     --sidebar-foreground: 210 15% 65%;
     --sidebar-primary: 185 70% 50%;
@@ -70,6 +79,7 @@
   }
 }
 
+/* ── Base Resets ── */
 @layer base {
   * {
     @apply border-border;
@@ -84,6 +94,223 @@
     font-family: var(--font-mono);
   }
 }
+
+/* ═══════════════════════════════════════════════════
+   COMPONENT CLASSES
+   Reusable via className — keeps JSX lean.
+   ═══════════════════════════════════════════════════ */
+
+@layer components {
+
+  /* ── Typography ── */
+
+  .orion-page-title {
+    @apply text-sm font-semibold tracking-wide text-foreground;
+  }
+
+  .orion-section-label {
+    @apply text-[10px] font-mono uppercase tracking-[0.15em] text-muted-foreground;
+    font-family: var(--font-mono);
+  }
+
+  .orion-breadcrumb {
+    @apply flex items-center gap-3 text-[10px] font-mono text-muted-foreground uppercase tracking-wider;
+    font-family: var(--font-mono);
+  }
+
+  .orion-breadcrumb-separator {
+    @apply text-border;
+  }
+
+  .orion-breadcrumb-current {
+    @apply text-foreground;
+  }
+
+  .orion-metric-value {
+    @apply text-lg font-semibold text-foreground leading-none;
+  }
+
+  .orion-metric-label {
+    @apply text-[9px] font-mono uppercase tracking-wider text-muted-foreground/60;
+    font-family: var(--font-mono);
+  }
+
+  .orion-meta {
+    @apply text-[9px] font-mono text-muted-foreground/40;
+    font-family: var(--font-mono);
+  }
+
+  .orion-mono-sm {
+    @apply text-[10px] font-mono text-muted-foreground/60;
+    font-family: var(--font-mono);
+  }
+
+  .orion-item-title {
+    @apply text-[13px] font-semibold text-foreground leading-snug;
+  }
+
+  .orion-item-description {
+    @apply text-[11px] text-foreground/50 leading-relaxed;
+  }
+
+  /* ── Section Header ── */
+
+  .orion-section-header {
+    @apply flex items-center gap-2 mb-3;
+  }
+
+  .orion-section-divider {
+    @apply flex-1 h-px bg-border/40;
+  }
+
+  .orion-live-indicator {
+    @apply text-[10px] font-mono text-primary animate-pulse-glow;
+    font-family: var(--font-mono);
+  }
+
+  /* ── Containers ── */
+
+  .orion-card {
+    @apply rounded-lg border border-border/50 bg-card;
+  }
+
+  .orion-card-elevated {
+    @apply rounded-lg border border-border/50 bg-card;
+    box-shadow: var(--shadow-command);
+  }
+
+  .orion-row {
+    @apply rounded-lg border border-border/40 bg-card hover:bg-accent/20 transition-colors cursor-pointer;
+  }
+
+  .orion-row-bordered {
+    @apply rounded-lg border border-border/40 bg-card border-l-2 hover:bg-accent/20 transition-colors cursor-pointer;
+  }
+
+  .orion-summary-grid {
+    @apply grid gap-px bg-border/30 rounded-lg overflow-hidden border border-border/50;
+  }
+
+  .orion-summary-cell {
+    @apply bg-card px-5 py-4 flex items-center gap-4;
+  }
+
+  .orion-icon-box {
+    @apply w-9 h-9 rounded-lg bg-surface-2 border border-border/50 flex items-center justify-center;
+  }
+
+  .orion-icon-box-sm {
+    @apply w-7 h-7 rounded-md bg-surface-2 border border-border/50 flex items-center justify-center;
+  }
+
+  .orion-table-header {
+    @apply px-4 py-2 bg-surface-2 text-[9px] font-mono uppercase tracking-wider text-muted-foreground/50;
+    font-family: var(--font-mono);
+  }
+
+  .orion-table-row {
+    @apply px-4 py-2.5 items-center border-t border-border/30 hover:bg-accent/30 transition-colors cursor-pointer;
+  }
+
+  .orion-context-box {
+    @apply px-3 py-2 rounded-md bg-surface-2 border border-border/30;
+  }
+
+  /* ── Badges ── */
+
+  .orion-badge {
+    @apply text-[8px] font-mono uppercase px-1.5 py-0.5 rounded border;
+    font-family: var(--font-mono);
+  }
+
+  .orion-badge-pill {
+    @apply text-[9px] font-mono font-medium px-2 py-0.5 rounded-full border;
+    font-family: var(--font-mono);
+  }
+
+  .orion-badge-critical {
+    @apply bg-status-critical/10 text-status-critical border-status-critical/20;
+  }
+
+  .orion-badge-warning {
+    @apply bg-status-warning/10 text-status-warning border-status-warning/20;
+  }
+
+  .orion-badge-success {
+    @apply bg-status-online/10 text-status-online border-status-online/20;
+  }
+
+  .orion-badge-info {
+    @apply bg-primary/10 text-primary border-primary/20;
+  }
+
+  .orion-badge-neutral {
+    @apply bg-muted-foreground/10 text-muted-foreground border-muted-foreground/20;
+  }
+
+  /* ── Status Indicators ── */
+
+  .orion-border-l-critical { @apply border-l-status-critical; }
+  .orion-border-l-warning  { @apply border-l-status-warning; }
+  .orion-border-l-success  { @apply border-l-status-online; }
+  .orion-border-l-info     { border-left-color: hsl(var(--primary) / 0.3); }
+  .orion-border-l-neutral  { border-left-color: hsl(var(--muted-foreground) / 0.2); }
+
+  .orion-bg-critical { @apply bg-status-critical/5; }
+  .orion-bg-warning  { @apply bg-status-warning/5; }
+
+  /* ── Separators ── */
+
+  .orion-vsep {
+    @apply h-3 w-px bg-border/30;
+  }
+
+  .orion-group-header {
+    @apply flex items-center gap-2 mb-2;
+  }
+
+  .orion-group-divider {
+    @apply flex-1 h-px bg-border/20;
+  }
+
+  /* ── Tags ── */
+
+  .orion-tag {
+    @apply text-[8px] font-mono px-1.5 py-0.5 rounded bg-surface-3 text-muted-foreground/50 border border-border/20;
+    font-family: var(--font-mono);
+  }
+
+  /* ── Code / Schedule ── */
+
+  .orion-code {
+    @apply text-[9px] font-mono px-1.5 py-0.5 rounded bg-surface-2 border border-border/40 text-muted-foreground/60;
+    font-family: var(--font-mono);
+  }
+
+  /* ── Progress Bars ── */
+
+  .orion-progress-track {
+    @apply h-1 w-full bg-surface-3 rounded-full overflow-hidden;
+  }
+
+  .orion-progress-bar {
+    @apply h-full rounded-full transition-all duration-500;
+  }
+
+  /* ── Dimmed States ── */
+
+  .orion-dimmed {
+    @apply opacity-50 hover:opacity-70;
+  }
+
+  .orion-dimmed-light {
+    @apply opacity-60 hover:opacity-80;
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   UTILITY CLASSES
+   ═══════════════════════════════════════════════════ */
 
 @layer utilities {
   .text-display {
@@ -106,21 +333,10 @@
     border-color: hsl(var(--primary) / 0.3);
   }
 
-  .surface-0 {
-    background-color: hsl(var(--surface-0));
-  }
-
-  .surface-1 {
-    background-color: hsl(var(--surface-1));
-  }
-
-  .surface-2 {
-    background-color: hsl(var(--surface-2));
-  }
-
-  .surface-3 {
-    background-color: hsl(var(--surface-3));
-  }
+  .surface-0 { background-color: hsl(var(--surface-0)); }
+  .surface-1 { background-color: hsl(var(--surface-1)); }
+  .surface-2 { background-color: hsl(var(--surface-2)); }
+  .surface-3 { background-color: hsl(var(--surface-3)); }
 
   .status-dot {
     @apply w-2 h-2 rounded-full;
@@ -140,4 +356,10 @@
     background-color: hsl(var(--status-critical));
     box-shadow: 0 0 6px hsl(var(--status-critical) / 0.5);
   }
+
+  .bg-status-critical\/5 { background-color: hsl(var(--status-critical) / 0.05); }
+  .bg-status-critical\/8 { background-color: hsl(var(--status-critical) / 0.08); }
+  .bg-status-critical\/10 { background-color: hsl(var(--status-critical) / 0.10); }
+  .bg-status-warning\/5 { background-color: hsl(var(--status-warning) / 0.05); }
+  .bg-status-online\/10 { background-color: hsl(var(--status-online) / 0.10); }
 }
