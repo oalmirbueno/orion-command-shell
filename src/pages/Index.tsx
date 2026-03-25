@@ -1,8 +1,7 @@
 import { OrionLayout } from "@/components/OrionLayout";
-import { OrionBreadcrumb } from "@/components/orion";
-import { SystemPulse } from "@/components/home/SystemPulse";
+import { CommandStatus } from "@/components/home/CommandStatus";
 import { AttentionRequired } from "@/components/home/AttentionRequired";
-import { ActiveSessions } from "@/components/home/ActiveSessions";
+import { LiveOperations } from "@/components/home/LiveOperations";
 import { AgentsHierarchy } from "@/components/home/AgentsHierarchy";
 import { OperationalHealth } from "@/components/home/OperationalHealth";
 import { ExecutiveBriefing } from "@/components/home/ExecutiveBriefing";
@@ -10,20 +9,31 @@ import { ExecutiveBriefing } from "@/components/home/ExecutiveBriefing";
 const Index = () => {
   return (
     <OrionLayout title="Comando">
-      <div className="max-w-7xl mx-auto space-y-8">
-        <OrionBreadcrumb items={["Mission Control", "Visão Geral"]} />
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Tier 1: Overall status — the single most important read */}
+        <CommandStatus />
 
-        <SystemPulse />
+        {/* Tier 2: What needs attention RIGHT NOW */}
         <AttentionRequired />
 
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-          <ActiveSessions />
-          <AgentsHierarchy />
+        {/* Tier 3: What's happening — live operations + agents side by side */}
+        <div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
+          <div className="xl:col-span-3">
+            <LiveOperations />
+          </div>
+          <div className="xl:col-span-2">
+            <AgentsHierarchy />
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-          <OperationalHealth />
-          <ExecutiveBriefing />
+        {/* Tier 4: Context — health + briefing */}
+        <div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
+          <div className="xl:col-span-2">
+            <OperationalHealth />
+          </div>
+          <div className="xl:col-span-3">
+            <ExecutiveBriefing />
+          </div>
         </div>
       </div>
     </OrionLayout>
