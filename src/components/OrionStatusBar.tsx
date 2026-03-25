@@ -44,14 +44,14 @@ function getBarColor(percent: number): string {
 
 function MiniBar({ percent }: { percent: number }) {
   return (
-    <div className="w-12 h-1 bg-surface-3 rounded-full overflow-hidden">
+    <div className="w-14 h-1.5 bg-surface-3 rounded-full overflow-hidden">
       <div className={`h-full rounded-full transition-all duration-700 ${getBarColor(percent)}`} style={{ width: `${percent}%` }} />
     </div>
   );
 }
 
 function Sep() {
-  return <div className="w-px h-3 bg-border/40" />;
+  return <div className="w-px h-3.5 bg-border" />;
 }
 
 export function OrionStatusBar() {
@@ -61,11 +61,10 @@ export function OrionStatusBar() {
   const diskPct = Math.round((stats.disk.used / stats.disk.total) * 100);
 
   return (
-    <footer className="h-7 flex items-center justify-between px-4 border-t border-border/50 surface-0 text-[10px] font-mono text-muted-foreground/60 shrink-0 select-none">
-      <div className="flex items-center gap-3">
-        {/* CPU */}
-        <div className="flex items-center gap-1.5">
-          <Cpu className="h-3 w-3" />
+    <footer className="h-8 flex items-center justify-between px-5 border-t border-border surface-0 text-xs font-mono text-muted-foreground/60 shrink-0 select-none">
+      <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
+          <Cpu className="h-3.5 w-3.5" />
           <span>CPU</span>
           <span className="text-foreground/70">{cpuPct}%</span>
           <MiniBar percent={cpuPct} />
@@ -73,9 +72,8 @@ export function OrionStatusBar() {
 
         <Sep />
 
-        {/* RAM */}
-        <div className="flex items-center gap-1.5">
-          <MemoryStick className="h-3 w-3" />
+        <div className="flex items-center gap-2">
+          <MemoryStick className="h-3.5 w-3.5" />
           <span>RAM</span>
           <span className="text-foreground/70">{stats.ram.used.toFixed(1)}/{stats.ram.total}GB</span>
           <MiniBar percent={ramPct} />
@@ -83,9 +81,8 @@ export function OrionStatusBar() {
 
         <Sep />
 
-        {/* Disk */}
-        <div className="flex items-center gap-1.5">
-          <HardDrive className="h-3 w-3" />
+        <div className="flex items-center gap-2">
+          <HardDrive className="h-3.5 w-3.5" />
           <span>DISK</span>
           <span className="text-foreground/70">{diskPct}%</span>
           <MiniBar percent={diskPct} />
@@ -93,34 +90,30 @@ export function OrionStatusBar() {
 
         <Sep />
 
-        {/* Latency */}
-        <div className="flex items-center gap-1.5">
-          <Activity className="h-3 w-3" />
+        <div className="flex items-center gap-2">
+          <Activity className="h-3.5 w-3.5" />
           <span>LAT</span>
           <span className="text-foreground/70">{stats.latency}ms</span>
         </div>
       </div>
 
-      <div className="flex items-center gap-3">
-        {/* Shield */}
-        <div className="flex items-center gap-1.5">
-          <Shield className="h-3 w-3 text-status-online" />
+      <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
+          <Shield className="h-3.5 w-3.5 text-status-online" />
           <span className="text-status-online">SECURE</span>
         </div>
 
         <Sep />
 
-        {/* Connections */}
-        <div className="flex items-center gap-1.5">
-          <Wifi className="h-3 w-3" />
+        <div className="flex items-center gap-2">
+          <Wifi className="h-3.5 w-3.5" />
           <span>{stats.activeConnections} conn</span>
         </div>
 
         <Sep />
 
-        {/* Uptime */}
-        <div className="flex items-center gap-1.5">
-          <Clock className="h-3 w-3" />
+        <div className="flex items-center gap-2">
+          <Clock className="h-3.5 w-3.5" />
           <span>UP {stats.uptime}</span>
         </div>
       </div>

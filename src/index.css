@@ -16,7 +16,7 @@
     --font-display: 'Space Grotesk', system-ui, sans-serif;
     --font-mono: 'JetBrains Mono', monospace;
 
-    /* ── Core Palette (deeper, OS-grade) ── */
+    /* ── Core Palette ── */
     --background: 0 0% 5%;
     --foreground: 0 0% 95%;
 
@@ -41,10 +41,11 @@
     --destructive: 0 72% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 16%;
+    --border: 0 0% 18%;
+    --border-strong: 0 0% 24%;
     --input: 0 0% 16%;
     --ring: 185 70% 50%;
-    --radius: 0.375rem;
+    --radius: 0.5rem;
 
     /* ── Status System ── */
     --status-online: 145 72% 46%;
@@ -52,11 +53,11 @@
     --status-critical: 0 72% 50%;
     --status-info: 185 70% 50%;
 
-    /* ── Surface Elevation (tighter steps) ── */
+    /* ── Surface Elevation ── */
     --surface-0: 0 0% 5%;
     --surface-1: 0 0% 8%;
     --surface-2: 0 0% 11%;
-    --surface-3: 0 0% 14%;
+    --surface-3: 0 0% 15%;
 
     /* ── Effects ── */
     --glow-primary: 185 70% 50%;
@@ -74,7 +75,7 @@
     --sidebar-primary-foreground: 0 0% 5%;
     --sidebar-accent: 0 0% 12%;
     --sidebar-accent-foreground: 0 0% 85%;
-    --sidebar-border: 0 0% 13%;
+    --sidebar-border: 0 0% 15%;
     --sidebar-ring: 185 70% 50%;
   }
 }
@@ -93,11 +94,15 @@
   code, pre, .font-mono {
     font-family: var(--font-mono);
   }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+  }
 }
 
 /* ═══════════════════════════════════════════════════
    COMPONENT CLASSES
-   Reusable via className — keeps JSX lean.
    ═══════════════════════════════════════════════════ */
 
 @layer components {
@@ -105,16 +110,16 @@
   /* ── Typography ── */
 
   .orion-page-title {
-    @apply text-base font-semibold tracking-wide text-foreground;
+    @apply text-lg font-semibold tracking-wide text-foreground;
   }
 
   .orion-section-label {
-    @apply text-[11px] font-mono uppercase tracking-[0.15em] text-muted-foreground;
+    @apply text-xs font-mono uppercase tracking-[0.12em] text-muted-foreground;
     font-family: var(--font-mono);
   }
 
   .orion-breadcrumb {
-    @apply flex items-center gap-3 text-[11px] font-mono text-muted-foreground uppercase tracking-wider;
+    @apply flex items-center gap-3 text-xs font-mono text-muted-foreground uppercase tracking-wider;
     font-family: var(--font-mono);
   }
 
@@ -127,21 +132,21 @@
   }
 
   .orion-metric-value {
-    @apply text-xl font-bold text-foreground leading-none;
+    @apply text-2xl font-bold text-foreground leading-none tracking-tight;
   }
 
   .orion-metric-label {
-    @apply text-[10px] font-mono uppercase tracking-wider text-muted-foreground/60;
+    @apply text-xs font-mono uppercase tracking-wider text-muted-foreground/60;
     font-family: var(--font-mono);
   }
 
   .orion-meta {
-    @apply text-[10px] font-mono text-muted-foreground/50;
+    @apply text-xs font-mono text-muted-foreground/50;
     font-family: var(--font-mono);
   }
 
   .orion-mono-sm {
-    @apply text-[11px] font-mono text-muted-foreground/60;
+    @apply text-xs font-mono text-muted-foreground/60;
     font-family: var(--font-mono);
   }
 
@@ -150,45 +155,71 @@
   }
 
   .orion-item-description {
-    @apply text-xs text-foreground/50 leading-relaxed;
+    @apply text-sm text-foreground/50 leading-relaxed;
+  }
+
+  /* ── Panel Header (OS-style section headers) ── */
+
+  .orion-panel-header {
+    @apply flex items-center justify-between px-5 py-3 border-b;
+    border-color: hsl(var(--border));
+    background-color: hsl(var(--surface-1));
+  }
+
+  .orion-panel-title {
+    @apply text-sm font-semibold tracking-wide text-foreground;
+    font-family: var(--font-display);
   }
 
   /* ── Section Header ── */
 
   .orion-section-header {
-    @apply flex items-center gap-3 mb-4;
+    @apply flex items-center gap-3 mb-5;
   }
 
   .orion-section-divider {
-    @apply flex-1 h-px bg-border/40;
+    @apply flex-1 h-px;
+    background-color: hsl(var(--border) / 0.4);
   }
 
   .orion-live-indicator {
-    @apply text-[11px] font-mono text-primary animate-pulse-glow font-medium;
+    @apply text-xs font-mono text-primary animate-pulse-glow font-medium;
     font-family: var(--font-mono);
   }
 
   /* ── Containers ── */
 
   .orion-card {
-    @apply rounded-lg border border-border/60 bg-card;
+    @apply rounded-lg border bg-card;
+    border-color: hsl(var(--border));
   }
 
   .orion-card-elevated {
-    @apply rounded-lg border border-border/60 bg-card;
+    @apply rounded-lg border bg-card;
+    border-color: hsl(var(--border));
     box-shadow: var(--shadow-command);
   }
 
   .orion-row {
-    @apply rounded-lg border border-border/50 bg-card hover:bg-accent/30 transition-colors cursor-pointer;
+    @apply rounded-lg border bg-card transition-colors cursor-pointer;
+    border-color: hsl(var(--border) / 0.6);
+  }
+  .orion-row:hover {
+    background-color: hsl(var(--accent) / 0.3);
   }
 
   .orion-row-bordered {
-    @apply rounded-lg border border-border/50 bg-card border-l-[3px] hover:bg-accent/30 transition-colors cursor-pointer;
+    @apply rounded-lg border bg-card border-l-[3px] transition-colors cursor-pointer;
+    border-color: hsl(var(--border) / 0.6);
+  }
+  .orion-row-bordered:hover {
+    background-color: hsl(var(--accent) / 0.3);
   }
 
   .orion-summary-grid {
-    @apply grid gap-px bg-border/30 rounded-lg overflow-hidden border border-border/60;
+    @apply grid gap-px rounded-lg overflow-hidden border;
+    background-color: hsl(var(--border) / 0.3);
+    border-color: hsl(var(--border));
   }
 
   .orion-summary-cell {
@@ -196,101 +227,131 @@
   }
 
   .orion-icon-box {
-    @apply w-10 h-10 rounded-lg bg-surface-2 border border-border/60 flex items-center justify-center;
+    @apply w-10 h-10 rounded-lg flex items-center justify-center;
+    background-color: hsl(var(--surface-2));
+    border: 1px solid hsl(var(--border));
   }
 
   .orion-icon-box-sm {
-    @apply w-8 h-8 rounded-md bg-surface-2 border border-border/60 flex items-center justify-center;
+    @apply w-9 h-9 rounded-md flex items-center justify-center;
+    background-color: hsl(var(--surface-2));
+    border: 1px solid hsl(var(--border));
   }
 
   .orion-table-header {
-    @apply px-5 py-3 bg-surface-2 text-[10px] font-mono uppercase tracking-wider text-muted-foreground/60;
+    @apply px-5 py-3 text-xs font-mono uppercase tracking-wider text-muted-foreground/60;
+    background-color: hsl(var(--surface-2));
     font-family: var(--font-mono);
   }
 
   .orion-table-row {
-    @apply px-5 py-3.5 items-center border-t border-border/30 hover:bg-accent/30 transition-colors cursor-pointer;
+    @apply px-5 py-4 items-center border-t transition-colors cursor-pointer;
+    border-color: hsl(var(--border) / 0.3);
+  }
+  .orion-table-row:hover {
+    background-color: hsl(var(--accent) / 0.3);
   }
 
   .orion-context-box {
-    @apply px-4 py-3 rounded-lg bg-surface-2 border border-border/40;
+    @apply px-5 py-4 rounded-lg;
+    background-color: hsl(var(--surface-2));
+    border: 1px solid hsl(var(--border) / 0.5);
   }
 
   /* ── Badges ── */
 
   .orion-badge {
-    @apply text-[9px] font-mono uppercase px-2 py-1 rounded border font-medium;
+    @apply text-[10px] font-mono uppercase px-2.5 py-1 rounded border font-semibold;
     font-family: var(--font-mono);
   }
 
   .orion-badge-pill {
-    @apply text-[10px] font-mono font-medium px-2.5 py-1 rounded-full border;
+    @apply text-xs font-mono font-medium px-3 py-1 rounded-full border;
     font-family: var(--font-mono);
   }
 
   .orion-badge-critical {
-    @apply bg-status-critical/10 text-status-critical border-status-critical/20;
+    background-color: hsl(var(--status-critical) / 0.1);
+    color: hsl(var(--status-critical));
+    border-color: hsl(var(--status-critical) / 0.2);
   }
 
   .orion-badge-warning {
-    @apply bg-status-warning/10 text-status-warning border-status-warning/20;
+    background-color: hsl(var(--status-warning) / 0.1);
+    color: hsl(var(--status-warning));
+    border-color: hsl(var(--status-warning) / 0.2);
   }
 
   .orion-badge-success {
-    @apply bg-status-online/10 text-status-online border-status-online/20;
+    background-color: hsl(var(--status-online) / 0.1);
+    color: hsl(var(--status-online));
+    border-color: hsl(var(--status-online) / 0.2);
   }
 
   .orion-badge-info {
-    @apply bg-primary/10 text-primary border-primary/20;
+    background-color: hsl(var(--primary) / 0.1);
+    color: hsl(var(--primary));
+    border-color: hsl(var(--primary) / 0.2);
   }
 
   .orion-badge-neutral {
-    @apply bg-muted-foreground/10 text-muted-foreground border-muted-foreground/20;
+    background-color: hsl(var(--muted-foreground) / 0.1);
+    color: hsl(var(--muted-foreground));
+    border-color: hsl(var(--muted-foreground) / 0.2);
   }
 
   /* ── Status Indicators ── */
 
-  .orion-border-l-critical { @apply border-l-status-critical; }
-  .orion-border-l-warning  { @apply border-l-status-warning; }
-  .orion-border-l-success  { @apply border-l-status-online; }
+  .orion-border-l-critical { border-left-color: hsl(var(--status-critical)); }
+  .orion-border-l-warning  { border-left-color: hsl(var(--status-warning)); }
+  .orion-border-l-success  { border-left-color: hsl(var(--status-online)); }
   .orion-border-l-info     { border-left-color: hsl(var(--primary) / 0.3); }
   .orion-border-l-neutral  { border-left-color: hsl(var(--muted-foreground) / 0.2); }
 
-  .orion-bg-critical { @apply bg-status-critical/5; }
-  .orion-bg-warning  { @apply bg-status-warning/5; }
+  .orion-bg-critical { background-color: hsl(var(--status-critical) / 0.05); }
+  .orion-bg-warning  { background-color: hsl(var(--status-warning) / 0.05); }
 
   /* ── Separators ── */
 
   .orion-vsep {
-    @apply h-3 w-px bg-border/30;
+    @apply h-4 w-px;
+    background-color: hsl(var(--border) / 0.4);
   }
 
   .orion-group-header {
-    @apply flex items-center gap-2.5 mb-3;
+    @apply flex items-center gap-3 mb-3;
   }
 
   .orion-group-divider {
-    @apply flex-1 h-px bg-border/20;
+    @apply flex-1 h-px;
+    background-color: hsl(var(--border) / 0.25);
   }
 
   /* ── Tags ── */
 
   .orion-tag {
-    @apply text-[9px] font-mono px-2 py-1 rounded bg-surface-3 text-muted-foreground/60 border border-border/30;
+    @apply text-[10px] font-mono px-2.5 py-1 rounded;
+    background-color: hsl(var(--surface-3));
+    color: hsl(var(--muted-foreground) / 0.7);
+    border: 1px solid hsl(var(--border) / 0.4);
     font-family: var(--font-mono);
   }
 
   /* ── Code / Schedule ── */
 
   .orion-code {
-    @apply text-[10px] font-mono px-2 py-1 rounded bg-surface-2 border border-border/50 text-muted-foreground/70;
+    @apply text-xs font-mono px-2.5 py-1.5 rounded;
+    background-color: hsl(var(--surface-2));
+    border: 1px solid hsl(var(--border) / 0.5);
+    color: hsl(var(--muted-foreground) / 0.8);
     font-family: var(--font-mono);
   }
 
   /* ── Progress Bars ── */
 
   .orion-progress-track {
-    @apply h-1.5 w-full bg-surface-3 rounded-full overflow-hidden;
+    @apply h-2 w-full rounded-full overflow-hidden;
+    background-color: hsl(var(--surface-3));
   }
 
   .orion-progress-bar {
@@ -339,29 +400,23 @@
   .surface-3 { background-color: hsl(var(--surface-3)); }
 
   .status-dot {
-    @apply w-2 h-2 rounded-full;
+    @apply w-2.5 h-2.5 rounded-full;
   }
 
   .status-online {
     background-color: hsl(var(--status-online));
-    box-shadow: 0 0 6px hsl(var(--status-online) / 0.5);
+    box-shadow: 0 0 8px hsl(var(--status-online) / 0.5);
   }
 
   .status-warning {
     background-color: hsl(var(--status-warning));
-    box-shadow: 0 0 6px hsl(var(--status-warning) / 0.5);
+    box-shadow: 0 0 8px hsl(var(--status-warning) / 0.5);
   }
 
   .status-critical {
     background-color: hsl(var(--status-critical));
-    box-shadow: 0 0 6px hsl(var(--status-critical) / 0.5);
+    box-shadow: 0 0 8px hsl(var(--status-critical) / 0.5);
   }
-
-  .bg-status-critical\/5 { background-color: hsl(var(--status-critical) / 0.05); }
-  .bg-status-critical\/8 { background-color: hsl(var(--status-critical) / 0.08); }
-  .bg-status-critical\/10 { background-color: hsl(var(--status-critical) / 0.10); }
-  .bg-status-warning\/5 { background-color: hsl(var(--status-warning) / 0.05); }
-  .bg-status-online\/10 { background-color: hsl(var(--status-online) / 0.10); }
 }
 
 /* ── Thin Scrollbar ── */
@@ -370,7 +425,7 @@
   scrollbar-color: hsl(var(--border)) transparent;
 }
 .orion-thin-scroll::-webkit-scrollbar {
-  width: 4px;
+  width: 6px;
 }
 .orion-thin-scroll::-webkit-scrollbar-track {
   background: transparent;

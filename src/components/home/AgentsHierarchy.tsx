@@ -50,20 +50,19 @@ export function AgentsHierarchy() {
   const total = (data || []).length;
 
   return (
-    <section className="rounded-md border border-border/50 overflow-hidden h-full">
-      {/* Panel header */}
-      <div className="flex items-center justify-between px-4 py-2.5 surface-2 border-b border-border/40">
-        <div className="flex items-center gap-2.5">
-          <div className="w-5 h-0.5 bg-primary rounded-full" />
-          <h2 className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground font-medium">Hierarquia de Agentes</h2>
+    <section className="rounded-lg border border-border overflow-hidden h-full">
+      <div className="orion-panel-header">
+        <div className="flex items-center gap-3">
+          <div className="w-6 h-0.5 bg-primary rounded-full" />
+          <h2 className="orion-panel-title">Hierarquia de Agentes</h2>
         </div>
         {data && (
-          <span className="text-[10px] font-mono text-primary font-semibold">{activeCount}/{total} ativos</span>
+          <span className="text-xs font-mono text-primary font-semibold">{activeCount}/{total} ativos</span>
         )}
       </div>
 
-      <OrionDataWrapper state={state} source={source} lastUpdated={lastUpdated} onRetry={refetch} compact>
-        <div className="p-3 space-y-3">
+      <OrionDataWrapper state={state} source={source} lastUpdated={lastUpdated} onRetry={refetch} compact hideSource>
+        <div className="p-4 space-y-4">
           {tiers.map((tier) => {
             const agents = (data || []).filter(a => a.tier === tier);
             if (agents.length === 0) return null;
@@ -72,26 +71,26 @@ export function AgentsHierarchy() {
 
             return (
               <div key={tier}>
-                <div className="flex items-center gap-2 mb-1.5 px-1">
-                  <TierIcon className={`h-3 w-3 ${cfg.color}`} />
-                  <span className={`text-[9px] font-mono uppercase tracking-widest ${cfg.color}`}>{cfg.label}</span>
-                  <div className="flex-1 h-px bg-border/20" />
+                <div className="flex items-center gap-2.5 mb-2 px-1">
+                  <TierIcon className={`h-4 w-4 ${cfg.color}`} />
+                  <span className={`text-[10px] font-mono uppercase tracking-widest font-semibold ${cfg.color}`}>{cfg.label}</span>
+                  <div className="flex-1 h-px bg-border/25" />
                 </div>
 
                 <div className="space-y-1">
                   {agents.map((agent) => (
-                    <div key={agent.name} className={`flex items-center gap-3 px-3 py-2 rounded-sm hover:bg-accent/20 transition-colors cursor-pointer ${agent.status === "offline" ? "opacity-35" : ""} ${tier === "orchestrator" ? "border-l-2 border-l-primary/40 bg-primary/[0.03]" : ""}`}>
-                      <div className={`status-dot ${statusDot[agent.status]}`} style={{ width: 6, height: 6 }} />
+                    <div key={agent.name} className={`flex items-center gap-3 px-4 py-2.5 rounded-md hover:bg-accent/20 transition-colors cursor-pointer ${agent.status === "offline" ? "opacity-35" : ""} ${tier === "orchestrator" ? "border-l-2 border-l-primary/40 bg-primary/[0.03]" : ""}`}>
+                      <div className={`status-dot ${statusDot[agent.status]}`} />
                       <div className="flex-1 min-w-0">
-                        <span className="text-[12px] font-medium text-foreground">{agent.name}</span>
-                        <p className="text-[9px] font-mono text-muted-foreground/40 mt-0">{agent.role}</p>
+                        <span className="text-sm font-medium text-foreground">{agent.name}</span>
+                        <p className="text-xs font-mono text-muted-foreground/40 mt-0.5">{agent.role}</p>
                       </div>
                       {agent.status !== "offline" && (
-                        <div className="flex items-center gap-1.5 shrink-0">
-                          <div className="w-12 h-1 bg-surface-3 rounded-full overflow-hidden">
+                        <div className="flex items-center gap-2 shrink-0">
+                          <div className="w-14 h-1.5 bg-surface-3 rounded-full overflow-hidden">
                             <div className={`h-full rounded-full ${agent.load > 85 ? "bg-status-warning" : "bg-primary/50"}`} style={{ width: `${agent.load}%` }} />
                           </div>
-                          <span className="text-[9px] font-mono text-muted-foreground/30 w-7 text-right">{agent.load}%</span>
+                          <span className="text-xs font-mono text-muted-foreground/40 w-8 text-right">{agent.load}%</span>
                         </div>
                       )}
                     </div>

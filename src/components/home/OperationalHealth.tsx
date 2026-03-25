@@ -21,9 +21,9 @@ const MOCK_SERVICES: HealthService[] = [
 ];
 
 const statusIcon = {
-  healthy: <CheckCircle2 className="h-3.5 w-3.5 text-status-online" />,
-  degraded: <Clock className="h-3.5 w-3.5 text-status-warning" />,
-  down: <XCircle className="h-3.5 w-3.5 text-status-critical" />,
+  healthy: <CheckCircle2 className="h-4 w-4 text-status-online" />,
+  degraded: <Clock className="h-4 w-4 text-status-warning" />,
+  down: <XCircle className="h-4 w-4 text-status-critical" />,
 };
 
 export function OperationalHealth() {
@@ -38,36 +38,35 @@ export function OperationalHealth() {
   const allHealthy = healthyCount === total;
 
   return (
-    <section className="rounded-md border border-border/50 overflow-hidden h-full">
-      {/* Panel header */}
-      <div className="flex items-center justify-between px-4 py-2.5 surface-2 border-b border-border/40">
-        <div className="flex items-center gap-2.5">
-          <div className={`w-5 h-0.5 rounded-full ${allHealthy ? "bg-status-online" : "bg-status-warning"}`} />
-          <h2 className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground font-medium">Saúde Operacional</h2>
+    <section className="rounded-lg border border-border overflow-hidden h-full">
+      <div className="orion-panel-header">
+        <div className="flex items-center gap-3">
+          <div className={`w-6 h-0.5 rounded-full ${allHealthy ? "bg-status-online" : "bg-status-warning"}`} />
+          <h2 className="orion-panel-title">Saúde Operacional</h2>
         </div>
         {data && (
-          <span className={`text-[10px] font-mono font-semibold ${allHealthy ? "text-status-online" : "text-status-warning"}`}>
+          <span className={`text-xs font-mono font-semibold ${allHealthy ? "text-status-online" : "text-status-warning"}`}>
             {healthyCount}/{total}
           </span>
         )}
       </div>
 
       {/* Table header */}
-      <div className="flex items-center gap-3 px-4 py-1.5 surface-2/50 border-b border-border/20 text-[9px] font-mono uppercase tracking-widest text-muted-foreground/40">
-        <span className="w-4" />
+      <div className="flex items-center gap-3 px-5 py-2 surface-2 border-b border-border/30 text-xs font-mono uppercase tracking-wider text-muted-foreground/40">
+        <span className="w-5" />
         <span className="flex-1">Serviço</span>
-        <span className="w-16 text-right">Latência</span>
-        <span className="w-16 text-right">Uptime</span>
+        <span className="w-20 text-right">Latência</span>
+        <span className="w-20 text-right">Uptime</span>
       </div>
 
-      <OrionDataWrapper state={state} source={source} lastUpdated={lastUpdated} onRetry={refetch} compact>
-        <div className="divide-y divide-border/15">
+      <OrionDataWrapper state={state} source={source} lastUpdated={lastUpdated} onRetry={refetch} compact hideSource>
+        <div className="divide-y divide-border/20">
           {(data || []).map((svc) => (
-            <div key={svc.name} className={`flex items-center gap-3 px-4 py-2.5 hover:bg-accent/15 transition-colors ${svc.status === "degraded" ? "bg-status-warning/[0.03]" : ""}`}>
+            <div key={svc.name} className={`flex items-center gap-3 px-5 py-3 hover:bg-accent/15 transition-colors ${svc.status === "degraded" ? "bg-status-warning/[0.03]" : ""}`}>
               {statusIcon[svc.status]}
-              <span className="text-[12px] text-foreground flex-1">{svc.name}</span>
-              <span className={`text-[10px] font-mono w-16 text-right ${svc.status === "degraded" ? "text-status-warning" : "text-muted-foreground/50"}`}>{svc.responseTime}</span>
-              <span className="text-[10px] font-mono text-muted-foreground/50 w-16 text-right">{svc.uptime}</span>
+              <span className="text-sm text-foreground flex-1">{svc.name}</span>
+              <span className={`text-xs font-mono w-20 text-right ${svc.status === "degraded" ? "text-status-warning" : "text-muted-foreground/50"}`}>{svc.responseTime}</span>
+              <span className="text-xs font-mono text-muted-foreground/50 w-20 text-right">{svc.uptime}</span>
             </div>
           ))}
         </div>
