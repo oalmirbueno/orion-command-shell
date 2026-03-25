@@ -7,6 +7,7 @@ import Index from "./pages/Index.tsx";
 import PlaceholderPage from "./pages/PlaceholderPage.tsx";
 import SystemPage from "./pages/SystemPage.tsx";
 import AgentsPage from "./pages/AgentsPage.tsx";
+import SessionsPage from "./pages/SessionsPage.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -20,7 +21,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/agents" element={<AgentsPage />} />
-          <Route path="/missions" element={<PlaceholderPage title="Missions" description="Mission tracking and orchestration" />} />
+          <Route path="/sessions" element={<SessionsPage />} />
           <Route path="/telemetry" element={<PlaceholderPage title="Telemetry" description="Real-time system telemetry" />} />
           <Route path="/comms" element={<PlaceholderPage title="Comms" description="Communications hub" />} />
           <Route path="/system" element={<SystemPage />} />
