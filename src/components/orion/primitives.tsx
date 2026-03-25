@@ -1,13 +1,9 @@
 /**
  * Orion Design System — Shared Primitives
- *
- * Reusable React components that enforce consistency
- * across all Orion Mission Control pages.
  */
 
 import React from "react";
 import { cn } from "@/lib/utils";
-import { ChevronRight } from "lucide-react";
 
 /* ── Types ── */
 
@@ -100,11 +96,11 @@ export function OrionSummaryGrid({
         return (
           <div key={m.label} className={cn("orion-summary-cell", m.highlight && "bg-status-critical/8")}>
             <div className={cn("orion-icon-box", m.highlight && "bg-status-critical/10 border-status-critical/25")}>
-              <Icon className={cn("h-4 w-4", m.iconColor || "text-muted-foreground/60")} />
+              <Icon className={cn("h-5 w-5", m.iconColor || "text-muted-foreground/60")} />
             </div>
             <div>
               <p className={cn("orion-metric-value", m.highlight && "text-status-critical")}>{m.value}</p>
-              <div className="flex items-center gap-1.5 mt-1">
+              <div className="flex items-center gap-2 mt-1">
                 {m.dotClass && <div className={cn("status-dot", m.dotClass)} />}
                 <span className="orion-metric-label">{m.label}</span>
               </div>
@@ -233,11 +229,11 @@ export function OrionGroupHeader({
   return (
     <div className="orion-group-header">
       {dotClass && <div className={cn("status-dot", dotClass)} />}
-      <span className={cn("text-[9px] font-mono uppercase tracking-widest", textClass || "text-muted-foreground/40")}>
+      <span className={cn("text-[10px] font-mono uppercase tracking-widest font-semibold", textClass || "text-muted-foreground/50")}>
         {label}
       </span>
       {count !== undefined && (
-        <span className="text-[9px] font-mono text-muted-foreground/30">{count}</span>
+        <span className="text-xs font-mono text-muted-foreground/30">{count}</span>
       )}
       <div className="orion-group-divider" />
     </div>
