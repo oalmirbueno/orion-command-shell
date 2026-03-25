@@ -150,12 +150,12 @@ function TaskCard({ task }: { task: OperationTask }) {
 function KanbanColumn({ column, tasks }: { column: ColumnDef; tasks: OperationTask[] }) {
   const Icon = column.icon;
   return (
-    <div className="flex flex-col min-w-[260px]">
+    <div className="flex flex-col min-w-0">
       {/* Column Header */}
-      <div className={cn("rounded-t-lg px-4 py-3 border border-b-0 border-border/30", column.headerBg)}>
+      <div className={cn("rounded-t-lg px-4 py-2.5 border border-b-0 border-border/30", column.headerBg)}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className={cn("w-2 h-2 rounded-full", column.accentDot)} />
+            <div className={cn("w-1.5 h-1.5 rounded-full", column.accentDot)} />
             <Icon className={cn("h-3.5 w-3.5", column.accentText)} />
             <span className="text-[10px] font-mono uppercase tracking-[0.12em] text-foreground/80">{column.label}</span>
           </div>
@@ -163,15 +163,17 @@ function KanbanColumn({ column, tasks }: { column: ColumnDef; tasks: OperationTa
         </div>
       </div>
 
-      {/* Column Body */}
-      <div className="flex-1 rounded-b-lg border border-border/30 bg-surface-0/50 p-2 space-y-2 min-h-[200px]">
-        {tasks.length === 0 ? (
-          <div className="flex items-center justify-center h-full min-h-[180px]">
-            <span className="text-[10px] font-mono text-muted-foreground/30">{column.emptyLabel}</span>
-          </div>
-        ) : (
-          tasks.map(task => <TaskCard key={task.id} task={task} />)
-        )}
+      {/* Column Body — scrollable */}
+      <div className="rounded-b-lg border border-border/30 bg-surface-0/50 max-h-[420px] overflow-y-auto orion-thin-scroll">
+        <div className="p-2 space-y-2">
+          {tasks.length === 0 ? (
+            <div className="flex items-center justify-center min-h-[120px]">
+              <span className="text-[10px] font-mono text-muted-foreground/30">{column.emptyLabel}</span>
+            </div>
+          ) : (
+            tasks.map(task => <TaskCard key={task.id} task={task} />)
+          )}
+        </div>
       </div>
     </div>
   );
@@ -234,7 +236,7 @@ export function OperationsKanban() {
       <OrionDataWrapper state={state} source={source} lastUpdated={lastUpdated} onRetry={refetch}>
         <KanbanSummaryBar tasks={tasks} />
 
-        <div className="mt-4 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-3">
+        <div className="mt-4 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-2.5">
           {COLUMNS.map(col => (
             <KanbanColumn
               key={col.key}

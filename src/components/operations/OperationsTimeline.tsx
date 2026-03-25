@@ -60,46 +60,39 @@ function TimelineRow({ event, isLast }: { event: TimelineEvent; isLast: boolean 
   return (
     <div className="flex gap-0">
       {/* Timeline spine */}
-      <div className="flex flex-col items-center w-12 shrink-0">
+      <div className="flex flex-col items-center w-10 shrink-0">
         <div className={cn(
-          "w-7 h-7 rounded-full border-2 flex items-center justify-center",
-          isUrgent ? "border-status-critical/40 bg-status-critical/10" : "border-border/40 bg-card",
+          "w-6 h-6 rounded-full border flex items-center justify-center",
+          isUrgent ? "border-status-critical/40 bg-status-critical/10" : "border-border/30 bg-card",
         )}>
-          <Icon className={cn("h-3.5 w-3.5", cfg.color)} />
+          <Icon className={cn("h-3 w-3", cfg.color)} />
         </div>
-        {!isLast && <div className="w-px flex-1 bg-border/20 my-1" />}
+        {!isLast && <div className="w-px flex-1 bg-border/15 my-0.5" />}
       </div>
 
       {/* Content */}
       <div className={cn(
-        "flex-1 rounded-lg border border-l-2 px-4 py-3 mb-2 transition-colors cursor-pointer",
-        "hover:border-primary/20 hover:shadow-[0_0_10px_-3px_hsl(var(--primary)/0.1)]",
+        "flex-1 rounded-md border border-l-2 px-3 py-2.5 mb-1.5 transition-colors cursor-pointer",
+        "hover:border-primary/20",
         cfg.borderColor, cfg.bg,
-        "border-border/30",
+        "border-border/20",
       )}>
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-1">
-              <span className={cn("text-[8px] font-mono uppercase px-1.5 py-0.5 rounded border", 
-                isUrgent ? "bg-status-critical/10 text-status-critical border-status-critical/20" : "bg-surface-2 text-muted-foreground border-border/30"
-              )}>
-                {cfg.label}
-              </span>
-              <h4 className="text-xs font-medium text-foreground truncate">{event.taskTitle}</h4>
-            </div>
-            <p className="text-[10px] text-foreground/40 leading-relaxed line-clamp-1 mb-1.5">{event.detail}</p>
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1">
-                <Bot className="h-3 w-3 text-muted-foreground/25" />
-                <span className="text-[9px] font-mono text-muted-foreground/40">{event.agent}</span>
-              </div>
-            </div>
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2 min-w-0 flex-1">
+            <span className="text-[10px] font-mono text-primary/50 shrink-0 w-10">{event.time}</span>
+            <span className={cn("text-[7px] font-mono uppercase px-1 py-0.5 rounded border shrink-0",
+              isUrgent ? "bg-status-critical/10 text-status-critical border-status-critical/20" : "bg-surface-2 text-muted-foreground/60 border-border/20"
+            )}>
+              {cfg.label}
+            </span>
+            <span className="text-[11px] font-medium text-foreground truncate">{event.taskTitle}</span>
           </div>
-          <div className="flex flex-col items-end shrink-0 gap-0.5">
-            <span className="text-[10px] font-mono text-primary/60">{event.time}</span>
-            <span className="text-[8px] font-mono text-muted-foreground/30">{event.timeAgo}</span>
+          <div className="flex items-center gap-2 shrink-0">
+            <Bot className="h-3 w-3 text-muted-foreground/20" />
+            <span className="text-[9px] font-mono text-muted-foreground/30">{event.agent}</span>
           </div>
         </div>
+        <p className="text-[10px] text-foreground/35 leading-relaxed mt-1 ml-10 line-clamp-1">{event.detail}</p>
       </div>
     </div>
   );
@@ -125,7 +118,7 @@ export function OperationsTimeline() {
       />
 
       <OrionDataWrapper state={state} source={source} lastUpdated={lastUpdated} onRetry={refetch}>
-        <div className="max-w-4xl">
+        <div className="max-w-5xl max-h-[500px] overflow-y-auto orion-thin-scroll pr-2">
           {events.map((event, i) => (
             <TimelineRow key={event.id} event={event} isLast={i === events.length - 1} />
           ))}
