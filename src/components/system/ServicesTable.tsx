@@ -39,7 +39,7 @@ export function ServicesTable() {
     <section>
       <div className="flex items-center gap-2 mb-3">
         <h2 className="text-[10px] font-mono uppercase tracking-[0.15em] text-muted-foreground">
-          Active Services
+          Serviços Ativos
         </h2>
         <div className="flex items-center gap-1.5 ml-2 px-2 py-0.5 rounded-full bg-primary/10 border border-primary/20">
           <span className="text-[9px] font-mono text-primary font-medium">{runningCount}/{MOCK_SERVICES.length}</span>
@@ -50,7 +50,7 @@ export function ServicesTable() {
       <div className="rounded-lg border border-border/50 overflow-hidden">
         {/* Header */}
         <div className="grid grid-cols-[1fr_70px_80px_70px_60px_50px] gap-2 px-4 py-2 bg-surface-2 text-[9px] font-mono uppercase tracking-wider text-muted-foreground/50">
-          <span>Service</span>
+          <span>Serviço</span>
           <span>Port</span>
           <span>CPU / Mem</span>
           <span>Uptime</span>

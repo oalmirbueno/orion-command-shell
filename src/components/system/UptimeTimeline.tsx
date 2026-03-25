@@ -37,7 +37,7 @@ export function UptimeTimeline() {
     <section>
       <div className="flex items-center gap-2 mb-3">
         <h2 className="text-[10px] font-mono uppercase tracking-[0.15em] text-muted-foreground">
-          Uptime · Last 90 Days
+          Uptime · Últimos 90 Dias
         </h2>
         <div className="flex-1 h-px bg-border/40" />
         <span className="text-[10px] font-mono text-foreground">99.97%</span>
@@ -58,18 +58,18 @@ export function UptimeTimeline() {
         <div className="flex items-center gap-4 mt-3 pt-3 border-t border-border/30">
           <div className="flex items-center gap-1.5">
             <div className="w-2 h-2 rounded-sm bg-primary/50" />
-            <span className="text-[9px] font-mono text-muted-foreground/50">Operational</span>
+            <span className="text-[9px] font-mono text-muted-foreground/50">Operacional</span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="w-2 h-2 rounded-sm bg-status-warning/60" />
-            <span className="text-[9px] font-mono text-muted-foreground/50">Degraded</span>
+            <span className="text-[9px] font-mono text-muted-foreground/50">Degradado</span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="w-2 h-2 rounded-sm bg-status-critical/60" />
-            <span className="text-[9px] font-mono text-muted-foreground/50">Down</span>
+            <span className="text-[9px] font-mono text-muted-foreground/50">Fora do ar</span>
           </div>
           <div className="flex-1" />
-          <span className="text-[9px] font-mono text-muted-foreground/40">90 days ago → Today</span>
+          <span className="text-[9px] font-mono text-muted-foreground/40">90 dias atrás → Hoje</span>
         </div>
       </div>
     </section>
