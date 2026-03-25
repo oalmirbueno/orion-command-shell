@@ -21,22 +21,22 @@ const MOCK_DATA: CommandData = {
 
 const stateConfig: Record<SystemState, {
   icon: React.ElementType; label: string; sublabel: string;
-  bg: string; border: string; text: string; dot: string; glow: string;
+  bg: string; border: string; text: string; dot: string;
 }> = {
   nominal: {
     icon: Shield, label: "SISTEMAS NOMINAIS", sublabel: "Todas as operações dentro dos parâmetros",
-    bg: "bg-status-online/5", border: "border-status-online/25", text: "text-status-online",
-    dot: "status-online", glow: "",
+    bg: "bg-status-online/[0.06]", border: "border-status-online/30", text: "text-status-online",
+    dot: "status-online",
   },
   degraded: {
     icon: AlertTriangle, label: "PERFORMANCE DEGRADADA", sublabel: "1 serviço com latência elevada · operação continua",
-    bg: "bg-status-warning/5", border: "border-status-warning/25", text: "text-status-warning",
-    dot: "status-warning", glow: "shadow-[0_0_40px_-8px_hsl(var(--status-warning)/0.25)]",
+    bg: "bg-status-warning/[0.06]", border: "border-status-warning/30", text: "text-status-warning",
+    dot: "status-warning",
   },
   critical: {
     icon: Shield, label: "FALHA DETECTADA", sublabel: "Ação imediata necessária",
-    bg: "bg-status-critical/5", border: "border-status-critical/25", text: "text-status-critical",
-    dot: "status-critical", glow: "shadow-[0_0_40px_-8px_hsl(var(--status-critical)/0.3)]",
+    bg: "bg-status-critical/[0.06]", border: "border-status-critical/30", text: "text-status-critical",
+    dot: "status-critical",
   },
 };
 
@@ -61,42 +61,42 @@ function CommandStatusContent({ data }: { data: CommandData }) {
   const Icon = cfg.icon;
 
   return (
-    <div className={`rounded-xl border-2 ${cfg.border} ${cfg.bg} ${cfg.glow} px-8 py-6`}>
+    <div className={`rounded-md border ${cfg.border} ${cfg.bg} px-6 py-4`}>
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-5">
-          <div className={`w-14 h-14 rounded-xl ${cfg.bg} border-2 ${cfg.border} flex items-center justify-center`}>
-            <Icon className={`h-7 w-7 ${cfg.text}`} />
+        <div className="flex items-center gap-4">
+          <div className={`w-10 h-10 rounded-md ${cfg.bg} border ${cfg.border} flex items-center justify-center`}>
+            <Icon className={`h-5 w-5 ${cfg.text}`} />
           </div>
           <div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2.5">
               <div className={`status-dot ${cfg.dot}`} />
-              <h1 className={`text-lg font-bold tracking-wide ${cfg.text}`}>{cfg.label}</h1>
+              <h1 className={`text-sm font-bold tracking-widest font-mono uppercase ${cfg.text}`}>{cfg.label}</h1>
             </div>
-            <p className="text-sm text-muted-foreground/70 mt-1.5">{cfg.sublabel}</p>
+            <p className="text-xs text-muted-foreground/60 mt-1">{cfg.sublabel}</p>
           </div>
         </div>
 
-        <div className="hidden md:flex items-center gap-8">
+        <div className="hidden md:flex items-center gap-6">
           {data.metrics.map(m => {
             const MIcon = m.icon;
             return (
               <div key={m.label} className="text-right">
-                <div className="flex items-center gap-2 justify-end">
-                  <MIcon className="h-4 w-4 text-muted-foreground/40" />
-                  <span className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground/60">{m.label}</span>
+                <div className="flex items-center gap-1.5 justify-end">
+                  <MIcon className="h-3 w-3 text-muted-foreground/30" />
+                  <span className="text-[9px] font-mono uppercase tracking-widest text-muted-foreground/50">{m.label}</span>
                 </div>
-                <p className="text-lg font-bold text-foreground mt-1">{m.value}</p>
+                <p className="text-lg font-bold text-foreground mt-0.5 tracking-tight">{m.value}</p>
               </div>
             );
           })}
         </div>
       </div>
 
-      <div className="flex md:hidden items-center gap-4 mt-5 pt-4 border-t border-border/20">
+      <div className="flex md:hidden items-center gap-3 mt-4 pt-3 border-t border-border/20">
         {data.metrics.map(m => (
           <div key={m.label} className="flex-1 text-center">
-            <span className="text-[10px] font-mono text-muted-foreground/50 uppercase">{m.label}</span>
-            <p className="text-base font-bold text-foreground mt-0.5">{m.value}</p>
+            <span className="text-[9px] font-mono text-muted-foreground/40 uppercase">{m.label}</span>
+            <p className="text-sm font-bold text-foreground mt-0.5">{m.value}</p>
           </div>
         ))}
       </div>
