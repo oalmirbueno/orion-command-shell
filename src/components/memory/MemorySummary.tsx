@@ -1,16 +1,21 @@
 import { Brain, Layers, Clock, Database } from "lucide-react";
+import type { MemorySummaryData } from "@/domains/memory/types";
 
-const MOCK = [
-  { label: "Snapshots", value: 24, icon: Layers, text: "text-primary", dot: "bg-primary/50" },
-  { label: "Categorias", value: 6, icon: Brain, text: "text-foreground", dot: "bg-foreground/30" },
-  { label: "Última Captura", value: "4min", icon: Clock, text: "text-status-online", dot: "status-online" },
-  { label: "Tamanho Total", value: "1.8MB", icon: Database, text: "text-muted-foreground", dot: "bg-muted-foreground/40" },
-];
+interface MemorySummaryProps {
+  summary: MemorySummaryData;
+}
 
-export function MemorySummary() {
+export function MemorySummary({ summary }: MemorySummaryProps) {
+  const items = [
+    { label: "Snapshots", value: summary.totalSnapshots, icon: Layers, text: "text-primary", dot: "bg-primary/50" },
+    { label: "Categorias", value: summary.totalCategories, icon: Brain, text: "text-foreground", dot: "bg-foreground/30" },
+    { label: "Última Captura", value: summary.lastCapture, icon: Clock, text: "text-status-online", dot: "status-online" },
+    { label: "Tamanho Total", value: summary.totalSize, icon: Database, text: "text-muted-foreground", dot: "bg-muted-foreground/40" },
+  ];
+
   return (
     <div className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-border/30 rounded-xl overflow-hidden border border-border/50">
-      {MOCK.map((m) => {
+      {items.map((m) => {
         const Icon = m.icon;
         return (
           <div key={m.label} className="bg-card px-6 py-5 flex items-center gap-4">

@@ -2,9 +2,6 @@ import {
   Brain, User, Target, Settings, Shield, Layers,
   ChevronRight, Clock,
 } from "lucide-react";
-import { useOrionData } from "@/hooks/useOrionData";
-import { OrionDataWrapper } from "@/components/orion/DataWrapper";
-import { fetchMemorySnapshots } from "@/domains/memory/fetcher";
 import type { MemorySnapshot, MemoryCategory } from "@/domains/memory/types";
 
 const categoryConfig: Record<MemoryCategory, { icon: React.ElementType; label: string; color: string }> = {
@@ -68,13 +65,11 @@ function SnapshotCard({ snapshot }: { snapshot: MemorySnapshot }) {
   );
 }
 
-export function MemorySnapshots() {
-  const { state, data, source, lastUpdated, refetch } = useOrionData<MemorySnapshot[]>({
-    key: "memory-snapshots",
-    fetcher: fetchMemorySnapshots,
-  });
+interface MemorySnapshotsProps {
+  snapshots: MemorySnapshot[];
+}
 
-  const snapshots = data || [];
+export function MemorySnapshots({ snapshots }: MemorySnapshotsProps) {
   const categories = Array.from(new Set(snapshots.map(s => s.category)));
 
   return (
@@ -95,13 +90,11 @@ export function MemorySnapshots() {
         </div>
       </div>
 
-      <OrionDataWrapper state={state} source={source} lastUpdated={lastUpdated} onRetry={refetch}>
-        <div className="space-y-3">
-          {snapshots.map((snapshot) => (
-            <SnapshotCard key={snapshot.id} snapshot={snapshot} />
-          ))}
-        </div>
-      </OrionDataWrapper>
+      <div className="space-y-3">
+        {snapshots.map((snapshot) => (
+          <SnapshotCard key={snapshot.id} snapshot={snapshot} />
+        ))}
+      </div>
     </section>
   );
 }

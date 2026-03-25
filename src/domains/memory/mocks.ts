@@ -1,4 +1,4 @@
-import type { MemorySnapshot } from "./types";
+import type { MemorySnapshot, MemoryPageData } from "./types";
 
 export const FALLBACK_SNAPSHOTS: MemorySnapshot[] = [
   { id: "m-01", title: "Perfil operacional do cliente Acme Corp", category: "profile", capturedAt: "09:42", capturedAgo: "5min ago", source: "Classifier-01", summary: "Cliente enterprise, 340 funcionários, setor tech B2B. Ciclo de compra longo (90d avg). Decision makers: CTO e VP Engineering. Último contato: proposta de expansão de licenças.", context: "Capturado durante classificação do batch #4821. Consolidação de 14 interações anteriores.", tags: ["enterprise", "b2b", "expansion"], relevance: "high" },
@@ -10,3 +10,13 @@ export const FALLBACK_SNAPSHOTS: MemorySnapshot[] = [
   { id: "m-07", title: "Perfil comportamental — Segmento SMB", category: "profile", capturedAt: "07:30", capturedAgo: "2h17 ago", source: "Analyzer-01", summary: "Leads SMB convertem 2.3x mais rápido que enterprise mas com ticket médio 5x menor. Canal preferido: email (62%), seguido de chat (24%). Melhor horário de contato: 10-11h e 14-15h.", context: "Análise de padrões sobre 2.4k leads processados no último trimestre.", tags: ["smb", "conversion", "patterns"], relevance: "medium" },
   { id: "m-08", title: "Incidente resolvido: deploy v2.14.2 rollback", category: "incident", capturedAt: "07:00", capturedAgo: "2h47 ago", source: "Core Engine", summary: "Deploy v2.14.2 causou regressão no endpoint /api/classify. Rollback automático acionado em 2min. Root cause: dependência incompatível com Node 20.x. Fix aplicado no v2.14.3.", context: "Post-mortem automático gerado. Tempo de impacto: 4min. Zero perda de dados.", tags: ["deploy", "rollback", "postmortem"], relevance: "medium" },
 ];
+
+export const FALLBACK_MEMORY_PAGE: MemoryPageData = {
+  snapshots: FALLBACK_SNAPSHOTS,
+  summary: {
+    totalSnapshots: FALLBACK_SNAPSHOTS.length,
+    totalCategories: new Set(FALLBACK_SNAPSHOTS.map(s => s.category)).size,
+    lastCapture: "4min",
+    totalSize: "1.8MB",
+  },
+};
