@@ -6,37 +6,8 @@ import { useOrionData } from "@/hooks/useOrionData";
 import { OrionDataWrapper } from "@/components/orion/DataWrapper";
 import { OrionSectionHeader } from "@/components/orion/primitives";
 import { cn } from "@/lib/utils";
-
-/* ── Types ── */
-
-type ActionType = "started" | "completed" | "failed" | "paused" | "resumed" | "retried" | "queued";
-
-interface TimelineEvent {
-  id: string;
-  time: string;
-  timeAgo: string;
-  action: ActionType;
-  taskTitle: string;
-  agent: string;
-  detail: string;
-}
-
-/* ── Mock ── */
-
-const MOCK_TIMELINE: TimelineEvent[] = [
-  { id: "tl-01", time: "09:47", timeAgo: "Agora", action: "failed", taskTitle: "Validação API Externa", agent: "Validator-01", detail: "Timeout após 3 retries — conexão perdida com endpoint" },
-  { id: "tl-02", time: "09:47", timeAgo: "Agora", action: "started", taskTitle: "Classificação Batch #4821", agent: "Classifier-01", detail: "8.4k leads carregados — processamento iniciado" },
-  { id: "tl-03", time: "09:45", timeAgo: "2min", action: "started", taskTitle: "Sync CRM → Data Lake", agent: "Sync-01", detail: "1.8k registros enfileirados para sincronização" },
-  { id: "tl-04", time: "09:42", timeAgo: "5min", action: "completed", taskTitle: "Rollback Pipeline v2.14.2", agent: "Core Engine", detail: "Restauração concluída — performance normalizada em 4min" },
-  { id: "tl-05", time: "09:42", timeAgo: "5min", action: "started", taskTitle: "Sumarização Emails Inbound", agent: "Summarizer-01", detail: "156 emails capturados para processamento" },
-  { id: "tl-06", time: "09:40", timeAgo: "7min", action: "started", taskTitle: "Enriquecimento Leads Q1", agent: "Enricher-01", detail: "7.8k registros via LinkedIn + Clearbit" },
-  { id: "tl-07", time: "09:38", timeAgo: "9min", action: "completed", taskTitle: "Health Check #8472", agent: "Monitor-01", detail: "12 endpoints verificados — todos nominais" },
-  { id: "tl-08", time: "09:34", timeAgo: "13min", action: "paused", taskTitle: "Reprocessamento Eventos", agent: "Analyzer-01", detail: "Pausado manualmente pelo operador — 480 eventos pendentes" },
-  { id: "tl-09", time: "08:55", timeAgo: "52min", action: "completed", taskTitle: "Deploy v2.14.3 Staging", agent: "Release Pipeline", detail: "Build #1847 validado — todos os testes passaram" },
-  { id: "tl-10", time: "08:45", timeAgo: "1h", action: "retried", taskTitle: "Validação API Externa", agent: "Validator-01", detail: "Retry #2 iniciado — backoff exponencial 30s" },
-  { id: "tl-11", time: "08:30", timeAgo: "1h17", action: "queued", taskTitle: "Classificação Batch #4822", agent: "Classifier-01", detail: "12k leads enfileirados — aguardando slot disponível" },
-  { id: "tl-12", time: "08:00", timeAgo: "1h47", action: "completed", taskTitle: "Health Check Matinal", agent: "Health Monitor", detail: "11/12 serviços nominais — Data Pipeline com P95 elevado" },
-];
+import { fetchTimeline } from "@/domains/operations/fetcher";
+import type { TimelineEvent, ActionType } from "@/domains/operations/types";
 
 /* ── Action config ── */
 
@@ -59,7 +30,6 @@ function TimelineRow({ event, isLast }: { event: TimelineEvent; isLast: boolean 
 
   return (
     <div className="flex gap-0">
-      {/* Timeline spine */}
       <div className="flex flex-col items-center w-12 shrink-0">
         <div className={cn(
           "w-8 h-8 rounded-full border-2 flex items-center justify-center",
@@ -70,7 +40,6 @@ function TimelineRow({ event, isLast }: { event: TimelineEvent; isLast: boolean 
         {!isLast && <div className="w-px flex-1 bg-border/20 my-1" />}
       </div>
 
-      {/* Content */}
       <div className={cn(
         "flex-1 rounded-lg border border-l-[3px] px-5 py-4 mb-2 transition-colors cursor-pointer",
         "hover:border-primary/20",
@@ -103,8 +72,7 @@ function TimelineRow({ event, isLast }: { event: TimelineEvent; isLast: boolean 
 export function OperationsTimeline() {
   const { state, data, source, lastUpdated, refetch } = useOrionData<TimelineEvent[]>({
     key: "operations-timeline",
-    mockData: MOCK_TIMELINE,
-    simulateDelay: 400,
+    fetcher: fetchTimeline,
   });
 
   const events = data || [];

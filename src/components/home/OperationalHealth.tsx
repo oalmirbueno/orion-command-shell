@@ -1,24 +1,8 @@
 import { CheckCircle2, XCircle, Clock } from "lucide-react";
 import { useOrionData } from "@/hooks/useOrionData";
 import { OrionDataWrapper } from "@/components/orion/DataWrapper";
-
-interface HealthService {
-  name: string;
-  status: "healthy" | "degraded" | "down";
-  responseTime: string;
-  uptime: string;
-}
-
-const MOCK_SERVICES: HealthService[] = [
-  { name: "API Gateway", status: "healthy", responseTime: "12ms", uptime: "99.99%" },
-  { name: "Core Engine", status: "healthy", responseTime: "8ms", uptime: "99.98%" },
-  { name: "Data Pipeline", status: "degraded", responseTime: "187ms", uptime: "99.91%" },
-  { name: "Auth Service", status: "healthy", responseTime: "15ms", uptime: "100%" },
-  { name: "ML Processor", status: "healthy", responseTime: "34ms", uptime: "99.95%" },
-  { name: "Cache Layer", status: "healthy", responseTime: "2ms", uptime: "100%" },
-  { name: "Queue Service", status: "healthy", responseTime: "5ms", uptime: "99.99%" },
-  { name: "Storage", status: "healthy", responseTime: "22ms", uptime: "99.97%" },
-];
+import { fetchHealthServices } from "@/domains/system/fetcher";
+import type { HealthService } from "@/domains/system/types";
 
 const statusIcon = {
   healthy: <CheckCircle2 className="h-4 w-4 text-status-online" />,
@@ -29,8 +13,7 @@ const statusIcon = {
 export function OperationalHealth() {
   const { state, data, source, lastUpdated, refetch } = useOrionData<HealthService[]>({
     key: "operational-health",
-    mockData: MOCK_SERVICES,
-    simulateDelay: 500,
+    fetcher: fetchHealthServices,
   });
 
   const healthyCount = (data || []).filter(s => s.status === "healthy").length;
@@ -51,7 +34,6 @@ export function OperationalHealth() {
         )}
       </div>
 
-      {/* Table header */}
       <div className="flex items-center gap-3 px-5 py-2 surface-2 border-b border-border/30 text-xs font-mono uppercase tracking-wider text-muted-foreground/40">
         <span className="w-5" />
         <span className="flex-1">Serviço</span>

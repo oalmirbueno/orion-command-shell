@@ -1,30 +1,8 @@
 import { Bot, Crown, Users, Cpu } from "lucide-react";
 import { useOrionData } from "@/hooks/useOrionData";
 import { OrionDataWrapper } from "@/components/orion/DataWrapper";
-
-type AgentTier = "orchestrator" | "core" | "support";
-type AgentStatus = "active" | "idle" | "offline";
-
-interface AgentNode {
-  name: string;
-  role: string;
-  tier: AgentTier;
-  status: AgentStatus;
-  load: number;
-}
-
-const AGENT_TREE: AgentNode[] = [
-  { name: "Router-01", role: "Orquestrador de Tarefas", tier: "orchestrator", status: "active", load: 63 },
-  { name: "Classifier-01", role: "Classificação de Leads", tier: "core", status: "active", load: 72 },
-  { name: "Enricher-01", role: "Enriquecimento de Dados", tier: "core", status: "active", load: 45 },
-  { name: "Summarizer-01", role: "Sumarização de Conteúdo", tier: "core", status: "active", load: 55 },
-  { name: "Analyzer-01", role: "Detecção de Padrões", tier: "core", status: "idle", load: 0 },
-  { name: "Sync-01", role: "Sincronização de Dados", tier: "support", status: "active", load: 91 },
-  { name: "Monitor-01", role: "Saúde & Observabilidade", tier: "support", status: "active", load: 18 },
-  { name: "Validator-01", role: "Validação de Dados", tier: "support", status: "offline", load: 0 },
-  { name: "Exporter-01", role: "Geração de Relatórios", tier: "support", status: "idle", load: 0 },
-  { name: "Responder-01", role: "Auto-Resposta", tier: "support", status: "idle", load: 0 },
-];
+import { fetchAgentTree } from "@/domains/agents/fetcher";
+import type { AgentNode, AgentTier, AgentStatus } from "@/domains/agents/types";
 
 const tierConfig: Record<AgentTier, { label: string; icon: React.ElementType; color: string }> = {
   orchestrator: { label: "Orquestrador", icon: Crown, color: "text-primary" },
@@ -41,8 +19,7 @@ const statusDot: Record<AgentStatus, string> = {
 export function AgentsHierarchy() {
   const { state, data, source, lastUpdated, refetch } = useOrionData<AgentNode[]>({
     key: "agents-hierarchy",
-    mockData: AGENT_TREE,
-    simulateDelay: 600,
+    fetcher: fetchAgentTree,
   });
 
   const tiers: AgentTier[] = ["orchestrator", "core", "support"];

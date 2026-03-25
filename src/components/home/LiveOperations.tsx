@@ -1,31 +1,13 @@
 import { Flame, Clock, Pause, ArrowRight, Bot } from "lucide-react";
 import { useOrionData } from "@/hooks/useOrionData";
 import { OrionDataWrapper } from "@/components/orion/DataWrapper";
-
-interface Operation {
-  id: string;
-  name: string;
-  agent: string;
-  status: "running" | "paused";
-  progress: number;
-  elapsed: string;
-  priority: "high" | "normal";
-}
-
-const OPS: Operation[] = [
-  { id: "1", name: "Classificação Batch #4821", agent: "Classifier-01", status: "running", progress: 67, elapsed: "14min", priority: "high" },
-  { id: "2", name: "Sync CRM → Data Lake", agent: "Sync-01", status: "running", progress: 88, elapsed: "8min", priority: "normal" },
-  { id: "3", name: "Sumarização Emails Inbound", agent: "Summarizer-01", status: "running", progress: 34, elapsed: "20min", priority: "high" },
-  { id: "4", name: "Enriquecimento Leads Q1", agent: "Enricher-01", status: "running", progress: 41, elapsed: "32min", priority: "normal" },
-  { id: "5", name: "Health Check #8472", agent: "Monitor-01", status: "running", progress: 92, elapsed: "2min", priority: "normal" },
-  { id: "6", name: "Reprocessamento Eventos", agent: "Analyzer-01", status: "paused", progress: 22, elapsed: "1h02", priority: "normal" },
-];
+import { fetchLiveOperations } from "@/domains/operations/fetcher";
+import type { Operation } from "@/domains/operations/types";
 
 export function LiveOperations() {
   const { state, data, source, lastUpdated, refetch } = useOrionData<Operation[]>({
     key: "live-operations",
-    mockData: OPS,
-    simulateDelay: 500,
+    fetcher: fetchLiveOperations,
   });
 
   const runningCount = (data || []).filter(o => o.status === "running").length;

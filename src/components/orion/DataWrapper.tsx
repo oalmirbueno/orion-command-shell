@@ -26,8 +26,7 @@ interface OrionDataWrapperProps {
 }
 
 const sourceLabels: Record<DataSource, { label: string; className: string }> = {
-  mock: { label: "OFFLINE", className: "text-muted-foreground/40 border-border/30" },
-  simulated: { label: "SIMULAÇÃO", className: "text-primary/50 border-primary/20" },
+  fallback: { label: "OFFLINE", className: "text-muted-foreground/40 border-border/30" },
   api: { label: "LIVE", className: "text-status-online border-status-online/30" },
   cache: { label: "CACHE", className: "text-muted-foreground/50 border-border/30" },
 };

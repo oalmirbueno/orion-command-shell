@@ -1,45 +1,13 @@
 import {
-  Clock, CheckCircle2, Loader2, AlertCircle, Bot, Flame,
-  ArrowRight, Pause, RotateCcw, ChevronRight, Zap,
+  Clock, CheckCircle2, AlertCircle, Bot, Flame,
+  Pause, RotateCcw, Zap,
 } from "lucide-react";
 import { useOrionData } from "@/hooks/useOrionData";
 import { OrionDataWrapper } from "@/components/orion/DataWrapper";
 import { OrionSectionHeader } from "@/components/orion/primitives";
 import { cn } from "@/lib/utils";
-
-/* ── Types ── */
-
-type TaskStatus = "queued" | "running" | "paused" | "done" | "failed";
-type TaskPriority = "critical" | "high" | "normal" | "low";
-
-interface OperationTask {
-  id: string;
-  title: string;
-  agent: string;
-  status: TaskStatus;
-  priority: TaskPriority;
-  progress: number;
-  elapsed: string;
-  updatedAt: string;
-  description: string;
-}
-
-/* ── Mock Data ── */
-
-const MOCK_TASKS: OperationTask[] = [
-  { id: "op-01", title: "Classificação Batch #4821", agent: "Classifier-01", status: "running", priority: "critical", progress: 67, elapsed: "14min", updatedAt: "09:47", description: "8.4k leads — accuracy target 97%" },
-  { id: "op-02", title: "Sync CRM → Data Lake", agent: "Sync-01", status: "running", priority: "high", progress: 88, elapsed: "8min", updatedAt: "09:45", description: "1.8k registros sincronizando" },
-  { id: "op-03", title: "Sumarização Emails Inbound", agent: "Summarizer-01", status: "running", priority: "critical", progress: 34, elapsed: "20min", updatedAt: "09:42", description: "156 emails capturados — prioridade alta" },
-  { id: "op-04", title: "Enriquecimento Leads Q1", agent: "Enricher-01", status: "running", priority: "normal", progress: 41, elapsed: "32min", updatedAt: "09:40", description: "7.8k registros via LinkedIn + Clearbit" },
-  { id: "op-05", title: "Health Check #8472", agent: "Monitor-01", status: "done", priority: "normal", progress: 100, elapsed: "2min", updatedAt: "09:38", description: "12 endpoints verificados — todos OK" },
-  { id: "op-06", title: "Reprocessamento Eventos", agent: "Analyzer-01", status: "paused", priority: "normal", progress: 22, elapsed: "1h02", updatedAt: "09:34", description: "480 eventos pendentes na fila" },
-  { id: "op-07", title: "Deploy v2.14.3 Staging", agent: "Release Pipeline", status: "done", priority: "high", progress: 100, elapsed: "6min", updatedAt: "08:55", description: "Build #1847 — todos os testes passaram" },
-  { id: "op-08", title: "Rollback Pipeline v2.14.2", agent: "Core Engine", status: "done", priority: "critical", progress: 100, elapsed: "4min", updatedAt: "09:42", description: "Restauração após falha no deploy" },
-  { id: "op-09", title: "Classificação Batch #4822", agent: "Classifier-01", status: "queued", priority: "high", progress: 0, elapsed: "—", updatedAt: "09:47", description: "12k leads enfileirados — aguardando slot" },
-  { id: "op-10", title: "Sync Salesforce Contacts", agent: "Sync-02", status: "queued", priority: "normal", progress: 0, elapsed: "—", updatedAt: "09:45", description: "3.2k contatos pendentes" },
-  { id: "op-11", title: "Geração Report Semanal", agent: "Reporter-01", status: "queued", priority: "low", progress: 0, elapsed: "—", updatedAt: "09:30", description: "Relatório executivo — agendado 10:00" },
-  { id: "op-12", title: "Validação API Externa", agent: "Validator-01", status: "failed", priority: "critical", progress: 78, elapsed: "3min", updatedAt: "09:47", description: "Timeout após 3 retries — conexão perdida" },
-];
+import { fetchOperationTasks } from "@/domains/operations/fetcher";
+import type { OperationTask, TaskStatus, TaskPriority } from "@/domains/operations/types";
 
 /* ── Column Config ── */
 
@@ -85,7 +53,6 @@ function TaskCard({ task }: { task: OperationTask }) {
       isActive && "border-status-online/20 bg-status-online/[0.02]",
       !isActive && !isFailed && "border-border/40 bg-card/50",
     )}>
-      {/* Header: title + priority */}
       <div className="flex items-start justify-between gap-2 mb-2">
         <h4 className="text-sm font-medium text-foreground leading-snug line-clamp-2">{task.title}</h4>
         <span className={cn("text-[9px] font-mono uppercase px-2 py-1 rounded border shrink-0 mt-0.5", pri.cls)}>
@@ -93,10 +60,8 @@ function TaskCard({ task }: { task: OperationTask }) {
         </span>
       </div>
 
-      {/* Description */}
       <p className="text-xs text-foreground/45 leading-relaxed mb-3 line-clamp-1">{task.description}</p>
 
-      {/* Progress bar */}
       {task.status !== "queued" && (
         <div className="flex items-center gap-2.5 mb-3">
           <div className="flex-1 h-2 bg-surface-3 rounded-full overflow-hidden">
@@ -115,7 +80,6 @@ function TaskCard({ task }: { task: OperationTask }) {
         </div>
       )}
 
-      {/* Footer: agent + time */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Bot className="h-3.5 w-3.5 text-muted-foreground/30" />
@@ -127,7 +91,6 @@ function TaskCard({ task }: { task: OperationTask }) {
         </div>
       </div>
 
-      {/* Active pulse indicator */}
       {isActive && (
         <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border/20">
           <div className="w-2 h-2 rounded-full bg-status-online animate-pulse" />
@@ -151,7 +114,6 @@ function KanbanColumn({ column, tasks }: { column: ColumnDef; tasks: OperationTa
   const Icon = column.icon;
   return (
     <div className="flex flex-col min-w-0">
-      {/* Column Header */}
       <div className={cn("rounded-t-lg px-5 py-3.5 border border-b-0 border-border/40", column.headerBg)}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
@@ -163,7 +125,6 @@ function KanbanColumn({ column, tasks }: { column: ColumnDef; tasks: OperationTa
         </div>
       </div>
 
-      {/* Column Body */}
       <div className="rounded-b-lg border border-border/40 bg-surface-0/50 max-h-[500px] overflow-y-auto orion-thin-scroll">
         <div className="p-2.5 space-y-2.5">
           {tasks.length === 0 ? (
@@ -219,8 +180,7 @@ function KanbanSummaryBar({ tasks }: { tasks: OperationTask[] }) {
 export function OperationsKanban() {
   const { state, data, source, lastUpdated, refetch } = useOrionData<OperationTask[]>({
     key: "operations-kanban",
-    mockData: MOCK_TASKS,
-    simulateDelay: 600,
+    fetcher: fetchOperationTasks,
   });
 
   const tasks = data || [];

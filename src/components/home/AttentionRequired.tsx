@@ -1,25 +1,10 @@
 import { AlertTriangle, AlertCircle, Info, ChevronRight } from "lucide-react";
 import { useOrionData } from "@/hooks/useOrionData";
 import { OrionDataWrapper } from "@/components/orion/DataWrapper";
+import { fetchAttentionItems } from "@/domains/activity/fetcher";
+import type { AttentionItem, AttentionPriority } from "@/domains/activity/types";
 
-type Priority = "critical" | "warning" | "info";
-
-interface AttentionItem {
-  id: string;
-  priority: Priority;
-  title: string;
-  context: string;
-  timestamp: string;
-}
-
-const MOCK_ITEMS: AttentionItem[] = [
-  { id: "1", priority: "critical", title: "Pipeline de ingestão com latência elevada", context: "Data Pipeline · P95 > 200ms há 12min", timestamp: "12min" },
-  { id: "2", priority: "warning", title: "Agente Classifier atingiu 85% de memória", context: "ML Processor · Cluster East", timestamp: "28min" },
-  { id: "3", priority: "warning", title: "3 tarefas na fila há mais de 5 minutos", context: "Queue Manager · Threshold: 3min", timestamp: "6min" },
-  { id: "4", priority: "info", title: "Deploy v2.14.3 aguardando aprovação", context: "Release Pipeline · Staging validated", timestamp: "1h" },
-];
-
-const priorityConfig = {
+const priorityConfig: Record<AttentionPriority, { icon: React.ElementType; border: string; bg: string; dot: string }> = {
   critical: { icon: AlertCircle, border: "border-l-status-critical", bg: "bg-status-critical/[0.04]", dot: "status-critical" },
   warning: { icon: AlertTriangle, border: "border-l-status-warning", bg: "bg-status-warning/[0.04]", dot: "status-warning" },
   info: { icon: Info, border: "border-l-primary/40", bg: "bg-primary/[0.03]", dot: "bg-primary/50" },
@@ -28,8 +13,7 @@ const priorityConfig = {
 export function AttentionRequired() {
   const { state, data, source, lastUpdated, refetch } = useOrionData<AttentionItem[]>({
     key: "attention-items",
-    mockData: MOCK_ITEMS,
-    simulateDelay: 700,
+    fetcher: fetchAttentionItems,
   });
 
   return (

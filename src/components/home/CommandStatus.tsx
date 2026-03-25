@@ -1,23 +1,8 @@
 import { Shield, AlertTriangle, Clock, Zap, Bot, Activity } from "lucide-react";
 import { useOrionData } from "@/hooks/useOrionData";
 import { OrionDataWrapper } from "@/components/orion/DataWrapper";
-
-type SystemState = "nominal" | "degraded" | "critical";
-
-interface CommandData {
-  systemState: SystemState;
-  metrics: { label: string; value: string; icon: React.ElementType }[];
-}
-
-const MOCK_DATA: CommandData = {
-  systemState: "degraded",
-  metrics: [
-    { label: "Uptime", value: "99.97%", icon: Clock },
-    { label: "Agentes", value: "7/10", icon: Bot },
-    { label: "Sessões", value: "5 ativas", icon: Activity },
-    { label: "Tokens/h", value: "142k", icon: Zap },
-  ],
-};
+import { fetchCommandStatus } from "@/domains/system/fetcher";
+import type { CommandData, SystemState } from "@/domains/system/types";
 
 const stateConfig: Record<SystemState, {
   icon: React.ElementType; label: string; sublabel: string;
@@ -40,11 +25,12 @@ const stateConfig: Record<SystemState, {
   },
 };
 
+const iconMap: Record<string, React.ElementType> = { Clock, Bot, Activity, Zap };
+
 export function CommandStatus() {
   const { state, data, source, lastUpdated, refetch } = useOrionData<CommandData>({
     key: "command-status",
-    mockData: MOCK_DATA,
-    simulateDelay: 400,
+    fetcher: fetchCommandStatus,
   });
 
   return (
@@ -78,7 +64,7 @@ function CommandStatusContent({ data }: { data: CommandData }) {
 
         <div className="hidden md:flex items-center gap-8">
           {data.metrics.map(m => {
-            const MIcon = m.icon;
+            const MIcon = iconMap[m.icon] || Clock;
             return (
               <div key={m.label} className="text-right">
                 <div className="flex items-center gap-2 justify-end">
