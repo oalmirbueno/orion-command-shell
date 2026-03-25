@@ -2,9 +2,6 @@ import {
   AlertCircle, AlertTriangle, Info, CheckCircle2,
   ChevronRight, Clock, ExternalLink,
 } from "lucide-react";
-import { useOrionData } from "@/hooks/useOrionData";
-import { OrionDataWrapper } from "@/components/orion/DataWrapper";
-import { fetchAlerts } from "@/domains/alerts/fetcher";
 import type { Alert, Severity } from "@/domains/alerts/types";
 
 const severityConfig: Record<Severity, {
@@ -78,13 +75,11 @@ function AlertRow({ alert }: { alert: Alert }) {
   );
 }
 
-export function AlertsList() {
-  const { state, data, source, lastUpdated, refetch } = useOrionData<Alert[]>({
-    key: "alerts-list",
-    fetcher: fetchAlerts,
-  });
+interface Props {
+  alerts: Alert[];
+}
 
-  const alerts = data || [];
+export function AlertsList({ alerts }: Props) {
   const allGroups = [
     { severity: "critical" as Severity, label: "Crítico", alerts: alerts.filter(a => a.severity === "critical") },
     { severity: "warning" as Severity, label: "Atenção", alerts: alerts.filter(a => a.severity === "warning") },
@@ -104,28 +99,26 @@ export function AlertsList() {
         <div className="flex-1 h-px bg-border/40" />
       </div>
 
-      <OrionDataWrapper state={state} source={source} lastUpdated={lastUpdated} onRetry={refetch}>
-        <div className="space-y-8">
-          {groups.map((group) => {
-            const cfg = severityConfig[group.severity];
-            return (
-              <div key={group.severity}>
-                <div className="flex items-center gap-2.5 mb-3">
-                  <div className={`status-dot ${cfg.dot}`} />
-                  <span className={`text-[11px] font-mono uppercase tracking-widest ${cfg.text}`}>{group.label}</span>
-                  <span className="text-[11px] font-mono text-muted-foreground/30">{group.alerts.length}</span>
-                  <div className="flex-1 h-px bg-border/20" />
-                </div>
-                <div className="space-y-3">
-                  {group.alerts.map((alert) => (
-                    <AlertRow key={alert.id} alert={alert} />
-                  ))}
-                </div>
+      <div className="space-y-8">
+        {groups.map((group) => {
+          const cfg = severityConfig[group.severity];
+          return (
+            <div key={group.severity}>
+              <div className="flex items-center gap-2.5 mb-3">
+                <div className={`status-dot ${cfg.dot}`} />
+                <span className={`text-[11px] font-mono uppercase tracking-widest ${cfg.text}`}>{group.label}</span>
+                <span className="text-[11px] font-mono text-muted-foreground/30">{group.alerts.length}</span>
+                <div className="flex-1 h-px bg-border/20" />
               </div>
-            );
-          })}
-        </div>
-      </OrionDataWrapper>
+              <div className="space-y-3">
+                {group.alerts.map((alert) => (
+                  <AlertRow key={alert.id} alert={alert} />
+                ))}
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </section>
   );
 }

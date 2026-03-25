@@ -13,3 +13,16 @@ export interface Alert {
   acknowledged: boolean;
   occurrences: number;
 }
+
+export interface AlertsSummaryData {
+  critical: number;
+  warning: number;
+  info: number;
+  resolved: number;
+}
+
+/** Unified page model for the Alerts domain */
+export interface AlertsPageData {
+  alerts: Alert[];
+  summary: AlertsSummaryData;
+}

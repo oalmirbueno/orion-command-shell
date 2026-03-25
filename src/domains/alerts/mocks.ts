@@ -1,4 +1,4 @@
-import type { Alert } from "./types";
+import type { Alert, AlertsPageData } from "./types";
 
 export const FALLBACK_ALERTS: Alert[] = [
   { id: "a-01", severity: "critical", title: "Validator-01 offline — conexão com API externa perdida", description: "Agente não responde há 14min. 3 retries falharam com timeout. Tarefas de validação suspensas.", action: "Verificar conectividade com api.external-service.com:443 e reiniciar agente", source: "Validator-01", triggeredAt: "09:33", triggeredAgo: "14min ago", acknowledged: false, occurrences: 1 },
@@ -14,3 +14,17 @@ export const FALLBACK_ALERTS: Alert[] = [
   { id: "a-11", severity: "resolved", title: "Rollback v2.14.2 concluído com sucesso", description: "Pipeline restaurado. Performance normalizada em 4min. Zero perda de dados.", action: "Resolvido automaticamente", source: "Core Engine", triggeredAt: "09:42", triggeredAgo: "5min ago", resolvedAt: "09:42", acknowledged: true, occurrences: 1 },
   { id: "a-12", severity: "resolved", title: "Health check matinal concluído", description: "11/12 serviços nominais. Data Pipeline flagged para monitoramento contínuo.", action: "Resolvido", source: "Health Monitor", triggeredAt: "08:00", triggeredAgo: "1h47 ago", resolvedAt: "08:02", acknowledged: true, occurrences: 1 },
 ];
+
+function computeSummary(alerts: Alert[]) {
+  return {
+    critical: alerts.filter(a => a.severity === "critical").length,
+    warning: alerts.filter(a => a.severity === "warning").length,
+    info: alerts.filter(a => a.severity === "info").length,
+    resolved: alerts.filter(a => a.severity === "resolved").length,
+  };
+}
+
+export const FALLBACK_ALERTS_PAGE: AlertsPageData = {
+  alerts: FALLBACK_ALERTS,
+  summary: computeSummary(FALLBACK_ALERTS),
+};
