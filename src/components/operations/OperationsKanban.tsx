@@ -197,15 +197,15 @@ function KanbanSummaryBar({ tasks }: { tasks: OperationTask[] }) {
   ];
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-5 gap-px rounded-lg border border-border/30 bg-border/30 overflow-hidden">
+    <div className="grid grid-cols-2 sm:grid-cols-5 gap-px rounded-lg border border-border/50 bg-border/30 overflow-hidden">
       {stats.map(s => {
         const Icon = s.icon;
         return (
-          <div key={s.label} className="bg-card px-4 py-3 flex items-center gap-3">
-            <Icon className={cn("h-4 w-4 shrink-0", s.color)} />
+          <div key={s.label} className="bg-card px-5 py-4 flex items-center gap-4">
+            <Icon className={cn("h-5 w-5 shrink-0", s.color)} />
             <div>
-              <p className={cn("text-lg font-semibold font-mono leading-none", s.color)}>{s.value}</p>
-              <span className="text-[9px] font-mono text-muted-foreground/40 uppercase tracking-wider">{s.label}</span>
+              <p className={cn("text-xl font-bold font-mono leading-none", s.color)}>{s.value}</p>
+              <span className="text-[11px] font-mono text-muted-foreground/50 uppercase tracking-wider">{s.label}</span>
             </div>
           </div>
         );
