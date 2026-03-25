@@ -25,11 +25,11 @@ export function ExecutiveBriefing() {
 
   return (
     <section>
-      <div className="flex items-center gap-2 mb-3">
-        <h2 className="text-[10px] font-mono uppercase tracking-[0.15em] text-muted-foreground">Leitura Executiva</h2>
-        <div className="flex items-center gap-1.5 ml-2 px-2 py-0.5 rounded-full bg-accent border border-border/50">
-          <FileText className="h-3 w-3 text-muted-foreground/50" />
-          <span className="text-[9px] font-mono text-muted-foreground">Hoje</span>
+      <div className="flex items-center gap-3 mb-4">
+        <h2 className="text-xs font-mono uppercase tracking-[0.15em] text-muted-foreground">Leitura Executiva</h2>
+        <div className="flex items-center gap-2 ml-2 px-3 py-1 rounded-full bg-accent border border-border/50">
+          <FileText className="h-3.5 w-3.5 text-muted-foreground/60" />
+          <span className="text-[11px] font-mono text-muted-foreground">Hoje</span>
         </div>
         <div className="flex-1 h-px bg-border/40" />
       </div>
@@ -38,14 +38,14 @@ export function ExecutiveBriefing() {
         <div className="rounded-lg border border-border/50 bg-card overflow-hidden">
           <div className="divide-y divide-border/30">
             {(data || []).map((item, i) => (
-              <div key={i} className="flex gap-4 px-4 py-3 hover:bg-accent/20 transition-colors">
+              <div key={i} className="flex gap-5 px-5 py-4 hover:bg-accent/20 transition-colors">
                 <div className="flex flex-col items-center pt-0.5">
-                  <span className="text-[10px] font-mono text-primary/70">{item.time}</span>
-                  {i < (data || []).length - 1 && <div className="w-px flex-1 bg-border/30 mt-1.5" />}
+                  <span className="text-xs font-mono text-primary/70 font-medium">{item.time}</span>
+                  {i < (data || []).length - 1 && <div className="w-px flex-1 bg-border/30 mt-2" />}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs text-foreground/90 leading-relaxed">{item.content}</p>
-                  <p className="text-[9px] font-mono text-muted-foreground/40 mt-1">{item.source}</p>
+                  <p className="text-sm text-foreground/90 leading-relaxed">{item.content}</p>
+                  <p className="text-[11px] font-mono text-muted-foreground/50 mt-1.5">{item.source}</p>
                 </div>
               </div>
             ))}

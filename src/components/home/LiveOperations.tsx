@@ -32,50 +32,50 @@ export function LiveOperations() {
 
   return (
     <section>
-      <div className="flex items-center gap-2 mb-3">
-        <h2 className="text-[10px] font-mono uppercase tracking-[0.15em] text-muted-foreground">Operações em Andamento</h2>
+      <div className="flex items-center gap-3 mb-4">
+        <h2 className="text-xs font-mono uppercase tracking-[0.15em] text-muted-foreground">Operações em Andamento</h2>
         {data && (
-          <div className="flex items-center gap-1.5 ml-2 px-2 py-0.5 rounded-full bg-status-online/10 border border-status-online/20">
-            <Flame className="h-3 w-3 text-status-online" />
-            <span className="text-[9px] font-mono text-status-online font-medium">{runningCount} ativas</span>
+          <div className="flex items-center gap-2 ml-2 px-3 py-1 rounded-full bg-status-online/10 border border-status-online/20">
+            <Flame className="h-3.5 w-3.5 text-status-online" />
+            <span className="text-[11px] font-mono text-status-online font-semibold">{runningCount} ativas</span>
           </div>
         )}
         <div className="flex-1 h-px bg-border/40" />
       </div>
 
       <OrionDataWrapper state={state} source={source} lastUpdated={lastUpdated} onRetry={refetch} compact>
-        <div className="space-y-1.5">
+        <div className="space-y-2">
           {(data || []).map(op => {
             const isPaused = op.status === "paused";
             const isHigh = op.priority === "high";
             return (
-              <div key={op.id} className={`flex items-center gap-3 px-4 py-3 rounded-lg border cursor-pointer group transition-colors ${isPaused ? "border-border/30 opacity-55 hover:opacity-75" : isHigh ? "border-primary/20 bg-primary/[0.03] hover:bg-primary/[0.06]" : "border-border/30 hover:bg-accent/20"}`}>
+              <div key={op.id} className={`flex items-center gap-4 px-5 py-4 rounded-lg border cursor-pointer group transition-colors ${isPaused ? "border-border/30 opacity-55 hover:opacity-75" : isHigh ? "border-primary/20 bg-primary/[0.03] hover:bg-primary/[0.06]" : "border-border/40 hover:bg-accent/30"}`}>
                 <div className="shrink-0">
-                  {isPaused ? <Pause className="h-3.5 w-3.5 text-status-warning" /> : <Flame className="h-3.5 w-3.5 text-status-online" />}
+                  {isPaused ? <Pause className="h-4.5 w-4.5 text-status-warning" /> : <Flame className="h-4.5 w-4.5 text-status-online" />}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-medium text-foreground truncate">{op.name}</span>
+                  <div className="flex items-center gap-2.5">
+                    <span className="text-sm font-medium text-foreground truncate">{op.name}</span>
                     {isHigh && !isPaused && (
-                      <span className="text-[7px] font-mono uppercase px-1 py-0.5 rounded bg-primary/10 text-primary border border-primary/15">PRI</span>
+                      <span className="text-[9px] font-mono uppercase px-1.5 py-0.5 rounded bg-primary/10 text-primary border border-primary/15">PRI</span>
                     )}
                   </div>
-                  <div className="flex items-center gap-1.5 mt-0.5">
-                    <Bot className="h-3 w-3 text-muted-foreground/25" />
-                    <span className="text-[9px] font-mono text-muted-foreground/40">{op.agent}</span>
+                  <div className="flex items-center gap-2 mt-1">
+                    <Bot className="h-3.5 w-3.5 text-muted-foreground/30" />
+                    <span className="text-[11px] font-mono text-muted-foreground/50">{op.agent}</span>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 shrink-0 w-28">
-                  <div className="flex-1 h-1.5 bg-surface-3 rounded-full overflow-hidden">
+                <div className="flex items-center gap-3 shrink-0 w-32">
+                  <div className="flex-1 h-2 bg-surface-3 rounded-full overflow-hidden">
                     <div className={`h-full rounded-full transition-all ${isPaused ? "bg-status-warning/50" : "bg-primary"}`} style={{ width: `${op.progress}%` }} />
                   </div>
-                  <span className="text-[9px] font-mono text-muted-foreground/40 w-8 text-right">{op.progress}%</span>
+                  <span className="text-[11px] font-mono text-muted-foreground/50 w-10 text-right">{op.progress}%</span>
                 </div>
-                <div className="flex items-center gap-1 shrink-0">
-                  <Clock className="h-3 w-3 text-muted-foreground/20" />
-                  <span className="text-[9px] font-mono text-muted-foreground/40">{op.elapsed}</span>
+                <div className="flex items-center gap-2 shrink-0">
+                  <Clock className="h-3.5 w-3.5 text-muted-foreground/30" />
+                  <span className="text-[11px] font-mono text-muted-foreground/50">{op.elapsed}</span>
                 </div>
-                <ArrowRight className="h-3.5 w-3.5 text-muted-foreground/15 group-hover:text-muted-foreground/40 transition-colors shrink-0" />
+                <ArrowRight className="h-4 w-4 text-muted-foreground/15 group-hover:text-muted-foreground/40 transition-colors shrink-0" />
               </div>
             );
           })}
