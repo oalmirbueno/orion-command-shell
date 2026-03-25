@@ -8,6 +8,7 @@ import {
   Settings,
   Zap,
   Radio,
+  Bot,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -27,6 +28,7 @@ import {
 const operationsItems = [
   { title: "Command", url: "/", icon: LayoutDashboard },
   { title: "Missions", url: "/missions", icon: Target },
+  { title: "Agents", url: "/agents", icon: Bot },
   { title: "Telemetry", url: "/telemetry", icon: Activity },
   { title: "Comms", url: "/comms", icon: Radio },
 ];
