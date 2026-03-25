@@ -1,16 +1,21 @@
 import { CheckCircle2, XCircle, Timer, Ban } from "lucide-react";
+import type { CronSummaryData } from "@/domains/cron/types";
 
-const MOCK = [
-  { label: "Jobs Ativos", value: 9, icon: Timer, text: "text-status-online", dot: "status-online" },
-  { label: "Saudáveis", value: 7, icon: CheckCircle2, text: "text-status-online", dot: "status-online" },
-  { label: "Falhas", value: 1, icon: XCircle, text: "text-status-critical", dot: "status-critical" },
-  { label: "Desabilitados", value: 2, icon: Ban, text: "text-muted-foreground", dot: "bg-muted-foreground/40" },
-];
+interface Props {
+  summary: CronSummaryData;
+}
 
-export function CronSummary() {
+export function CronSummary({ summary }: Props) {
+  const items = [
+    { label: "Jobs Ativos", value: summary.active, icon: Timer, text: "text-status-online", dot: "status-online" },
+    { label: "Saudáveis", value: summary.healthy, icon: CheckCircle2, text: "text-status-online", dot: "status-online" },
+    { label: "Falhas", value: summary.failed, icon: XCircle, text: "text-status-critical", dot: "status-critical" },
+    { label: "Desabilitados", value: summary.disabled, icon: Ban, text: "text-muted-foreground", dot: "bg-muted-foreground/40" },
+  ];
+
   return (
     <div className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-border/30 rounded-xl overflow-hidden border border-border/50">
-      {MOCK.map((m) => {
+      {items.map((m) => {
         const Icon = m.icon;
         return (
           <div key={m.label} className="bg-card px-6 py-5 flex items-center gap-4">
