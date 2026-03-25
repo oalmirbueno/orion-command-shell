@@ -9,7 +9,7 @@ import { ExecutiveBriefing } from "@/components/home/ExecutiveBriefing";
 const Index = () => {
   return (
     <OrionLayout title="Comando">
-      <div className="max-w-7xl mx-auto space-y-6">
+      <div className="space-y-8">
         {/* Tier 1: Overall status — the single most important read */}
         <CommandStatus />
 
@@ -17,7 +17,7 @@ const Index = () => {
         <AttentionRequired />
 
         {/* Tier 3: What's happening — live operations + agents side by side */}
-        <div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
+        <div className="grid grid-cols-1 xl:grid-cols-5 gap-8">
           <div className="xl:col-span-3">
             <LiveOperations />
           </div>
@@ -27,7 +27,7 @@ const Index = () => {
         </div>
 
         {/* Tier 4: Context — health + briefing */}
-        <div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
+        <div className="grid grid-cols-1 xl:grid-cols-5 gap-8">
           <div className="xl:col-span-2">
             <OperationalHealth />
           </div>

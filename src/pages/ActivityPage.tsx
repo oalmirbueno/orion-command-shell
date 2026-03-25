@@ -6,7 +6,7 @@ import { ActivityFeed } from "@/components/activity/ActivityFeed";
 const ActivityPage = () => {
   return (
     <OrionLayout title="Atividade">
-      <div className="max-w-7xl mx-auto space-y-8">
+      <div className="space-y-8">
         <OrionBreadcrumb items={["Mission Control", "Atividade"]} />
         <ActivitySummary />
         <ActivityFeed />
