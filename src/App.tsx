@@ -12,6 +12,7 @@ import ActivityPage from "./pages/ActivityPage.tsx";
 import CronPage from "./pages/CronPage.tsx";
 import MemoryPage from "./pages/MemoryPage.tsx";
 import AlertsPage from "./pages/AlertsPage.tsx";
+import Office3DPage from "./pages/Office3DPage.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -25,16 +26,16 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/agents" element={<AgentsPage />} />
-          <Route path="/missions" element={<PlaceholderPage title="Missions" description="Mission tracking and orchestration" />} />
+          <Route path="/missions" element={<PlaceholderPage title="Missões" description="Rastreamento e orquestração de missões" />} />
           <Route path="/sessions" element={<SessionsPage />} />
           <Route path="/activity" element={<ActivityPage />} />
           <Route path="/memory" element={<MemoryPage />} />
-          <Route path="/telemetry" element={<PlaceholderPage title="Telemetry" description="Real-time system telemetry" />} />
           <Route path="/system" element={<SystemPage />} />
           <Route path="/cron" element={<CronPage />} />
           <Route path="/alerts" element={<AlertsPage />} />
-          <Route path="/pipelines" element={<PlaceholderPage title="Pipelines" description="Data pipeline management" />} />
-          <Route path="/settings" element={<PlaceholderPage title="Settings" description="System configuration" />} />
+          <Route path="/pipelines" element={<PlaceholderPage title="Pipelines" description="Gerenciamento de pipelines de dados" />} />
+          <Route path="/office3d" element={<Office3DPage />} />
+          <Route path="/settings" element={<PlaceholderPage title="Configurações" description="Configuração do sistema" />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

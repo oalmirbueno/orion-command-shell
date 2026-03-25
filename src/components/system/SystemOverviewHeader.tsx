@@ -7,7 +7,7 @@ const MOCK_STATUS: OverallStatus = "healthy";
 const statusConfig = {
   healthy: {
     icon: CheckCircle2,
-    label: "All Systems Operational",
+    label: "Todos os Sistemas Operacionais",
     sublabel: "Nenhuma anomalia detectada",
     dot: "status-online",
     border: "border-status-online/20",
@@ -16,7 +16,7 @@ const statusConfig = {
   },
   degraded: {
     icon: AlertTriangle,
-    label: "Degraded Performance",
+    label: "Performance Degradada",
     sublabel: "Alguns serviços com performance reduzida",
     dot: "status-warning",
     border: "border-status-warning/20",
@@ -25,7 +25,7 @@ const statusConfig = {
   },
   critical: {
     icon: XCircle,
-    label: "System Failure Detected",
+    label: "Falha no Sistema Detectada",
     sublabel: "Ação imediata necessária",
     dot: "status-critical",
     border: "border-status-critical/20",
