@@ -39,29 +39,29 @@ export function SystemOverviewHeader() {
   const Icon = cfg.icon;
 
   return (
-    <div className={`flex items-center gap-4 px-5 py-4 rounded-lg border ${cfg.border} ${cfg.bg}`}>
-      <div className={`w-10 h-10 rounded-lg ${cfg.bg} border ${cfg.border} flex items-center justify-center`}>
-        <Icon className={`h-5 w-5 ${cfg.text}`} />
+    <div className={`flex items-center gap-5 px-6 py-5 rounded-xl border ${cfg.border} ${cfg.bg}`}>
+      <div className={`w-12 h-12 rounded-lg ${cfg.bg} border ${cfg.border} flex items-center justify-center`}>
+        <Icon className={`h-6 w-6 ${cfg.text}`} />
       </div>
       <div className="flex-1">
-        <div className="flex items-center gap-2.5">
-          <h2 className={`text-sm font-semibold ${cfg.text}`}>{cfg.label}</h2>
+        <div className="flex items-center gap-3">
+          <h2 className={`text-base font-semibold ${cfg.text}`}>{cfg.label}</h2>
           <div className={`status-dot ${cfg.dot}`} />
         </div>
-        <p className="text-[10px] font-mono text-muted-foreground mt-0.5">{cfg.sublabel}</p>
+        <p className="text-sm font-mono text-muted-foreground mt-1">{cfg.sublabel}</p>
       </div>
-      <div className="flex items-center gap-4 text-right">
+      <div className="flex items-center gap-6 text-right">
         <div>
-          <p className="text-[9px] font-mono text-muted-foreground/50 uppercase">Host</p>
-          <p className="text-[11px] font-mono text-foreground">orion-prod-01</p>
+          <p className="text-xs font-mono text-muted-foreground/50 uppercase">Host</p>
+          <p className="text-sm font-mono text-foreground">orion-prod-01</p>
         </div>
         <div>
-          <p className="text-[9px] font-mono text-muted-foreground/50 uppercase">Uptime</p>
-          <p className="text-[11px] font-mono text-foreground">47d 12h 38m</p>
+          <p className="text-xs font-mono text-muted-foreground/50 uppercase">Uptime</p>
+          <p className="text-sm font-mono text-foreground">47d 12h 38m</p>
         </div>
         <div>
-          <p className="text-[9px] font-mono text-muted-foreground/50 uppercase">Última Verif.</p>
-          <p className="text-[11px] font-mono text-foreground">12s atrás</p>
+          <p className="text-xs font-mono text-muted-foreground/50 uppercase">Última Verif.</p>
+          <p className="text-sm font-mono text-foreground">12s atrás</p>
         </div>
       </div>
     </div>

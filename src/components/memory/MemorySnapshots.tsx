@@ -98,48 +98,48 @@ function SnapshotCard({ snapshot }: { snapshot: MemorySnapshot }) {
   const CatIcon = cat.icon;
 
   return (
-    <div className={`rounded-lg border border-border/40 bg-card border-l-2 ${rel.border} hover:bg-accent/20 transition-colors cursor-pointer group`}>
-      <div className="px-5 py-4">
-        {/* Header: Title + Category badge */}
-        <div className="flex items-start justify-between mb-2.5">
-          <div className="flex items-center gap-2.5 min-w-0 flex-1">
-            <CatIcon className="h-4 w-4 text-muted-foreground/50 shrink-0" />
-            <h3 className="text-[13px] font-semibold text-foreground leading-snug">{snapshot.title}</h3>
+    <div className={`rounded-xl border border-border/40 bg-card border-l-[3px] ${rel.border} hover:bg-accent/20 transition-colors cursor-pointer group`}>
+      <div className="px-6 py-5">
+        {/* Header */}
+        <div className="flex items-start justify-between mb-3">
+          <div className="flex items-center gap-3 min-w-0 flex-1">
+            <CatIcon className="h-5 w-5 text-muted-foreground/50 shrink-0" />
+            <h3 className="text-base font-semibold text-foreground leading-snug">{snapshot.title}</h3>
           </div>
-          <div className="flex items-center gap-2 shrink-0 ml-3">
-            <span className={`text-[8px] font-mono uppercase px-1.5 py-0.5 rounded border ${cat.color}`}>
+          <div className="flex items-center gap-2 shrink-0 ml-4">
+            <span className={`text-xs font-mono uppercase px-2 py-1 rounded border ${cat.color}`}>
               {cat.label}
             </span>
-            <ChevronRight className="h-4 w-4 text-muted-foreground/15 group-hover:text-muted-foreground/40 transition-colors" />
+            <ChevronRight className="h-5 w-5 text-muted-foreground/15 group-hover:text-muted-foreground/40 transition-colors" />
           </div>
         </div>
 
-        {/* Summary — editorial, not raw */}
-        <p className="text-[11.5px] text-foreground/65 leading-relaxed mb-3 ml-[26px]">
+        {/* Summary */}
+        <p className="text-sm text-foreground/65 leading-relaxed mb-4 ml-8">
           {snapshot.summary}
         </p>
 
         {/* Context note */}
-        <div className="ml-[26px] px-3 py-2 rounded-md bg-surface-2 border border-border/30 mb-3">
-          <p className="text-[10px] text-muted-foreground/50 leading-relaxed italic">
+        <div className="ml-8 px-4 py-3 rounded-lg bg-surface-2 border border-border/30 mb-4">
+          <p className="text-xs text-muted-foreground/50 leading-relaxed italic">
             {snapshot.context}
           </p>
         </div>
 
-        {/* Footer: Tags + Metadata */}
-        <div className="flex items-center justify-between ml-[26px]">
-          <div className="flex items-center gap-1.5 flex-wrap">
+        {/* Footer */}
+        <div className="flex items-center justify-between ml-8">
+          <div className="flex items-center gap-2 flex-wrap">
             {snapshot.tags.map((tag) => (
-              <span key={tag} className="text-[8px] font-mono px-1.5 py-0.5 rounded bg-surface-3 text-muted-foreground/50 border border-border/20">
+              <span key={tag} className="text-xs font-mono px-2 py-1 rounded bg-surface-3 text-muted-foreground/50 border border-border/20">
                 {tag}
               </span>
             ))}
           </div>
-          <div className="flex items-center gap-3 text-[9px] font-mono text-muted-foreground/40 shrink-0">
+          <div className="flex items-center gap-4 text-xs font-mono text-muted-foreground/40 shrink-0">
             <span>{snapshot.source}</span>
-            <div className="h-3 w-px bg-border/30" />
-            <div className="flex items-center gap-1">
-              <Clock className="h-3 w-3" />
+            <div className="h-4 w-px bg-border/30" />
+            <div className="flex items-center gap-1.5">
+              <Clock className="h-3.5 w-3.5" />
               <span>{snapshot.capturedAt}</span>
             </div>
             <span className="text-muted-foreground/25">{snapshot.capturedAgo}</span>
@@ -151,26 +151,24 @@ function SnapshotCard({ snapshot }: { snapshot: MemorySnapshot }) {
 }
 
 export function MemorySnapshots() {
-  // Group by category for section headers
   const categories = Array.from(new Set(MOCK_SNAPSHOTS.map(s => s.category)));
 
   return (
     <section>
-      <div className="flex items-center gap-2 mb-4">
-        <h2 className="text-[10px] font-mono uppercase tracking-[0.15em] text-muted-foreground">
+      <div className="flex items-center gap-3 mb-5">
+        <h2 className="text-xs font-mono uppercase tracking-[0.15em] text-muted-foreground">
           Banco de Memória
         </h2>
-        <div className="flex items-center gap-1.5 ml-2 px-2 py-0.5 rounded-full bg-primary/10 border border-primary/20">
-          <span className="text-[9px] font-mono text-primary font-medium">{MOCK_SNAPSHOTS.length} snapshots</span>
+        <div className="flex items-center gap-2 ml-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20">
+          <span className="text-xs font-mono text-primary font-medium">{MOCK_SNAPSHOTS.length} snapshots</span>
         </div>
         <div className="flex-1 h-px bg-border/40" />
 
-        {/* Category filter pills */}
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-2">
           {categories.map((cat) => {
             const cfg = categoryConfig[cat];
             return (
-              <span key={cat} className={`text-[8px] font-mono uppercase px-2 py-1 rounded-full border cursor-pointer hover:opacity-80 transition-opacity ${cfg.color}`}>
+              <span key={cat} className={`text-xs font-mono uppercase px-3 py-1.5 rounded-full border cursor-pointer hover:opacity-80 transition-opacity ${cfg.color}`}>
                 {cfg.label}
               </span>
             );
@@ -178,7 +176,7 @@ export function MemorySnapshots() {
         </div>
       </div>
 
-      <div className="space-y-2.5">
+      <div className="space-y-3">
         {MOCK_SNAPSHOTS.map((snapshot) => (
           <SnapshotCard key={snapshot.id} snapshot={snapshot} />
         ))}

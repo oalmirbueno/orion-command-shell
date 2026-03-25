@@ -1,11 +1,5 @@
 import { Crown, Cpu, Users, ArrowDown, ArrowRight } from "lucide-react";
 
-/**
- * AgentArchitectureMap — visual top-down view of the agent hierarchy.
- * Shows the orchestrator at the top, core agents in the middle, support at the bottom,
- * with visual flow indicators showing task distribution.
- */
-
 type AgentStatus = "active" | "idle" | "offline";
 
 interface MapNode {
@@ -15,7 +9,7 @@ interface MapNode {
   status: AgentStatus;
   load: number;
   sessions: number;
-  feedsTo?: string[]; // IDs of agents this one feeds tasks to
+  feedsTo?: string[];
 }
 
 const ORCHESTRATOR: MapNode = {
@@ -51,33 +45,31 @@ function MiniNode({ node, variant = "default" }: { node: MapNode; variant?: "orc
 
   return (
     <div className={`
-      relative rounded-lg border bg-card px-4 py-3 transition-all cursor-pointer group
+      relative rounded-xl border bg-card px-5 py-4 transition-all cursor-pointer group
       ${isOrch ? "border-primary/30 bg-primary/5 shadow-[0_0_20px_-5px_hsl(var(--primary)/0.15)]" : "border-border/40 hover:bg-accent/20"}
       ${isOffline ? "opacity-50" : ""}
     `}>
-      {/* Status pulse for active orchestrator */}
       {isOrch && node.status === "active" && (
-        <div className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-primary animate-pulse" />
+        <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-primary animate-pulse" />
       )}
 
-      <div className="flex items-center gap-2.5 mb-1.5">
+      <div className="flex items-center gap-3 mb-2">
         <div className={`status-dot ${statusDot[node.status]}`} />
-        <span className={`text-[11px] font-semibold ${isOrch ? "text-primary" : "text-foreground"}`}>{node.name}</span>
+        <span className={`text-sm font-semibold ${isOrch ? "text-primary" : "text-foreground"}`}>{node.name}</span>
         {node.sessions > 0 && (
-          <span className="text-[8px] font-mono px-1.5 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 ml-auto">
+          <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 ml-auto">
             {node.sessions}s
           </span>
         )}
       </div>
-      <p className="text-[9px] font-mono text-muted-foreground/50">{node.role}</p>
+      <p className="text-xs font-mono text-muted-foreground/50">{node.role}</p>
 
-      {/* Load bar */}
       {node.status !== "offline" && node.load > 0 && (
-        <div className="mt-2 flex items-center gap-1.5">
-          <div className="flex-1 h-1 bg-surface-3 rounded-full overflow-hidden">
+        <div className="mt-3 flex items-center gap-2">
+          <div className="flex-1 h-2 bg-surface-3 rounded-full overflow-hidden">
             <div className={`h-full rounded-full ${loadColor}`} style={{ width: `${node.load}%` }} />
           </div>
-          <span className="text-[8px] font-mono text-muted-foreground/30">{node.load}%</span>
+          <span className="text-[10px] font-mono text-muted-foreground/40">{node.load}%</span>
         </div>
       )}
     </div>
@@ -86,10 +78,10 @@ function MiniNode({ node, variant = "default" }: { node: MapNode; variant?: "orc
 
 function FlowArrow({ label }: { label?: string }) {
   return (
-    <div className="flex flex-col items-center py-1">
-      <div className="w-px h-4 bg-border/30" />
-      <ArrowDown className="h-3 w-3 text-border/40" />
-      {label && <span className="text-[7px] font-mono text-muted-foreground/25 mt-0.5">{label}</span>}
+    <div className="flex flex-col items-center py-2">
+      <div className="w-px h-6 bg-border/30" />
+      <ArrowDown className="h-4 w-4 text-border/40" />
+      {label && <span className="text-[10px] font-mono text-muted-foreground/30 mt-1">{label}</span>}
     </div>
   );
 }
@@ -100,60 +92,58 @@ export function AgentArchitectureMap() {
 
   return (
     <section>
-      <div className="flex items-center gap-2 mb-4">
-        <h2 className="text-[10px] font-mono uppercase tracking-[0.15em] text-muted-foreground">
+      <div className="flex items-center gap-3 mb-5">
+        <h2 className="text-xs font-mono uppercase tracking-[0.15em] text-muted-foreground">
           Mapa de Arquitetura
         </h2>
         <div className="flex-1 h-px bg-border/40" />
-        <span className="text-[10px] font-mono text-primary animate-pulse-glow">● AO VIVO</span>
+        <span className="text-xs font-mono text-primary animate-pulse-glow">● AO VIVO</span>
       </div>
 
-      <div className="rounded-lg border border-border/50 bg-card/50 p-6">
+      <div className="rounded-xl border border-border/50 bg-card/50 p-8">
         {/* Tier 1: Orchestrator */}
-        <div className="flex flex-col items-center mb-1">
-          <div className="flex items-center gap-1.5 mb-2">
-            <Crown className="h-3 w-3 text-primary" />
-            <span className="text-[8px] font-mono uppercase tracking-widest text-primary/70">Orquestrador</span>
+        <div className="flex flex-col items-center mb-2">
+          <div className="flex items-center gap-2 mb-3">
+            <Crown className="h-4 w-4 text-primary" />
+            <span className="text-[10px] font-mono uppercase tracking-widest text-primary/70">Orquestrador</span>
           </div>
-          <div className="w-full max-w-xs">
+          <div className="w-full max-w-sm">
             <MiniNode node={ORCHESTRATOR} variant="orchestrator" />
           </div>
         </div>
 
-        {/* Flow arrows */}
         <div className="flex justify-center">
           <FlowArrow label="distribui tasks" />
         </div>
 
         {/* Tier 2: Core */}
-        <div className="mb-1">
-          <div className="flex items-center gap-1.5 mb-2 justify-center">
-            <Cpu className="h-3 w-3 text-foreground/50" />
-            <span className="text-[8px] font-mono uppercase tracking-widest text-muted-foreground/50">
+        <div className="mb-2">
+          <div className="flex items-center gap-2 mb-3 justify-center">
+            <Cpu className="h-4 w-4 text-foreground/50" />
+            <span className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground/50">
               Núcleo · {activeCore}/{CORE_AGENTS.length} ativos
             </span>
           </div>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {CORE_AGENTS.map(agent => (
               <MiniNode key={agent.id} node={agent} variant="core" />
             ))}
           </div>
         </div>
 
-        {/* Flow arrows */}
         <div className="flex justify-center">
           <FlowArrow label="alimenta" />
         </div>
 
         {/* Tier 3: Support */}
         <div>
-          <div className="flex items-center gap-1.5 mb-2 justify-center">
-            <Users className="h-3 w-3 text-muted-foreground/40" />
-            <span className="text-[8px] font-mono uppercase tracking-widest text-muted-foreground/40">
+          <div className="flex items-center gap-2 mb-3 justify-center">
+            <Users className="h-4 w-4 text-muted-foreground/40" />
+            <span className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground/40">
               Suporte · {activeSupport}/{SUPPORT_AGENTS.length} ativos
             </span>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
             {SUPPORT_AGENTS.map(agent => (
               <MiniNode key={agent.id} node={agent} variant="support" />
             ))}

@@ -5,7 +5,6 @@ interface UptimeDay {
   status: DayStatus;
 }
 
-// Generate 90 days of mock uptime
 const generateDays = (): UptimeDay[] => {
   const days: UptimeDay[] = [];
   const today = new Date();
@@ -13,7 +12,6 @@ const generateDays = (): UptimeDay[] => {
     const d = new Date(today);
     d.setDate(d.getDate() - i);
     const dateStr = d.toISOString().slice(5, 10);
-    // Mostly up, occasional degraded
     let status: DayStatus = "up";
     if (i === 45) status = "degraded";
     if (i === 67) status = "partial";
@@ -35,41 +33,40 @@ const statusColor: Record<DayStatus, string> = {
 export function UptimeTimeline() {
   return (
     <section>
-      <div className="flex items-center gap-2 mb-3">
-        <h2 className="text-[10px] font-mono uppercase tracking-[0.15em] text-muted-foreground">
+      <div className="flex items-center gap-3 mb-4">
+        <h2 className="text-xs font-mono uppercase tracking-[0.15em] text-muted-foreground">
           Uptime · Últimos 90 Dias
         </h2>
         <div className="flex-1 h-px bg-border/40" />
-        <span className="text-[10px] font-mono text-foreground">99.97%</span>
+        <span className="text-sm font-mono font-semibold text-foreground">99.97%</span>
       </div>
 
-      <div className="rounded-lg border border-border/50 bg-card p-4">
-        <div className="flex gap-[3px] flex-wrap">
+      <div className="rounded-xl border border-border/50 bg-card p-6">
+        <div className="flex gap-1 flex-wrap">
           {MOCK_DAYS.map((day, i) => (
             <div
               key={i}
-              className={`w-2 h-6 rounded-sm transition-colors cursor-pointer ${statusColor[day.status]}`}
+              className={`w-3 h-8 rounded-sm transition-colors cursor-pointer ${statusColor[day.status]}`}
               title={`${day.date}: ${day.status}`}
             />
           ))}
         </div>
 
-        {/* Legend */}
-        <div className="flex items-center gap-4 mt-3 pt-3 border-t border-border/30">
-          <div className="flex items-center gap-1.5">
-            <div className="w-2 h-2 rounded-sm bg-primary/50" />
-            <span className="text-[9px] font-mono text-muted-foreground/50">Operacional</span>
+        <div className="flex items-center gap-5 mt-4 pt-4 border-t border-border/30">
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-sm bg-primary/50" />
+            <span className="text-xs font-mono text-muted-foreground/50">Operacional</span>
           </div>
-          <div className="flex items-center gap-1.5">
-            <div className="w-2 h-2 rounded-sm bg-status-warning/60" />
-            <span className="text-[9px] font-mono text-muted-foreground/50">Degradado</span>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-sm bg-status-warning/60" />
+            <span className="text-xs font-mono text-muted-foreground/50">Degradado</span>
           </div>
-          <div className="flex items-center gap-1.5">
-            <div className="w-2 h-2 rounded-sm bg-status-critical/60" />
-            <span className="text-[9px] font-mono text-muted-foreground/50">Fora do ar</span>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-sm bg-status-critical/60" />
+            <span className="text-xs font-mono text-muted-foreground/50">Fora do ar</span>
           </div>
           <div className="flex-1" />
-          <span className="text-[9px] font-mono text-muted-foreground/40">90 dias atrás → Hoje</span>
+          <span className="text-xs font-mono text-muted-foreground/40">90 dias atrás → Hoje</span>
         </div>
       </div>
     </section>

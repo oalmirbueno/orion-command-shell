@@ -23,34 +23,22 @@ function getStatusColor(value: number, max: number): string {
   return "bg-primary";
 }
 
-function getStatusRing(value: number, max: number): string {
-  const pct = (value / max) * 100;
-  if (pct > 90) return "border-status-critical/30";
-  if (pct > 75) return "border-status-warning/30";
-  return "border-primary/30";
-}
-
 function CircularGauge({ data }: { data: GaugeData }) {
   const pct = (data.value / data.max) * 100;
-  // For uptime, invert the visual logic (99.97% is good)
   const isUptime = data.label === "Uptime";
-  const barColor = isUptime ? "bg-primary" : getStatusColor(data.value, data.max);
-  const ringColor = isUptime ? "border-primary/30" : getStatusRing(data.value, data.max);
   const Icon = data.icon;
 
   return (
-    <div className={`rounded-lg border border-border/50 bg-card p-5 flex flex-col items-center gap-4`}>
+    <div className="rounded-xl border border-border/50 bg-card p-6 flex flex-col items-center gap-5">
       {/* Gauge circle */}
-      <div className="relative w-24 h-24">
+      <div className="relative w-28 h-28">
         <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
-          {/* Background ring */}
           <circle
             cx="50" cy="50" r="42"
             fill="none"
             stroke="hsl(var(--surface-3))"
             strokeWidth="6"
           />
-          {/* Value ring */}
           <circle
             cx="50" cy="50" r="42"
             fill="none"
@@ -61,22 +49,20 @@ function CircularGauge({ data }: { data: GaugeData }) {
             className={`transition-all duration-700 ${isUptime ? "" : pct > 90 ? "[stroke:hsl(var(--status-critical))]" : pct > 75 ? "[stroke:hsl(var(--status-warning))]" : ""}`}
           />
         </svg>
-        {/* Center value */}
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-lg font-semibold text-foreground leading-none">
+          <span className="text-2xl font-bold text-foreground leading-none">
             {data.label === "Uptime" ? data.value : Math.round(pct)}
           </span>
-          <span className="text-[9px] font-mono text-muted-foreground/50 mt-0.5">{data.unit}</span>
+          <span className="text-xs font-mono text-muted-foreground/50 mt-1">{data.unit}</span>
         </div>
       </div>
 
-      {/* Label */}
       <div className="text-center">
-        <div className="flex items-center justify-center gap-1.5 mb-1">
-          <Icon className="h-3.5 w-3.5 text-muted-foreground/50" />
-          <span className="text-[11px] font-medium text-foreground">{data.label}</span>
+        <div className="flex items-center justify-center gap-2 mb-1.5">
+          <Icon className="h-4 w-4 text-muted-foreground/50" />
+          <span className="text-sm font-medium text-foreground">{data.label}</span>
         </div>
-        <p className="text-[9px] font-mono text-muted-foreground/40">{data.detail}</p>
+        <p className="text-xs font-mono text-muted-foreground/40">{data.detail}</p>
       </div>
     </div>
   );
@@ -85,15 +71,15 @@ function CircularGauge({ data }: { data: GaugeData }) {
 export function ResourceGauges() {
   return (
     <section>
-      <div className="flex items-center gap-2 mb-3">
-        <h2 className="text-[10px] font-mono uppercase tracking-[0.15em] text-muted-foreground">
+      <div className="flex items-center gap-3 mb-4">
+        <h2 className="text-xs font-mono uppercase tracking-[0.15em] text-muted-foreground">
           Uso de Recursos
         </h2>
         <div className="flex-1 h-px bg-border/40" />
-        <span className="text-[10px] font-mono text-primary animate-pulse-glow">● AO VIVO</span>
+        <span className="text-xs font-mono text-primary animate-pulse-glow">● AO VIVO</span>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
         {MOCK_GAUGES.map((g) => (
           <CircularGauge key={g.label} data={g} />
         ))}
