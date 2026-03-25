@@ -31,10 +31,10 @@ export function SystemPulse() {
     <section>
       <div className="flex items-center gap-2 mb-3">
         <h2 className="text-[10px] font-mono uppercase tracking-[0.15em] text-muted-foreground">
-          System Pulse
+          Pulso do Sistema
         </h2>
         <div className="flex-1 h-px bg-border/40" />
-        <span className="text-[10px] font-mono text-primary animate-pulse-glow">● LIVE</span>
+        <span className="text-[10px] font-mono text-primary animate-pulse-glow">● AO VIVO</span>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-px bg-border/30 rounded-lg overflow-hidden border border-border/50">

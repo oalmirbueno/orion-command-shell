@@ -30,7 +30,7 @@ export function ActiveSessions() {
           Sessões Ativas
         </h2>
         <div className="flex items-center gap-1.5 ml-2 px-2 py-0.5 rounded-full bg-primary/10 border border-primary/20">
-          <span className="text-[9px] font-mono text-primary font-medium">{MOCK_SESSIONS.filter(s => s.status === "running").length} running</span>
+          <span className="text-[9px] font-mono text-primary font-medium">{MOCK_SESSIONS.filter(s => s.status === "running").length} em execução</span>
         </div>
         <div className="flex-1 h-px bg-border/40" />
       </div>

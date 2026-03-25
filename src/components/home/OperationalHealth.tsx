@@ -37,7 +37,7 @@ export function OperationalHealth() {
         </h2>
         <div className={`flex items-center gap-1.5 ml-2 px-2 py-0.5 rounded-full border ${allHealthy ? "bg-status-online/10 border-status-online/20" : "bg-status-warning/10 border-status-warning/20"}`}>
           <span className={`text-[9px] font-mono font-medium ${allHealthy ? "text-status-online" : "text-status-warning"}`}>
-            {healthyCount}/{total} healthy
+            {healthyCount}/{total} saudáveis
           </span>
         </div>
         <div className="flex-1 h-px bg-border/40" />
