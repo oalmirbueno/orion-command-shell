@@ -4,36 +4,25 @@ import { OrionDataWrapper } from "@/components/orion/DataWrapper";
 import { OperationsKanban } from "@/components/operations/OperationsKanban";
 import { OperationsTimeline } from "@/components/operations/OperationsTimeline";
 import { useOrionData } from "@/hooks/useOrionData";
-import { fetchOperationTasks, fetchTimeline } from "@/domains/operations/fetcher";
-import type { OperationTask, TimelineEvent } from "@/domains/operations/types";
+import { fetchOperationsPage } from "@/domains/operations/fetcher";
+import type { OperationsPageData } from "@/domains/operations/types.page";
 
 const OperationsPage = () => {
-  const tasks = useOrionData<OperationTask[]>({ key: "operations-tasks", fetcher: fetchOperationTasks });
-  const timeline = useOrionData<TimelineEvent[]>({ key: "operations-timeline", fetcher: fetchTimeline });
+  const { state, data, source, lastUpdated, refetch } = useOrionData<OperationsPageData>({
+    key: "operations-page",
+    fetcher: fetchOperationsPage,
+  });
 
-  const allTasks = tasks.data || [];
-  const allEvents = timeline.data || [];
-
-  // Use worst state between the two fetches
-  const combinedState = tasks.state === "error" || timeline.state === "error"
-    ? "error"
-    : tasks.state === "loading" || timeline.state === "loading"
-      ? "loading"
-      : tasks.state;
+  const pageData = data || { tasks: [], timeline: [], liveOps: [] };
 
   return (
     <OrionLayout title="Operações">
       <div className="space-y-8">
         <OrionBreadcrumb items={["Mission Control", "Operações"]} />
-        <OrionDataWrapper
-          state={combinedState}
-          source={tasks.source}
-          lastUpdated={tasks.lastUpdated}
-          onRetry={() => { tasks.refetch(); timeline.refetch(); }}
-        >
-          <OperationsKanban tasks={allTasks} />
+        <OrionDataWrapper state={state} source={source} lastUpdated={lastUpdated} onRetry={refetch}>
+          <OperationsKanban tasks={pageData.tasks} />
           <div className="mt-8">
-            <OperationsTimeline events={allEvents} />
+            <OperationsTimeline events={pageData.timeline} />
           </div>
         </OrionDataWrapper>
       </div>
