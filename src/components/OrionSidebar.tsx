@@ -4,6 +4,7 @@ import {
   Activity,
   Target,
   GitBranch,
+  Kanban,
   Settings,
   Radio,
   Bot,
@@ -32,6 +33,7 @@ const operationsItems = [
   { title: "Missões", url: "/missions", icon: Target },
   { title: "Agentes", url: "/agents", icon: Bot },
   { title: "Sessões", url: "/sessions", icon: Activity },
+  { title: "Operações", url: "/operations", icon: Kanban },
   { title: "Atividade", url: "/activity", icon: Radio },
   { title: "Memória", url: "/memory", icon: Brain },
 ];
