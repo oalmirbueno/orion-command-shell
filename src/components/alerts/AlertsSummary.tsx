@@ -11,20 +11,20 @@ export function AlertsSummary() {
   const hasCritical = MOCK[0].value > 0;
 
   return (
-    <div className={`grid grid-cols-2 sm:grid-cols-4 gap-px rounded-lg overflow-hidden border ${hasCritical ? "bg-status-critical/10 border-status-critical/30" : "bg-border/30 border-border/50"}`}>
+    <div className={`grid grid-cols-2 sm:grid-cols-4 gap-px rounded-lg overflow-hidden border ${hasCritical ? "bg-status-critical/10 border-status-critical/30" : "bg-border/30 border-border/60"}`}>
       {MOCK.map((m, i) => {
         const Icon = m.icon;
         const isCriticalCell = i === 0 && m.value > 0;
         return (
-          <div key={m.label} className={`px-5 py-4 flex items-center gap-4 ${isCriticalCell ? "bg-status-critical/8" : "bg-card"}`}>
-            <div className={`w-9 h-9 rounded-lg border border-border/50 flex items-center justify-center ${isCriticalCell ? "bg-status-critical/10 border-status-critical/25" : "bg-surface-2"}`}>
-              <Icon className={`h-4 w-4 ${m.text}`} />
+          <div key={m.label} className={`px-6 py-5 flex items-center gap-4 ${isCriticalCell ? "bg-status-critical/8" : "bg-card"}`}>
+            <div className={`w-11 h-11 rounded-lg border flex items-center justify-center ${isCriticalCell ? "bg-status-critical/10 border-status-critical/25" : "bg-surface-2 border-border/60"}`}>
+              <Icon className={`h-5 w-5 ${m.text}`} />
             </div>
             <div>
-              <p className={`text-lg font-semibold leading-none ${isCriticalCell ? "text-status-critical" : "text-foreground"}`}>{m.value}</p>
-              <div className="flex items-center gap-1.5 mt-1">
+              <p className={`text-2xl font-bold leading-none ${isCriticalCell ? "text-status-critical" : "text-foreground"}`}>{m.value}</p>
+              <div className="flex items-center gap-2 mt-1.5">
                 <div className={`status-dot ${m.dot} ${isCriticalCell ? "animate-pulse-glow" : ""}`} />
-                <span className="text-[9px] font-mono uppercase tracking-wider text-muted-foreground/60">{m.label}</span>
+                <span className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground/60">{m.label}</span>
               </div>
             </div>
           </div>

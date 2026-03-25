@@ -9,11 +9,11 @@ import { UptimeTimeline } from "@/components/system/UptimeTimeline";
 const SystemPage = () => {
   return (
     <OrionLayout title="Sistema">
-      <div className="max-w-7xl mx-auto space-y-8">
+      <div className="space-y-8">
         <OrionBreadcrumb items={["Mission Control", "Sistema"]} />
         <SystemOverviewHeader />
         <ResourceGauges />
-        <div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
+        <div className="grid grid-cols-1 xl:grid-cols-5 gap-8">
           <div className="xl:col-span-3">
             <ServicesTable />
           </div>

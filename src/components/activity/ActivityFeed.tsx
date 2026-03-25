@@ -160,35 +160,35 @@ function EventRow({ event }: { event: ActivityEvent }) {
   const isDimmed = event.priority === "neutral";
 
   return (
-    <div className={`flex gap-4 group cursor-pointer hover:bg-accent/20 transition-colors rounded-lg border border-border/30 border-l-2 ${pcfg.borderAccent} ${pcfg.bg} ${isDimmed ? "opacity-60 hover:opacity-80" : ""} px-4 py-3.5`}>
+    <div className={`flex gap-5 group cursor-pointer hover:bg-accent/20 transition-colors rounded-lg border border-border/40 border-l-[3px] ${pcfg.borderAccent} ${pcfg.bg} ${isDimmed ? "opacity-60 hover:opacity-80" : ""} px-6 py-5`}>
       {/* Timeline column */}
-      <div className="flex flex-col items-center shrink-0 w-12 pt-0.5">
-        <span className="text-[10px] font-mono text-primary/70 leading-none">{event.time}</span>
-        <span className="text-[8px] font-mono text-muted-foreground/30 mt-0.5 leading-none whitespace-nowrap">{event.timeAgo}</span>
+      <div className="flex flex-col items-center shrink-0 w-14 pt-0.5">
+        <span className="text-xs font-mono text-primary/70 leading-none font-medium">{event.time}</span>
+        <span className="text-[10px] font-mono text-muted-foreground/30 mt-1 leading-none whitespace-nowrap">{event.timeAgo}</span>
       </div>
 
       {/* Priority icon */}
       <div className="shrink-0 pt-0.5">
-        <PIcon className={`h-4 w-4 ${pcfg.text} ${isHot ? "animate-pulse-glow" : ""}`} />
+        <PIcon className={`h-5 w-5 ${pcfg.text} ${isHot ? "animate-pulse-glow" : ""}`} />
       </div>
 
       {/* Content */}
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 mb-1">
-          <h3 className="text-[13px] font-medium text-foreground truncate">{event.title}</h3>
-          <span className={`text-[8px] font-mono uppercase px-1.5 py-0.5 rounded border shrink-0 ${ccfg.color}`}>
+        <div className="flex items-center gap-2.5 mb-1.5">
+          <h3 className="text-sm font-semibold text-foreground truncate">{event.title}</h3>
+          <span className={`text-[10px] font-mono uppercase px-2 py-1 rounded border shrink-0 ${ccfg.color}`}>
             {ccfg.label}
           </span>
         </div>
-        <p className="text-[11px] text-foreground/50 leading-relaxed line-clamp-2">{event.description}</p>
-        <div className="flex items-center gap-1.5 mt-1.5">
-          <span className="text-[9px] font-mono text-muted-foreground/40">via {event.source}</span>
+        <p className="text-sm text-foreground/50 leading-relaxed line-clamp-2">{event.description}</p>
+        <div className="flex items-center gap-2 mt-2">
+          <span className="text-[11px] font-mono text-muted-foreground/50">via {event.source}</span>
         </div>
       </div>
 
       {/* Action */}
       <div className="shrink-0 flex items-center">
-        <ChevronRight className="h-4 w-4 text-muted-foreground/15 group-hover:text-muted-foreground/40 transition-colors" />
+        <ChevronRight className="h-5 w-5 text-muted-foreground/15 group-hover:text-muted-foreground/40 transition-colors" />
       </div>
     </div>
   );
@@ -199,28 +199,26 @@ export function ActivityFeed() {
 
   return (
     <section>
-      <div className="flex items-center gap-2 mb-4">
-        <h2 className="text-[10px] font-mono uppercase tracking-[0.15em] text-muted-foreground">
+      <div className="flex items-center gap-3 mb-5">
+        <h2 className="text-xs font-mono uppercase tracking-[0.15em] text-muted-foreground">
           Feed de Eventos
         </h2>
-        <div className="flex items-center gap-1.5 ml-2 px-2 py-0.5 rounded-full bg-status-online/10 border border-status-online/20">
-          <span className="text-[9px] font-mono text-status-online font-medium">{MOCK_EVENTS.length} eventos</span>
+        <div className="flex items-center gap-2 ml-2 px-3 py-1 rounded-full bg-status-online/10 border border-status-online/20">
+          <span className="text-[11px] font-mono text-status-online font-semibold">{MOCK_EVENTS.length} eventos</span>
         </div>
         <div className="flex-1 h-px bg-border/40" />
-        <span className="text-[10px] font-mono text-primary animate-pulse-glow">● AO VIVO</span>
+        <span className="text-xs font-mono text-primary animate-pulse-glow font-medium">● AO VIVO</span>
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-8">
         {blocks.map((block) => (
           <div key={block.label}>
-            {/* Time block header */}
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-[9px] font-mono uppercase tracking-widest text-muted-foreground/40">{block.label}</span>
+            <div className="flex items-center gap-2.5 mb-3">
+              <span className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground/50">{block.label}</span>
               <div className="flex-1 h-px bg-border/20" />
             </div>
 
-            {/* Events in block */}
-            <div className="space-y-1.5">
+            <div className="space-y-2.5">
               {block.events.map((event) => (
                 <EventRow key={event.id} event={event} />
               ))}

@@ -6,7 +6,7 @@ import { CronJobsList } from "@/components/cron/CronJobsList";
 const CronPage = () => {
   return (
     <OrionLayout title="Cron">
-      <div className="max-w-7xl mx-auto space-y-8">
+      <div className="space-y-8">
         <OrionBreadcrumb items={["Mission Control", "Cron Jobs"]} />
         <CronSummary />
         <CronJobsList />

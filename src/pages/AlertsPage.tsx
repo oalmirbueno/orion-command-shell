@@ -6,7 +6,7 @@ import { AlertsList } from "@/components/alerts/AlertsList";
 const AlertsPage = () => {
   return (
     <OrionLayout title="Alertas">
-      <div className="max-w-7xl mx-auto space-y-8">
+      <div className="space-y-8">
         <OrionBreadcrumb items={["Mission Control", "Alertas"]} />
         <AlertsSummary />
         <AlertsList />

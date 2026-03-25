@@ -6,7 +6,7 @@ import { SessionsList } from "@/components/sessions/SessionsList";
 const SessionsPage = () => {
   return (
     <OrionLayout title="Sessões">
-      <div className="max-w-7xl mx-auto space-y-8">
+      <div className="space-y-8">
         <OrionBreadcrumb items={["Mission Control", "Sessões"]} />
         <SessionsSummary />
         <SessionsList />

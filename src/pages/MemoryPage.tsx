@@ -6,7 +6,7 @@ import { MemorySnapshots } from "@/components/memory/MemorySnapshots";
 const MemoryPage = () => {
   return (
     <OrionLayout title="Memória">
-      <div className="max-w-7xl mx-auto space-y-8">
+      <div className="space-y-8">
         <OrionBreadcrumb items={["Mission Control", "Memória"]} />
         <MemorySummary />
         <MemorySnapshots />

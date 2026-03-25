@@ -9,19 +9,19 @@ const MOCK = [
 
 export function ActivitySummary() {
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-border/30 rounded-lg overflow-hidden border border-border/50">
+    <div className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-border/30 rounded-lg overflow-hidden border border-border/60">
       {MOCK.map((m) => {
         const Icon = m.icon;
         return (
-          <div key={m.label} className="bg-card px-5 py-4 flex items-center gap-4">
-            <div className="w-9 h-9 rounded-lg bg-surface-2 border border-border/50 flex items-center justify-center">
-              <Icon className={`h-4 w-4 ${m.text}`} />
+          <div key={m.label} className="bg-card px-6 py-5 flex items-center gap-4">
+            <div className="w-11 h-11 rounded-lg bg-surface-2 border border-border/60 flex items-center justify-center">
+              <Icon className={`h-5 w-5 ${m.text}`} />
             </div>
             <div>
-              <p className="text-lg font-semibold text-foreground leading-none">{m.value}</p>
-              <div className="flex items-center gap-1.5 mt-1">
+              <p className="text-2xl font-bold text-foreground leading-none">{m.value}</p>
+              <div className="flex items-center gap-2 mt-1.5">
                 <div className={`status-dot ${m.dot}`} />
-                <span className="text-[9px] font-mono uppercase tracking-wider text-muted-foreground/60">{m.label}</span>
+                <span className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground/60">{m.label}</span>
               </div>
             </div>
           </div>
