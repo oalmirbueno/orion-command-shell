@@ -134,43 +134,43 @@ function AlertRow({ alert }: { alert: Alert }) {
   const isResolved = alert.severity === "resolved";
 
   return (
-    <div className={`rounded-lg border border-border/40 border-l-[3px] ${cfg.border} ${cfg.bg} ${isResolved ? "opacity-50 hover:opacity-70" : ""} hover:bg-accent/20 transition-all cursor-pointer group`}>
-      <div className="px-5 py-4">
+    <div className={`rounded-lg border border-border/50 border-l-[3px] ${cfg.border} ${cfg.bg} ${isResolved ? "opacity-50 hover:opacity-70" : ""} hover:bg-accent/20 transition-all cursor-pointer group`}>
+      <div className="px-6 py-5">
         {/* Row 1: Severity icon + Title + Badge */}
-        <div className="flex items-start justify-between mb-2">
-          <div className="flex items-start gap-3 min-w-0 flex-1">
-            <div className={`w-7 h-7 rounded-md border flex items-center justify-center shrink-0 mt-0.5 ${cfg.ringBg}`}>
-              <Icon className={`h-4 w-4 ${cfg.text} ${isCritical ? "animate-pulse-glow" : ""}`} />
+        <div className="flex items-start justify-between mb-3">
+          <div className="flex items-start gap-4 min-w-0 flex-1">
+            <div className={`w-9 h-9 rounded-lg border flex items-center justify-center shrink-0 mt-0.5 ${cfg.ringBg}`}>
+              <Icon className={`h-5 w-5 ${cfg.text} ${isCritical ? "animate-pulse-glow" : ""}`} />
             </div>
             <div className="min-w-0">
-              <h3 className={`text-[13px] font-semibold leading-snug ${isCritical ? "text-status-critical" : "text-foreground"}`}>
+              <h3 className={`text-base font-semibold leading-snug ${isCritical ? "text-status-critical" : "text-foreground"}`}>
                 {alert.title}
               </h3>
-              <p className="text-[11px] text-foreground/50 leading-relaxed mt-1">{alert.description}</p>
+              <p className="text-sm text-foreground/50 leading-relaxed mt-1.5">{alert.description}</p>
             </div>
           </div>
-          <div className="flex items-center gap-2 shrink-0 ml-3 mt-1">
+          <div className="flex items-center gap-3 shrink-0 ml-4 mt-1">
             {!alert.acknowledged && !isResolved && (
-              <span className="text-[8px] font-mono uppercase px-1.5 py-0.5 rounded bg-status-warning/15 text-status-warning border border-status-warning/20">
+              <span className="text-[10px] font-mono uppercase px-2 py-1 rounded bg-status-warning/15 text-status-warning border border-status-warning/20">
                 Pendente
               </span>
             )}
             {alert.occurrences > 1 && (
-              <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-surface-2 border border-border/40 text-muted-foreground/60">
+              <span className="text-[11px] font-mono px-2 py-1 rounded bg-surface-2 border border-border/40 text-muted-foreground/60">
                 ×{alert.occurrences}
               </span>
             )}
-            <ChevronRight className="h-4 w-4 text-muted-foreground/15 group-hover:text-muted-foreground/40 transition-colors" />
+            <ChevronRight className="h-5 w-5 text-muted-foreground/15 group-hover:text-muted-foreground/40 transition-colors" />
           </div>
         </div>
 
         {/* Action box */}
         {!isResolved && (
-          <div className="ml-10 mb-3 px-3 py-2 rounded-md bg-surface-2 border border-border/30">
-            <div className="flex items-start gap-1.5">
-              <ExternalLink className="h-3 w-3 text-muted-foreground/30 shrink-0 mt-0.5" />
-              <p className="text-[10px] text-foreground/60 leading-relaxed">
-                <span className="text-muted-foreground/40 font-mono text-[9px] mr-1">AÇÃO:</span>
+          <div className="ml-[52px] mb-4 px-4 py-3 rounded-lg bg-surface-2 border border-border/40">
+            <div className="flex items-start gap-2">
+              <ExternalLink className="h-4 w-4 text-muted-foreground/30 shrink-0 mt-0.5" />
+              <p className="text-xs text-foreground/60 leading-relaxed">
+                <span className="text-muted-foreground/50 font-mono text-[10px] mr-1.5">AÇÃO:</span>
                 {alert.action}
               </p>
             </div>
@@ -178,17 +178,17 @@ function AlertRow({ alert }: { alert: Alert }) {
         )}
 
         {/* Metadata */}
-        <div className="flex items-center gap-3 ml-10 text-[9px] font-mono text-muted-foreground/40">
+        <div className="flex items-center gap-4 ml-[52px] text-[11px] font-mono text-muted-foreground/50">
           <span>{alert.source}</span>
-          <div className="h-3 w-px bg-border/30" />
-          <div className="flex items-center gap-1">
-            <Clock className="h-3 w-3" />
+          <div className="h-4 w-px bg-border/30" />
+          <div className="flex items-center gap-1.5">
+            <Clock className="h-3.5 w-3.5" />
             <span>{alert.triggeredAt}</span>
           </div>
-          <span className="text-muted-foreground/25">{alert.triggeredAgo}</span>
+          <span className="text-muted-foreground/30">{alert.triggeredAgo}</span>
           {alert.resolvedAt && (
             <>
-              <div className="h-3 w-px bg-border/30" />
+              <div className="h-4 w-px bg-border/30" />
               <span className="text-status-online/60">Resolvido {alert.resolvedAt}</span>
             </>
           )}
@@ -211,32 +211,31 @@ export function AlertsList() {
 
   return (
     <section>
-      <div className="flex items-center gap-2 mb-4">
-        <h2 className="text-[10px] font-mono uppercase tracking-[0.15em] text-muted-foreground">
+      <div className="flex items-center gap-3 mb-5">
+        <h2 className="text-xs font-mono uppercase tracking-[0.15em] text-muted-foreground">
           Feed de Alertas
         </h2>
-        <div className="flex items-center gap-1.5 ml-2 px-2 py-0.5 rounded-full bg-status-critical/10 border border-status-critical/20">
-          <span className="text-[9px] font-mono text-status-critical font-medium">{activeCount} ativos</span>
+        <div className="flex items-center gap-2 ml-2 px-3 py-1 rounded-full bg-status-critical/10 border border-status-critical/20">
+          <span className="text-[11px] font-mono text-status-critical font-semibold">{activeCount} ativos</span>
         </div>
         <div className="flex-1 h-px bg-border/40" />
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-8">
         {groups.map((group) => {
           const cfg = severityConfig[group.severity];
           return (
             <div key={group.severity}>
-              {/* Group header */}
-              <div className="flex items-center gap-2 mb-2">
+              <div className="flex items-center gap-2.5 mb-3">
                 <div className={`status-dot ${cfg.dot}`} />
-                <span className={`text-[9px] font-mono uppercase tracking-widest ${cfg.text}`}>
+                <span className={`text-[11px] font-mono uppercase tracking-widest ${cfg.text}`}>
                   {group.label}
                 </span>
-                <span className="text-[9px] font-mono text-muted-foreground/30">{group.alerts.length}</span>
+                <span className="text-[11px] font-mono text-muted-foreground/30">{group.alerts.length}</span>
                 <div className="flex-1 h-px bg-border/20" />
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {group.alerts.map((alert) => (
                   <AlertRow key={alert.id} alert={alert} />
                 ))}
