@@ -1,108 +1,9 @@
-import { Bot, Cpu, MessageSquare, Clock, Zap, AlertTriangle, Crown, Users, ArrowRight, Activity } from "lucide-react";
+import { Bot, Cpu, Zap, AlertTriangle, Crown, Users, ArrowRight, Activity } from "lucide-react";
+import type { Agent, AgentStatus, AgentTier } from "@/domains/agents/types";
 
-type AgentStatus = "active" | "idle" | "offline";
-type AgentTier = "orchestrator" | "core" | "support";
-
-interface AgentDetail {
-  id: string;
-  name: string;
-  role: string;
-  tier: AgentTier;
-  model: string;
-  status: AgentStatus;
-  sessions: number;
-  currentTask: string;
-  currentTaskAge: string;
-  load: number;
-  tokensToday: string;
-  availability: string;
-  dependsOn: string[];
-  feeds: string[];
-  alertCount: number;
+interface AgentDetailCardsProps {
+  agents: Agent[];
 }
-
-const AGENTS: AgentDetail[] = [
-  {
-    id: "rtr-01", name: "Router-01", role: "Orquestrador de Tarefas",
-    tier: "orchestrator", model: "GPT-4o-mini", status: "active", sessions: 5,
-    currentTask: "Distribuindo tasks para fila de classificação", currentTaskAge: "há 1s",
-    load: 63, tokensToday: "67k", availability: "100%",
-    dependsOn: [], feeds: ["Classifier-01", "Enricher-01", "Summarizer-01", "Analyzer-01"],
-    alertCount: 0,
-  },
-  {
-    id: "clf-01", name: "Classifier-01", role: "Classificação de Leads",
-    tier: "core", model: "GPT-4o", status: "active", sessions: 3,
-    currentTask: "Classificando batch #4821 — 67% concluído", currentTaskAge: "há 2s",
-    load: 72, tokensToday: "142k", availability: "99.8%",
-    dependsOn: ["Router-01"], feeds: ["Sync-01", "Validator-01"],
-    alertCount: 0,
-  },
-  {
-    id: "enr-01", name: "Enricher-01", role: "Enriquecimento de Dados",
-    tier: "core", model: "GPT-4o-mini", status: "active", sessions: 2,
-    currentTask: "Enriquecendo registros via LinkedIn + Clearbit", currentTaskAge: "há 5s",
-    load: 45, tokensToday: "89k", availability: "99.9%",
-    dependsOn: ["Router-01"], feeds: ["Sync-01"],
-    alertCount: 0,
-  },
-  {
-    id: "sum-01", name: "Summarizer-01", role: "Sumarização de Conteúdo",
-    tier: "core", model: "GPT-4o", status: "active", sessions: 2,
-    currentTask: "Sumarizando 156 emails inbound", currentTaskAge: "há 4s",
-    load: 55, tokensToday: "178k", availability: "99.6%",
-    dependsOn: ["Router-01"], feeds: ["Responder-01"],
-    alertCount: 0,
-  },
-  {
-    id: "anl-01", name: "Analyzer-01", role: "Detecção de Padrões",
-    tier: "core", model: "GPT-4o", status: "idle", sessions: 0,
-    currentTask: "Aguardando — última análise concluída", currentTaskAge: "há 12min",
-    load: 0, tokensToday: "34k", availability: "99.7%",
-    dependsOn: ["Router-01"], feeds: [],
-    alertCount: 0,
-  },
-  {
-    id: "syn-01", name: "Sync-01", role: "Sincronização de Dados",
-    tier: "support", model: "GPT-4o-mini", status: "active", sessions: 1,
-    currentTask: "Sincronizando HubSpot → Data Lake (2.1k registros)", currentTaskAge: "há 3s",
-    load: 91, tokensToday: "201k", availability: "99.5%",
-    dependsOn: ["Classifier-01", "Enricher-01"], feeds: [],
-    alertCount: 1,
-  },
-  {
-    id: "mon-01", name: "Monitor-01", role: "Saúde & Observabilidade",
-    tier: "support", model: "GPT-4o-mini", status: "active", sessions: 1,
-    currentTask: "Ciclo de verificação #8472 — 11/12 OK", currentTaskAge: "há 8s",
-    load: 18, tokensToday: "12k", availability: "100%",
-    dependsOn: [], feeds: [],
-    alertCount: 0,
-  },
-  {
-    id: "val-01", name: "Validator-01", role: "Validação de Dados",
-    tier: "support", model: "GPT-4o", status: "offline", sessions: 0,
-    currentTask: "Offline — falha de conexão com API externa", currentTaskAge: "há 14min",
-    load: 0, tokensToday: "8k", availability: "94.2%",
-    dependsOn: ["Classifier-01"], feeds: [],
-    alertCount: 2,
-  },
-  {
-    id: "exp-01", name: "Exporter-01", role: "Geração de Relatórios",
-    tier: "support", model: "GPT-4o-mini", status: "idle", sessions: 0,
-    currentTask: "Relatório semanal exportado — aguardando", currentTaskAge: "há 1h",
-    load: 0, tokensToday: "5k", availability: "99.9%",
-    dependsOn: [], feeds: [],
-    alertCount: 0,
-  },
-  {
-    id: "res-01", name: "Responder-01", role: "Auto-Resposta & Rascunhos",
-    tier: "support", model: "GPT-4o", status: "idle", sessions: 0,
-    currentTask: "Fila vazia — aguardando input do Summarizer", currentTaskAge: "há 3min",
-    load: 0, tokensToday: "22k", availability: "99.8%",
-    dependsOn: ["Summarizer-01"], feeds: [],
-    alertCount: 0,
-  },
-];
 
 const statusConfig: Record<AgentStatus, { label: string; dot: string; text: string; border: string; bg: string }> = {
   active: { label: "Ativo", dot: "status-online", text: "text-status-online", border: "border-l-status-online", bg: "" },
@@ -116,7 +17,7 @@ const tierConfig: Record<AgentTier, { label: string; icon: React.ElementType; ba
   support: { label: "Suporte", icon: Users, badgeClass: "orion-badge-neutral", description: "Agentes auxiliares de infraestrutura e operações" },
 };
 
-function AgentCard({ agent }: { agent: AgentDetail }) {
+function AgentCard({ agent }: { agent: Agent }) {
   const cfg = statusConfig[agent.status];
   const tier = tierConfig[agent.tier];
   const isOrch = agent.tier === "orchestrator";
@@ -222,7 +123,7 @@ function AgentCard({ agent }: { agent: AgentDetail }) {
   );
 }
 
-export function AgentDetailCards() {
+export function AgentDetailCards({ agents }: AgentDetailCardsProps) {
   const tiers: AgentTier[] = ["orchestrator", "core", "support"];
 
   return (
@@ -237,23 +138,23 @@ export function AgentDetailCards() {
 
       <div className="space-y-8">
         {tiers.map(tier => {
-          const agents = AGENTS.filter(a => a.tier === tier);
-          if (agents.length === 0) return null;
+          const tierAgents = agents.filter(a => a.tier === tier);
+          if (tierAgents.length === 0) return null;
           const cfg = tierConfig[tier];
           const TierIcon = cfg.icon;
-          const activeCount = agents.filter(a => a.status === "active").length;
+          const activeCount = tierAgents.filter(a => a.status === "active").length;
 
           return (
             <div key={tier}>
               <div className="flex items-center gap-3 mb-3">
                 <TierIcon className="h-4 w-4 text-muted-foreground/50" />
                 <span className="text-xs font-mono uppercase tracking-widest text-muted-foreground/50">{cfg.label}</span>
-                <span className="text-xs font-mono text-muted-foreground/25">{activeCount}/{agents.length}</span>
+                <span className="text-xs font-mono text-muted-foreground/25">{activeCount}/{tierAgents.length}</span>
                 <span className="text-xs text-muted-foreground/30 ml-1">— {cfg.description}</span>
                 <div className="flex-1 h-px bg-border/20" />
               </div>
               <div className="space-y-3">
-                {agents.map(agent => (
+                {tierAgents.map(agent => (
                   <AgentCard key={agent.id} agent={agent} />
                 ))}
               </div>
