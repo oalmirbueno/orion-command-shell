@@ -11,9 +11,9 @@ interface GaugeData {
 
 const MOCK_GAUGES: GaugeData[] = [
   { label: "CPU", value: 34, max: 100, unit: "%", detail: "8 cores · 3.2GHz", icon: Cpu },
-  { label: "RAM", value: 12.4, max: 32, unit: "GB", detail: "32 GB total · 19.6 GB free", icon: MemoryStick },
-  { label: "Disk", value: 187, max: 500, unit: "GB", detail: "500 GB NVMe · 313 GB free", icon: HardDrive },
-  { label: "Uptime", value: 99.97, max: 100, unit: "%", detail: "47d 12h 38m · 30d rolling", icon: Clock },
+  { label: "RAM", value: 12.4, max: 32, unit: "GB", detail: "32 GB total · 19.6 GB livre", icon: MemoryStick },
+  { label: "Disco", value: 187, max: 500, unit: "GB", detail: "500 GB NVMe · 313 GB livre", icon: HardDrive },
+  { label: "Uptime", value: 99.97, max: 100, unit: "%", detail: "47d 12h 38m · 30d contínuos", icon: Clock },
 ];
 
 function getStatusColor(value: number, max: number): string {
@@ -87,10 +87,10 @@ export function ResourceGauges() {
     <section>
       <div className="flex items-center gap-2 mb-3">
         <h2 className="text-[10px] font-mono uppercase tracking-[0.15em] text-muted-foreground">
-          Resource Usage
+          Uso de Recursos
         </h2>
         <div className="flex-1 h-px bg-border/40" />
-        <span className="text-[10px] font-mono text-primary animate-pulse-glow">● LIVE</span>
+        <span className="text-[10px] font-mono text-primary animate-pulse-glow">● AO VIVO</span>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">

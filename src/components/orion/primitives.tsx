@@ -59,7 +59,7 @@ export function OrionSectionHeader({ label, badge, live, right }: SectionHeaderP
       )}
       <div className="orion-section-divider" />
       {right}
-      {live && <span className="orion-live-indicator">● LIVE</span>}
+      {live && <span className="orion-live-indicator">● AO VIVO</span>}
     </div>
   );
 }

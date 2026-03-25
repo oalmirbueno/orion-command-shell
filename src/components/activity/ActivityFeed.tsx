@@ -19,8 +19,8 @@ interface ActivityEvent {
 
 const MOCK_EVENTS: ActivityEvent[] = [
   {
-    id: "e-01", time: "09:47", timeAgo: "Just now", priority: "critical",
-    category: "agent", title: "Validator-01 went offline",
+    id: "e-01", time: "09:47", timeAgo: "Agora", priority: "critical",
+    category: "agent", title: "Validator-01 ficou offline",
     description: "Falha de conexão com API externa após 3 retries. Última resposta: timeout 30s.",
     source: "Validator-01",
   },
@@ -119,11 +119,11 @@ const priorityConfig: Record<EventPriority, { icon: React.ElementType; dot: stri
 };
 
 const categoryConfig: Record<EventCategory, { icon: React.ElementType; label: string; color: string }> = {
-  agent: { icon: Bot, label: "Agent", color: "bg-primary/10 text-primary border-primary/20" },
-  system: { icon: Server, label: "System", color: "bg-status-online/10 text-status-online border-status-online/20" },
+  agent: { icon: Bot, label: "Agente", color: "bg-primary/10 text-primary border-primary/20" },
+  system: { icon: Server, label: "Sistema", color: "bg-status-online/10 text-status-online border-status-online/20" },
   pipeline: { icon: GitBranch, label: "Pipeline", color: "bg-status-warning/10 text-status-warning border-status-warning/20" },
-  security: { icon: Shield, label: "Security", color: "bg-status-critical/10 text-status-critical border-status-critical/20" },
-  session: { icon: Zap, label: "Session", color: "bg-muted-foreground/10 text-muted-foreground border-muted-foreground/20" },
+  security: { icon: Shield, label: "Segurança", color: "bg-status-critical/10 text-status-critical border-status-critical/20" },
+  session: { icon: Zap, label: "Sessão", color: "bg-muted-foreground/10 text-muted-foreground border-muted-foreground/20" },
   deploy: { icon: GitBranch, label: "Deploy", color: "bg-primary/10 text-primary border-primary/20" },
 };
 
@@ -135,11 +135,11 @@ function groupByTimeBlock(events: ActivityEvent[]): { label: string; events: Act
   for (const event of events) {
     const hour = parseInt(event.time.split(":")[0]);
     let blockLabel: string;
-    if (event.timeAgo.includes("Just now") || event.timeAgo.includes("min ago")) {
+    if (event.timeAgo.includes("Agora") || event.timeAgo.includes("min ago")) {
       const mins = parseInt(event.timeAgo) || 0;
-      blockLabel = mins <= 10 || event.timeAgo === "Just now" ? "Right Now" : "Last 30 Minutes";
+      blockLabel = mins <= 10 || event.timeAgo === "Agora" ? "Agora" : "Últimos 30 Minutos";
     } else {
-      blockLabel = hour >= 9 ? "Earlier Today" : "This Morning";
+      blockLabel = hour >= 9 ? "Mais Cedo" : "Esta Manhã";
     }
 
     if (!currentBlock || currentBlock.label !== blockLabel) {
@@ -201,13 +201,13 @@ export function ActivityFeed() {
     <section>
       <div className="flex items-center gap-2 mb-4">
         <h2 className="text-[10px] font-mono uppercase tracking-[0.15em] text-muted-foreground">
-          Event Feed
+          Feed de Eventos
         </h2>
         <div className="flex items-center gap-1.5 ml-2 px-2 py-0.5 rounded-full bg-status-online/10 border border-status-online/20">
-          <span className="text-[9px] font-mono text-status-online font-medium">{MOCK_EVENTS.length} events</span>
+          <span className="text-[9px] font-mono text-status-online font-medium">{MOCK_EVENTS.length} eventos</span>
         </div>
         <div className="flex-1 h-px bg-border/40" />
-        <span className="text-[10px] font-mono text-primary animate-pulse-glow">● LIVE</span>
+        <span className="text-[10px] font-mono text-primary animate-pulse-glow">● AO VIVO</span>
       </div>
 
       <div className="space-y-6">

@@ -60,8 +60,8 @@ export function SystemOverviewHeader() {
           <p className="text-[11px] font-mono text-foreground">47d 12h 38m</p>
         </div>
         <div>
-          <p className="text-[9px] font-mono text-muted-foreground/50 uppercase">Last Check</p>
-          <p className="text-[11px] font-mono text-foreground">12s ago</p>
+          <p className="text-[9px] font-mono text-muted-foreground/50 uppercase">Última Verif.</p>
+          <p className="text-[11px] font-mono text-foreground">12s atrás</p>
         </div>
       </div>
     </div>

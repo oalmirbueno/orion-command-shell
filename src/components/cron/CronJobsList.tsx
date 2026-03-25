@@ -163,33 +163,33 @@ function JobRow({ job }: { job: CronJob }) {
         {/* Row 2: Metrics */}
         <div className="flex items-center gap-4 ml-[26px] text-[10px] font-mono text-muted-foreground/50 flex-wrap">
           <div className="flex items-center gap-1.5">
-            <span className="text-muted-foreground/35">Last run</span>
+            <span className="text-muted-foreground/35">Última exec.</span>
             <span className="text-foreground/70">{job.lastRun}</span>
             <span className="text-muted-foreground/25">({job.lastRunAgo})</span>
           </div>
           <div className="h-3 w-px bg-border/30" />
           <div className="flex items-center gap-1.5">
-            <span className="text-muted-foreground/35">Duration</span>
+            <span className="text-muted-foreground/35">Duração</span>
             <span className="text-foreground/70">{job.lastDuration}</span>
           </div>
           <div className="h-3 w-px bg-border/30" />
           <ResultBadge result={job.lastResult} />
           <div className="h-3 w-px bg-border/30" />
           <div className="flex items-center gap-1.5">
-            <span className="text-muted-foreground/35">Next</span>
+            <span className="text-muted-foreground/35">Próxima</span>
             <span className="text-primary/70">{job.nextRun}</span>
             <span className="text-muted-foreground/25">{job.nextRunIn}</span>
           </div>
           {job.consecutiveSuccess > 0 && (
             <>
               <div className="h-3 w-px bg-border/30" />
-              <span className="text-status-online/60">{job.consecutiveSuccess}× consecutive OK</span>
+              <span className="text-status-online/60">{job.consecutiveSuccess}× consecutivos OK</span>
             </>
           )}
           {job.consecutiveFails > 0 && (
             <>
               <div className="h-3 w-px bg-border/30" />
-              <span className="text-status-critical">{job.consecutiveFails}× consecutive FAIL</span>
+              <span className="text-status-critical">{job.consecutiveFails}× falhas consecutivas</span>
             </>
           )}
         </div>
@@ -207,10 +207,10 @@ export function CronJobsList() {
     <section>
       <div className="flex items-center gap-2 mb-3">
         <h2 className="text-[10px] font-mono uppercase tracking-[0.15em] text-muted-foreground">
-          Job Registry
+          Registro de Jobs
         </h2>
         <div className="flex items-center gap-1.5 ml-2 px-2 py-0.5 rounded-full bg-primary/10 border border-primary/20">
-          <span className="text-[9px] font-mono text-primary font-medium">{MOCK_JOBS.filter(j => j.enabled).length} enabled</span>
+          <span className="text-[9px] font-mono text-primary font-medium">{MOCK_JOBS.filter(j => j.enabled).length} habilitados</span>
         </div>
         <div className="flex-1 h-px bg-border/40" />
       </div>

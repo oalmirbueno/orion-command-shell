@@ -2,9 +2,9 @@ import { Brain, Layers, Clock, Database } from "lucide-react";
 
 const MOCK = [
   { label: "Snapshots", value: 24, icon: Layers, text: "text-primary", dot: "bg-primary/50" },
-  { label: "Categories", value: 6, icon: Brain, text: "text-foreground", dot: "bg-foreground/30" },
-  { label: "Last Capture", value: "4min", icon: Clock, text: "text-status-online", dot: "status-online" },
-  { label: "Total Size", value: "1.8MB", icon: Database, text: "text-muted-foreground", dot: "bg-muted-foreground/40" },
+  { label: "Categorias", value: 6, icon: Brain, text: "text-foreground", dot: "bg-foreground/30" },
+  { label: "Última Captura", value: "4min", icon: Clock, text: "text-status-online", dot: "status-online" },
+  { label: "Tamanho Total", value: "1.8MB", icon: Database, text: "text-muted-foreground", dot: "bg-muted-foreground/40" },
 ];
 
 export function MemorySummary() {

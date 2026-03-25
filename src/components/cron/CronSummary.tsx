@@ -1,10 +1,10 @@
 import { CheckCircle2, XCircle, Timer, Ban } from "lucide-react";
 
 const MOCK = [
-  { label: "Active Jobs", value: 9, icon: Timer, text: "text-status-online", dot: "status-online" },
-  { label: "Healthy", value: 7, icon: CheckCircle2, text: "text-status-online", dot: "status-online" },
-  { label: "Failed", value: 1, icon: XCircle, text: "text-status-critical", dot: "status-critical" },
-  { label: "Disabled", value: 2, icon: Ban, text: "text-muted-foreground", dot: "bg-muted-foreground/40" },
+  { label: "Jobs Ativos", value: 9, icon: Timer, text: "text-status-online", dot: "status-online" },
+  { label: "Saudáveis", value: 7, icon: CheckCircle2, text: "text-status-online", dot: "status-online" },
+  { label: "Falhas", value: 1, icon: XCircle, text: "text-status-critical", dot: "status-critical" },
+  { label: "Desabilitados", value: 2, icon: Ban, text: "text-muted-foreground", dot: "bg-muted-foreground/40" },
 ];
 
 export function CronSummary() {
