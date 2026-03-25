@@ -201,13 +201,13 @@ export function ActivityFeed() {
     <section>
       <div className="flex items-center gap-2 mb-4">
         <h2 className="text-[10px] font-mono uppercase tracking-[0.15em] text-muted-foreground">
-          Event Feed
+          Feed de Eventos
         </h2>
         <div className="flex items-center gap-1.5 ml-2 px-2 py-0.5 rounded-full bg-status-online/10 border border-status-online/20">
-          <span className="text-[9px] font-mono text-status-online font-medium">{MOCK_EVENTS.length} events</span>
+          <span className="text-[9px] font-mono text-status-online font-medium">{MOCK_EVENTS.length} eventos</span>
         </div>
         <div className="flex-1 h-px bg-border/40" />
-        <span className="text-[10px] font-mono text-primary animate-pulse-glow">● LIVE</span>
+        <span className="text-[10px] font-mono text-primary animate-pulse-glow">● AO VIVO</span>
       </div>
 
       <div className="space-y-6">
