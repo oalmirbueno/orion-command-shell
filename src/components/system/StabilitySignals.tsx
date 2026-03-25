@@ -1,39 +1,25 @@
-import { AlertTriangle, ThermometerSun, HardDrive, Wifi, Clock, ShieldAlert } from "lucide-react";
+import { ThermometerSun, HardDrive, Wifi, ShieldAlert, Clock } from "lucide-react";
+import type { StabilitySignal, SignalLevel } from "@/domains/system/types";
 
-type SignalLevel = "normal" | "elevated" | "critical";
+const iconMap: Record<string, React.ElementType> = { ThermometerSun, HardDrive, Wifi, ShieldAlert, Clock };
 
-interface Signal {
-  label: string;
-  value: string;
-  level: SignalLevel;
-  icon: React.ElementType;
-  detail?: string;
-}
-
-const MOCK_SIGNALS: Signal[] = [
-  { label: "Load Average", value: "1.24", level: "normal", icon: ThermometerSun, detail: "1m: 1.24 · 5m: 1.18 · 15m: 1.02" },
-  { label: "Disk I/O", value: "42 MB/s", level: "normal", icon: HardDrive, detail: "Read: 28 MB/s · Write: 14 MB/s" },
-  { label: "Network", value: "156 Mbps", level: "normal", icon: Wifi, detail: "In: 98 Mbps · Out: 58 Mbps" },
-  { label: "Eventos OOM", value: "0", level: "normal", icon: ShieldAlert, detail: "Últimas 24h · Sem kills" },
-  { label: "Swap Usage", value: "0.2 GB", level: "normal", icon: HardDrive, detail: "8 GB total · 7.8 GB free" },
-  { label: "Process Count", value: "247", level: "elevated", icon: Clock, detail: "Acima da média de 210" },
-];
-
-const levelConfig = {
+const levelConfig: Record<SignalLevel, { bg: string; border: string; text: string; dot: string }> = {
   normal: { bg: "bg-primary/5", border: "border-primary/15", text: "text-primary", dot: "bg-primary/50" },
   elevated: { bg: "bg-status-warning/5", border: "border-status-warning/15", text: "text-status-warning", dot: "status-warning" },
   critical: { bg: "bg-status-critical/5", border: "border-status-critical/15", text: "text-status-critical", dot: "status-critical" },
 };
 
-export function StabilitySignals() {
-  const hasIssues = MOCK_SIGNALS.some(s => s.level !== "normal");
+interface Props {
+  signals: StabilitySignal[];
+}
+
+export function StabilitySignals({ signals }: Props) {
+  const hasIssues = signals.some(s => s.level !== "normal");
 
   return (
     <section>
       <div className="flex items-center gap-3 mb-4">
-        <h2 className="text-xs font-mono uppercase tracking-[0.15em] text-muted-foreground">
-          Sinais de Estabilidade
-        </h2>
+        <h2 className="text-xs font-mono uppercase tracking-[0.15em] text-muted-foreground">Sinais de Estabilidade</h2>
         {!hasIssues ? (
           <div className="flex items-center gap-2 ml-2 px-3 py-1 rounded-full bg-status-online/10 border border-status-online/20">
             <span className="text-xs font-mono text-status-online font-medium">Estável</span>
@@ -47,9 +33,9 @@ export function StabilitySignals() {
       </div>
 
       <div className="space-y-3">
-        {MOCK_SIGNALS.map((signal) => {
+        {signals.map((signal) => {
           const cfg = levelConfig[signal.level];
-          const Icon = signal.icon;
+          const Icon = iconMap[signal.iconName] || Clock;
 
           return (
             <div

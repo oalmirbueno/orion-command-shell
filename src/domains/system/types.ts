@@ -25,3 +25,53 @@ export interface SystemService {
   uptime: string;
   pid: string;
 }
+
+/** Overall system status for the header */
+export type OverallStatus = "healthy" | "degraded" | "critical";
+
+/** Resource gauge data */
+export interface ResourceGauge {
+  label: string;
+  value: number;
+  max: number;
+  unit: string;
+  detail: string;
+  iconName: string;
+}
+
+/** Stability signal */
+export type SignalLevel = "normal" | "elevated" | "critical";
+
+export interface StabilitySignal {
+  label: string;
+  value: string;
+  level: SignalLevel;
+  iconName: string;
+  detail?: string;
+}
+
+/** Uptime day entry */
+export type DayStatus = "up" | "degraded" | "down" | "partial";
+
+export interface UptimeDay {
+  date: string;
+  status: DayStatus;
+}
+
+/** System header info */
+export interface SystemHeaderData {
+  overallStatus: OverallStatus;
+  host: string;
+  uptime: string;
+  lastCheck: string;
+}
+
+/** Unified page model */
+export interface SystemPageData {
+  header: SystemHeaderData;
+  gauges: ResourceGauge[];
+  services: SystemService[];
+  signals: StabilitySignal[];
+  uptimeDays: UptimeDay[];
+  uptimePercent: string;
+}
