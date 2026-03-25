@@ -1,7 +1,4 @@
 import { CheckCircle2, XCircle, Clock } from "lucide-react";
-import { useOrionData } from "@/hooks/useOrionData";
-import { OrionDataWrapper } from "@/components/orion/DataWrapper";
-import { fetchHealthServices } from "@/domains/system/fetcher";
 import type { HealthService } from "@/domains/system/types";
 
 const statusIcon = {
@@ -10,14 +7,13 @@ const statusIcon = {
   down: <XCircle className="h-4 w-4 text-status-critical" />,
 };
 
-export function OperationalHealth() {
-  const { state, data, source, lastUpdated, refetch } = useOrionData<HealthService[]>({
-    key: "operational-health",
-    fetcher: fetchHealthServices,
-  });
+interface OperationalHealthProps {
+  services: HealthService[];
+}
 
-  const healthyCount = (data || []).filter(s => s.status === "healthy").length;
-  const total = (data || []).length;
+export function OperationalHealth({ services }: OperationalHealthProps) {
+  const healthyCount = services.filter(s => s.status === "healthy").length;
+  const total = services.length;
   const allHealthy = healthyCount === total;
 
   return (
@@ -27,11 +23,9 @@ export function OperationalHealth() {
           <div className={`w-6 h-0.5 rounded-full ${allHealthy ? "bg-status-online" : "bg-status-warning"}`} />
           <h2 className="orion-panel-title">Saúde Operacional</h2>
         </div>
-        {data && (
-          <span className={`text-xs font-mono font-semibold ${allHealthy ? "text-status-online" : "text-status-warning"}`}>
-            {healthyCount}/{total}
-          </span>
-        )}
+        <span className={`text-xs font-mono font-semibold ${allHealthy ? "text-status-online" : "text-status-warning"}`}>
+          {healthyCount}/{total}
+        </span>
       </div>
 
       <div className="flex items-center gap-3 px-5 py-2 surface-2 border-b border-border/30 text-xs font-mono uppercase tracking-wider text-muted-foreground/40">
@@ -41,18 +35,16 @@ export function OperationalHealth() {
         <span className="w-20 text-right">Uptime</span>
       </div>
 
-      <OrionDataWrapper state={state} source={source} lastUpdated={lastUpdated} onRetry={refetch} compact hideSource>
-        <div className="divide-y divide-border/20">
-          {(data || []).map((svc) => (
-            <div key={svc.name} className={`flex items-center gap-3 px-5 py-3 hover:bg-accent/15 transition-colors ${svc.status === "degraded" ? "bg-status-warning/[0.03]" : ""}`}>
-              {statusIcon[svc.status]}
-              <span className="text-sm text-foreground flex-1">{svc.name}</span>
-              <span className={`text-xs font-mono w-20 text-right ${svc.status === "degraded" ? "text-status-warning" : "text-muted-foreground/50"}`}>{svc.responseTime}</span>
-              <span className="text-xs font-mono text-muted-foreground/50 w-20 text-right">{svc.uptime}</span>
-            </div>
-          ))}
-        </div>
-      </OrionDataWrapper>
+      <div className="divide-y divide-border/20">
+        {services.map((svc) => (
+          <div key={svc.name} className={`flex items-center gap-3 px-5 py-3 hover:bg-accent/15 transition-colors ${svc.status === "degraded" ? "bg-status-warning/[0.03]" : ""}`}>
+            {statusIcon[svc.status]}
+            <span className="text-sm text-foreground flex-1">{svc.name}</span>
+            <span className={`text-xs font-mono w-20 text-right ${svc.status === "degraded" ? "text-status-warning" : "text-muted-foreground/50"}`}>{svc.responseTime}</span>
+            <span className="text-xs font-mono text-muted-foreground/50 w-20 text-right">{svc.uptime}</span>
+          </div>
+        ))}
+      </div>
     </section>
   );
 }

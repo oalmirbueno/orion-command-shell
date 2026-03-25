@@ -1,7 +1,4 @@
 import { Shield, AlertTriangle, Clock, Zap, Bot, Activity } from "lucide-react";
-import { useOrionData } from "@/hooks/useOrionData";
-import { OrionDataWrapper } from "@/components/orion/DataWrapper";
-import { fetchCommandStatus } from "@/domains/system/fetcher";
 import type { CommandData, SystemState } from "@/domains/system/types";
 
 const stateConfig: Record<SystemState, {
@@ -27,65 +24,56 @@ const stateConfig: Record<SystemState, {
 
 const iconMap: Record<string, React.ElementType> = { Clock, Bot, Activity, Zap };
 
-export function CommandStatus() {
-  const { state, data, source, lastUpdated, refetch } = useOrionData<CommandData>({
-    key: "command-status",
-    fetcher: fetchCommandStatus,
-  });
-
-  return (
-    <section>
-      <OrionDataWrapper state={state} source={source} lastUpdated={lastUpdated} onRetry={refetch} compact hideSource>
-        {data && <CommandStatusContent data={data} />}
-      </OrionDataWrapper>
-    </section>
-  );
+interface CommandStatusProps {
+  data: CommandData;
 }
 
-function CommandStatusContent({ data }: { data: CommandData }) {
+export function CommandStatus({ data }: CommandStatusProps) {
   const cfg = stateConfig[data.systemState];
   const Icon = cfg.icon;
 
   return (
-    <div className={`rounded-lg border ${cfg.border} ${cfg.bg} px-6 py-5`}>
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <div className={`w-11 h-11 rounded-lg ${cfg.bg} border ${cfg.border} flex items-center justify-center`}>
-            <Icon className={`h-5 w-5 ${cfg.text}`} />
-          </div>
-          <div>
-            <div className="flex items-center gap-3">
-              <div className={`status-dot ${cfg.dot}`} />
-              <h1 className={`text-sm font-bold tracking-widest font-mono uppercase ${cfg.text}`}>{cfg.label}</h1>
+    <section>
+      <div className={`rounded-lg border ${cfg.border} ${cfg.bg} px-6 py-5`}>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className={`w-11 h-11 rounded-lg ${cfg.bg} border ${cfg.border} flex items-center justify-center`}>
+              <Icon className={`h-5 w-5 ${cfg.text}`} />
             </div>
-            <p className="text-sm text-muted-foreground/60 mt-1">{cfg.sublabel}</p>
-          </div>
-        </div>
-
-        <div className="hidden md:flex items-center gap-8">
-          {data.metrics.map(m => {
-            const MIcon = iconMap[m.icon] || Clock;
-            return (
-              <div key={m.label} className="text-right">
-                <div className="flex items-center gap-2 justify-end">
-                  <MIcon className="h-4 w-4 text-muted-foreground/30" />
-                  <span className="text-xs font-mono uppercase tracking-wider text-muted-foreground/50">{m.label}</span>
-                </div>
-                <p className="text-xl font-bold text-foreground mt-0.5 tracking-tight">{m.value}</p>
+            <div>
+              <div className="flex items-center gap-3">
+                <div className={`status-dot ${cfg.dot}`} />
+                <h1 className={`text-sm font-bold tracking-widest font-mono uppercase ${cfg.text}`}>{cfg.label}</h1>
               </div>
-            );
-          })}
+              <p className="text-sm text-muted-foreground/60 mt-1">{cfg.sublabel}</p>
+            </div>
+          </div>
+
+          <div className="hidden md:flex items-center gap-8">
+            {data.metrics.map(m => {
+              const MIcon = iconMap[m.icon] || Clock;
+              return (
+                <div key={m.label} className="text-right">
+                  <div className="flex items-center gap-2 justify-end">
+                    <MIcon className="h-4 w-4 text-muted-foreground/30" />
+                    <span className="text-xs font-mono uppercase tracking-wider text-muted-foreground/50">{m.label}</span>
+                  </div>
+                  <p className="text-xl font-bold text-foreground mt-0.5 tracking-tight">{m.value}</p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="flex md:hidden items-center gap-4 mt-4 pt-4 border-t border-border/20">
+          {data.metrics.map(m => (
+            <div key={m.label} className="flex-1 text-center">
+              <span className="text-xs font-mono text-muted-foreground/40 uppercase">{m.label}</span>
+              <p className="text-base font-bold text-foreground mt-0.5">{m.value}</p>
+            </div>
+          ))}
         </div>
       </div>
-
-      <div className="flex md:hidden items-center gap-4 mt-4 pt-4 border-t border-border/20">
-        {data.metrics.map(m => (
-          <div key={m.label} className="flex-1 text-center">
-            <span className="text-xs font-mono text-muted-foreground/40 uppercase">{m.label}</span>
-            <p className="text-base font-bold text-foreground mt-0.5">{m.value}</p>
-          </div>
-        ))}
-      </div>
-    </div>
+    </section>
   );
 }
