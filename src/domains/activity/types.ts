@@ -27,3 +27,14 @@ export interface AttentionItem {
   context: string;
   timestamp: string;
 }
+
+/** Unified page model for the Activity domain */
+export interface ActivityPageData {
+  events: ActivityEvent[];
+  summary: {
+    total: number;
+    critical: number;
+    warning: number;
+    resolved: number;
+  };
+}

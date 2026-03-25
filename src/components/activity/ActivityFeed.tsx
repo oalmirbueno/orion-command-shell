@@ -2,9 +2,6 @@ import {
   AlertCircle, AlertTriangle, CheckCircle2, Info, Zap,
   Bot, Server, GitBranch, Shield, Clock, ChevronRight,
 } from "lucide-react";
-import { useOrionData } from "@/hooks/useOrionData";
-import { OrionDataWrapper } from "@/components/orion/DataWrapper";
-import { fetchActivityEvents } from "@/domains/activity/fetcher";
 import type { ActivityEvent, EventPriority, EventCategory } from "@/domains/activity/types";
 
 const priorityConfig: Record<EventPriority, { icon: React.ElementType; dot: string; text: string; borderAccent: string; bg: string }> = {
@@ -81,13 +78,11 @@ function EventRow({ event }: { event: ActivityEvent }) {
   );
 }
 
-export function ActivityFeed() {
-  const { state, data, source, lastUpdated, refetch } = useOrionData<ActivityEvent[]>({
-    key: "activity-events",
-    fetcher: fetchActivityEvents,
-  });
+interface ActivityFeedProps {
+  events: ActivityEvent[];
+}
 
-  const events = data || [];
+export function ActivityFeed({ events }: ActivityFeedProps) {
   const blocks = groupByTimeBlock(events);
 
   return (
@@ -101,23 +96,21 @@ export function ActivityFeed() {
         <span className="text-xs font-mono text-primary animate-pulse-glow font-medium">● AO VIVO</span>
       </div>
 
-      <OrionDataWrapper state={state} source={source} lastUpdated={lastUpdated} onRetry={refetch}>
-        <div className="space-y-8">
-          {blocks.map((block) => (
-            <div key={block.label}>
-              <div className="flex items-center gap-2.5 mb-3">
-                <span className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground/50">{block.label}</span>
-                <div className="flex-1 h-px bg-border/20" />
-              </div>
-              <div className="space-y-2.5">
-                {block.events.map((event) => (
-                  <EventRow key={event.id} event={event} />
-                ))}
-              </div>
+      <div className="space-y-8">
+        {blocks.map((block) => (
+          <div key={block.label}>
+            <div className="flex items-center gap-2.5 mb-3">
+              <span className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground/50">{block.label}</span>
+              <div className="flex-1 h-px bg-border/20" />
             </div>
-          ))}
-        </div>
-      </OrionDataWrapper>
+            <div className="space-y-2.5">
+              {block.events.map((event) => (
+                <EventRow key={event.id} event={event} />
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
     </section>
   );
 }
