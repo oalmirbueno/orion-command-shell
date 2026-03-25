@@ -88,12 +88,12 @@ const statusConfig: Record<SessionStatus, { icon: React.ElementType; dot: string
 };
 
 const typeBadge: Record<SessionType, { label: string; color: string }> = {
-  classification: { label: "Classification", color: "bg-primary/10 text-primary border-primary/20" },
-  enrichment: { label: "Enrichment", color: "bg-status-info/10 text-status-info border-status-info/20" },
-  sync: { label: "Sync", color: "bg-status-online/10 text-status-online border-status-online/20" },
-  analysis: { label: "Analysis", color: "bg-status-warning/10 text-status-warning border-status-warning/20" },
-  export: { label: "Export", color: "bg-muted-foreground/10 text-muted-foreground border-muted-foreground/20" },
-  routing: { label: "Routing", color: "bg-primary/10 text-primary border-primary/20" },
+  classification: { label: "Classificação", color: "bg-primary/10 text-primary border-primary/20" },
+  enrichment: { label: "Enriquecimento", color: "bg-status-info/10 text-status-info border-status-info/20" },
+  sync: { label: "Sincronização", color: "bg-status-online/10 text-status-online border-status-online/20" },
+  analysis: { label: "Análise", color: "bg-status-warning/10 text-status-warning border-status-warning/20" },
+  export: { label: "Exportação", color: "bg-muted-foreground/10 text-muted-foreground border-muted-foreground/20" },
+  routing: { label: "Roteamento", color: "bg-primary/10 text-primary border-primary/20" },
 };
 
 function ProgressBar({ progress, status }: { progress: number; status: SessionStatus }) {

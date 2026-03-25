@@ -78,18 +78,18 @@ const MOCK_SNAPSHOTS: MemorySnapshot[] = [
 ];
 
 const categoryConfig: Record<MemoryCategory, { icon: React.ElementType; label: string; color: string }> = {
-  context: { icon: Brain, label: "Context", color: "bg-primary/10 text-primary border-primary/20" },
-  decision: { icon: Target, label: "Decision", color: "bg-status-warning/10 text-status-warning border-status-warning/20" },
-  learning: { icon: Layers, label: "Learning", color: "bg-status-online/10 text-status-online border-status-online/20" },
-  profile: { icon: User, label: "Profile", color: "bg-primary/10 text-primary border-primary/20" },
-  config: { icon: Settings, label: "Config", color: "bg-muted-foreground/10 text-muted-foreground border-muted-foreground/20" },
-  incident: { icon: Shield, label: "Incident", color: "bg-status-critical/10 text-status-critical border-status-critical/20" },
+  context: { icon: Brain, label: "Contexto", color: "bg-primary/10 text-primary border-primary/20" },
+  decision: { icon: Target, label: "Decisão", color: "bg-status-warning/10 text-status-warning border-status-warning/20" },
+  learning: { icon: Layers, label: "Aprendizado", color: "bg-status-online/10 text-status-online border-status-online/20" },
+  profile: { icon: User, label: "Perfil", color: "bg-primary/10 text-primary border-primary/20" },
+  config: { icon: Settings, label: "Configuração", color: "bg-muted-foreground/10 text-muted-foreground border-muted-foreground/20" },
+  incident: { icon: Shield, label: "Incidente", color: "bg-status-critical/10 text-status-critical border-status-critical/20" },
 };
 
 const relevanceConfig = {
-  high: { border: "border-l-primary", label: "High relevance" },
-  medium: { border: "border-l-muted-foreground/30", label: "Medium" },
-  low: { border: "border-l-border", label: "Low" },
+  high: { border: "border-l-primary", label: "Alta relevância" },
+  medium: { border: "border-l-muted-foreground/30", label: "Média" },
+  low: { border: "border-l-border", label: "Baixa" },
 };
 
 function SnapshotCard({ snapshot }: { snapshot: MemorySnapshot }) {
@@ -158,7 +158,7 @@ export function MemorySnapshots() {
     <section>
       <div className="flex items-center gap-2 mb-4">
         <h2 className="text-[10px] font-mono uppercase tracking-[0.15em] text-muted-foreground">
-          Memory Bank
+          Banco de Memória
         </h2>
         <div className="flex items-center gap-1.5 ml-2 px-2 py-0.5 rounded-full bg-primary/10 border border-primary/20">
           <span className="text-[9px] font-mono text-primary font-medium">{MOCK_SNAPSHOTS.length} snapshots</span>

@@ -19,8 +19,8 @@ interface ActivityEvent {
 
 const MOCK_EVENTS: ActivityEvent[] = [
   {
-    id: "e-01", time: "09:47", timeAgo: "Just now", priority: "critical",
-    category: "agent", title: "Validator-01 went offline",
+    id: "e-01", time: "09:47", timeAgo: "Agora", priority: "critical",
+    category: "agent", title: "Validator-01 ficou offline",
     description: "Falha de conexão com API externa após 3 retries. Última resposta: timeout 30s.",
     source: "Validator-01",
   },
