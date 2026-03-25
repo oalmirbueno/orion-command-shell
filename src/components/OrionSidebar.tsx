@@ -1,4 +1,5 @@
 import {
+  Monitor,
   LayoutDashboard,
   Activity,
   Target,
@@ -31,6 +32,7 @@ const operationsItems = [
 ];
 
 const systemItems = [
+  { title: "System", url: "/system", icon: Monitor },
   { title: "Pipelines", url: "/pipelines", icon: GitBranch },
   { title: "Automations", url: "/automations", icon: Zap },
   { title: "Security", url: "/security", icon: Shield },
