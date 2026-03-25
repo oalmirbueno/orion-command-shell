@@ -9,6 +9,7 @@ import {
   Zap,
   Radio,
   Bot,
+  Timer,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -35,8 +36,8 @@ const operationsItems = [
 
 const systemItems = [
   { title: "System", url: "/system", icon: Monitor },
+  { title: "Cron", url: "/cron", icon: Timer },
   { title: "Pipelines", url: "/pipelines", icon: GitBranch },
-  { title: "Automations", url: "/automations", icon: Zap },
   { title: "Security", url: "/security", icon: Shield },
   { title: "Settings", url: "/settings", icon: Settings },
 ];

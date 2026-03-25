@@ -9,6 +9,7 @@ import SystemPage from "./pages/SystemPage.tsx";
 import AgentsPage from "./pages/AgentsPage.tsx";
 import SessionsPage from "./pages/SessionsPage.tsx";
 import ActivityPage from "./pages/ActivityPage.tsx";
+import CronPage from "./pages/CronPage.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -27,8 +28,8 @@ const App = () => (
           <Route path="/activity" element={<ActivityPage />} />
           <Route path="/telemetry" element={<PlaceholderPage title="Telemetry" description="Real-time system telemetry" />} />
           <Route path="/system" element={<SystemPage />} />
+          <Route path="/cron" element={<CronPage />} />
           <Route path="/pipelines" element={<PlaceholderPage title="Pipelines" description="Data pipeline management" />} />
-          <Route path="/automations" element={<PlaceholderPage title="Automations" description="Automation workflows" />} />
           <Route path="/security" element={<PlaceholderPage title="Security" description="Security monitoring and controls" />} />
           <Route path="/settings" element={<PlaceholderPage title="Settings" description="System configuration" />} />
           <Route path="*" element={<NotFound />} />
