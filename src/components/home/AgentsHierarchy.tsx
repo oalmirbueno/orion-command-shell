@@ -1,7 +1,4 @@
 import { Bot, Crown, Users, Cpu } from "lucide-react";
-import { useOrionData } from "@/hooks/useOrionData";
-import { OrionDataWrapper } from "@/components/orion/DataWrapper";
-import { fetchAgentTree } from "@/domains/agents/fetcher";
 import type { AgentNode, AgentTier, AgentStatus } from "@/domains/agents/types";
 
 const tierConfig: Record<AgentTier, { label: string; icon: React.ElementType; color: string }> = {
@@ -16,15 +13,14 @@ const statusDot: Record<AgentStatus, string> = {
   offline: "status-critical",
 };
 
-export function AgentsHierarchy() {
-  const { state, data, source, lastUpdated, refetch } = useOrionData<AgentNode[]>({
-    key: "agents-hierarchy",
-    fetcher: fetchAgentTree,
-  });
+interface AgentsHierarchyProps {
+  agents: AgentNode[];
+}
 
+export function AgentsHierarchy({ agents }: AgentsHierarchyProps) {
   const tiers: AgentTier[] = ["orchestrator", "core", "support"];
-  const activeCount = (data || []).filter(a => a.status === "active").length;
-  const total = (data || []).length;
+  const activeCount = agents.filter(a => a.status === "active").length;
+  const total = agents.length;
 
   return (
     <section className="rounded-lg border border-border overflow-hidden h-full">
@@ -33,51 +29,47 @@ export function AgentsHierarchy() {
           <div className="w-6 h-0.5 bg-primary rounded-full" />
           <h2 className="orion-panel-title">Hierarquia de Agentes</h2>
         </div>
-        {data && (
-          <span className="text-xs font-mono text-primary font-semibold">{activeCount}/{total} ativos</span>
-        )}
+        <span className="text-xs font-mono text-primary font-semibold">{activeCount}/{total} ativos</span>
       </div>
 
-      <OrionDataWrapper state={state} source={source} lastUpdated={lastUpdated} onRetry={refetch} compact hideSource>
-        <div className="p-4 space-y-4">
-          {tiers.map((tier) => {
-            const agents = (data || []).filter(a => a.tier === tier);
-            if (agents.length === 0) return null;
-            const cfg = tierConfig[tier];
-            const TierIcon = cfg.icon;
+      <div className="p-4 space-y-4">
+        {tiers.map((tier) => {
+          const tierAgents = agents.filter(a => a.tier === tier);
+          if (tierAgents.length === 0) return null;
+          const cfg = tierConfig[tier];
+          const TierIcon = cfg.icon;
 
-            return (
-              <div key={tier}>
-                <div className="flex items-center gap-2.5 mb-2 px-1">
-                  <TierIcon className={`h-4 w-4 ${cfg.color}`} />
-                  <span className={`text-[10px] font-mono uppercase tracking-widest font-semibold ${cfg.color}`}>{cfg.label}</span>
-                  <div className="flex-1 h-px bg-border/25" />
-                </div>
-
-                <div className="space-y-1">
-                  {agents.map((agent) => (
-                    <div key={agent.name} className={`flex items-center gap-3 px-4 py-2.5 rounded-md hover:bg-accent/20 transition-colors cursor-pointer ${agent.status === "offline" ? "opacity-35" : ""} ${tier === "orchestrator" ? "border-l-2 border-l-primary/40 bg-primary/[0.03]" : ""}`}>
-                      <div className={`status-dot ${statusDot[agent.status]}`} />
-                      <div className="flex-1 min-w-0">
-                        <span className="text-sm font-medium text-foreground">{agent.name}</span>
-                        <p className="text-xs font-mono text-muted-foreground/40 mt-0.5">{agent.role}</p>
-                      </div>
-                      {agent.status !== "offline" && (
-                        <div className="flex items-center gap-2 shrink-0">
-                          <div className="w-14 h-1.5 bg-surface-3 rounded-full overflow-hidden">
-                            <div className={`h-full rounded-full ${agent.load > 85 ? "bg-status-warning" : "bg-primary/50"}`} style={{ width: `${agent.load}%` }} />
-                          </div>
-                          <span className="text-xs font-mono text-muted-foreground/40 w-8 text-right">{agent.load}%</span>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
+          return (
+            <div key={tier}>
+              <div className="flex items-center gap-2.5 mb-2 px-1">
+                <TierIcon className={`h-4 w-4 ${cfg.color}`} />
+                <span className={`text-[10px] font-mono uppercase tracking-widest font-semibold ${cfg.color}`}>{cfg.label}</span>
+                <div className="flex-1 h-px bg-border/25" />
               </div>
-            );
-          })}
-        </div>
-      </OrionDataWrapper>
+
+              <div className="space-y-1">
+                {tierAgents.map((agent) => (
+                  <div key={agent.name} className={`flex items-center gap-3 px-4 py-2.5 rounded-md hover:bg-accent/20 transition-colors cursor-pointer ${agent.status === "offline" ? "opacity-35" : ""} ${tier === "orchestrator" ? "border-l-2 border-l-primary/40 bg-primary/[0.03]" : ""}`}>
+                    <div className={`status-dot ${statusDot[agent.status]}`} />
+                    <div className="flex-1 min-w-0">
+                      <span className="text-sm font-medium text-foreground">{agent.name}</span>
+                      <p className="text-xs font-mono text-muted-foreground/40 mt-0.5">{agent.role}</p>
+                    </div>
+                    {agent.status !== "offline" && (
+                      <div className="flex items-center gap-2 shrink-0">
+                        <div className="w-14 h-1.5 bg-surface-3 rounded-full overflow-hidden">
+                          <div className={`h-full rounded-full ${agent.load > 85 ? "bg-status-warning" : "bg-primary/50"}`} style={{ width: `${agent.load}%` }} />
+                        </div>
+                        <span className="text-xs font-mono text-muted-foreground/40 w-8 text-right">{agent.load}%</span>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </section>
   );
 }

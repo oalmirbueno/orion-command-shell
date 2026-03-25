@@ -1,7 +1,4 @@
 import { AlertTriangle, AlertCircle, Info, ChevronRight } from "lucide-react";
-import { useOrionData } from "@/hooks/useOrionData";
-import { OrionDataWrapper } from "@/components/orion/DataWrapper";
-import { fetchAttentionItems } from "@/domains/activity/fetcher";
 import type { AttentionItem, AttentionPriority } from "@/domains/activity/types";
 
 const priorityConfig: Record<AttentionPriority, { icon: React.ElementType; border: string; bg: string; dot: string }> = {
@@ -10,12 +7,11 @@ const priorityConfig: Record<AttentionPriority, { icon: React.ElementType; borde
   info: { icon: Info, border: "border-l-primary/40", bg: "bg-primary/[0.03]", dot: "bg-primary/50" },
 };
 
-export function AttentionRequired() {
-  const { state, data, source, lastUpdated, refetch } = useOrionData<AttentionItem[]>({
-    key: "attention-items",
-    fetcher: fetchAttentionItems,
-  });
+interface AttentionRequiredProps {
+  items: AttentionItem[];
+}
 
+export function AttentionRequired({ items }: AttentionRequiredProps) {
   return (
     <section className="rounded-lg border border-border overflow-hidden">
       <div className="orion-panel-header">
@@ -23,30 +19,26 @@ export function AttentionRequired() {
           <div className="w-6 h-0.5 bg-status-warning rounded-full" />
           <h2 className="orion-panel-title">Atenção Necessária</h2>
         </div>
-        {data && (
-          <span className="text-xs font-mono text-status-warning font-semibold">{data.length} itens</span>
-        )}
+        <span className="text-xs font-mono text-status-warning font-semibold">{items.length} itens</span>
       </div>
 
-      <OrionDataWrapper state={state} source={source} lastUpdated={lastUpdated} onRetry={refetch} compact hideSource>
-        <div className="divide-y divide-border/30">
-          {(data || []).map((item) => {
-            const config = priorityConfig[item.priority];
-            const Icon = config.icon;
-            return (
-              <div key={item.id} className={`flex items-center gap-4 px-5 py-4 ${config.bg} border-l-3 ${config.border} cursor-pointer hover:bg-accent/30 transition-colors group`}>
-                <Icon className="h-5 w-5 shrink-0 text-muted-foreground/60" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground truncate">{item.title}</p>
-                  <p className="text-xs font-mono text-muted-foreground/50 mt-1">{item.context}</p>
-                </div>
-                <span className="text-xs font-mono text-muted-foreground/40 shrink-0">{item.timestamp}</span>
-                <ChevronRight className="h-4 w-4 text-muted-foreground/20 group-hover:text-muted-foreground/50 transition-colors shrink-0" />
+      <div className="divide-y divide-border/30">
+        {items.map((item) => {
+          const config = priorityConfig[item.priority];
+          const Icon = config.icon;
+          return (
+            <div key={item.id} className={`flex items-center gap-4 px-5 py-4 ${config.bg} border-l-3 ${config.border} cursor-pointer hover:bg-accent/30 transition-colors group`}>
+              <Icon className="h-5 w-5 shrink-0 text-muted-foreground/60" />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-foreground truncate">{item.title}</p>
+                <p className="text-xs font-mono text-muted-foreground/50 mt-1">{item.context}</p>
               </div>
-            );
-          })}
-        </div>
-      </OrionDataWrapper>
+              <span className="text-xs font-mono text-muted-foreground/40 shrink-0">{item.timestamp}</span>
+              <ChevronRight className="h-4 w-4 text-muted-foreground/20 group-hover:text-muted-foreground/50 transition-colors shrink-0" />
+            </div>
+          );
+        })}
+      </div>
     </section>
   );
 }
