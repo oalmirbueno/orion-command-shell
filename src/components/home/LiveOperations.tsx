@@ -5,7 +5,7 @@ interface LiveOperationsProps {
   operations: Operation[];
 }
 
-export function LiveOperations({ operations }: LiveOperationsProps) {
+export function LiveOperations({ operations = [] }: LiveOperationsProps) {
   const runningCount = operations.filter(o => o.status === "running").length;
 
   return (

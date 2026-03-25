@@ -17,7 +17,7 @@ interface AgentsHierarchyProps {
   agents: AgentNode[];
 }
 
-export function AgentsHierarchy({ agents }: AgentsHierarchyProps) {
+export function AgentsHierarchy({ agents = [] }: AgentsHierarchyProps) {
   const tiers: AgentTier[] = ["orchestrator", "core", "support"];
   const activeCount = agents.filter(a => a.status === "active").length;
   const total = agents.length;

@@ -11,7 +11,7 @@ interface OperationalHealthProps {
   services: HealthService[];
 }
 
-export function OperationalHealth({ services }: OperationalHealthProps) {
+export function OperationalHealth({ services = [] }: OperationalHealthProps) {
   const healthyCount = services.filter(s => s.status === "healthy").length;
   const total = services.length;
   const allHealthy = healthyCount === total;

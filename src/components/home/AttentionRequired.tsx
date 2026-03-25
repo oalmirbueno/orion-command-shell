@@ -11,7 +11,7 @@ interface AttentionRequiredProps {
   items: AttentionItem[];
 }
 
-export function AttentionRequired({ items }: AttentionRequiredProps) {
+export function AttentionRequired({ items = [] }: AttentionRequiredProps) {
   return (
     <section className="rounded-lg border border-border overflow-hidden">
       <div className="orion-panel-header">
