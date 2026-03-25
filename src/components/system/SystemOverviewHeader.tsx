@@ -25,7 +25,7 @@ const statusConfig = {
   },
   critical: {
     icon: XCircle,
-    label: "System Failure Detected",
+    label: "Falha no Sistema Detectada",
     sublabel: "Ação imediata necessária",
     dot: "status-critical",
     border: "border-status-critical/20",
