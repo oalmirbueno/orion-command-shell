@@ -51,18 +51,18 @@ export function AgentsHierarchy() {
 
   return (
     <section>
-      <div className="flex items-center gap-2 mb-3">
-        <h2 className="text-[10px] font-mono uppercase tracking-[0.15em] text-muted-foreground">Hierarquia de Agentes</h2>
+      <div className="flex items-center gap-3 mb-4">
+        <h2 className="text-xs font-mono uppercase tracking-[0.15em] text-muted-foreground">Hierarquia de Agentes</h2>
         {data && (
-          <div className="flex items-center gap-1.5 ml-2 px-2 py-0.5 rounded-full bg-primary/10 border border-primary/20">
-            <span className="text-[9px] font-mono text-primary font-medium">{activeCount}/{total} ativos</span>
+          <div className="flex items-center gap-2 ml-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20">
+            <span className="text-[11px] font-mono text-primary font-semibold">{activeCount}/{total} ativos</span>
           </div>
         )}
         <div className="flex-1 h-px bg-border/40" />
       </div>
 
       <OrionDataWrapper state={state} source={source} lastUpdated={lastUpdated} onRetry={refetch} compact>
-        <div className="space-y-3">
+        <div className="space-y-4">
           {tiers.map((tier) => {
             const agents = (data || []).filter(a => a.tier === tier);
             if (agents.length === 0) return null;
@@ -71,26 +71,26 @@ export function AgentsHierarchy() {
 
             return (
               <div key={tier}>
-                <div className="flex items-center gap-1.5 mb-1.5">
-                  <TierIcon className={`h-3 w-3 ${cfg.color}`} />
-                  <span className={`text-[9px] font-mono uppercase tracking-widest ${cfg.color}`}>{cfg.label}</span>
+                <div className="flex items-center gap-2 mb-2">
+                  <TierIcon className={`h-4 w-4 ${cfg.color}`} />
+                  <span className={`text-[11px] font-mono uppercase tracking-widest ${cfg.color}`}>{cfg.label}</span>
                   <div className="flex-1 h-px bg-border/20" />
                 </div>
 
-                <div className={`grid gap-1.5 ${tier === "orchestrator" ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2"}`}>
+                <div className={`grid gap-2 ${tier === "orchestrator" ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2"}`}>
                   {agents.map((agent) => (
-                    <div key={agent.name} className={`flex items-center gap-3 px-3 py-2 rounded-md border border-border/30 bg-card hover:bg-accent/20 transition-colors cursor-pointer ${agent.status === "offline" ? "opacity-45" : ""} ${tier === "orchestrator" ? "border-l-2 border-l-primary/50 bg-primary/5" : ""}`}>
+                    <div key={agent.name} className={`flex items-center gap-4 px-4 py-3 rounded-lg border border-border/40 bg-card hover:bg-accent/30 transition-colors cursor-pointer ${agent.status === "offline" ? "opacity-45" : ""} ${tier === "orchestrator" ? "border-l-[3px] border-l-primary/50 bg-primary/5" : ""}`}>
                       <div className={`status-dot ${statusDot[agent.status]}`} />
                       <div className="flex-1 min-w-0">
-                        <span className="text-[11px] font-medium text-foreground">{agent.name}</span>
-                        <p className="text-[9px] font-mono text-muted-foreground/40">{agent.role}</p>
+                        <span className="text-sm font-medium text-foreground">{agent.name}</span>
+                        <p className="text-[11px] font-mono text-muted-foreground/50 mt-0.5">{agent.role}</p>
                       </div>
                       {agent.status !== "offline" && (
-                        <div className="flex items-center gap-1.5 shrink-0">
-                          <div className="w-12 h-1 bg-surface-3 rounded-full overflow-hidden">
+                        <div className="flex items-center gap-2 shrink-0">
+                          <div className="w-16 h-2 bg-surface-3 rounded-full overflow-hidden">
                             <div className={`h-full rounded-full ${agent.load > 85 ? "bg-status-warning" : "bg-primary/60"}`} style={{ width: `${agent.load}%` }} />
                           </div>
-                          <span className="text-[8px] font-mono text-muted-foreground/30 w-6 text-right">{agent.load}%</span>
+                          <span className="text-[10px] font-mono text-muted-foreground/40 w-8 text-right">{agent.load}%</span>
                         </div>
                       )}
                     </div>

@@ -34,30 +34,30 @@ export function AttentionRequired() {
 
   return (
     <section>
-      <div className="flex items-center gap-2 mb-3">
-        <h2 className="text-[10px] font-mono uppercase tracking-[0.15em] text-muted-foreground">Atenção Necessária</h2>
+      <div className="flex items-center gap-3 mb-4">
+        <h2 className="text-xs font-mono uppercase tracking-[0.15em] text-muted-foreground">Atenção Necessária</h2>
         {data && (
-          <div className="flex items-center gap-1.5 ml-2 px-2 py-0.5 rounded-full bg-status-warning/10 border border-status-warning/20">
-            <span className="text-[9px] font-mono text-status-warning font-medium">{data.length}</span>
+          <div className="flex items-center gap-2 ml-2 px-3 py-1 rounded-full bg-status-warning/10 border border-status-warning/20">
+            <span className="text-[11px] font-mono text-status-warning font-semibold">{data.length}</span>
           </div>
         )}
         <div className="flex-1 h-px bg-border/40" />
       </div>
 
       <OrionDataWrapper state={state} source={source} lastUpdated={lastUpdated} onRetry={refetch} compact>
-        <div className="space-y-1.5">
+        <div className="space-y-2">
           {(data || []).map((item) => {
             const config = priorityConfig[item.priority];
             const Icon = config.icon;
             return (
-              <div key={item.id} className={`flex items-center gap-3 px-4 py-3 rounded-md border border-border/40 ${config.bg} border-l-2 ${config.border} cursor-pointer hover:bg-accent/50 transition-colors group`}>
-                <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
+              <div key={item.id} className={`flex items-center gap-4 px-5 py-4 rounded-lg border border-border/50 ${config.bg} border-l-[3px] ${config.border} cursor-pointer hover:bg-accent/40 transition-colors group`}>
+                <Icon className="h-5 w-5 shrink-0 text-muted-foreground" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium text-foreground truncate">{item.title}</p>
-                  <p className="text-[10px] font-mono text-muted-foreground/60 mt-0.5">{item.context}</p>
+                  <p className="text-sm font-medium text-foreground truncate">{item.title}</p>
+                  <p className="text-xs font-mono text-muted-foreground/60 mt-1">{item.context}</p>
                 </div>
-                <span className="text-[9px] font-mono text-muted-foreground/50 shrink-0">{item.timestamp}</span>
-                <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/30 group-hover:text-muted-foreground transition-colors shrink-0" />
+                <span className="text-[11px] font-mono text-muted-foreground/50 shrink-0">{item.timestamp}</span>
+                <ChevronRight className="h-4 w-4 text-muted-foreground/30 group-hover:text-muted-foreground transition-colors shrink-0" />
               </div>
             );
           })}
