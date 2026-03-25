@@ -152,7 +152,7 @@ function AlertRow({ alert }: { alert: Alert }) {
           <div className="flex items-center gap-2 shrink-0 ml-3 mt-1">
             {!alert.acknowledged && !isResolved && (
               <span className="text-[8px] font-mono uppercase px-1.5 py-0.5 rounded bg-status-warning/15 text-status-warning border border-status-warning/20">
-                Unack
+                Pendente
               </span>
             )}
             {alert.occurrences > 1 && (
@@ -170,7 +170,7 @@ function AlertRow({ alert }: { alert: Alert }) {
             <div className="flex items-start gap-1.5">
               <ExternalLink className="h-3 w-3 text-muted-foreground/30 shrink-0 mt-0.5" />
               <p className="text-[10px] text-foreground/60 leading-relaxed">
-                <span className="text-muted-foreground/40 font-mono text-[9px] mr-1">ACTION:</span>
+                <span className="text-muted-foreground/40 font-mono text-[9px] mr-1">AÇÃO:</span>
                 {alert.action}
               </p>
             </div>
@@ -189,7 +189,7 @@ function AlertRow({ alert }: { alert: Alert }) {
           {alert.resolvedAt && (
             <>
               <div className="h-3 w-px bg-border/30" />
-              <span className="text-status-online/60">Resolved {alert.resolvedAt}</span>
+              <span className="text-status-online/60">Resolvido {alert.resolvedAt}</span>
             </>
           )}
         </div>
@@ -200,10 +200,10 @@ function AlertRow({ alert }: { alert: Alert }) {
 
 export function AlertsList() {
   const allGroups = [
-    { severity: "critical" as Severity, label: "Critical", alerts: MOCK_ALERTS.filter(a => a.severity === "critical") },
-    { severity: "warning" as Severity, label: "Warning", alerts: MOCK_ALERTS.filter(a => a.severity === "warning") },
-    { severity: "info" as Severity, label: "Informational", alerts: MOCK_ALERTS.filter(a => a.severity === "info") },
-    { severity: "resolved" as Severity, label: "Resolved", alerts: MOCK_ALERTS.filter(a => a.severity === "resolved") },
+    { severity: "critical" as Severity, label: "Crítico", alerts: MOCK_ALERTS.filter(a => a.severity === "critical") },
+    { severity: "warning" as Severity, label: "Atenção", alerts: MOCK_ALERTS.filter(a => a.severity === "warning") },
+    { severity: "info" as Severity, label: "Informativo", alerts: MOCK_ALERTS.filter(a => a.severity === "info") },
+    { severity: "resolved" as Severity, label: "Resolvido", alerts: MOCK_ALERTS.filter(a => a.severity === "resolved") },
   ];
   const groups = allGroups.filter(g => g.alerts.length > 0);
 
@@ -213,10 +213,10 @@ export function AlertsList() {
     <section>
       <div className="flex items-center gap-2 mb-4">
         <h2 className="text-[10px] font-mono uppercase tracking-[0.15em] text-muted-foreground">
-          Alert Feed
+          Feed de Alertas
         </h2>
         <div className="flex items-center gap-1.5 ml-2 px-2 py-0.5 rounded-full bg-status-critical/10 border border-status-critical/20">
-          <span className="text-[9px] font-mono text-status-critical font-medium">{activeCount} active</span>
+          <span className="text-[9px] font-mono text-status-critical font-medium">{activeCount} ativos</span>
         </div>
         <div className="flex-1 h-px bg-border/40" />
       </div>

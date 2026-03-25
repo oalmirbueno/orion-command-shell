@@ -1,10 +1,10 @@
 import { AlertCircle, AlertTriangle, Info, CheckCircle2 } from "lucide-react";
 
 const MOCK = [
-  { label: "Critical", value: 2, icon: AlertCircle, text: "text-status-critical", dot: "status-critical" },
-  { label: "Warning", value: 5, icon: AlertTriangle, text: "text-status-warning", dot: "status-warning" },
+  { label: "Crítico", value: 2, icon: AlertCircle, text: "text-status-critical", dot: "status-critical" },
+  { label: "Atenção", value: 5, icon: AlertTriangle, text: "text-status-warning", dot: "status-warning" },
   { label: "Info", value: 8, icon: Info, text: "text-primary", dot: "bg-primary/50" },
-  { label: "Resolved", value: 41, icon: CheckCircle2, text: "text-status-online", dot: "status-online" },
+  { label: "Resolvido", value: 41, icon: CheckCircle2, text: "text-status-online", dot: "status-online" },
 ];
 
 export function AlertsSummary() {
