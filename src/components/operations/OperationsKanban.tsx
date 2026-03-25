@@ -83,23 +83,23 @@ function TaskCard({ task }: { task: OperationTask }) {
       "hover:border-primary/30 hover:shadow-[0_0_15px_-3px_hsl(var(--primary)/0.15)]",
       isFailed && "border-status-critical/25 bg-status-critical/[0.03]",
       isActive && "border-status-online/20 bg-status-online/[0.02]",
-      !isActive && !isFailed && "border-border/30 bg-card/50",
+      !isActive && !isFailed && "border-border/40 bg-card/50",
     )}>
       {/* Header: title + priority */}
       <div className="flex items-start justify-between gap-2 mb-2">
-        <h4 className="text-xs font-medium text-foreground leading-snug line-clamp-2">{task.title}</h4>
-        <span className={cn("text-[7px] font-mono uppercase px-1.5 py-0.5 rounded border shrink-0 mt-0.5", pri.cls)}>
+        <h4 className="text-sm font-medium text-foreground leading-snug line-clamp-2">{task.title}</h4>
+        <span className={cn("text-[9px] font-mono uppercase px-2 py-1 rounded border shrink-0 mt-0.5", pri.cls)}>
           {pri.label}
         </span>
       </div>
 
       {/* Description */}
-      <p className="text-[10px] text-foreground/40 leading-relaxed mb-3 line-clamp-1">{task.description}</p>
+      <p className="text-xs text-foreground/45 leading-relaxed mb-3 line-clamp-1">{task.description}</p>
 
-      {/* Progress bar (for running/paused/failed) */}
+      {/* Progress bar */}
       {task.status !== "queued" && (
-        <div className="flex items-center gap-2 mb-3">
-          <div className="flex-1 h-1.5 bg-surface-3 rounded-full overflow-hidden">
+        <div className="flex items-center gap-2.5 mb-3">
+          <div className="flex-1 h-2 bg-surface-3 rounded-full overflow-hidden">
             <div
               className={cn(
                 "h-full rounded-full transition-all",
@@ -111,34 +111,34 @@ function TaskCard({ task }: { task: OperationTask }) {
               style={{ width: `${task.progress}%` }}
             />
           </div>
-          <span className="text-[9px] font-mono text-muted-foreground/40 w-8 text-right">{task.progress}%</span>
+          <span className="text-[11px] font-mono text-muted-foreground/50 w-10 text-right">{task.progress}%</span>
         </div>
       )}
 
       {/* Footer: agent + time */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1.5">
-          <Bot className="h-3 w-3 text-muted-foreground/25" />
-          <span className="text-[9px] font-mono text-muted-foreground/40">{task.agent}</span>
+        <div className="flex items-center gap-2">
+          <Bot className="h-3.5 w-3.5 text-muted-foreground/30" />
+          <span className="text-[11px] font-mono text-muted-foreground/50">{task.agent}</span>
         </div>
-        <div className="flex items-center gap-1.5">
-          <Clock className="h-2.5 w-2.5 text-muted-foreground/20" />
-          <span className="text-[9px] font-mono text-muted-foreground/30">{task.elapsed}</span>
+        <div className="flex items-center gap-2">
+          <Clock className="h-3.5 w-3.5 text-muted-foreground/25" />
+          <span className="text-[11px] font-mono text-muted-foreground/40">{task.elapsed}</span>
         </div>
       </div>
 
       {/* Active pulse indicator */}
       {isActive && (
-        <div className="flex items-center gap-1.5 mt-2 pt-2 border-t border-border/20">
-          <div className="w-1.5 h-1.5 rounded-full bg-status-online animate-pulse" />
-          <span className="text-[8px] font-mono text-status-online/60 uppercase tracking-wider">Processando</span>
+        <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border/20">
+          <div className="w-2 h-2 rounded-full bg-status-online animate-pulse" />
+          <span className="text-[10px] font-mono text-status-online/60 uppercase tracking-wider">Processando</span>
         </div>
       )}
 
       {isFailed && (
-        <div className="flex items-center gap-1.5 mt-2 pt-2 border-t border-status-critical/15">
-          <RotateCcw className="h-3 w-3 text-status-critical/50" />
-          <span className="text-[8px] font-mono text-status-critical/60 uppercase tracking-wider">Retry disponível</span>
+        <div className="flex items-center gap-2 mt-3 pt-3 border-t border-status-critical/15">
+          <RotateCcw className="h-3.5 w-3.5 text-status-critical/50" />
+          <span className="text-[10px] font-mono text-status-critical/60 uppercase tracking-wider">Retry disponível</span>
         </div>
       )}
     </div>
