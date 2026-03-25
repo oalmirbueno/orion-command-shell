@@ -37,19 +37,19 @@ export function ServicesTable() {
 
   return (
     <section>
-      <div className="flex items-center gap-2 mb-3">
-        <h2 className="text-[10px] font-mono uppercase tracking-[0.15em] text-muted-foreground">
+      <div className="flex items-center gap-3 mb-4">
+        <h2 className="text-xs font-mono uppercase tracking-[0.15em] text-muted-foreground">
           Serviços Ativos
         </h2>
-        <div className="flex items-center gap-1.5 ml-2 px-2 py-0.5 rounded-full bg-primary/10 border border-primary/20">
-          <span className="text-[9px] font-mono text-primary font-medium">{runningCount}/{MOCK_SERVICES.length}</span>
+        <div className="flex items-center gap-2 ml-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20">
+          <span className="text-xs font-mono text-primary font-medium">{runningCount}/{MOCK_SERVICES.length}</span>
         </div>
         <div className="flex-1 h-px bg-border/40" />
       </div>
 
-      <div className="rounded-lg border border-border/50 overflow-hidden">
+      <div className="rounded-xl border border-border/50 overflow-hidden">
         {/* Header */}
-        <div className="grid grid-cols-[1fr_70px_80px_70px_60px_50px] gap-2 px-4 py-2 bg-surface-2 text-[9px] font-mono uppercase tracking-wider text-muted-foreground/50">
+        <div className="grid grid-cols-[1fr_80px_100px_80px_70px_60px] gap-3 px-5 py-3 bg-surface-2 text-xs font-mono uppercase tracking-wider text-muted-foreground/50">
           <span>Serviço</span>
           <span>Port</span>
           <span>CPU / Mem</span>
@@ -59,7 +59,7 @@ export function ServicesTable() {
         </div>
 
         {/* Rows */}
-        {MOCK_SERVICES.map((svc, i) => {
+        {MOCK_SERVICES.map((svc) => {
           const cfg = statusConfig[svc.status];
           const Icon = cfg.icon;
           const isIssue = svc.status !== "running";
@@ -67,22 +67,22 @@ export function ServicesTable() {
           return (
             <div
               key={svc.name}
-              className={`grid grid-cols-[1fr_70px_80px_70px_60px_50px] gap-2 px-4 py-2.5 items-center border-t border-border/30 hover:bg-accent/30 transition-colors cursor-pointer ${isIssue ? "bg-accent/10" : ""}`}
+              className={`grid grid-cols-[1fr_80px_100px_80px_70px_60px] gap-3 px-5 py-3.5 items-center border-t border-border/30 hover:bg-accent/30 transition-colors cursor-pointer ${isIssue ? "bg-accent/10" : ""}`}
             >
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 <div className={`status-dot ${cfg.dotClass}`} />
-                <span className={`text-xs font-mono ${isIssue ? cfg.color : "text-foreground"}`}>{svc.name}</span>
+                <span className={`text-sm font-mono ${isIssue ? cfg.color : "text-foreground"}`}>{svc.name}</span>
               </div>
-              <span className="text-[10px] font-mono text-muted-foreground/60">{svc.port}</span>
-              <div className="text-[10px] font-mono text-muted-foreground/60">
+              <span className="text-sm font-mono text-muted-foreground/60">{svc.port}</span>
+              <div className="text-sm font-mono text-muted-foreground/60">
                 <span>{svc.cpu}</span>
-                <span className="text-border mx-1">/</span>
+                <span className="text-border mx-1.5">/</span>
                 <span>{svc.mem}</span>
               </div>
-              <span className="text-[10px] font-mono text-muted-foreground/60">{svc.uptime}</span>
-              <span className="text-[10px] font-mono text-muted-foreground/40">{svc.pid}</span>
+              <span className="text-sm font-mono text-muted-foreground/60">{svc.uptime}</span>
+              <span className="text-sm font-mono text-muted-foreground/40">{svc.pid}</span>
               <div className="flex justify-center">
-                <Icon className={`h-3.5 w-3.5 ${cfg.color}`} />
+                <Icon className={`h-4 w-4 ${cfg.color}`} />
               </div>
             </div>
           );

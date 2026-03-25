@@ -30,23 +30,23 @@ export function StabilitySignals() {
 
   return (
     <section>
-      <div className="flex items-center gap-2 mb-3">
-        <h2 className="text-[10px] font-mono uppercase tracking-[0.15em] text-muted-foreground">
+      <div className="flex items-center gap-3 mb-4">
+        <h2 className="text-xs font-mono uppercase tracking-[0.15em] text-muted-foreground">
           Sinais de Estabilidade
         </h2>
         {!hasIssues ? (
-          <div className="flex items-center gap-1.5 ml-2 px-2 py-0.5 rounded-full bg-status-online/10 border border-status-online/20">
-            <span className="text-[9px] font-mono text-status-online font-medium">Estável</span>
+          <div className="flex items-center gap-2 ml-2 px-3 py-1 rounded-full bg-status-online/10 border border-status-online/20">
+            <span className="text-xs font-mono text-status-online font-medium">Estável</span>
           </div>
         ) : (
-          <div className="flex items-center gap-1.5 ml-2 px-2 py-0.5 rounded-full bg-status-warning/10 border border-status-warning/20">
-            <span className="text-[9px] font-mono text-status-warning font-medium">Atenção</span>
+          <div className="flex items-center gap-2 ml-2 px-3 py-1 rounded-full bg-status-warning/10 border border-status-warning/20">
+            <span className="text-xs font-mono text-status-warning font-medium">Atenção</span>
           </div>
         )}
         <div className="flex-1 h-px bg-border/40" />
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-3">
         {MOCK_SIGNALS.map((signal) => {
           const cfg = levelConfig[signal.level];
           const Icon = signal.icon;
@@ -54,19 +54,19 @@ export function StabilitySignals() {
           return (
             <div
               key={signal.label}
-              className={`flex items-center gap-3 px-4 py-3 rounded-md border ${cfg.border} ${cfg.bg} hover:bg-accent/30 transition-colors`}
+              className={`flex items-center gap-4 px-5 py-4 rounded-xl border ${cfg.border} ${cfg.bg} hover:bg-accent/30 transition-colors`}
             >
-              <Icon className="h-4 w-4 text-muted-foreground/50 shrink-0" />
+              <Icon className="h-5 w-5 text-muted-foreground/50 shrink-0" />
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="text-[11px] font-medium text-foreground">{signal.label}</span>
+                <div className="flex items-center gap-2.5">
+                  <span className="text-sm font-medium text-foreground">{signal.label}</span>
                   <div className={`status-dot ${cfg.dot}`} />
                 </div>
                 {signal.detail && (
-                  <p className="text-[9px] font-mono text-muted-foreground/40 mt-0.5 truncate">{signal.detail}</p>
+                  <p className="text-xs font-mono text-muted-foreground/40 mt-1 truncate">{signal.detail}</p>
                 )}
               </div>
-              <span className={`text-xs font-mono font-medium ${cfg.text} shrink-0`}>{signal.value}</span>
+              <span className={`text-sm font-mono font-semibold ${cfg.text} shrink-0`}>{signal.value}</span>
             </div>
           );
         })}

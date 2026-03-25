@@ -1,10 +1,5 @@
 import { Bot, Cpu, MessageSquare, Clock, Zap, AlertTriangle, Crown, Users, ArrowRight, Activity } from "lucide-react";
 
-/**
- * AgentDetailCards — expanded detail view for each agent tier.
- * Shows deeper operational data: dependencies, current task, metrics, and session links.
- */
-
 type AgentStatus = "active" | "idle" | "offline";
 type AgentTier = "orchestrator" | "core" | "support";
 
@@ -130,32 +125,32 @@ function AgentCard({ agent }: { agent: AgentDetail }) {
 
   return (
     <div className={`
-      rounded-lg border border-border/40 border-l-[3px] ${cfg.border} ${cfg.bg}
+      rounded-xl border border-border/40 border-l-[3px] ${cfg.border} ${cfg.bg}
       ${isOrch ? "bg-primary/[0.03] border-primary/25" : ""}
       ${isOffline ? "opacity-60" : ""}
       hover:bg-accent/20 transition-all cursor-pointer group
     `}>
-      <div className="px-5 py-4">
-        {/* Header: Name + Status + Tier */}
-        <div className="flex items-start justify-between mb-2">
-          <div className="flex items-center gap-3">
-            <div className={`w-9 h-9 rounded-lg border flex items-center justify-center ${isOrch ? "bg-primary/10 border-primary/25" : "bg-surface-2 border-border/50"}`}>
-              <Bot className={`h-4 w-4 ${isOrch ? "text-primary" : "text-muted-foreground/60"}`} />
+      <div className="px-6 py-5">
+        {/* Header */}
+        <div className="flex items-start justify-between mb-3">
+          <div className="flex items-center gap-4">
+            <div className={`w-11 h-11 rounded-lg border flex items-center justify-center ${isOrch ? "bg-primary/10 border-primary/25" : "bg-surface-2 border-border/50"}`}>
+              <Bot className={`h-5 w-5 ${isOrch ? "text-primary" : "text-muted-foreground/60"}`} />
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <h3 className={`text-sm font-semibold ${isOrch ? "text-primary" : "text-foreground"}`}>{agent.name}</h3>
+              <div className="flex items-center gap-2.5">
+                <h3 className={`text-base font-semibold ${isOrch ? "text-primary" : "text-foreground"}`}>{agent.name}</h3>
                 <div className={`status-dot ${cfg.dot}`} />
-                <span className={`text-[9px] font-mono uppercase ${cfg.text}`}>{cfg.label}</span>
+                <span className={`text-xs font-mono uppercase ${cfg.text}`}>{cfg.label}</span>
               </div>
-              <p className="text-[10px] text-muted-foreground/50 mt-0.5">{agent.role} · <span className="text-muted-foreground/40">{agent.model}</span></p>
+              <p className="text-sm text-muted-foreground/50 mt-0.5">{agent.role} · <span className="text-muted-foreground/40">{agent.model}</span></p>
             </div>
           </div>
-          <div className="flex items-center gap-1.5 mt-1">
+          <div className="flex items-center gap-2 mt-1">
             {agent.alertCount > 0 && (
-              <div className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-status-warning/10 border border-status-warning/20">
-                <AlertTriangle className="h-3 w-3 text-status-warning" />
-                <span className="text-[8px] font-mono text-status-warning">{agent.alertCount}</span>
+              <div className="flex items-center gap-1.5 px-2 py-1 rounded bg-status-warning/10 border border-status-warning/20">
+                <AlertTriangle className="h-4 w-4 text-status-warning" />
+                <span className="text-xs font-mono text-status-warning">{agent.alertCount}</span>
               </div>
             )}
             <span className={`orion-badge ${tier.badgeClass}`}>{tier.label}</span>
@@ -163,29 +158,29 @@ function AgentCard({ agent }: { agent: AgentDetail }) {
         </div>
 
         {/* Current Task */}
-        <div className="flex items-start gap-2 mb-3 ml-12">
-          <Activity className="h-3 w-3 text-muted-foreground/30 shrink-0 mt-0.5" />
-          <span className="text-[11px] text-foreground/65 leading-relaxed">{agent.currentTask}</span>
-          <span className="text-[9px] font-mono text-muted-foreground/30 shrink-0 ml-auto">{agent.currentTaskAge}</span>
+        <div className="flex items-start gap-3 mb-4 ml-[60px]">
+          <Activity className="h-4 w-4 text-muted-foreground/30 shrink-0 mt-0.5" />
+          <span className="text-sm text-foreground/65 leading-relaxed">{agent.currentTask}</span>
+          <span className="text-xs font-mono text-muted-foreground/30 shrink-0 ml-auto">{agent.currentTaskAge}</span>
         </div>
 
         {/* Dependencies & Feeds */}
         {(agent.dependsOn.length > 0 || agent.feeds.length > 0) && (
-          <div className="flex items-center gap-4 mb-3 ml-12 flex-wrap">
+          <div className="flex items-center gap-5 mb-4 ml-[60px] flex-wrap">
             {agent.dependsOn.length > 0 && (
-              <div className="flex items-center gap-1.5">
-                <span className="text-[8px] font-mono text-muted-foreground/30 uppercase">Recebe de</span>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-mono text-muted-foreground/35 uppercase">Recebe de</span>
                 {agent.dependsOn.map(dep => (
-                  <span key={dep} className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-surface-2 border border-border/30 text-foreground/60">{dep}</span>
+                  <span key={dep} className="text-xs font-mono px-2 py-1 rounded bg-surface-2 border border-border/30 text-foreground/60">{dep}</span>
                 ))}
               </div>
             )}
             {agent.feeds.length > 0 && (
-              <div className="flex items-center gap-1.5">
-                <ArrowRight className="h-3 w-3 text-muted-foreground/20" />
-                <span className="text-[8px] font-mono text-muted-foreground/30 uppercase">Alimenta</span>
+              <div className="flex items-center gap-2">
+                <ArrowRight className="h-4 w-4 text-muted-foreground/20" />
+                <span className="text-[10px] font-mono text-muted-foreground/35 uppercase">Alimenta</span>
                 {agent.feeds.map(f => (
-                  <span key={f} className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-surface-2 border border-border/30 text-foreground/60">{f}</span>
+                  <span key={f} className="text-xs font-mono px-2 py-1 rounded bg-surface-2 border border-border/30 text-foreground/60">{f}</span>
                 ))}
               </div>
             )}
@@ -193,31 +188,31 @@ function AgentCard({ agent }: { agent: AgentDetail }) {
         )}
 
         {/* Metrics */}
-        <div className="flex items-center gap-4 pt-3 border-t border-border/20 ml-12 flex-wrap">
-          <div className="flex items-center gap-1">
-            <Zap className="h-3 w-3 text-muted-foreground/25" />
-            <span className="text-[9px] font-mono text-muted-foreground/40">Sessões</span>
-            <span className={`text-[10px] font-mono font-medium ${agent.sessions > 0 ? "text-foreground" : "text-muted-foreground/30"}`}>{agent.sessions}</span>
+        <div className="flex items-center gap-5 pt-4 border-t border-border/20 ml-[60px] flex-wrap">
+          <div className="flex items-center gap-1.5">
+            <Zap className="h-4 w-4 text-muted-foreground/25" />
+            <span className="text-xs font-mono text-muted-foreground/40">Sessões</span>
+            <span className={`text-sm font-mono font-medium ${agent.sessions > 0 ? "text-foreground" : "text-muted-foreground/30"}`}>{agent.sessions}</span>
           </div>
-          <div className="h-3 w-px bg-border/20" />
-          <div className="flex items-center gap-1">
-            <span className="text-[9px] font-mono text-muted-foreground/40">Tokens</span>
-            <span className="text-[10px] font-mono text-foreground">{agent.tokensToday}</span>
+          <div className="h-4 w-px bg-border/20" />
+          <div className="flex items-center gap-1.5">
+            <span className="text-xs font-mono text-muted-foreground/40">Tokens</span>
+            <span className="text-sm font-mono text-foreground">{agent.tokensToday}</span>
           </div>
-          <div className="h-3 w-px bg-border/20" />
-          <div className="flex items-center gap-1">
-            <span className="text-[9px] font-mono text-muted-foreground/40">Disp.</span>
-            <span className={`text-[10px] font-mono ${parseFloat(agent.availability) < 99 ? "text-status-warning" : "text-foreground"}`}>{agent.availability}</span>
+          <div className="h-4 w-px bg-border/20" />
+          <div className="flex items-center gap-1.5">
+            <span className="text-xs font-mono text-muted-foreground/40">Disp.</span>
+            <span className={`text-sm font-mono ${parseFloat(agent.availability) < 99 ? "text-status-warning" : "text-foreground"}`}>{agent.availability}</span>
           </div>
           {agent.status !== "offline" && agent.load > 0 && (
             <>
-              <div className="h-3 w-px bg-border/20" />
-              <div className="flex items-center gap-1.5 flex-1 max-w-[100px]">
-                <span className="text-[9px] font-mono text-muted-foreground/40">Carga</span>
-                <div className="flex-1 h-1 bg-surface-3 rounded-full overflow-hidden">
+              <div className="h-4 w-px bg-border/20" />
+              <div className="flex items-center gap-2 flex-1 max-w-[140px]">
+                <span className="text-xs font-mono text-muted-foreground/40">Carga</span>
+                <div className="flex-1 h-2 bg-surface-3 rounded-full overflow-hidden">
                   <div className={`h-full rounded-full ${loadColor}`} style={{ width: `${agent.load}%` }} />
                 </div>
-                <span className="text-[8px] font-mono text-muted-foreground/30">{agent.load}%</span>
+                <span className="text-xs font-mono text-muted-foreground/30">{agent.load}%</span>
               </div>
             </>
           )}
@@ -232,15 +227,15 @@ export function AgentDetailCards() {
 
   return (
     <section>
-      <div className="flex items-center gap-2 mb-4">
-        <h2 className="text-[10px] font-mono uppercase tracking-[0.15em] text-muted-foreground">
+      <div className="flex items-center gap-3 mb-5">
+        <h2 className="text-xs font-mono uppercase tracking-[0.15em] text-muted-foreground">
           Detalhe Operacional
         </h2>
         <div className="orion-section-divider" />
         <span className="orion-live-indicator">● AO VIVO</span>
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-8">
         {tiers.map(tier => {
           const agents = AGENTS.filter(a => a.tier === tier);
           if (agents.length === 0) return null;
@@ -250,14 +245,14 @@ export function AgentDetailCards() {
 
           return (
             <div key={tier}>
-              <div className="flex items-center gap-2 mb-2">
-                <TierIcon className="h-3 w-3 text-muted-foreground/50" />
-                <span className="text-[9px] font-mono uppercase tracking-widest text-muted-foreground/50">{cfg.label}</span>
-                <span className="text-[9px] font-mono text-muted-foreground/25">{activeCount}/{agents.length}</span>
-                <span className="text-[8px] text-muted-foreground/30 ml-1">— {cfg.description}</span>
+              <div className="flex items-center gap-3 mb-3">
+                <TierIcon className="h-4 w-4 text-muted-foreground/50" />
+                <span className="text-xs font-mono uppercase tracking-widest text-muted-foreground/50">{cfg.label}</span>
+                <span className="text-xs font-mono text-muted-foreground/25">{activeCount}/{agents.length}</span>
+                <span className="text-xs text-muted-foreground/30 ml-1">— {cfg.description}</span>
                 <div className="flex-1 h-px bg-border/20" />
               </div>
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {agents.map(agent => (
                   <AgentCard key={agent.id} agent={agent} />
                 ))}
