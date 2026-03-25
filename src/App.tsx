@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Index from "./pages/Index.tsx";
+import PlaceholderPage from "./pages/PlaceholderPage.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -16,7 +17,13 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="/missions" element={<PlaceholderPage title="Missions" description="Mission tracking and orchestration" />} />
+          <Route path="/telemetry" element={<PlaceholderPage title="Telemetry" description="Real-time system telemetry" />} />
+          <Route path="/comms" element={<PlaceholderPage title="Comms" description="Communications hub" />} />
+          <Route path="/pipelines" element={<PlaceholderPage title="Pipelines" description="Data pipeline management" />} />
+          <Route path="/automations" element={<PlaceholderPage title="Automations" description="Automation workflows" />} />
+          <Route path="/security" element={<PlaceholderPage title="Security" description="Security monitoring and controls" />} />
+          <Route path="/settings" element={<PlaceholderPage title="Settings" description="System configuration" />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
