@@ -1,10 +1,10 @@
 import { Zap, AlertTriangle, CheckCircle2, Info } from "lucide-react";
 
 const MOCK = [
-  { label: "Total Today", value: 142, icon: Zap, text: "text-foreground", dot: "bg-foreground/30" },
-  { label: "Critical", value: 3, icon: AlertTriangle, text: "text-status-critical", dot: "status-critical" },
-  { label: "Warnings", value: 8, icon: AlertTriangle, text: "text-status-warning", dot: "status-warning" },
-  { label: "Resolved", value: 131, icon: CheckCircle2, text: "text-status-online", dot: "status-online" },
+  { label: "Total Hoje", value: 142, icon: Zap, text: "text-foreground", dot: "bg-foreground/30" },
+  { label: "Crítico", value: 3, icon: AlertTriangle, text: "text-status-critical", dot: "status-critical" },
+  { label: "Atenção", value: 8, icon: AlertTriangle, text: "text-status-warning", dot: "status-warning" },
+  { label: "Resolvido", value: 131, icon: CheckCircle2, text: "text-status-online", dot: "status-online" },
 ];
 
 export function ActivitySummary() {

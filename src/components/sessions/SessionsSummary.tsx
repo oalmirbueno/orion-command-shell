@@ -1,10 +1,10 @@
 import { Flame, Pause, CheckCircle2, XCircle } from "lucide-react";
 
 const MOCK = [
-  { label: "Running", value: 5, icon: Flame, dot: "status-online", text: "text-status-online" },
-  { label: "Paused", value: 2, icon: Pause, dot: "status-warning", text: "text-status-warning" },
-  { label: "Completed", value: 34, icon: CheckCircle2, dot: "bg-primary/50", text: "text-primary" },
-  { label: "Failed", value: 1, icon: XCircle, dot: "status-critical", text: "text-status-critical" },
+  { label: "Em Execução", value: 5, icon: Flame, dot: "status-online", text: "text-status-online" },
+  { label: "Pausadas", value: 2, icon: Pause, dot: "status-warning", text: "text-status-warning" },
+  { label: "Concluídas", value: 34, icon: CheckCircle2, dot: "bg-primary/50", text: "text-primary" },
+  { label: "Falhas", value: 1, icon: XCircle, dot: "status-critical", text: "text-status-critical" },
 ];
 
 export function SessionsSummary() {
