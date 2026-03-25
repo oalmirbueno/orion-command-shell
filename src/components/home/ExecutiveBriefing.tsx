@@ -1,26 +1,13 @@
 import { FileText } from "lucide-react";
 import { useOrionData } from "@/hooks/useOrionData";
 import { OrionDataWrapper } from "@/components/orion/DataWrapper";
-
-interface BriefingItem {
-  time: string;
-  content: string;
-  source: string;
-}
-
-const MOCK_BRIEFING: BriefingItem[] = [
-  { time: "09:42", content: "Pipeline de ingestão retomado após rollback automático do v2.14.2. Performance restaurada em 4min.", source: "Core Engine" },
-  { time: "09:15", content: "Agente Validator-01 reportou falha de conectividade com API externa. Retry policy ativado.", source: "Validator-01" },
-  { time: "08:58", content: "Classificação de leads Q1 iniciada. ETA: 45min com 12.4k registros enfileirados.", source: "Mission Control" },
-  { time: "08:30", content: "Deploy v2.14.3 em staging validado. Aguardando aprovação para produção.", source: "Release Pipeline" },
-  { time: "08:00", content: "Rotina de saúde matinal concluída. Todos os serviços nominais exceto Data Pipeline (P95 elevado).", source: "Health Monitor" },
-];
+import { fetchBriefing } from "@/domains/activity/fetcher";
+import type { BriefingItem } from "@/domains/activity/types";
 
 export function ExecutiveBriefing() {
   const { state, data, source, lastUpdated, refetch } = useOrionData<BriefingItem[]>({
     key: "executive-briefing",
-    mockData: MOCK_BRIEFING,
-    simulateDelay: 800,
+    fetcher: fetchBriefing,
   });
 
   return (
