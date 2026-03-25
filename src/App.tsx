@@ -21,6 +21,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/agents" element={<AgentsPage />} />
+          <Route path="/missions" element={<PlaceholderPage title="Missions" description="Mission tracking and orchestration" />} />
           <Route path="/sessions" element={<SessionsPage />} />
           <Route path="/telemetry" element={<PlaceholderPage title="Telemetry" description="Real-time system telemetry" />} />
           <Route path="/comms" element={<PlaceholderPage title="Comms" description="Communications hub" />} />
