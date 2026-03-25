@@ -1,27 +1,4 @@
-type DayStatus = "up" | "degraded" | "down" | "partial";
-
-interface UptimeDay {
-  date: string;
-  status: DayStatus;
-}
-
-const generateDays = (): UptimeDay[] => {
-  const days: UptimeDay[] = [];
-  const today = new Date();
-  for (let i = 89; i >= 0; i--) {
-    const d = new Date(today);
-    d.setDate(d.getDate() - i);
-    const dateStr = d.toISOString().slice(5, 10);
-    let status: DayStatus = "up";
-    if (i === 45) status = "degraded";
-    if (i === 67) status = "partial";
-    if (i === 72) status = "degraded";
-    days.push({ date: dateStr, status });
-  }
-  return days;
-};
-
-const MOCK_DAYS = generateDays();
+import type { UptimeDay, DayStatus } from "@/domains/system/types";
 
 const statusColor: Record<DayStatus, string> = {
   up: "bg-primary/50 hover:bg-primary/70",
@@ -30,20 +7,23 @@ const statusColor: Record<DayStatus, string> = {
   partial: "bg-status-warning/40 hover:bg-status-warning/60",
 };
 
-export function UptimeTimeline() {
+interface Props {
+  days: UptimeDay[];
+  uptimePercent: string;
+}
+
+export function UptimeTimeline({ days, uptimePercent }: Props) {
   return (
     <section>
       <div className="flex items-center gap-3 mb-4">
-        <h2 className="text-xs font-mono uppercase tracking-[0.15em] text-muted-foreground">
-          Uptime · Últimos 90 Dias
-        </h2>
+        <h2 className="text-xs font-mono uppercase tracking-[0.15em] text-muted-foreground">Uptime · Últimos 90 Dias</h2>
         <div className="flex-1 h-px bg-border/40" />
-        <span className="text-sm font-mono font-semibold text-foreground">99.97%</span>
+        <span className="text-sm font-mono font-semibold text-foreground">{uptimePercent}</span>
       </div>
 
       <div className="rounded-xl border border-border/50 bg-card p-6">
         <div className="flex gap-1 flex-wrap">
-          {MOCK_DAYS.map((day, i) => (
+          {days.map((day, i) => (
             <div
               key={i}
               className={`w-3 h-8 rounded-sm transition-colors cursor-pointer ${statusColor[day.status]}`}
