@@ -1,15 +1,17 @@
-import { Bot, Zap, Pause, WifiOff } from "lucide-react";
+import { Bot, Zap, Pause, WifiOff, Crown, Cpu } from "lucide-react";
 
 const MOCK_SUMMARY = [
   { label: "Total", value: 10, icon: Bot, color: "text-foreground", dotClass: "bg-foreground/30" },
   { label: "Ativos", value: 6, icon: Zap, color: "text-status-online", dotClass: "status-online" },
   { label: "Ociosos", value: 3, icon: Pause, color: "text-muted-foreground", dotClass: "bg-muted-foreground/40" },
   { label: "Offline", value: 1, icon: WifiOff, color: "text-status-critical", dotClass: "status-critical" },
+  { label: "Orquestrador", value: 1, icon: Crown, color: "text-primary", dotClass: "bg-primary/50" },
+  { label: "Tokens Hoje", value: "758k", icon: Cpu, color: "text-foreground", dotClass: "bg-foreground/30" },
 ];
 
 export function AgentsSummaryBar() {
   return (
-    <div className="orion-summary-grid grid-cols-2 sm:grid-cols-4">
+    <div className="orion-summary-grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
       {MOCK_SUMMARY.map((m) => {
         const Icon = m.icon;
         return (
