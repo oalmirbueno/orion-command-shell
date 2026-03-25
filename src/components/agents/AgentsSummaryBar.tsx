@@ -1,18 +1,34 @@
 import { Bot, Zap, Pause, WifiOff, Crown, Cpu } from "lucide-react";
+import type { Agent } from "@/domains/agents/types";
 
-const MOCK_SUMMARY = [
-  { label: "Total", value: 10, icon: Bot, color: "text-foreground", dotClass: "bg-foreground/30" },
-  { label: "Ativos", value: 6, icon: Zap, color: "text-status-online", dotClass: "status-online" },
-  { label: "Ociosos", value: 3, icon: Pause, color: "text-muted-foreground", dotClass: "bg-muted-foreground/40" },
-  { label: "Offline", value: 1, icon: WifiOff, color: "text-status-critical", dotClass: "status-critical" },
-  { label: "Orquestrador", value: 1, icon: Crown, color: "text-primary", dotClass: "bg-primary/50" },
-  { label: "Tokens Hoje", value: "758k", icon: Cpu, color: "text-foreground", dotClass: "bg-foreground/30" },
-];
+interface AgentsSummaryBarProps {
+  agents: Agent[];
+}
 
-export function AgentsSummaryBar() {
+export function AgentsSummaryBar({ agents }: AgentsSummaryBarProps) {
+  const total = agents.length;
+  const active = agents.filter(a => a.status === "active").length;
+  const idle = agents.filter(a => a.status === "idle").length;
+  const offline = agents.filter(a => a.status === "offline").length;
+  const orchestrators = agents.filter(a => a.tier === "orchestrator").length;
+  const totalTokens = agents.reduce((sum, a) => {
+    const num = parseFloat(a.tokensToday.replace("k", ""));
+    return sum + (isNaN(num) ? 0 : num);
+  }, 0);
+  const tokensLabel = `${Math.round(totalTokens)}k`;
+
+  const items = [
+    { label: "Total", value: total, icon: Bot, color: "text-foreground", dotClass: "bg-foreground/30" },
+    { label: "Ativos", value: active, icon: Zap, color: "text-status-online", dotClass: "status-online" },
+    { label: "Ociosos", value: idle, icon: Pause, color: "text-muted-foreground", dotClass: "bg-muted-foreground/40" },
+    { label: "Offline", value: offline, icon: WifiOff, color: "text-status-critical", dotClass: "status-critical" },
+    { label: "Orquestrador", value: orchestrators, icon: Crown, color: "text-primary", dotClass: "bg-primary/50" },
+    { label: "Tokens Hoje", value: tokensLabel, icon: Cpu, color: "text-foreground", dotClass: "bg-foreground/30" },
+  ];
+
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-px bg-border/30 rounded-xl overflow-hidden border border-border/50">
-      {MOCK_SUMMARY.map((m) => {
+      {items.map((m) => {
         const Icon = m.icon;
         return (
           <div key={m.label} className="bg-card px-6 py-5 flex items-center gap-4">

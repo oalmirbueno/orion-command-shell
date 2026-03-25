@@ -22,4 +22,14 @@ export interface Agent {
   load: number;
   tokensToday: string;
   availability: string;
+  /** Current task description */
+  currentTask: string;
+  /** How long ago the current task started */
+  currentTaskAge: string;
+  /** Agent names this agent depends on */
+  dependsOn: string[];
+  /** Agent names this agent feeds data to */
+  feeds: string[];
+  /** Number of active alerts */
+  alertCount: number;
 }
