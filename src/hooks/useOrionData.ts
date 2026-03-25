@@ -1,36 +1,37 @@
 /**
- * useOrionData — Simulates data fetching states for Orion components.
+ * useOrionData — Domain-aware data fetching hook.
  *
- * Provides a clean state machine (loading → ready | error | empty)
- * that components can use to render appropriate UI states.
- * When real APIs are connected, replace the simulation with actual fetch logic.
+ * Accepts a DomainFetcher function and manages the full lifecycle:
+ * loading → ready | error | empty | stale
+ *
+ * The fetcher is the single point of integration. Currently backed by
+ * fallback data per domain. To connect real APIs, replace the fetcher
+ * in the domain's fetcher.ts — no component changes needed.
  *
  * Usage:
- *   const { state, data, error, refetch, lastUpdated, source } = useOrionData({
+ *   const { state, data, refetch } = useOrionData({
  *     key: "agents",
- *     mockData: AGENTS_DATA,
- *     simulateDelay: 800,
+ *     fetcher: fetchAgents,
  *   });
  */
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import type { DataState, DataSource, DomainFetcher } from "@/domains/types";
 
-export type DataState = "loading" | "ready" | "error" | "empty" | "stale";
-export type DataSource = "mock" | "simulated" | "api" | "cache";
+// Re-export for backward compatibility
+export type { DataState, DataSource };
 
 interface UseOrionDataOptions<T> {
   /** Unique key for this data source */
   key: string;
-  /** Mock/placeholder data to return after simulated loading */
-  mockData?: T;
-  /** Simulated loading delay in ms (0 = instant) */
-  simulateDelay?: number;
-  /** Force a specific state — useful for testing UI states */
-  forceState?: DataState;
+  /** Domain fetcher function — the single integration point */
+  fetcher: DomainFetcher<T>;
   /** Mark data as stale after this many ms (0 = never) */
   staleAfter?: number;
   /** Whether to start loading automatically */
   autoLoad?: boolean;
+  /** Force a specific state — useful for testing UI states */
+  forceState?: DataState;
 }
 
 interface UseOrionDataResult<T> {
@@ -49,8 +50,7 @@ interface UseOrionDataResult<T> {
 
 export function useOrionData<T>({
   key,
-  mockData,
-  simulateDelay = 600,
+  fetcher,
   forceState,
   staleAfter = 0,
   autoLoad = true,
@@ -59,43 +59,60 @@ export function useOrionData<T>({
   const [data, setData] = useState<T | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [source, setSource] = useState<DataSource>("fallback");
   const staleTimer = useRef<ReturnType<typeof setTimeout>>();
+  const mountedRef = useRef(true);
 
-  const load = useCallback(() => {
+  const load = useCallback(async () => {
     if (forceState) {
       setState(forceState);
-      if (forceState === "ready" && mockData) setData(mockData);
       return;
     }
 
     setState("loading");
     setError(null);
 
-    const timer = setTimeout(() => {
-      if (mockData === undefined || mockData === null || (Array.isArray(mockData) && mockData.length === 0)) {
+    try {
+      const result = await fetcher();
+
+      if (!mountedRef.current) return;
+
+      const isEmpty =
+        result.data === undefined ||
+        result.data === null ||
+        (Array.isArray(result.data) && result.data.length === 0);
+
+      if (isEmpty) {
         setState("empty");
         setData(null);
       } else {
         setState("ready");
-        setData(mockData);
-        setLastUpdated(new Date());
+        setData(result.data);
+        setSource(result.source);
+        setLastUpdated(result.timestamp);
 
-        // Schedule stale transition
         if (staleAfter > 0) {
           if (staleTimer.current) clearTimeout(staleTimer.current);
-          staleTimer.current = setTimeout(() => setState("stale"), staleAfter);
+          staleTimer.current = setTimeout(() => {
+            if (mountedRef.current) setState("stale");
+          }, staleAfter);
         }
       }
-    }, simulateDelay);
-
-    return () => clearTimeout(timer);
-  }, [key, mockData, simulateDelay, forceState, staleAfter]);
+    } catch (err) {
+      if (!mountedRef.current) return;
+      setState("error");
+      setError(err instanceof Error ? err.message : "Falha ao carregar dados");
+    }
+  }, [key, fetcher, forceState, staleAfter]);
 
   useEffect(() => {
+    mountedRef.current = true;
     if (autoLoad) {
-      const cleanup = load();
-      return cleanup;
+      load();
     }
+    return () => {
+      mountedRef.current = false;
+    };
   }, [key, autoLoad]);
 
   useEffect(() => {
@@ -104,19 +121,19 @@ export function useOrionData<T>({
     };
   }, []);
 
-  const source: DataSource = "mock";
+  const resolvedState = forceState || state;
 
   return {
-    state: forceState || state,
+    state: resolvedState,
     data,
     error,
     refetch: load,
     lastUpdated,
     source,
-    isLoading: (forceState || state) === "loading",
-    isReady: (forceState || state) === "ready",
-    isEmpty: (forceState || state) === "empty",
-    isError: (forceState || state) === "error",
-    isStale: (forceState || state) === "stale",
+    isLoading: resolvedState === "loading",
+    isReady: resolvedState === "ready",
+    isEmpty: resolvedState === "empty",
+    isError: resolvedState === "error",
+    isStale: resolvedState === "stale",
   };
 }
