@@ -66,9 +66,9 @@ function deriveFromSessions(sessions: Session[]): { ops: OperationInfo[]; events
       agentId: null,
       sessionId: s.id,
       assignee: s.model,
-      startedAt: s.updatedAt,
-      updatedAt: s.updatedAt,
-      completedAt: isDone ? s.updatedAt : null,
+      startedAt: String(s.updatedAt),
+      updatedAt: String(s.updatedAt),
+      completedAt: isDone ? String(s.updatedAt) : null,
       metadata: { totalTokens: s.totalTokens, type: s.type },
     });
 
@@ -83,7 +83,7 @@ function deriveFromSessions(sessions: Session[]): { ops: OperationInfo[]; events
       action,
       agent: s.model,
       detail: s.preview ? s.preview.slice(0, 120) : null,
-      createdAt: s.updatedAt,
+      createdAt: String(s.updatedAt),
     });
   }
 
