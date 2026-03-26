@@ -29,10 +29,10 @@ const COLUMNS: ColumnDef[] = [
 /* ── Priority badge ── */
 
 const priorityStyles: Record<TaskPriority, { label: string; cls: string }> = {
-  critical: { label: "CRIT", cls: "bg-status-critical/15 text-status-critical border-status-critical/20" },
-  high: { label: "HIGH", cls: "bg-status-warning/15 text-status-warning border-status-warning/20" },
+  critical: { label: "CRÍT", cls: "bg-status-critical/15 text-status-critical border-status-critical/20" },
+  high: { label: "ALTO", cls: "bg-status-warning/15 text-status-warning border-status-warning/20" },
   normal: { label: "NORM", cls: "bg-muted text-muted-foreground border-border/30" },
-  low: { label: "LOW", cls: "bg-surface-2 text-muted-foreground/50 border-border/20" },
+  low: { label: "BAIXO", cls: "bg-surface-2 text-muted-foreground/50 border-border/20" },
 };
 
 /* ── Task Card ── */
@@ -91,14 +91,14 @@ function TaskCard({ task }: { task: OperationTask }) {
       {isActive && (
         <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border/20">
           <div className="w-2 h-2 rounded-full bg-status-online animate-pulse" />
-          <span className="text-xs font-mono text-status-online/60 uppercase tracking-wider">Processando</span>
+          <span className="text-xs font-mono text-status-online/60 uppercase tracking-wider">Em execução</span>
         </div>
       )}
 
       {isFailed && (
         <div className="flex items-center gap-2 mt-3 pt-3 border-t border-status-critical/15">
           <RotateCcw className="h-3.5 w-3.5 text-status-critical/50" />
-          <span className="text-xs font-mono text-status-critical/60 uppercase tracking-wider">Retry disponível</span>
+          <span className="text-xs font-mono text-status-critical/60 uppercase tracking-wider">Reexecutar disponível</span>
         </div>
       )}
     </div>
@@ -183,8 +183,7 @@ export function OperationsKanban({ tasks }: OperationsKanbanProps) {
     <section className="space-y-4">
       <OrionSectionHeader
         label="Painel Operacional"
-        badge={{ text: `${tasks.filter(t => t.status === "running").length} ativas`, variant: "success" }}
-        live
+        badge={tasks.length > 0 ? { text: `${tasks.filter(t => t.status === "running").length} ativas`, variant: "success" } : undefined}
       />
 
       <KanbanSummaryBar tasks={tasks} />

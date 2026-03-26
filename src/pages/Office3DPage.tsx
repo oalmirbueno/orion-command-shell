@@ -5,10 +5,10 @@ import { Suspense, useState } from "react";
 import { SceneCanvas } from "@/components/office3d/SceneCanvas";
 
 const layerItems = [
-  { label: "Agentes", color: "bg-[#a78bfa]", active: true },
-  { label: "Conexões", color: "bg-[#60a5fa]", active: true },
-  { label: "Sessões", color: "bg-[#6ee7b7]", active: false },
-  { label: "Pipelines", color: "bg-[#fbbf24]", active: false },
+  { label: "Agentes", color: "bg-primary/60", active: true },
+  { label: "Conexões", color: "bg-accent-foreground/40", active: true },
+  { label: "Sessões", color: "bg-status-online/60", active: false },
+  { label: "Pipelines", color: "bg-status-warning/60", active: false },
 ];
 
 const Office3DPage = () => {
@@ -16,7 +16,7 @@ const Office3DPage = () => {
 
   return (
     <OrionLayout title="Office 3D">
-      <div className="max-w-7xl mx-auto space-y-6">
+      <div className="space-y-6">
         <OrionBreadcrumb items={["Mission Control", "Office 3D"]} />
 
         {/* Header */}
@@ -62,7 +62,7 @@ const Office3DPage = () => {
           <div style={{ height: fullscreen ? "calc(100vh - 41px)" : "520px" }}>
             <Suspense
               fallback={
-                <div className="w-full h-full flex items-center justify-center bg-[#0a0a0f]">
+                <div className="w-full h-full flex items-center justify-center bg-background">
                   <div className="text-center space-y-3">
                     <RotateCcw className="h-6 w-6 text-primary/40 animate-spin mx-auto" />
                     <p className="text-xs font-mono text-muted-foreground/40">Carregando viewport…</p>
@@ -115,9 +115,9 @@ const Office3DPage = () => {
               <h3 className="text-xs font-mono text-muted-foreground uppercase tracking-wider mb-3">Legenda</h3>
               <div className="space-y-2">
                 {[
-                  { label: "Orquestrador", color: "bg-[#a78bfa]", desc: "Coordenação central" },
-                  { label: "Núcleo", color: "bg-[#60a5fa]", desc: "Execução principal" },
-                  { label: "Suporte", color: "bg-[#6ee7b7]", desc: "Ferramentas e recursos" },
+                  { label: "Orquestrador", color: "bg-primary/60", desc: "Coordenação central" },
+                  { label: "Núcleo", color: "bg-accent-foreground/40", desc: "Execução principal" },
+                  { label: "Suporte", color: "bg-status-online/60", desc: "Ferramentas e recursos" },
                 ].map((item) => (
                   <div key={item.label} className="flex items-center gap-2.5">
                     <div className={`w-2.5 h-2.5 rounded-sm ${item.color}`} />

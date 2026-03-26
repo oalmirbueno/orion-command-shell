@@ -27,7 +27,7 @@ interface OrionDataWrapperProps {
 
 const sourceLabels: Record<DataSource, { label: string; className: string }> = {
   fallback: { label: "OFFLINE", className: "text-muted-foreground/40 border-border/30" },
-  api: { label: "LIVE", className: "text-status-online border-status-online/30" },
+  api: { label: "API", className: "text-status-online border-status-online/30" },
   cache: { label: "CACHE", className: "text-muted-foreground/50 border-border/30" },
 };
 

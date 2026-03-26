@@ -14,7 +14,7 @@ const actionConfig: Record<ActionType, { icon: React.ElementType; label: string;
   failed: { icon: AlertCircle, label: "Falha", color: "text-status-critical", borderColor: "border-l-status-critical", bg: "bg-status-critical/[0.03]" },
   paused: { icon: Pause, label: "Pausada", color: "text-status-warning", borderColor: "border-l-status-warning", bg: "" },
   resumed: { icon: Play, label: "Retomada", color: "text-status-online", borderColor: "border-l-status-online/40", bg: "" },
-  retried: { icon: RotateCcw, label: "Retry", color: "text-status-warning", borderColor: "border-l-status-warning/40", bg: "bg-status-warning/[0.02]" },
+  retried: { icon: RotateCcw, label: "Reexecução", color: "text-status-warning", borderColor: "border-l-status-warning/40", bg: "bg-status-warning/[0.02]" },
   queued: { icon: Clock, label: "Na Fila", color: "text-muted-foreground", borderColor: "border-l-muted-foreground/30", bg: "" },
 };
 
@@ -75,8 +75,7 @@ export function OperationsTimeline({ events }: OperationsTimelineProps) {
     <section className="space-y-4">
       <OrionSectionHeader
         label="Linha do Tempo Operacional"
-        badge={{ text: `${events.length} eventos`, variant: "info" }}
-        live
+        badge={events.length > 0 ? { text: `${events.length} eventos`, variant: "info" } : undefined}
       />
 
       <div className="max-w-5xl max-h-[500px] overflow-y-auto orion-thin-scroll pr-2">
