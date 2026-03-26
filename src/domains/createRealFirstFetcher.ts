@@ -30,13 +30,13 @@
  *   });
  */
 
-import { isApiConfigured, apiUrl } from "./api";
+import { apiUrl } from "./api";
 import type { DomainFetcher, DomainResult, DataSource } from "./types";
 
 interface RealFirstFetcherOptions<TRaw, TDomain> {
-  /** API path appended to VITE_ORION_API_URL (e.g. "/sessions") */
+  /** API path appended to base URL (e.g. "/sessions") */
   endpoint: string;
-  /** Local fallback data used when API is unavailable */
+  /** Local fallback data used when backend is unavailable */
   fallbackData: TDomain;
   /** Optional transform from raw API response to domain type */
   transform?: (raw: TRaw) => TDomain;
@@ -51,16 +51,7 @@ export function createRealFirstFetcher<TRaw = unknown, TDomain = TRaw>({
   timeout = 8000,
 }: RealFirstFetcherOptions<TRaw, TDomain>): DomainFetcher<TDomain> {
   return async (): Promise<DomainResult<TDomain>> => {
-    // If no API is configured, go straight to fallback — no network attempt
-    if (!isApiConfigured()) {
-      return {
-        data: fallbackData,
-        source: "fallback" as DataSource,
-        timestamp: new Date(),
-      };
-    }
-
-    // Attempt real fetch with timeout
+    // Always attempt real fetch — backend is expected on /api or override
     try {
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), timeout);
