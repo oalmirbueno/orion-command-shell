@@ -1,7 +1,21 @@
 import { Bell, Search } from "lucide-react";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 
 export function OrionTopBar({ title = "Comando" }: { title?: string }) {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        navigate("/search");
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [navigate]);
   return (
     <header className="h-12 flex items-center justify-between border-b border-border px-5 surface-1 shrink-0 select-none">
       <div className="flex items-center gap-4">
@@ -26,7 +40,10 @@ export function OrionTopBar({ title = "Comando" }: { title?: string }) {
         </div>
 
         {/* Search shortcut */}
-        <button className="flex items-center gap-2 px-3 py-1.5 rounded-md text-muted-foreground/50 hover:text-foreground hover:bg-accent/40 transition-colors text-xs font-mono">
+        <button
+          onClick={() => navigate("/search")}
+          className="flex items-center gap-2 px-3 py-1.5 rounded-md text-muted-foreground/50 hover:text-foreground hover:bg-accent/40 transition-colors text-xs font-mono"
+        >
           <Search className="h-4 w-4" />
           <span className="hidden md:inline">⌘K</span>
         </button>
