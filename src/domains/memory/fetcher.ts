@@ -1,14 +1,25 @@
 import { createRealFirstFetcher } from "../createRealFirstFetcher";
-import { createFallbackFetcher } from "../createFallbackFetcher";
-import { FALLBACK_SNAPSHOTS, FALLBACK_MEMORY_PAGE } from "./mocks";
 import type { MemorySnapshot, MemoryPageData } from "./types";
 import type { DomainFetcher } from "../types";
+
+const EMPTY_MEMORY_PAGE: MemoryPageData = {
+  snapshots: [],
+  summary: {
+    totalSnapshots: 0,
+    avgRelevance: 0,
+    topCategory: "—",
+    lastUpdated: "—",
+  },
+};
 
 /** Unified page fetcher — real-first + fallback-safe */
 export const fetchMemoryPage: DomainFetcher<MemoryPageData> = createRealFirstFetcher({
   endpoint: "/memory",
-  fallbackData: FALLBACK_MEMORY_PAGE,
+  fallbackData: EMPTY_MEMORY_PAGE,
 });
 
-/** Legacy fetcher kept for Home widgets compatibility */
-export const fetchMemorySnapshots: DomainFetcher<MemorySnapshot[]> = createFallbackFetcher(FALLBACK_SNAPSHOTS);
+/** Fetcher for Home widgets */
+export const fetchMemorySnapshots: DomainFetcher<MemorySnapshot[]> = createRealFirstFetcher({
+  endpoint: "/memory/snapshots",
+  fallbackData: [],
+});

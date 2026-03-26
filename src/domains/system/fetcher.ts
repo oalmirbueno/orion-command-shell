@@ -2,26 +2,16 @@
  * System Domain — Fetchers (real-first + fallback-safe)
  *
  * Primary: fetchSystemPage — unified page model for SystemPage.
- * Legacy: individual fetchers used by Home page components.
+ * Secondary: individual fetchers for Home page widgets.
  *
- * === INTEGRATION GUIDE ===
- * 1. Set VITE_ORION_API_URL in .env
- * 2. GET /system → SystemPageData JSON
+ * Todos tentam /api/* primeiro; fallback vazio apenas em erro.
  */
 
 import { createRealFirstFetcher } from "../createRealFirstFetcher";
-import { createFallbackFetcher } from "../createFallbackFetcher";
-import { FALLBACK_SYSTEM_PAGE } from "./mocks";
 import type { SystemPageData, CommandData, HealthService } from "./types";
 import type { DomainFetcher } from "../types";
 
-/** Unified page model — used by SystemPage */
-export const fetchSystemPage: DomainFetcher<SystemPageData> = createRealFirstFetcher<SystemPageData, SystemPageData>({
-  endpoint: "/system",
-  fallbackData: FALLBACK_SYSTEM_PAGE,
-});
-
-/** Empty command status — production fallback */
+/** Empty command status — fallback honesto */
 const EMPTY_COMMAND: CommandData = {
   systemState: "nominal",
   metrics: [
@@ -32,6 +22,37 @@ const EMPTY_COMMAND: CommandData = {
   ],
 };
 
-export const fetchCommandStatus: DomainFetcher<CommandData> = createFallbackFetcher(EMPTY_COMMAND);
-export const fetchHealthServices: DomainFetcher<HealthService[]> = createFallbackFetcher([]);
-export const fetchSystemServices: DomainFetcher<SystemPageData["services"]> = createFallbackFetcher([]);
+const EMPTY_SYSTEM_PAGE: SystemPageData = {
+  header: {
+    overallStatus: "healthy",
+    uptime: "—",
+    lastIncident: "—",
+    activeAlerts: 0,
+  },
+  resources: { cpu: 0, memory: 0, disk: 0, network: 0 },
+  services: [],
+  stability: [],
+  uptimeHistory: [],
+};
+
+/** Unified page model — used by SystemPage */
+export const fetchSystemPage: DomainFetcher<SystemPageData> = createRealFirstFetcher({
+  endpoint: "/system",
+  fallbackData: EMPTY_SYSTEM_PAGE,
+});
+
+/** Home widget fetchers */
+export const fetchCommandStatus: DomainFetcher<CommandData> = createRealFirstFetcher({
+  endpoint: "/system/command",
+  fallbackData: EMPTY_COMMAND,
+});
+
+export const fetchHealthServices: DomainFetcher<HealthService[]> = createRealFirstFetcher({
+  endpoint: "/system/health",
+  fallbackData: [],
+});
+
+export const fetchSystemServices: DomainFetcher<SystemPageData["services"]> = createRealFirstFetcher({
+  endpoint: "/system/services",
+  fallbackData: [],
+});
