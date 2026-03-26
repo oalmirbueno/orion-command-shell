@@ -21,10 +21,10 @@ const FALLBACK_COMMAND: CommandData = {
 };
 
 const FALLBACK_ATTENTION: AttentionItem[] = [
-  { id: "1", priority: "critical", title: "Pipeline de ingestão com latência elevada", context: "Data Pipeline · P95 > 200ms há 12min", timestamp: "12min" },
-  { id: "2", priority: "warning", title: "Agente Classifier atingiu 85% de memória", context: "ML Processor · Cluster East", timestamp: "28min" },
-  { id: "3", priority: "warning", title: "3 tarefas na fila há mais de 5 minutos", context: "Queue Manager · Threshold: 3min", timestamp: "6min" },
-  { id: "4", priority: "info", title: "Deploy v2.14.3 aguardando aprovação", context: "Release Pipeline · Staging validated", timestamp: "1h" },
+  { id: "1", priority: "critical", title: "Pipeline de ingestão com latência elevada", context: "data-pipeline · P95 > 200ms há 12min", timestamp: "12min" },
+  { id: "2", priority: "warning", title: "Classifier-01 atingiu 85% de memória", context: "ml-processor · cluster-east", timestamp: "28min" },
+  { id: "3", priority: "warning", title: "3 tarefas na fila há mais de 5 minutos", context: "queue-manager · threshold: 3min", timestamp: "6min" },
+  { id: "4", priority: "info", title: "Deploy v2.14.3 aguardando aprovação", context: "release-pipeline · staging validado", timestamp: "1h" },
 ];
 
 const FALLBACK_LIVE_OPS: Operation[] = [
@@ -58,11 +58,11 @@ const FALLBACK_HEALTH: HealthService[] = [
 ];
 
 const FALLBACK_BRIEFING: BriefingItem[] = [
-  { time: "09:42", content: "Pipeline de ingestão retomado após rollback automático do v2.14.2. Performance restaurada em 4min.", source: "Core Engine" },
-  { time: "09:15", content: "Agente Validator-01 reportou falha de conectividade com API externa. Retry policy ativado.", source: "Validator-01" },
-  { time: "08:58", content: "Classificação de leads Q1 iniciada. ETA: 45min com 12.4k registros enfileirados.", source: "Mission Control" },
-  { time: "08:30", content: "Deploy v2.14.3 em staging validado. Aguardando aprovação para produção.", source: "Release Pipeline" },
-  { time: "08:00", content: "Rotina de saúde matinal concluída. Todos os serviços nominais exceto Data Pipeline (P95 elevado).", source: "Health Monitor" },
+  { time: "há 3min", content: "Pipeline de ingestão retomado após rollback do v2.14.2. Performance normalizada.", source: "core-engine" },
+  { time: "há 30min", content: "Validator-01 reportou falha de conectividade com API externa. Retry ativo.", source: "validator-01" },
+  { time: "há 47min", content: "Classificação Q1 iniciada. 12.4k registros enfileirados, ETA ~45min.", source: "classifier-01" },
+  { time: "há 1h", content: "Deploy v2.14.3 validado em staging. Aguardando aprovação.", source: "release-pipeline" },
+  { time: "há 2h", content: "Health check matinal concluído. Data Pipeline com P95 elevado, demais nominais.", source: "monitor-01" },
 ];
 
 export const FALLBACK_HOME_PAGE: HomePageData = {

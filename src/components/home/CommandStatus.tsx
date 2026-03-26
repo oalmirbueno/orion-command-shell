@@ -6,17 +6,17 @@ const stateConfig: Record<SystemState, {
   bg: string; border: string; text: string; dot: string;
 }> = {
   nominal: {
-    icon: Shield, label: "SISTEMAS NOMINAIS", sublabel: "Todas as operações dentro dos parâmetros",
+    icon: Shield, label: "NOMINAL", sublabel: "Operações dentro dos parâmetros",
     bg: "bg-status-online/[0.06]", border: "border-status-online/30", text: "text-status-online",
     dot: "status-online",
   },
   degraded: {
-    icon: AlertTriangle, label: "PERFORMANCE DEGRADADA", sublabel: "1 serviço com latência elevada · operação continua",
+    icon: AlertTriangle, label: "DEGRADADO", sublabel: "Latência elevada detectada",
     bg: "bg-status-warning/[0.06]", border: "border-status-warning/30", text: "text-status-warning",
     dot: "status-warning",
   },
   critical: {
-    icon: Shield, label: "FALHA DETECTADA", sublabel: "Ação imediata necessária",
+    icon: Shield, label: "CRÍTICO", sublabel: "Intervenção necessária",
     bg: "bg-status-critical/[0.06]", border: "border-status-critical/30", text: "text-status-critical",
     dot: "status-critical",
   },

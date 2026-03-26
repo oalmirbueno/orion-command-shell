@@ -11,11 +11,11 @@ export function ExecutiveBriefing({ items = [] }: ExecutiveBriefingProps) {
       <div className="orion-panel-header">
         <div className="flex items-center gap-3">
           <div className="w-6 h-0.5 bg-muted-foreground/40 rounded-full" />
-          <h2 className="orion-panel-title">Leitura Executiva</h2>
+          <h2 className="orion-panel-title">Log Operacional</h2>
         </div>
         <div className="flex items-center gap-2">
           <FileText className="h-4 w-4 text-muted-foreground/40" />
-          <span className="text-xs font-mono text-muted-foreground/40">Hoje</span>
+          <span className="text-xs font-mono text-muted-foreground/40">{items.length} registros</span>
         </div>
       </div>
 
