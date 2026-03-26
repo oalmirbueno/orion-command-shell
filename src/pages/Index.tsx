@@ -23,13 +23,9 @@ const Index = () => {
         {data && (
           <div className="space-y-5">
             {/* Tier 1: Status + Weather side by side */}
-            <div className="grid grid-cols-1 xl:grid-cols-5 gap-5">
-              <div className="xl:col-span-3">
-                <CommandStatus data={data.command} />
-              </div>
-              <div className="xl:col-span-2">
-                <WeatherContext />
-              </div>
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
+              <CommandStatus data={data.command} />
+              <WeatherContext />
             </div>
 
             {/* Tier 2: What needs attention */}
