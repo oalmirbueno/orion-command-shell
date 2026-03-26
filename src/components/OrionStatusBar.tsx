@@ -83,7 +83,7 @@ export function OrionStatusBar() {
 
         <div className="flex items-center gap-2">
           <HardDrive className="h-3.5 w-3.5" />
-          <span>DISK</span>
+          <span>DISCO</span>
           <span className="text-foreground/70">{diskPct}%</span>
           <MiniBar percent={diskPct} />
         </div>
@@ -100,14 +100,14 @@ export function OrionStatusBar() {
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
           <Shield className="h-3.5 w-3.5 text-status-online" />
-          <span className="text-status-online">SECURE</span>
+          <span className="text-status-online">SEGURO</span>
         </div>
 
         <Sep />
 
         <div className="flex items-center gap-2">
           <Wifi className="h-3.5 w-3.5" />
-          <span>{stats.activeConnections} conn</span>
+          <span>{stats.activeConnections} conex</span>
         </div>
 
         <Sep />
