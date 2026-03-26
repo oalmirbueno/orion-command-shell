@@ -8,7 +8,7 @@ const EMPTY_FILES_PAGE: FilesPageData = {
     totalFiles: 0,
     totalSize: "—",
     lastModified: "—",
-    categories: [],
+    categories: 0,
   },
 };
 
