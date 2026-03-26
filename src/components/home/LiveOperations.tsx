@@ -6,6 +6,22 @@ interface LiveOperationsProps {
 }
 
 export function LiveOperations({ operations = [] }: LiveOperationsProps) {
+  if (operations.length === 0) {
+    return (
+      <section className="rounded-lg border border-border overflow-hidden h-full">
+        <div className="orion-panel-header">
+          <div className="flex items-center gap-3">
+            <div className="w-6 h-0.5 bg-status-online rounded-full" />
+            <h2 className="orion-panel-title">Operações em Andamento</h2>
+          </div>
+        </div>
+        <div className="px-5 py-8 text-center">
+          <p className="text-sm text-muted-foreground/50 font-mono">Aguardando conexão com API</p>
+        </div>
+      </section>
+    );
+  }
+
   const runningCount = operations.filter(o => o.status === "running").length;
 
   return (

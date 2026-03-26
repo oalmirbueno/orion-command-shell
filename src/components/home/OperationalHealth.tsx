@@ -12,6 +12,22 @@ interface OperationalHealthProps {
 }
 
 export function OperationalHealth({ services = [] }: OperationalHealthProps) {
+  if (services.length === 0) {
+    return (
+      <section className="rounded-lg border border-border overflow-hidden h-full">
+        <div className="orion-panel-header">
+          <div className="flex items-center gap-3">
+            <div className="w-6 h-0.5 bg-muted-foreground/40 rounded-full" />
+            <h2 className="orion-panel-title">Saúde Operacional</h2>
+          </div>
+        </div>
+        <div className="px-5 py-8 text-center">
+          <p className="text-sm text-muted-foreground/50 font-mono">Aguardando conexão com API</p>
+        </div>
+      </section>
+    );
+  }
+
   const healthyCount = services.filter(s => s.status === "healthy").length;
   const total = services.length;
   const allHealthy = healthyCount === total;
