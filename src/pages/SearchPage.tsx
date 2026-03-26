@@ -49,7 +49,7 @@ const SearchPage = () => {
           </div>
 
           {/* Scope filters */}
-          <div className="flex items-center gap-1.5 px-6 py-3 border-t border-border/20 bg-accent/3">
+          <div className="flex items-center gap-1.5 px-6 py-3 border-t border-border/20 bg-accent/5">
             {scopes.map((scope) => {
               const Icon = scope.icon;
               const isActive = activeScope === scope.value;
@@ -60,7 +60,7 @@ const SearchPage = () => {
                   className={`flex items-center gap-1.5 text-[10px] font-mono uppercase px-2.5 py-1 rounded-full border transition-colors ${
                     isActive
                       ? "bg-primary/10 text-primary border-primary/20"
-                      : "text-muted-foreground/40 border-border/15 hover:border-border/30"
+                      : "text-muted-foreground/40 border-border/20 hover:border-border/30"
                   }`}
                 >
                   <Icon className="h-3 w-3" />
