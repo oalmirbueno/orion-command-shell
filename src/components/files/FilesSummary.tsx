@@ -1,16 +1,16 @@
-import { Brain, Layers, Clock, Database } from "lucide-react";
-import type { MemorySummaryData } from "@/domains/memory/types";
+import { FolderOpen, HardDrive, Clock, Layers } from "lucide-react";
+import type { FilesSummaryData } from "@/domains/files/types";
 
-interface MemorySummaryProps {
-  summary: MemorySummaryData;
+interface FilesSummaryProps {
+  summary: FilesSummaryData;
 }
 
-export function MemorySummary({ summary }: MemorySummaryProps) {
+export function FilesSummary({ summary }: FilesSummaryProps) {
   const items = [
-    { label: "Snapshots", value: summary.totalSnapshots || "—", icon: Layers, text: "text-primary", dot: "bg-primary/50" },
-    { label: "Categorias", value: summary.totalCategories || "—", icon: Brain, text: "text-foreground", dot: "bg-foreground/30" },
-    { label: "Última Captura", value: summary.lastCapture || "—", icon: Clock, text: "text-status-online", dot: "bg-status-online/40" },
-    { label: "Tamanho", value: summary.totalSize || "—", icon: Database, text: "text-muted-foreground", dot: "bg-muted-foreground/40" },
+    { label: "Arquivos", value: summary.totalFiles || "—", icon: FolderOpen, text: "text-primary", dot: "bg-primary/50" },
+    { label: "Categorias", value: summary.categories || "—", icon: Layers, text: "text-foreground", dot: "bg-foreground/30" },
+    { label: "Última Alteração", value: summary.lastModified || "—", icon: Clock, text: "text-status-online", dot: "bg-status-online/40" },
+    { label: "Tamanho Total", value: summary.totalSize || "—", icon: HardDrive, text: "text-muted-foreground", dot: "bg-muted-foreground/40" },
   ];
 
   return (
