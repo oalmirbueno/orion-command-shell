@@ -1,12 +1,23 @@
+/**
+ * Operations Domain — Fetchers (real-first + derivação client-side)
+ *
+ * Estratégia:
+ *   1. Tenta /api/operations (endpoint real do OpenClaw)
+ *   2. Se indisponível, deriva operations client-side a partir de
+ *      sinais reais de Sessions, Cron, Activities, Agents
+ *   3. Nunca retorna dados fake — apenas sinais reais ou vazio honesto
+ */
+
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { createRealFirstFetcher } from "../createRealFirstFetcher";
+import { deriveOperationsFromDomains } from "./derive";
 import type {
   OperationInfo, TimelineEventInfo,
   OperationTask, TimelineEvent, Operation, OperationsSummaryData,
 } from "./types";
 import type { OperationsPageData } from "./types.page";
-import type { DomainFetcher } from "../types";
+import type { DomainFetcher, DomainResult, DataSource } from "../types";
 
 /* ── Transforms: canônico → view ── */
 
@@ -70,23 +81,71 @@ function buildSummary(tasks: OperationTask[]): OperationsSummaryData {
   };
 }
 
+function buildPageData(operations: OperationInfo[], timeline: TimelineEventInfo[]): OperationsPageData {
+  const tasks = operations.map(toOperationTask);
+  const timelineEvents = timeline.map(ev => toTimelineEvent(ev, operations));
+  const liveOps = operations.map(toLiveOp).filter((o): o is Operation => o !== null);
+  return { tasks, timeline: timelineEvents, liveOps, summary: buildSummary(tasks) };
+}
+
 /* ── Raw API shape ── */
 interface RawOperationsPage {
   operations: OperationInfo[];
   timeline: TimelineEventInfo[];
 }
 
+const EMPTY_PAGE: OperationsPageData = {
+  tasks: [], timeline: [], liveOps: [],
+  summary: { total: 0, running: 0, queued: 0, done: 0, failed: 0, criticalActive: 0 },
+};
+
+/* ── Fetcher com fallback para derivação client-side ── */
+
+async function fetchOperationsRaw(): Promise<DomainResult<RawOperationsPage>> {
+  const realFetcher = createRealFirstFetcher<RawOperationsPage, RawOperationsPage>({
+    endpoint: "/operations",
+    fallbackData: { operations: [], timeline: [] },
+  });
+
+  const result = await realFetcher();
+
+  // Se veio da API real, usa direto
+  if (result.source === "api") {
+    return result;
+  }
+
+  // Fallback: derivar client-side
+  try {
+    const derived = await deriveOperationsFromDomains();
+    return {
+      data: derived,
+      source: "api" as DataSource,
+      timestamp: new Date(),
+    };
+  } catch {
+    console.debug("[Orion] operations: derivação client-side falhou, retornando vazio");
+    return {
+      data: { operations: [], timeline: [] },
+      source: "fallback" as DataSource,
+      timestamp: new Date(),
+    };
+  }
+}
+
 /* ── Page-level fetcher ── */
-export const fetchOperationsPage: DomainFetcher<OperationsPageData> = createRealFirstFetcher<RawOperationsPage, OperationsPageData>({
-  endpoint: "/operations",
-  fallbackData: { tasks: [], timeline: [], liveOps: [], summary: { total: 0, running: 0, queued: 0, done: 0, failed: 0, criticalActive: 0 } },
-  transform: (raw) => {
-    const tasks = raw.operations.map(toOperationTask);
-    const timeline = raw.timeline.map(ev => toTimelineEvent(ev, raw.operations));
-    const liveOps = raw.operations.map(toLiveOp).filter((o): o is Operation => o !== null);
-    return { tasks, timeline, liveOps, summary: buildSummary(tasks) };
-  },
-});
+export const fetchOperationsPage: DomainFetcher<OperationsPageData> = async (): Promise<DomainResult<OperationsPageData>> => {
+  const result = await fetchOperationsRaw();
+
+  if (result.data.operations.length === 0 && result.data.timeline.length === 0) {
+    return { data: EMPTY_PAGE, source: result.source, timestamp: result.timestamp };
+  }
+
+  return {
+    data: buildPageData(result.data.operations, result.data.timeline),
+    source: result.source,
+    timestamp: result.timestamp,
+  };
+};
 
 /* ── Granular fetchers ── */
 export const fetchOperationTasks: DomainFetcher<OperationTask[]> = createRealFirstFetcher<OperationInfo[], OperationTask[]>({
