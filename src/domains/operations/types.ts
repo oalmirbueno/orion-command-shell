@@ -17,6 +17,11 @@ export type OperationKind =
 export type OperationStatus = "queued" | "running" | "paused" | "done" | "failed";
 export type OperationPriority = "critical" | "high" | "normal" | "low";
 
+// Aliases para compatibilidade com componentes de UI existentes
+export type TaskStatus = OperationStatus;
+export type TaskPriority = OperationPriority;
+export type ActionType = TimelineAction;
+
 export type TimelineAction =
   | "started" | "completed" | "failed"
   | "paused" | "resumed" | "retried" | "queued";
