@@ -1,33 +1,12 @@
 /**
  * createRealFirstFetcher — Real-first, fallback-safe data fetching.
  *
- * Strategy:
- *   1. If a real API URL is configured, attempt the real fetch first.
- *   2. If the real fetch fails (network error, non-2xx, timeout), fall back to local data.
- *   3. If no API URL is configured, use fallback directly (no network request).
+ * Estratégia (OpenClaw-first):
+ *   1. Sempre tenta fetch real em /api/* (backend acoplado ao host).
+ *   2. Se VITE_ORION_API_URL estiver definido, usa como override de host.
+ *   3. Em caso de erro (rede, non-2xx, timeout), usa fallback vazio honesto.
  *
- * This is the standard pattern for all Orion domains.
- * Sessions is the pilot — replicate this for agents, system, etc.
- *
- * === HOW TO CONNECT A REAL API ===
- *
- * 1. Set VITE_ORION_API_URL in your .env:
- *      VITE_ORION_API_URL=https://api.your-backend.com
- *
- * 2. Ensure your endpoint returns JSON matching the domain's type (e.g. Session[]).
- *
- * 3. That's it. The fetcher will automatically try the real endpoint first.
- *    If it fails, fallback data is used and source is marked "fallback".
- *
- * === CUSTOMIZING THE RESPONSE TRANSFORM ===
- *
- * If your API returns a different shape, pass a `transform` function:
- *
- *   createRealFirstFetcher({
- *     endpoint: "/sessions",
- *     fallbackData: FALLBACK_SESSIONS,
- *     transform: (raw) => raw.data.items,  // extract from wrapper
- *   });
+ * Padrão consolidado para todos os domínios do Orion Mission Control.
  */
 
 import { apiUrl } from "./api";
@@ -51,7 +30,6 @@ export function createRealFirstFetcher<TRaw = unknown, TDomain = TRaw>({
   timeout = 8000,
 }: RealFirstFetcherOptions<TRaw, TDomain>): DomainFetcher<TDomain> {
   return async (): Promise<DomainResult<TDomain>> => {
-    // Always attempt real fetch — backend is expected on /api or override
     try {
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), timeout);
@@ -76,8 +54,7 @@ export function createRealFirstFetcher<TRaw = unknown, TDomain = TRaw>({
         timestamp: new Date(),
       };
     } catch {
-      // Real fetch failed — use fallback silently
-      console.debug(`[Orion] ${endpoint}: API unavailable, using fallback`);
+      console.debug(`[Orion] ${endpoint}: backend indisponível, usando fallback`);
       return {
         data: fallbackData,
         source: "fallback" as DataSource,

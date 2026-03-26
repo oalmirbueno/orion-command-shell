@@ -1,9 +1,18 @@
 import { createRealFirstFetcher } from "../createRealFirstFetcher";
-import { FALLBACK_FILES_PAGE } from "./mocks";
 import type { FilesPageData } from "./types";
 import type { DomainFetcher } from "../types";
 
+const EMPTY_FILES_PAGE: FilesPageData = {
+  files: [],
+  summary: {
+    totalFiles: 0,
+    totalSize: "—",
+    lastModified: "—",
+    categories: 0,
+  },
+};
+
 export const fetchFilesPage: DomainFetcher<FilesPageData> = createRealFirstFetcher({
   endpoint: "/files",
-  fallbackData: FALLBACK_FILES_PAGE,
+  fallbackData: EMPTY_FILES_PAGE,
 });
