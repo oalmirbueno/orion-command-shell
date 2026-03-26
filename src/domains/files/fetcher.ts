@@ -1,14 +1,47 @@
 // Files Domain — Fetchers (real-first + fallback-safe)
 //
-// Shape canônico: FileInfo (dados brutos do OpenClaw)
-// Shape de UI: FilesPageData (derivado via transform)
+// Real API returns: [{ name, path, type: "file"|"folder", children? }]
+// Transform maps flat tree to FileInfo canonical shape.
 
 import { createRealFirstFetcher } from "../createRealFirstFetcher";
 import type { FileInfo, FileEntry, FilesPageData, FilesSummaryData, FileType } from "./types";
 import type { DomainFetcher, DomainResult } from "../types";
 
 // ═══════════════════════════════════════════════════════
-// Transforms — canônico → view
+// Real API shape
+// ═══════════════════════════════════════════════════════
+
+interface RealFileEntry {
+  name: string;
+  path: string;
+  type: "file" | "folder";
+  children?: RealFileEntry[];
+}
+
+/** Flatten tree into FileInfo[] */
+function flattenFiles(entries: RealFileEntry[], result: FileInfo[] = []): FileInfo[] {
+  for (const entry of entries) {
+    result.push({
+      name: entry.name,
+      path: entry.path,
+      kind: entry.type === "folder" ? "directory" : "file",
+      sizeBytes: 0,
+      mimeType: null,
+      modifiedAt: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
+      permissions: "644",
+      owner: null,
+      workspace: null,
+    });
+    if (entry.children) {
+      flattenFiles(entry.children, result);
+    }
+  }
+  return result;
+}
+
+// ═══════════════════════════════════════════════════════
+// Transforms — canonical → view
 // ═══════════════════════════════════════════════════════
 
 function deriveFileType(mime: string | null, name: string): FileType {
@@ -86,9 +119,17 @@ const EMPTY_FILES_PAGE: FilesPageData = {
 };
 
 export const fetchFilesPage: DomainFetcher<FilesPageData> = async (): Promise<DomainResult<FilesPageData>> => {
-  const baseFetcher = createRealFirstFetcher<FileInfo[], FileInfo[]>({
+  const baseFetcher = createRealFirstFetcher<RealFileEntry[] | FileInfo[], FileInfo[]>({
     endpoint: "/files",
     fallbackData: [],
+    transform: (raw) => {
+      if (!Array.isArray(raw)) return [];
+      // Detect real shape: has "type" field with "file"/"folder" values
+      if (raw.length > 0 && raw[0] && "type" in raw[0] && (raw[0].type === "file" || raw[0].type === "folder")) {
+        return flattenFiles(raw as RealFileEntry[]);
+      }
+      return raw as FileInfo[];
+    },
   });
 
   const result = await baseFetcher();
@@ -97,12 +138,20 @@ export const fetchFilesPage: DomainFetcher<FilesPageData> = async (): Promise<Do
     return { data: EMPTY_FILES_PAGE, source: result.source, timestamp: result.timestamp };
   }
 
-  // Filtra apenas arquivos (não diretórios) para a listagem
-  const fileInfos = result.data.filter(f => f.kind === "file");
+  const allFiles = result.data;
+  const fileInfos = allFiles.filter(f => f.kind === "file");
+  const dirInfos = allFiles.filter(f => f.kind === "directory");
   const files = fileInfos.map(toFileEntry);
 
   return {
-    data: { files, summary: buildSummary(files, fileInfos) },
+    data: {
+      files,
+      summary: {
+        ...buildSummary(files, fileInfos),
+        totalFiles: fileInfos.length,
+        categories: new Set([...files.map(f => f.type), ...(dirInfos.length > 0 ? ["folder" as FileType] : [])]).size,
+      },
+    },
     source: result.source,
     timestamp: result.timestamp,
   };

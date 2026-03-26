@@ -1,13 +1,65 @@
 /**
  * Agents Domain — Fetchers (real-first + fallback-safe)
  *
- * Shape canônico: AgentInfo (dados brutos do OpenClaw)
- * Shape de UI: AgentView (derivado via transform)
+ * Real API shape: { agents: [{ id, name, emoji, color, model, status, lastActivity, activeSessions }] }
+ * Missing fields from canonical are filled with sensible defaults.
  */
 
 import { createRealFirstFetcher } from "../createRealFirstFetcher";
-import type { AgentInfo, AgentView, AgentNode, AgentStatus } from "./types";
+import type { AgentInfo, AgentView, AgentNode, AgentStatus, AgentTier } from "./types";
 import type { DomainFetcher, DomainResult } from "../types";
+
+// ═══════════════════════════════════════════════════════
+// Real API shape
+// ═══════════════════════════════════════════════════════
+
+interface RealAgent {
+  id: string;
+  name: string;
+  emoji?: string;
+  color?: string;
+  model?: string;
+  workspace?: string;
+  dmPolicy?: string;
+  status?: string;
+  lastActivity?: string;
+  activeSessions?: number;
+  allowAgents?: string[];
+}
+
+interface AgentsApiResponse {
+  agents: RealAgent[];
+}
+
+// ═══════════════════════════════════════════════════════
+// Transform real → canonical
+// ═══════════════════════════════════════════════════════
+
+function realToAgentInfo(raw: RealAgent): AgentInfo {
+  return {
+    id: raw.id,
+    name: raw.name,
+    role: raw.model?.split("/")[0] || "agent",
+    tier: "core" as AgentTier,
+    model: raw.model || "unknown",
+    enabled: true,
+    online: raw.status === "online",
+    activeSessions: raw.activeSessions || 0,
+    totalTokensToday: 0,
+    uptimePercent: raw.status === "online" ? 99.9 : 0,
+    cpuPercent: 0,
+    lastActivityAt: raw.lastActivity || new Date().toISOString(),
+    currentTask: null,
+    currentTaskStartedAt: null,
+    dependsOn: [],
+    feeds: [],
+    alertCount: 0,
+  };
+}
+
+// ═══════════════════════════════════════════════════════
+// Canonical → View transforms
+// ═══════════════════════════════════════════════════════
 
 function deriveStatus(agent: AgentInfo): AgentStatus {
   if (!agent.online || !agent.enabled) return "offline";
@@ -60,9 +112,16 @@ function toAgentView(a: AgentInfo): AgentView {
 }
 
 export const fetchAgents: DomainFetcher<AgentView[]> = async (): Promise<DomainResult<AgentView[]>> => {
-  const baseFetcher = createRealFirstFetcher<AgentInfo[], AgentInfo[]>({
+  const baseFetcher = createRealFirstFetcher<AgentsApiResponse | AgentInfo[], AgentInfo[]>({
     endpoint: "/agents",
     fallbackData: [],
+    transform: (raw) => {
+      if (Array.isArray(raw)) return raw;
+      if (raw && typeof raw === "object" && "agents" in raw) {
+        return (raw as AgentsApiResponse).agents.map(realToAgentInfo);
+      }
+      return [];
+    },
   });
 
   const result = await baseFetcher();
@@ -73,7 +132,14 @@ export const fetchAgents: DomainFetcher<AgentView[]> = async (): Promise<DomainR
   };
 };
 
-export const fetchAgentTree: DomainFetcher<AgentNode[]> = createRealFirstFetcher({
-  endpoint: "/agents/tree",
-  fallbackData: [],
-});
+export const fetchAgentTree: DomainFetcher<AgentNode[]> = async (): Promise<DomainResult<AgentNode[]>> => {
+  const result = await fetchAgents();
+  const nodes: AgentNode[] = result.data.map(a => ({
+    name: a.name,
+    role: a.role,
+    tier: a.tier,
+    status: a.status,
+    load: a.load,
+  }));
+  return { data: nodes, source: result.source, timestamp: result.timestamp };
+};
