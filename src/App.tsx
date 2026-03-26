@@ -14,6 +14,8 @@ import MemoryPage from "./pages/MemoryPage.tsx";
 import AlertsPage from "./pages/AlertsPage.tsx";
 import Office3DPage from "./pages/Office3DPage.tsx";
 import OperationsPage from "./pages/OperationsPage.tsx";
+import FilesPage from "./pages/FilesPage.tsx";
+import SearchPage from "./pages/SearchPage.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -35,6 +37,8 @@ const App = () => (
           <Route path="/cron" element={<CronPage />} />
           <Route path="/alerts" element={<AlertsPage />} />
           <Route path="/operations" element={<OperationsPage />} />
+          <Route path="/files" element={<FilesPage />} />
+          <Route path="/search" element={<SearchPage />} />
           <Route path="/pipelines" element={<PlaceholderPage title="Pipelines" description="Gerenciamento de pipelines de dados" />} />
           <Route path="/office3d" element={<Office3DPage />} />
           <Route path="/settings" element={<PlaceholderPage title="Configurações" description="Configuração do sistema" />} />
