@@ -107,7 +107,7 @@ export function OrionStatusBar() {
 
         <div className="flex items-center gap-2">
           <Wifi className="h-3.5 w-3.5" />
-          <span>{stats.activeConnections} conex</span>
+          <span>{stats.activeConnections} conexões</span>
         </div>
 
         <Sep />

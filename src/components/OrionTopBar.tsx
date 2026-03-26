@@ -21,7 +21,7 @@ export function OrionTopBar({ title = "Comando" }: { title?: string }) {
 
         {/* Uptime */}
         <div className="hidden md:flex items-center gap-2 px-3 py-1.5 mr-1">
-          <span className="text-xs font-mono text-muted-foreground/50">UPTIME</span>
+          <span className="text-xs font-mono text-muted-foreground/50">ATIVO</span>
           <span className="text-xs font-mono text-primary font-semibold">99.97%</span>
         </div>
 
