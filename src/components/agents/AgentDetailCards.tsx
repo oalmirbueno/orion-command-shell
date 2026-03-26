@@ -1,8 +1,8 @@
 import { Bot, Cpu, Zap, AlertTriangle, Crown, Users, ArrowRight, Activity, Inbox } from "lucide-react";
-import type { Agent, AgentStatus, AgentTier } from "@/domains/agents/types";
+import type { AgentView, AgentStatus, AgentTier } from "@/domains/agents/types";
 
 interface AgentDetailCardsProps {
-  agents: Agent[];
+  agents: AgentView[];
 }
 
 const statusConfig: Record<AgentStatus, { label: string; dot: string; text: string; border: string; bg: string }> = {
@@ -17,7 +17,7 @@ const tierConfig: Record<AgentTier, { label: string; icon: React.ElementType; ba
   support: { label: "Suporte", icon: Users, badgeClass: "orion-badge-neutral", description: "Infraestrutura e operações auxiliares" },
 };
 
-function AgentCard({ agent }: { agent: Agent }) {
+function AgentCard({ agent }: { agent: AgentView }) {
   const cfg = statusConfig[agent.status];
   const tier = tierConfig[agent.tier];
   const isOrch = agent.tier === "orchestrator";
