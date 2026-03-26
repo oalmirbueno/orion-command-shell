@@ -13,16 +13,16 @@ export function OrionTopBar({ title = "Comando" }: { title?: string }) {
       <div className="flex items-center gap-2">
         {/* System status pill */}
         <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-md surface-2 border border-border mr-2">
-          <div className="status-dot status-online" style={{ width: 7, height: 7 }} />
+          <div className="status-dot bg-muted-foreground/30" style={{ width: 7, height: 7 }} />
           <span className="text-xs font-mono text-muted-foreground uppercase tracking-wider">
-            Nominal
+            Aguardando
           </span>
         </div>
 
         {/* Uptime */}
         <div className="hidden md:flex items-center gap-2 px-3 py-1.5 mr-1">
           <span className="text-xs font-mono text-muted-foreground/50">ATIVO</span>
-          <span className="text-xs font-mono text-primary font-semibold">99.97%</span>
+          <span className="text-xs font-mono text-muted-foreground/40">—</span>
         </div>
 
         {/* Search shortcut */}
