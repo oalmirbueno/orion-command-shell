@@ -13,7 +13,7 @@ import type { AgentNode } from "../agents/types";
 const FALLBACK_COMMAND: CommandData = {
   systemState: "degraded",
   metrics: [
-    { label: "Uptime", value: "99.97%", icon: "Clock" },
+    { label: "Disponib.", value: "99.97%", icon: "Clock" },
     { label: "Agentes", value: "7/10", icon: "Bot" },
     { label: "Sessões", value: "5 ativas", icon: "Activity" },
     { label: "Tokens/h", value: "142k", icon: "Zap" },
