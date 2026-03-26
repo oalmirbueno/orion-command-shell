@@ -7,6 +7,7 @@
 // O shell consome via ActivityPageData sem saber do naming interno.
 
 import { createRealFirstFetcher } from "../createRealFirstFetcher";
+import { deriveActivitiesFromDomains } from "./derive";
 import type {
   ActivityInfo, ActivityEvent, ActivityPageData,
   BriefingItem, AttentionItem,
@@ -84,6 +85,7 @@ const EMPTY_PAGE: ActivityPageData = {
 };
 
 // Rota canônica: /api/activities (plural, alinhado ao projeto-base)
+// Se retornar vazio, deriva de outros domínios (modo standalone)
 export const fetchActivityPage: DomainFetcher<ActivityPageData> = async (): Promise<DomainResult<ActivityPageData>> => {
   const baseFetcher = createRealFirstFetcher<ActivityInfo[], ActivityInfo[]>({
     endpoint: "/activities",
@@ -91,30 +93,42 @@ export const fetchActivityPage: DomainFetcher<ActivityPageData> = async (): Prom
   });
 
   const result = await baseFetcher();
+  let rawData = result.data;
+  let source = result.source;
 
-  if (result.data.length === 0) {
-    return { data: EMPTY_PAGE, source: result.source, timestamp: result.timestamp };
+  // Se vazio, tentar derivação client-side a partir de outros domínios
+  if (rawData.length === 0) {
+    try {
+      const derived = await deriveActivitiesFromDomains();
+      if (derived.length > 0) {
+        rawData = derived;
+        source = "fallback";
+        console.debug("[Orion] Activity: derivado de outros domínios", derived.length, "eventos");
+      }
+    } catch {
+      console.debug("[Orion] Activity: derivação client-side falhou");
+    }
   }
 
-  const events = result.data.map(toActivityEvent);
+  if (rawData.length === 0) {
+    return { data: EMPTY_PAGE, source, timestamp: result.timestamp };
+  }
+
+  const events = rawData.map(toActivityEvent);
   return {
     data: { events, summary: buildSummary(events) },
-    source: result.source,
+    source,
     timestamp: result.timestamp,
   };
 };
 
 // Widget fetchers para Home
 export const fetchActivityEvents: DomainFetcher<ActivityEvent[]> = async (): Promise<DomainResult<ActivityEvent[]>> => {
-  const baseFetcher = createRealFirstFetcher<ActivityInfo[], ActivityInfo[]>({
-    endpoint: "/activities",
-    fallbackData: [],
-  });
-  const result = await baseFetcher();
+  const pageResult = await fetchActivityPage();
   return {
-    data: result.data.map(toActivityEvent),
-    source: result.source,
-    timestamp: result.timestamp,
+    data: pageResult.data.events,
+    source: pageResult.source,
+    timestamp: pageResult.timestamp,
   };
 };
 
