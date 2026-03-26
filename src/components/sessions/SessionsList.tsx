@@ -25,7 +25,7 @@ const defaultBadge = { label: "Sessão", color: "bg-muted-foreground/10 text-mut
 
 function SessionRow({ session }: { session: SessionView }) {
   const cfg = statusConfig[session.status];
-  const badge = typeBadge[session.type];
+  const badge = typeBadge[session.type] || defaultBadge;
   const Icon = cfg.icon;
   const isLive = session.status === "running";
   const isDimmed = session.status === "completed";
