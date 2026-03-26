@@ -1,7 +1,7 @@
 // Memory Domain — Fetchers (real-first + fallback-safe)
 //
-// Shape canônico: MemoryItem (dados brutos do OpenClaw)
-// Shape de UI: MemoryPageData (derivado via transform)
+// Real API /memory/snapshots returns: { items: [{ id, memory_type, title, content, priority, created_at }] }
+// Transform maps to MemoryItem canonical shape.
 
 import { createRealFirstFetcher } from "../createRealFirstFetcher";
 import type {
@@ -10,7 +10,60 @@ import type {
 import type { DomainFetcher, DomainResult } from "../types";
 
 // ═══════════════════════════════════════════════════════
-// Transforms — canônico → view
+// Real API shape
+// ═══════════════════════════════════════════════════════
+
+interface RealMemoryItem {
+  id: number | string;
+  memory_type?: string;
+  title?: string;
+  content?: string;
+  priority?: string;
+  created_at?: string;
+}
+
+interface MemorySnapshotsResponse {
+  items: RealMemoryItem[];
+}
+
+function memoryTypeToKind(memType: string): MemoryCategory {
+  const map: Record<string, MemoryCategory> = {
+    "daily-note": "context",
+    "memory-file": "context",
+    "decision": "decision",
+    "learning": "learning",
+    "profile": "profile",
+    "config": "config",
+    "incident": "incident",
+  };
+  return map[memType] || "context";
+}
+
+function priorityToRelevance(priority: string): "high" | "medium" | "low" {
+  if (priority === "high" || priority === "critical") return "high";
+  if (priority === "normal" || priority === "medium") return "medium";
+  return "low";
+}
+
+function realToMemoryItem(raw: RealMemoryItem): MemoryItem {
+  return {
+    id: String(raw.id),
+    kind: memoryTypeToKind(raw.memory_type || "context"),
+    content: raw.content || "",
+    summary: raw.title || null,
+    source: raw.memory_type || "memory",
+    agentId: null,
+    sessionId: null,
+    tags: [],
+    score: null,
+    sizeBytes: (raw.content || "").length,
+    createdAt: raw.created_at || new Date().toISOString(),
+    updatedAt: raw.created_at || new Date().toISOString(),
+  };
+}
+
+// ═══════════════════════════════════════════════════════
+// Transforms — canonical → view
 // ═══════════════════════════════════════════════════════
 
 function formatTimeAgo(iso: string): string {
@@ -86,9 +139,17 @@ const EMPTY_MEMORY_PAGE: MemoryPageData = {
 };
 
 export const fetchMemoryPage: DomainFetcher<MemoryPageData> = async (): Promise<DomainResult<MemoryPageData>> => {
-  const baseFetcher = createRealFirstFetcher<MemoryItem[], MemoryItem[]>({
-    endpoint: "/memory/search",
+  const baseFetcher = createRealFirstFetcher<MemorySnapshotsResponse | MemoryItem[], MemoryItem[]>({
+    endpoint: "/memory/snapshots",
     fallbackData: [],
+    transform: (raw) => {
+      // Handle { items: [...] } wrapper
+      if (raw && typeof raw === "object" && !Array.isArray(raw) && "items" in raw) {
+        return (raw as MemorySnapshotsResponse).items.map(realToMemoryItem);
+      }
+      if (Array.isArray(raw)) return raw as MemoryItem[];
+      return [];
+    },
   });
 
   const result = await baseFetcher();
@@ -106,15 +167,6 @@ export const fetchMemoryPage: DomainFetcher<MemoryPageData> = async (): Promise<
 };
 
 export const fetchMemorySnapshots: DomainFetcher<MemorySnapshot[]> = async (): Promise<DomainResult<MemorySnapshot[]>> => {
-  const baseFetcher = createRealFirstFetcher<MemoryItem[], MemoryItem[]>({
-    endpoint: "/memory/snapshots",
-    fallbackData: [],
-  });
-
-  const result = await baseFetcher();
-  return {
-    data: result.data.map(toMemorySnapshot),
-    source: result.source,
-    timestamp: result.timestamp,
-  };
+  const result = await fetchMemoryPage();
+  return { data: result.data.snapshots, source: result.source, timestamp: result.timestamp };
 };

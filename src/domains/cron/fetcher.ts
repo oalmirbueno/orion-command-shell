@@ -1,8 +1,8 @@
 /**
  * Cron Domain — Fetchers (real-first + fallback-safe)
  *
- * Shape canônico: CronJobInfo (dados brutos do OpenClaw)
- * Shape de UI: CronPageData (derivado via transform)
+ * Real API returns array with: { id, agentId, name, enabled, schedule: { kind, expr, tz }, payload, ... }
+ * Transform maps to CronJobInfo canonical shape.
  */
 
 import { createRealFirstFetcher } from "../createRealFirstFetcher";
@@ -10,7 +10,61 @@ import type { CronJobInfo, CronJob, CronPageData, CronSummaryData, JobStatus } f
 import type { DomainFetcher, DomainResult } from "../types";
 
 // ═══════════════════════════════════════════════════════
-// Transforms — canônico → view
+// Real API shape
+// ═══════════════════════════════════════════════════════
+
+interface RealCronJob {
+  id: string;
+  agentId?: string;
+  name: string;
+  enabled: boolean;
+  createdAtMs?: number;
+  updatedAtMs?: number;
+  schedule?: {
+    kind?: string;
+    expr?: string;
+    tz?: string;
+  };
+  sessionTarget?: string;
+  payload?: Record<string, unknown>;
+  lastRunAt?: string | number | null;
+  lastRunDurationMs?: number | null;
+  lastRunSuccess?: boolean | null;
+  lastRunError?: string | null;
+  nextRunAt?: string | number | null;
+  consecutiveSuccesses?: number;
+  consecutiveFailures?: number;
+  totalRuns?: number;
+  description?: string;
+}
+
+function realToCronJobInfo(raw: RealCronJob): CronJobInfo {
+  const toIso = (v: string | number | null | undefined): string | null => {
+    if (!v) return null;
+    if (typeof v === "number") return new Date(v).toISOString();
+    return v;
+  };
+
+  return {
+    id: raw.id,
+    name: raw.name,
+    description: raw.description || raw.name,
+    schedule: raw.schedule?.expr || "—",
+    enabled: raw.enabled,
+    lastRunAt: toIso(raw.lastRunAt),
+    lastRunDurationMs: raw.lastRunDurationMs ?? null,
+    lastRunSuccess: raw.lastRunSuccess ?? null,
+    lastRunError: raw.lastRunError ?? null,
+    nextRunAt: toIso(raw.nextRunAt),
+    consecutiveSuccesses: raw.consecutiveSuccesses ?? 0,
+    consecutiveFailures: raw.consecutiveFailures ?? 0,
+    totalRuns: raw.totalRuns ?? 0,
+    createdAt: raw.createdAtMs ? new Date(raw.createdAtMs).toISOString() : new Date().toISOString(),
+  };
+}
+
+// ═══════════════════════════════════════════════════════
+// Transforms — canonical → view
 // ═══════════════════════════════════════════════════════
 
 const CRON_LABELS: Record<string, string> = {
@@ -25,6 +79,7 @@ const CRON_LABELS: Record<string, string> = {
   "0 */6 * * *": "A cada 6 horas",
   "0 */12 * * *": "A cada 12 horas",
   "0 0 * * *": "Diariamente à meia-noite",
+  "0 2 * * *": "Diariamente às 02:00",
   "0 6 * * *": "Diariamente às 06:00",
   "0 0 * * 0": "Semanalmente",
   "0 0 1 * *": "Mensalmente",
@@ -114,9 +169,20 @@ const EMPTY_CRON_PAGE: CronPageData = {
 };
 
 export const fetchCronPage: DomainFetcher<CronPageData> = async (): Promise<DomainResult<CronPageData>> => {
-  const baseFetcher = createRealFirstFetcher<CronJobInfo[], CronJobInfo[]>({
+  const baseFetcher = createRealFirstFetcher<RealCronJob[] | CronJobInfo[], CronJobInfo[]>({
     endpoint: "/cron",
     fallbackData: [],
+    transform: (raw) => {
+      if (!Array.isArray(raw)) return [];
+      return raw.map((item) => {
+        // If it has schedule.expr, it's the real shape
+        if (item && typeof item === "object" && "schedule" in item && typeof (item as RealCronJob).schedule === "object") {
+          return realToCronJobInfo(item as RealCronJob);
+        }
+        // Already canonical
+        return item as CronJobInfo;
+      });
+    },
   });
 
   const result = await baseFetcher();
@@ -134,15 +200,6 @@ export const fetchCronPage: DomainFetcher<CronPageData> = async (): Promise<Doma
 };
 
 export const fetchCronJobs: DomainFetcher<CronJob[]> = async (): Promise<DomainResult<CronJob[]>> => {
-  const baseFetcher = createRealFirstFetcher<CronJobInfo[], CronJobInfo[]>({
-    endpoint: "/cron/jobs",
-    fallbackData: [],
-  });
-
-  const result = await baseFetcher();
-  return {
-    data: result.data.map(toCronJob),
-    source: result.source,
-    timestamp: result.timestamp,
-  };
+  const result = await fetchCronPage();
+  return { data: result.data.jobs, source: result.source, timestamp: result.timestamp };
 };

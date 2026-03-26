@@ -1,8 +1,15 @@
+/**
+ * Sessions Domain — Fetchers (real-first + fallback-safe)
+ *
+ * Real API shape: { sessions: Session[] }
+ * The API wraps sessions in an object, so we unwrap it.
+ */
+
 import { createRealFirstFetcher } from "../createRealFirstFetcher";
 import type { Session, SessionView, SessionStatus } from "./types";
 import type { DomainFetcher, DomainResult } from "../types";
 
-/** Deriva status da UI a partir do shape canônico */
+/** Derives UI status from canonical shape */
 function deriveStatus(session: Session): SessionStatus {
   if (session.aborted) return "failed";
   if (session.ageMs < 60_000 && session.totalTokens > 0) return "running";
@@ -10,30 +17,25 @@ function deriveStatus(session: Session): SessionStatus {
   return "completed";
 }
 
-/** Deriva progresso estimado */
 function deriveProgress(session: Session): number {
   if (session.aborted) return session.totalTokens > 0 ? 100 : 0;
   if (session.totalTokens === 0) return 0;
-  // Heurística: sessions com menos de 1min são "em andamento"
   if (session.ageMs < 60_000) return Math.min(95, Math.round((session.ageMs / 60_000) * 100));
   return 100;
 }
 
-/** Formata elapsed legível */
 function formatElapsed(ms: number): string {
   if (ms < 60_000) return `${Math.round(ms / 1000)}s`;
   if (ms < 3_600_000) return `${Math.round(ms / 60_000)}min`;
   return `${(ms / 3_600_000).toFixed(1)}h`;
 }
 
-/** Formata tokens para display */
 function formatTokens(n: number): string {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
   if (n >= 1_000) return `${(n / 1_000).toFixed(1)}k`;
   return String(n);
 }
 
-/** Transforma shape canônico OpenClaw → shape de UI */
 function toSessionView(s: Session): SessionView {
   const status = deriveStatus(s);
   return {
@@ -58,10 +60,21 @@ function toSessionView(s: Session): SessionView {
   };
 }
 
+/** Real API returns { sessions: Session[] } — unwrap */
+interface SessionsApiResponse {
+  sessions: Session[];
+}
+
 export const fetchSessions: DomainFetcher<SessionView[]> = async (): Promise<DomainResult<SessionView[]>> => {
-  const baseFetcher = createRealFirstFetcher<Session[], Session[]>({
+  const baseFetcher = createRealFirstFetcher<SessionsApiResponse | Session[], Session[]>({
     endpoint: "/sessions",
     fallbackData: [],
+    transform: (raw) => {
+      // Handle both { sessions: [...] } and direct array
+      if (Array.isArray(raw)) return raw;
+      if (raw && typeof raw === "object" && "sessions" in raw) return raw.sessions;
+      return [];
+    },
   });
 
   const result = await baseFetcher();

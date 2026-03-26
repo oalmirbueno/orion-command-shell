@@ -1,13 +1,11 @@
 /**
  * System Domain — Fetchers (real-first + fallback-safe)
  *
- * Shape canônico: SystemInfo, ProcessInfo, SystemStats, UptimeEntry
- * Shape de UI: SystemPageData (derivado via transform)
+ * Real API shapes:
+ *   /api/system → { agent, system: { uptime, memory, hostname, ... }, integrations, timestamp }
+ *   /api/system/stats → { cpu, ram: { used, total }, disk: { used, total }, uptime, ... }
  *
- * Estratégia:
- *   1. Tenta /api/system (shape canônico OpenClaw)
- *   2. Transform para SystemPageData (view model)
- *   3. Fallback vazio honesto em caso de erro
+ * These are transformed into the canonical SystemPageData for the UI.
  */
 
 import { createRealFirstFetcher } from "../createRealFirstFetcher";
@@ -16,11 +14,96 @@ import type {
   SystemPageData, CommandData, HealthService,
   SystemHeaderData, ResourceGauge, SystemService,
   StabilitySignal, UptimeDay, OverallStatus, ServiceStatus, SignalLevel, DayStatus,
+  SystemState,
 } from "./types";
 import type { DomainFetcher, DomainResult } from "../types";
 
 // ═══════════════════════════════════════════════════════
-// Transforms — canônico → view
+// Real API shapes (as returned by runtime)
+// ═══════════════════════════════════════════════════════
+
+interface RealSystemResponse {
+  agent?: { name: string; creature?: string; emoji?: string };
+  system?: {
+    uptime: number;
+    uptimeFormatted?: string;
+    nodeVersion?: string;
+    model?: string;
+    workspacePath?: string;
+    platform?: string;
+    hostname?: string;
+    memory?: { total: number; free: number; used: number };
+  };
+  integrations?: Array<{
+    id: string;
+    name: string;
+    status: string;
+    icon?: string;
+    lastActivity?: string | null;
+    detail?: string | null;
+  }>;
+  timestamp?: string;
+}
+
+interface RealStatsResponse {
+  cpu?: number;
+  ram?: { used: number; total: number };
+  disk?: { used: number; total: number };
+  vpnActive?: boolean;
+  firewallActive?: boolean;
+  activeServices?: number;
+  totalServices?: number;
+  uptime?: string;
+}
+
+// ═══════════════════════════════════════════════════════
+// Transform real shapes → canonical
+// ═══════════════════════════════════════════════════════
+
+function realToSystemInfo(sys: RealSystemResponse, stats: RealStatsResponse | null): SystemInfo {
+  const s = sys.system || {} as RealSystemResponse["system"] & {};
+  const mem = s?.memory || { total: 0, free: 0, used: 0 };
+  const cpuPct = stats?.cpu ?? 0;
+  const diskUsedGB = stats?.disk?.used ?? 0;
+  const diskTotalGB = stats?.disk?.total ?? 1;
+
+  return {
+    hostname: s?.hostname || "unknown",
+    platform: s?.platform || "linux",
+    arch: "x64",
+    nodeVersion: s?.nodeVersion || "—",
+    uptimeSeconds: (s?.uptime ?? 0),
+    cpuCount: 1,
+    cpuUsagePercent: cpuPct,
+    memTotalBytes: mem.total,
+    memUsedBytes: mem.used,
+    memFreeBytes: mem.free,
+    diskTotalBytes: diskTotalGB * 1e9,
+    diskUsedBytes: diskUsedGB * 1e9,
+    diskFreeBytes: (diskTotalGB - diskUsedGB) * 1e9,
+    loadAvg: [cpuPct / 100, 0, 0] as [number, number, number],
+    state: cpuPct > 90 ? "critical" : cpuPct > 75 ? "degraded" : "nominal",
+    checkedAt: sys.timestamp || new Date().toISOString(),
+  };
+}
+
+function integrationsToProcesses(integrations: RealSystemResponse["integrations"]): ProcessInfo[] {
+  if (!integrations) return [];
+  return integrations.map((integ, i) => ({
+    name: integ.name,
+    pid: 1000 + i,
+    status: integ.status === "connected" ? "running" as const :
+            integ.status === "not_configured" ? "stopped" as const : "stopped" as const,
+    port: null,
+    cpuPercent: 0,
+    memBytes: 0,
+    uptimeSeconds: 0,
+    restarts: 0,
+  }));
+}
+
+// ═══════════════════════════════════════════════════════
+// Transforms — canonical → view (unchanged)
 // ═══════════════════════════════════════════════════════
 
 function formatUptime(seconds: number): string {
@@ -97,73 +180,6 @@ function toServices(processes: ProcessInfo[]): SystemService[] {
   }));
 }
 
-function toSignals(stats: SystemStats): StabilitySignal[] {
-  const signals: StabilitySignal[] = [];
-
-  const errorLevel: SignalLevel = stats.errorRate > 5 ? "critical" : stats.errorRate > 1 ? "elevated" : "normal";
-  signals.push({
-    label: "Taxa de Erro", value: `${stats.errorRate.toFixed(1)}%`,
-    level: errorLevel, iconName: "ShieldAlert",
-    detail: `${stats.requestsPerMin} req/min`,
-  });
-
-  const latencyLevel: SignalLevel = stats.avgResponseMs > 500 ? "critical" : stats.avgResponseMs > 200 ? "elevated" : "normal";
-  signals.push({
-    label: "Latência Média", value: `${Math.round(stats.avgResponseMs)}ms`,
-    level: latencyLevel, iconName: "Clock",
-    detail: `${stats.activeConnections} conexões ativas`,
-  });
-
-  if (stats.temperature !== undefined) {
-    const tempLevel: SignalLevel = stats.temperature > 80 ? "critical" : stats.temperature > 65 ? "elevated" : "normal";
-    signals.push({
-      label: "Temperatura", value: `${stats.temperature}°C`,
-      level: tempLevel, iconName: "ThermometerSun",
-    });
-  }
-
-  signals.push({
-    label: "I/O Disco", value: `${formatBytes(stats.diskIoReadBytes + stats.diskIoWriteBytes)}/s`,
-    level: "normal", iconName: "HardDrive",
-    detail: `R: ${formatBytes(stats.diskIoReadBytes)} W: ${formatBytes(stats.diskIoWriteBytes)}`,
-  });
-
-  signals.push({
-    label: "Rede", value: `${formatBytes(stats.networkRxBytes + stats.networkTxBytes)}/s`,
-    level: "normal", iconName: "Wifi",
-    detail: `↓ ${formatBytes(stats.networkRxBytes)} ↑ ${formatBytes(stats.networkTxBytes)}`,
-  });
-
-  return signals;
-}
-
-function toUptimeDays(entries: UptimeEntry[]): UptimeDay[] {
-  return entries.map(e => {
-    let status: DayStatus = "up";
-    if (e.uptimePercent < 50) status = "down";
-    else if (e.uptimePercent < 95) status = "degraded";
-    else if (e.incidents > 0) status = "partial";
-    return { date: e.date, status };
-  });
-}
-
-function computeUptimePercent(entries: UptimeEntry[]): string {
-  if (entries.length === 0) return "—";
-  const avg = entries.reduce((sum, e) => sum + e.uptimePercent, 0) / entries.length;
-  return `${avg.toFixed(2)}%`;
-}
-
-// ═══════════════════════════════════════════════════════
-// Shapes de resposta da API (podem vir combinados ou separados)
-// ═══════════════════════════════════════════════════════
-
-interface SystemApiResponse {
-  info: SystemInfo;
-  processes?: ProcessInfo[];
-  stats?: SystemStats;
-  uptime?: UptimeEntry[];
-}
-
 // ═══════════════════════════════════════════════════════
 // Fetchers
 // ═══════════════════════════════════════════════════════
@@ -187,57 +203,85 @@ const EMPTY_COMMAND: CommandData = {
   ],
 };
 
-/** Unified page model — tenta /api/system que retorna SystemApiResponse */
+/** Unified page model — fetches /api/system + /api/system/stats */
 export const fetchSystemPage: DomainFetcher<SystemPageData> = async (): Promise<DomainResult<SystemPageData>> => {
-  const baseFetcher = createRealFirstFetcher<SystemApiResponse, SystemApiResponse>({
+  const systemFetcher = createRealFirstFetcher<RealSystemResponse, RealSystemResponse>({
     endpoint: "/system",
-    fallbackData: { info: {} as SystemInfo },
+    fallbackData: {},
+  });
+  const statsFetcher = createRealFirstFetcher<RealStatsResponse, RealStatsResponse>({
+    endpoint: "/system/stats",
+    fallbackData: {},
   });
 
-  const result = await baseFetcher();
+  const [systemResult, statsResult] = await Promise.all([systemFetcher(), statsFetcher()]);
 
-  // Se veio fallback vazio (sem backend), retorna empty state
-  if (!result.data.info?.hostname) {
-    return { data: EMPTY_SYSTEM_PAGE, source: result.source, timestamp: result.timestamp };
+  // If no real data at all
+  if (!systemResult.data.system && !statsResult.data.cpu) {
+    return { data: EMPTY_SYSTEM_PAGE, source: systemResult.source, timestamp: systemResult.timestamp };
   }
 
-  const { info, processes = [], stats, uptime = [] } = result.data;
+  const info = realToSystemInfo(systemResult.data, statsResult.data.cpu !== undefined ? statsResult.data : null);
+  const processes = integrationsToProcesses(systemResult.data.integrations);
 
   const pageData: SystemPageData = {
     header: toHeader(info),
     gauges: toGauges(info),
     services: toServices(processes),
-    signals: stats ? toSignals(stats) : [],
-    uptimeDays: toUptimeDays(uptime),
-    uptimePercent: computeUptimePercent(uptime),
+    signals: [],
+    uptimeDays: [],
+    uptimePercent: statsResult.data.uptime || formatUptime(info.uptimeSeconds),
   };
 
-  return { data: pageData, source: result.source, timestamp: result.timestamp };
+  return {
+    data: pageData,
+    source: systemResult.source === "api" || statsResult.source === "api" ? "api" : "fallback",
+    timestamp: new Date(),
+  };
 };
 
-/** Home widget — command status */
-export const fetchCommandStatus: DomainFetcher<CommandData> = createRealFirstFetcher({
-  endpoint: "/system/command",
-  fallbackData: EMPTY_COMMAND,
-});
+/** Home widget — command status (derived from /system + /system/stats) */
+export const fetchCommandStatus: DomainFetcher<CommandData> = async (): Promise<DomainResult<CommandData>> => {
+  const result = await fetchSystemPage();
+  const sys = result.data;
 
-/** Home widget — health services */
-export const fetchHealthServices: DomainFetcher<HealthService[]> = createRealFirstFetcher({
-  endpoint: "/system/health",
-  fallbackData: [],
-});
+  const state: SystemState =
+    sys.header.overallStatus === "critical" ? "critical" :
+    sys.header.overallStatus === "degraded" ? "degraded" : "nominal";
 
-/** Individual services fetcher */
-export const fetchSystemServices: DomainFetcher<SystemPageData["services"]> = async (): Promise<DomainResult<SystemPageData["services"]>> => {
-  const baseFetcher = createRealFirstFetcher<ProcessInfo[], ProcessInfo[]>({
-    endpoint: "/system/services",
-    fallbackData: [],
-  });
+  const cpuGauge = sys.gauges.find(g => g.label === "CPU");
 
-  const result = await baseFetcher();
   return {
-    data: toServices(result.data),
+    data: {
+      systemState: state,
+      metrics: [
+        { label: "Disponib.", value: sys.uptimePercent || "—", icon: "Clock" },
+        { label: "CPU", value: cpuGauge ? `${cpuGauge.value}%` : "—", icon: "Activity" },
+        { label: "Serviços", value: `${sys.services.filter(s => s.status === "running").length}/${sys.services.length}`, icon: "Bot" },
+        { label: "Host", value: sys.header.host, icon: "Zap" },
+      ],
+    },
     source: result.source,
     timestamp: result.timestamp,
   };
+};
+
+/** Home widget — health services (derived from integrations/processes) */
+export const fetchHealthServices: DomainFetcher<HealthService[]> = async (): Promise<DomainResult<HealthService[]>> => {
+  const result = await fetchSystemPage();
+  const health: HealthService[] = result.data.services.map(svc => ({
+    name: svc.name,
+    status: svc.status === "running" ? "healthy" as const :
+            svc.status === "stopped" ? "down" as const : "degraded" as const,
+    responseTime: svc.cpu,
+    uptime: svc.uptime,
+  }));
+
+  return { data: health, source: result.source, timestamp: result.timestamp };
+};
+
+/** Individual services fetcher */
+export const fetchSystemServices: DomainFetcher<SystemPageData["services"]> = async (): Promise<DomainResult<SystemPageData["services"]>> => {
+  const result = await fetchSystemPage();
+  return { data: result.data.services, source: result.source, timestamp: result.timestamp };
 };

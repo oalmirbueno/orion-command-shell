@@ -1,10 +1,7 @@
 // Activity Domain — Fetchers (real-first + fallback-safe)
 //
-// Shape canônico: ActivityInfo (dados brutos do OpenClaw em /api/activities)
-// Shape de UI: ActivityPageData (derivado via transform)
-//
-// Nota de naming: a base real usa /api/activities (plural).
-// O shell consome via ActivityPageData sem saber do naming interno.
+// Real API returns: { activities: [], total, limit, offset, hasMore }
+// When empty, derives from other domains via client-side derivation.
 
 import { createRealFirstFetcher } from "../createRealFirstFetcher";
 import { deriveActivitiesFromDomains } from "./derive";
@@ -16,7 +13,19 @@ import type {
 import type { DomainFetcher, DomainResult } from "../types";
 
 // ═══════════════════════════════════════════════════════
-// Transforms — canônico → view
+// Real API shape
+// ═══════════════════════════════════════════════════════
+
+interface ActivitiesApiResponse {
+  activities: ActivityInfo[];
+  total?: number;
+  limit?: number;
+  offset?: number;
+  hasMore?: boolean;
+}
+
+// ═══════════════════════════════════════════════════════
+// Transforms — canonical → view
 // ═══════════════════════════════════════════════════════
 
 function levelToPriority(level: ActivityLevel, type: ActivityType): EventPriority {
@@ -84,19 +93,25 @@ const EMPTY_PAGE: ActivityPageData = {
   summary: { total: 0, critical: 0, warning: 0, resolved: 0 },
 };
 
-// Rota canônica: /api/activities (plural, alinhado ao projeto-base)
-// Se retornar vazio, deriva de outros domínios (modo standalone)
 export const fetchActivityPage: DomainFetcher<ActivityPageData> = async (): Promise<DomainResult<ActivityPageData>> => {
-  const baseFetcher = createRealFirstFetcher<ActivityInfo[], ActivityInfo[]>({
+  const baseFetcher = createRealFirstFetcher<ActivitiesApiResponse | ActivityInfo[], ActivityInfo[]>({
     endpoint: "/activities",
     fallbackData: [],
+    transform: (raw) => {
+      // Handle { activities: [...] } wrapper
+      if (raw && typeof raw === "object" && !Array.isArray(raw) && "activities" in raw) {
+        return (raw as ActivitiesApiResponse).activities;
+      }
+      if (Array.isArray(raw)) return raw;
+      return [];
+    },
   });
 
   const result = await baseFetcher();
   let rawData = result.data;
   let source = result.source;
 
-  // Se vazio, tentar derivação client-side a partir de outros domínios
+  // If empty, try client-side derivation from other domains
   if (rawData.length === 0) {
     try {
       const derived = await deriveActivitiesFromDomains();
