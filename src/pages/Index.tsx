@@ -9,6 +9,7 @@ import { LiveOperations } from "@/components/home/LiveOperations";
 import { AgentsHierarchy } from "@/components/home/AgentsHierarchy";
 import { OperationalHealth } from "@/components/home/OperationalHealth";
 import { ExecutiveBriefing } from "@/components/home/ExecutiveBriefing";
+import { WeatherContext } from "@/components/home/WeatherContext";
 
 const Index = () => {
   const { state, data, source, lastUpdated, refetch } = useOrionData<HomePageData>({
