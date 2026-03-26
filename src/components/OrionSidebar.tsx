@@ -12,6 +12,8 @@ import {
   Brain,
   Bell,
   Box,
+  FolderOpen,
+  Search,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import {
@@ -35,6 +37,8 @@ const operationsItems = [
   { title: "Operações", url: "/operations", icon: ClipboardList },
   { title: "Atividade", url: "/activity", icon: Radio },
   { title: "Memória", url: "/memory", icon: Brain },
+  { title: "Arquivos", url: "/files", icon: FolderOpen },
+  { title: "Busca", url: "/search", icon: Search },
 ];
 
 const systemItems = [

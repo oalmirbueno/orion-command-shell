@@ -1,7 +1,8 @@
 import {
   Brain, User, Target, Settings, Shield, Layers,
-  ChevronRight, Clock,
+  ChevronRight, Clock, Inbox, Search,
 } from "lucide-react";
+import { useState } from "react";
 import type { MemorySnapshot, MemoryCategory } from "@/domains/memory/types";
 
 const categoryConfig: Record<MemoryCategory, { icon: React.ElementType; label: string; color: string }> = {
@@ -14,7 +15,7 @@ const categoryConfig: Record<MemoryCategory, { icon: React.ElementType; label: s
 };
 
 const relevanceConfig = {
-  high: { border: "border-l-primary", label: "Alta relevância" },
+  high: { border: "border-l-primary", label: "Alta" },
   medium: { border: "border-l-muted-foreground/30", label: "Média" },
   low: { border: "border-l-border", label: "Baixa" },
 };
@@ -30,34 +31,34 @@ function SnapshotCard({ snapshot }: { snapshot: MemorySnapshot }) {
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-3 min-w-0 flex-1">
             <CatIcon className="h-5 w-5 text-muted-foreground/50 shrink-0" />
-            <h3 className="text-base font-semibold text-foreground leading-snug">{snapshot.title}</h3>
+            <h3 className="text-sm font-semibold text-foreground leading-snug">{snapshot.title}</h3>
           </div>
           <div className="flex items-center gap-2 shrink-0 ml-4">
-            <span className={`text-xs font-mono uppercase px-2 py-1 rounded border ${cat.color}`}>{cat.label}</span>
-            <ChevronRight className="h-5 w-5 text-muted-foreground/15 group-hover:text-muted-foreground/40 transition-colors" />
+            <span className={`text-[10px] font-mono uppercase px-2 py-0.5 rounded border ${cat.color}`}>{cat.label}</span>
+            <ChevronRight className="h-4 w-4 text-muted-foreground/15 group-hover:text-muted-foreground/40 transition-colors" />
           </div>
         </div>
 
-        <p className="text-sm text-foreground/65 leading-relaxed mb-4 ml-8">{snapshot.summary}</p>
+        <p className="text-sm text-foreground/60 leading-relaxed mb-3 ml-8">{snapshot.summary}</p>
 
-        <div className="ml-8 px-4 py-3 rounded-lg bg-surface-2 border border-border/30 mb-4">
-          <p className="text-xs text-muted-foreground/50 leading-relaxed italic">{snapshot.context}</p>
+        <div className="ml-8 px-4 py-2.5 rounded-lg bg-accent/5 border border-border/20 mb-3">
+          <p className="text-xs text-muted-foreground/45 leading-relaxed italic">{snapshot.context}</p>
         </div>
 
         <div className="flex items-center justify-between ml-8">
-          <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-1.5 flex-wrap">
             {snapshot.tags.map((tag) => (
-              <span key={tag} className="text-xs font-mono px-2 py-1 rounded bg-surface-3 text-muted-foreground/50 border border-border/20">{tag}</span>
+              <span key={tag} className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-accent/10 text-muted-foreground/45 border border-border/15">{tag}</span>
             ))}
           </div>
-          <div className="flex items-center gap-4 text-xs font-mono text-muted-foreground/40 shrink-0">
+          <div className="flex items-center gap-3 text-[10px] font-mono text-muted-foreground/35 shrink-0">
             <span>{snapshot.source}</span>
-            <div className="h-4 w-px bg-border/30" />
-            <div className="flex items-center gap-1.5">
-              <Clock className="h-3.5 w-3.5" />
+            <div className="h-3 w-px bg-border/20" />
+            <div className="flex items-center gap-1">
+              <Clock className="h-3 w-3" />
               <span>{snapshot.capturedAt}</span>
             </div>
-            <span className="text-muted-foreground/25">{snapshot.capturedAgo}</span>
+            <span className="text-muted-foreground/20">{snapshot.capturedAgo}</span>
           </div>
         </div>
       </div>
@@ -70,30 +71,90 @@ interface MemorySnapshotsProps {
 }
 
 export function MemorySnapshots({ snapshots }: MemorySnapshotsProps) {
+  const [activeFilter, setActiveFilter] = useState<MemoryCategory | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  if (snapshots.length === 0) {
+    return (
+      <section>
+        <div className="flex items-center gap-3 mb-5">
+          <h2 className="text-xs font-mono uppercase tracking-[0.15em] text-muted-foreground">Banco de Memória</h2>
+          <div className="flex-1 h-px bg-border/40" />
+        </div>
+        <div className="flex flex-col items-center justify-center py-16 text-center rounded-xl border border-border/30 bg-card">
+          <Inbox className="h-6 w-6 text-muted-foreground/25 mb-3" />
+          <p className="text-sm font-medium text-muted-foreground/50">Nenhum snapshot registrado</p>
+          <p className="text-xs font-mono text-muted-foreground/30 mt-1.5">Aguardando conexão com API</p>
+        </div>
+      </section>
+    );
+  }
+
   const categories = Array.from(new Set(snapshots.map(s => s.category)));
+
+  const filtered = snapshots.filter((s) => {
+    if (activeFilter && s.category !== activeFilter) return false;
+    if (searchTerm) {
+      const q = searchTerm.toLowerCase();
+      return s.title.toLowerCase().includes(q) || s.summary.toLowerCase().includes(q) || s.tags.some(t => t.toLowerCase().includes(q));
+    }
+    return true;
+  });
 
   return (
     <section>
-      <div className="flex items-center gap-3 mb-5">
+      <div className="flex items-center gap-3 mb-4">
         <h2 className="text-xs font-mono uppercase tracking-[0.15em] text-muted-foreground">Banco de Memória</h2>
-        <div className="flex items-center gap-2 ml-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20">
-          <span className="text-xs font-mono text-primary font-medium">{snapshots.length} snapshots</span>
+        <div className="flex items-center gap-2 ml-1 px-2.5 py-0.5 rounded-full bg-primary/8 border border-primary/15">
+          <span className="text-[10px] font-mono text-primary font-medium">{filtered.length} de {snapshots.length}</span>
         </div>
         <div className="flex-1 h-px bg-border/40" />
-        <div className="flex items-center gap-2">
+      </div>
+
+      {/* Filtros e busca */}
+      <div className="flex items-center gap-3 mb-5">
+        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border/30 bg-card flex-1 max-w-xs">
+          <Search className="h-3.5 w-3.5 text-muted-foreground/30" />
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Buscar memória..."
+            className="bg-transparent text-xs text-foreground placeholder:text-muted-foreground/30 outline-none w-full"
+          />
+        </div>
+        <div className="flex items-center gap-1.5">
+          <button
+            onClick={() => setActiveFilter(null)}
+            className={`text-[10px] font-mono uppercase px-2.5 py-1 rounded-full border transition-colors ${!activeFilter ? "bg-primary/10 text-primary border-primary/20" : "text-muted-foreground/40 border-border/20 hover:border-border/40"}`}
+          >
+            Todos
+          </button>
           {categories.map((cat) => {
             const cfg = categoryConfig[cat];
+            const isActive = activeFilter === cat;
             return (
-              <span key={cat} className={`text-xs font-mono uppercase px-3 py-1.5 rounded-full border cursor-pointer hover:opacity-80 transition-opacity ${cfg.color}`}>{cfg.label}</span>
+              <button
+                key={cat}
+                onClick={() => setActiveFilter(isActive ? null : cat)}
+                className={`text-[10px] font-mono uppercase px-2.5 py-1 rounded-full border transition-colors ${isActive ? cfg.color : "text-muted-foreground/40 border-border/20 hover:border-border/40"}`}
+              >
+                {cfg.label}
+              </button>
             );
           })}
         </div>
       </div>
 
-      <div className="space-y-3">
-        {snapshots.map((snapshot) => (
+      <div className="space-y-2.5">
+        {filtered.map((snapshot) => (
           <SnapshotCard key={snapshot.id} snapshot={snapshot} />
         ))}
+        {filtered.length === 0 && (
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <p className="text-sm text-muted-foreground/40">Nenhum resultado para o filtro aplicado</p>
+          </div>
+        )}
       </div>
     </section>
   );
