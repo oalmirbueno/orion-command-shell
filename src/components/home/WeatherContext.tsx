@@ -2,13 +2,13 @@
  * WeatherContext — Contextual weather block for the Command Center.
  *
  * Displays current weather for the operational base (Curitiba, PR)
- * as environmental context, not as a standalone weather app.
+ * as environmental context. Designed to sit alongside CommandStatus.
  *
  * Uses Open-Meteo (free, no API key) for real weather data.
  */
 
 import { useState, useEffect } from "react";
-import { Cloud, CloudRain, CloudSnow, Sun, CloudLightning, CloudDrizzle, Wind, Thermometer, Eye } from "lucide-react";
+import { Cloud, CloudRain, CloudSnow, Sun, CloudLightning, CloudDrizzle, Wind, Thermometer, Droplets, MapPin } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface WeatherData {
@@ -18,6 +18,8 @@ interface WeatherData {
   conditionCode: number;
   windSpeed: number;
   humidity: number;
+  maxTemp: number;
+  minTemp: number;
   forecast: string;
 }
 
@@ -51,11 +53,6 @@ function getCondition(code: number) {
   return WMO_CONDITIONS[code] || { label: "Indisponível", icon: Cloud };
 }
 
-function buildForecast(maxTemp: number, minTemp: number, code: number): string {
-  const cond = getCondition(code);
-  return `${cond.label}, máx ${Math.round(maxTemp)}° mín ${Math.round(minTemp)}°`;
-}
-
 export function WeatherContext() {
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [state, setState] = useState<WeatherState>("loading");
@@ -65,18 +62,17 @@ export function WeatherContext() {
 
     async function fetchWeather() {
       try {
-        // Curitiba, PR — lat/lon
         const res = await fetch(
           "https://api.open-meteo.com/v1/forecast?latitude=-25.4284&longitude=-49.2733&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=America/Sao_Paulo&forecast_days=1"
         );
         if (!res.ok) throw new Error("Weather API error");
         const json = await res.json();
-
         if (cancelled) return;
 
         const c = json.current;
         const d = json.daily;
         const cond = getCondition(c.weather_code);
+        const forecastCond = getCondition(d.weather_code[0]);
 
         setWeather({
           temperature: Math.round(c.temperature_2m),
@@ -85,7 +81,9 @@ export function WeatherContext() {
           conditionCode: c.weather_code,
           windSpeed: Math.round(c.wind_speed_10m),
           humidity: c.relative_humidity_2m,
-          forecast: buildForecast(d.temperature_2m_max[0], d.temperature_2m_min[0], d.weather_code[0]),
+          maxTemp: Math.round(d.temperature_2m_max[0]),
+          minTemp: Math.round(d.temperature_2m_min[0]),
+          forecast: forecastCond.label,
         });
         setState("ready");
       } catch {
@@ -97,66 +95,96 @@ export function WeatherContext() {
     return () => { cancelled = true; };
   }, []);
 
+  // Shared wrapper to match CommandStatus height
+  const wrapperClass = "h-full rounded-lg border border-border bg-card/50 px-5 py-5 flex flex-col justify-between";
+
   if (state === "error") {
     return (
-      <div className="flex items-center gap-3 px-4 py-3 rounded-lg border border-border bg-card/50">
-        <Cloud className="h-4 w-4 text-muted-foreground/40" />
-        <span className="text-xs font-mono text-muted-foreground/40">Clima indisponível</span>
-      </div>
+      <section className={wrapperClass}>
+        <div className="flex items-center gap-3">
+          <Cloud className="h-5 w-5 text-muted-foreground/30" />
+          <span className="text-xs font-mono text-muted-foreground/40">Clima indisponível</span>
+        </div>
+      </section>
     );
   }
 
   if (state === "loading" || !weather) {
     return (
-      <div className="flex items-center gap-4 px-4 py-3 rounded-lg border border-border bg-card/50">
-        <Skeleton className="h-8 w-8 rounded" />
-        <div className="space-y-1.5 flex-1">
-          <Skeleton className="h-3 w-24" />
-          <Skeleton className="h-2.5 w-40" />
+      <section className={wrapperClass}>
+        <div className="flex items-center gap-3 mb-3">
+          <Skeleton className="h-4 w-4 rounded" />
+          <Skeleton className="h-3 w-28" />
         </div>
-      </div>
+        <div className="flex items-end gap-4">
+          <Skeleton className="h-12 w-16 rounded" />
+          <div className="flex-1 space-y-2">
+            <Skeleton className="h-3 w-full" />
+            <Skeleton className="h-3 w-3/4" />
+          </div>
+        </div>
+        <div className="flex gap-4 mt-3">
+          <Skeleton className="h-3 w-16" />
+          <Skeleton className="h-3 w-16" />
+          <Skeleton className="h-3 w-16" />
+        </div>
+      </section>
     );
   }
 
   const { icon: CondIcon } = getCondition(weather.conditionCode);
 
   return (
-    <div className="flex items-center gap-4 px-4 py-3 rounded-lg border border-border bg-card/50">
-      {/* Icon + temp */}
-      <div className="flex items-center gap-3">
-        <CondIcon className="h-5 w-5 text-muted-foreground/60" />
-        <span className="text-lg font-semibold font-mono text-foreground">{weather.temperature}°</span>
+    <section className={wrapperClass}>
+      {/* Header: location */}
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <MapPin className="h-3.5 w-3.5 text-muted-foreground/40" />
+          <span className="text-xs font-mono uppercase tracking-wider text-muted-foreground/50">Curitiba, PR</span>
+        </div>
+        <span className="text-[10px] font-mono text-muted-foreground/30 uppercase">Base Operacional</span>
       </div>
 
-      {/* Divider */}
-      <div className="h-6 w-px bg-border" />
+      {/* Main: temp + condition */}
+      <div className="flex items-center gap-4 mb-4">
+        <div className="flex items-center gap-3">
+          <div className="w-11 h-11 rounded-lg bg-muted/50 border border-border flex items-center justify-center">
+            <CondIcon className="h-5 w-5 text-primary/70" />
+          </div>
+          <div>
+            <span className="text-3xl font-bold font-mono text-foreground leading-none">{weather.temperature}°</span>
+            <span className="text-sm font-mono text-muted-foreground/40 ml-1">C</span>
+          </div>
+        </div>
 
-      {/* Details */}
-      <div className="flex items-center gap-4 text-xs font-mono text-muted-foreground/60">
-        <span>{weather.condition}</span>
-        <span className="flex items-center gap-1">
-          <Thermometer className="h-3 w-3" />
-          {weather.feelsLike}°
-        </span>
-        <span className="flex items-center gap-1">
-          <Wind className="h-3 w-3" />
-          {weather.windSpeed} km/h
-        </span>
-        <span className="flex items-center gap-1">
-          <Eye className="h-3 w-3" />
-          {weather.humidity}%
-        </span>
+        <div className="h-10 w-px bg-border/50" />
+
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium text-foreground/80 truncate">{weather.condition}</p>
+          <p className="text-xs font-mono text-muted-foreground/50 mt-0.5">
+            Sensação {weather.feelsLike}° · Máx {weather.maxTemp}° · Mín {weather.minTemp}°
+          </p>
+        </div>
       </div>
 
-      {/* Divider */}
-      <div className="h-6 w-px bg-border" />
-
-      {/* Location + forecast */}
-      <div className="flex items-center gap-3 text-xs font-mono text-muted-foreground/40">
-        <span>Curitiba, PR</span>
-        <span>·</span>
-        <span>{weather.forecast}</span>
+      {/* Footer: metrics row */}
+      <div className="flex items-center gap-5 pt-3 border-t border-border/30">
+        <div className="flex items-center gap-1.5">
+          <Thermometer className="h-3.5 w-3.5 text-muted-foreground/30" />
+          <span className="text-xs font-mono text-muted-foreground/50">Sensação</span>
+          <span className="text-xs font-mono font-medium text-foreground/70">{weather.feelsLike}°</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <Wind className="h-3.5 w-3.5 text-muted-foreground/30" />
+          <span className="text-xs font-mono text-muted-foreground/50">Vento</span>
+          <span className="text-xs font-mono font-medium text-foreground/70">{weather.windSpeed} km/h</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <Droplets className="h-3.5 w-3.5 text-muted-foreground/30" />
+          <span className="text-xs font-mono text-muted-foreground/50">Umidade</span>
+          <span className="text-xs font-mono font-medium text-foreground/70">{weather.humidity}%</span>
+        </div>
       </div>
-    </div>
+    </section>
   );
 }

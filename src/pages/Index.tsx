@@ -22,11 +22,15 @@ const Index = () => {
       <OrionDataWrapper state={state} source={source} lastUpdated={lastUpdated} onRetry={refetch} compact hideSource>
         {data && (
           <div className="space-y-5">
-            {/* Tier 1: Overall status */}
-            <CommandStatus data={data.command} />
-
-            {/* Context: weather — operational environment */}
-            <WeatherContext />
+            {/* Tier 1: Status + Weather side by side */}
+            <div className="grid grid-cols-1 xl:grid-cols-5 gap-5">
+              <div className="xl:col-span-3">
+                <CommandStatus data={data.command} />
+              </div>
+              <div className="xl:col-span-2">
+                <WeatherContext />
+              </div>
+            </div>
 
             {/* Tier 2: What needs attention */}
             <AttentionRequired items={data.attention} />
