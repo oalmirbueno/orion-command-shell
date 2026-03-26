@@ -86,12 +86,12 @@ export function OrionSidebar() {
     <Sidebar collapsible="icon" className="border-r border-border">
       <div className="flex items-center gap-3 px-4 py-4 border-b border-border">
         <div className="w-8 h-8 rounded-lg bg-primary/15 border border-primary/25 flex items-center justify-center">
-          <span className="text-primary font-bold text-xs font-mono">O</span>
+          <span className="text-sm">⚡</span>
         </div>
         {!collapsed && (
           <div className="flex flex-col">
             <span className="text-xs font-bold tracking-wider text-foreground">ORION</span>
-            <span className="text-xs text-muted-foreground/50 font-mono tracking-widest">MISSION CONTROL</span>
+            <span className="text-[10px] text-muted-foreground/50 font-mono tracking-widest">COMMAND LAYER</span>
           </div>
         )}
       </div>
