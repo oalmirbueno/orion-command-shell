@@ -9,7 +9,7 @@
  *     {
  *       "id":                "string",
  *       "name":              "Sync de leads",
- *       "schedule":          "0 */6 * * *",                  // cron expression
+ *       "schedule":          "0 0/6 * * *",                  // cron expression
  *       "scheduleHuman":     "A cada 6 horas",               // human-readable
  *       "enabled":           true,
  *       "status":            "healthy" | "failed" | "warning" | "disabled",
