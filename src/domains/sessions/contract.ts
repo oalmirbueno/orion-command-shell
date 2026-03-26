@@ -1,118 +1,82 @@
 /**
- * Sessions Domain — API Contract
- * ================================
- * Reference contract for real API integration.
- * This is the FIRST domain contract — use as template for all others.
+ * Sessions Domain — API Contract (Canônico OpenClaw)
+ * ===================================================
+ * Shape de referência baseado na rota local do OpenClaw.
+ * A API externa publicada NÃO define o shape canônico.
  *
  * === ENDPOINT ===
  *
- *   GET {VITE_ORION_API_URL}/sessions
+ *   GET /api/sessions
  *
- * === EXPECTED RESPONSE (direct shape) ===
+ * === SHAPE CANÔNICO (rota local OpenClaw) ===
  *
- *   Status: 200 OK
- *   Content-Type: application/json
- *
- *   Session[] — array of session objects:
+ *   Session[] — array de objetos de sessão:
  *
  *   [
  *     {
- *       "id":        "s-4821",                              // string, required — unique ID
- *       "title":     "Classificação Batch #4821",           // string, required — display name
- *       "type":      "classification",                      // SessionType, required — one of: classification | enrichment | sync | analysis | export | routing
- *       "agent":     "Classifier-01",                       // string, required — agent display name
- *       "model":     "GPT-4o",                              // string, required — model identifier
- *       "status":    "running",                             // SessionStatus, required — one of: running | paused | completed | failed
- *       "progress":  67,                                    // number, required — 0-100
- *       "preview":   "Processando 8.4k leads...",           // string, required — short progress description
- *       "startedAt": "09:28",                               // string, required — display time (HH:mm or ISO)
- *       "elapsed":   "14min",                               // string, required — human-readable elapsed
- *       "tokens":    "42k"                                  // string, required — token count (display format)
+ *       "id":           "sess_abc123",                  // string — ID único
+ *       "key":          "batch-4821",                   // string — chave legível / slug
+ *       "type":         "classification",               // SessionType — classification | enrichment | sync | analysis | export | routing
+ *       "typeLabel":    "Classificação",                // string — label localizado do tipo
+ *       "typeEmoji":    "🏷️",                           // string — emoji representativo
+ *       "updatedAt":    "2025-03-26T09:42:00Z",         // string ISO 8601 — última atualização
+ *       "ageMs":        840000,                         // number — idade em ms desde criação
+ *       "model":        "gpt-4o",                       // string — modelo usado
+ *       "inputTokens":  12400,                          // number — tokens de entrada
+ *       "outputTokens": 29600,                          // number — tokens de saída
+ *       "totalTokens":  42000,                          // number — total de tokens
+ *       "preview":      "Processando 8.4k leads...",    // string — descrição curta do progresso
+ *       "previewType":  "text",                         // PreviewType — text | json | markdown | code
+ *       "aborted":      false                           // boolean — se foi abortada
  *     }
  *   ]
  *
- * === WRAPPED RESPONSE (common API pattern) ===
+ * === CAMPOS DERIVADOS (transform no fetcher.ts) ===
  *
- *   If your API wraps data in an envelope:
+ *   Os seguintes campos são derivados para a UI (SessionView):
  *
- *   {
- *     "data": Session[],
- *     "meta": { "total": 10, "page": 1 }
- *   }
+ *   - title:     construído a partir de typeEmoji + typeLabel + key
+ *   - status:    derivado de aborted, ageMs, totalTokens
+ *   - progress:  heurística baseada em ageMs e estado
+ *   - elapsed:   formatação legível de ageMs
+ *   - tokens:    formatação legível de totalTokens (ex: "42k")
+ *   - agent:     mapeado de model (simplificação atual)
+ *   - startedAt: extraído de updatedAt
  *
- *   Use the transform in fetcher.ts:
+ * === CAMPO MAPPING (se API usar nomes diferentes) ===
  *
- *   interface ApiEnvelope {
- *     data: Session[];
- *     meta: { total: number; page: number };
- *   }
- *
- *   export const fetchSessions = createRealFirstFetcher<ApiEnvelope, Session[]>({
- *     endpoint: "/sessions",
- *     fallbackData: FALLBACK_SESSIONS,
- *     transform: (raw) => raw.data,
- *   });
- *
- * === FIELD MAPPING (if API uses different names) ===
- *
- *   If your API returns snake_case or different field names:
+ *   Se o OpenClaw retornar snake_case:
  *
  *   interface ApiSession {
  *     session_id: string;
- *     name: string;
+ *     session_key: string;
  *     session_type: string;
- *     agent_name: string;
+ *     type_label: string;
+ *     type_emoji: string;
+ *     updated_at: string;
+ *     age_ms: number;
  *     model_id: string;
- *     current_status: string;
- *     progress_pct: number;
- *     description: string;
- *     started_at: string;
- *     elapsed_time: string;
- *     token_count: string;
+ *     input_tokens: number;
+ *     output_tokens: number;
+ *     total_tokens: number;
+ *     preview_text: string;
+ *     preview_type: string;
+ *     is_aborted: boolean;
  *   }
  *
- *   Use the transform to map:
+ *   Usar transform no fetcher para mapear ao shape canônico antes
+ *   da derivação para SessionView.
  *
- *   export const fetchSessions = createRealFirstFetcher<ApiSession[], Session[]>({
- *     endpoint: "/sessions",
- *     fallbackData: FALLBACK_SESSIONS,
- *     transform: (raw) => raw.map(s => ({
- *       id: s.session_id,
- *       title: s.name,
- *       type: s.session_type as SessionType,
- *       agent: s.agent_name,
- *       model: s.model_id,
- *       status: s.current_status as SessionStatus,
- *       progress: s.progress_pct,
- *       preview: s.description,
- *       startedAt: s.started_at,
- *       elapsed: s.elapsed_time,
- *       tokens: s.token_count,
- *     })),
- *   });
+ * === ATIVAÇÃO ===
  *
- * === ACTIVATION ===
+ *   1. Rodar acoplado ao OpenClaw (rota /api/sessions disponível)
+ *   2. Ou definir VITE_ORION_API_URL como override
+ *   3. Nenhuma mudança de UI necessária — componentes consomem SessionView
  *
- *   1. Set VITE_ORION_API_URL in your environment
- *   2. Ensure GET /sessions returns one of the shapes above
- *   3. Add a transform to fetcher.ts if needed
- *   4. No UI changes required — components are pure and data-driven
+ * === ERRO ===
  *
- * === ERROR HANDLING ===
- *
- *   - Non-2xx responses → automatic fallback to local data
- *   - Network errors → automatic fallback
- *   - Timeout (8s default) → automatic fallback
- *   - source field in useOrionData indicates "api" vs "fallback"
- *
- * === REPLICATION ===
- *
- *   To apply this pattern to another domain:
- *
- *   1. Copy this contract file to the domain folder
- *   2. Adjust types, endpoint, and field mapping
- *   3. Update fetcher.ts with the correct transform
- *   4. That's it — useOrionData handles the rest
+ *   - Non-2xx / rede / timeout → fallback vazio (empty state honesto)
+ *   - source indica "api" vs "fallback"
  */
 
-export type { Session, SessionStatus, SessionType } from "./types";
+export type { Session, SessionView, SessionStatus, SessionType, PreviewType } from "./types";

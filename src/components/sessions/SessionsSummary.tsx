@@ -1,5 +1,5 @@
-import { Flame, Pause, CheckCircle2, XCircle, Inbox } from "lucide-react";
-import type { Session, SessionStatus } from "@/domains/sessions/types";
+import { Flame, Pause, CheckCircle2, XCircle } from "lucide-react";
+import type { SessionView, SessionStatus } from "@/domains/sessions/types";
 
 const CONFIG: { status: SessionStatus; label: string; icon: React.ElementType; dot: string; text: string }[] = [
   { status: "running", label: "Em Execução", icon: Flame, dot: "status-online", text: "text-status-online" },
@@ -9,7 +9,7 @@ const CONFIG: { status: SessionStatus; label: string; icon: React.ElementType; d
 ];
 
 interface Props {
-  sessions: Session[];
+  sessions: SessionView[];
 }
 
 export function SessionsSummary({ sessions }: Props) {

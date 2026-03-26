@@ -5,10 +5,10 @@ import { SessionsList } from "@/components/sessions/SessionsList";
 import { useOrionData } from "@/hooks/useOrionData";
 import { fetchSessions } from "@/domains/sessions/fetcher";
 import { OrionDataWrapper } from "@/components/orion/DataWrapper";
-import type { Session } from "@/domains/sessions/types";
+import type { SessionView } from "@/domains/sessions/types";
 
 const SessionsPage = () => {
-  const { state, data, source, lastUpdated, refetch } = useOrionData<Session[]>({
+  const { state, data, source, lastUpdated, refetch } = useOrionData<SessionView[]>({
     key: "sessions",
     fetcher: fetchSessions,
   });
