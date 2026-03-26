@@ -170,11 +170,6 @@ export function WeatherContext() {
       {/* Footer: metrics row */}
       <div className="flex items-center gap-5 pt-3 border-t border-border/30">
         <div className="flex items-center gap-1.5">
-          <Thermometer className="h-3.5 w-3.5 text-muted-foreground/30" />
-          <span className="text-xs font-mono text-muted-foreground/50">Sensação</span>
-          <span className="text-xs font-mono font-medium text-foreground/70">{weather.feelsLike}°</span>
-        </div>
-        <div className="flex items-center gap-1.5">
           <Wind className="h-3.5 w-3.5 text-muted-foreground/30" />
           <span className="text-xs font-mono text-muted-foreground/50">Vento</span>
           <span className="text-xs font-mono font-medium text-foreground/70">{weather.windSpeed} km/h</span>
@@ -183,6 +178,11 @@ export function WeatherContext() {
           <Droplets className="h-3.5 w-3.5 text-muted-foreground/30" />
           <span className="text-xs font-mono text-muted-foreground/50">Umidade</span>
           <span className="text-xs font-mono font-medium text-foreground/70">{weather.humidity}%</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <Thermometer className="h-3.5 w-3.5 text-muted-foreground/30" />
+          <span className="text-xs font-mono text-muted-foreground/50">Previsão</span>
+          <span className="text-xs font-mono font-medium text-foreground/70">{weather.forecast}</span>
         </div>
       </div>
     </section>
