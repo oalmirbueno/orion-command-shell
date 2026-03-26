@@ -53,8 +53,8 @@ export function OrionDataWrapper({
       {state === "empty" && (
         <OrionEmpty
           compact={compact}
-          title="Sem dados"
-          description="Aguardando integração ativa"
+          title="Nenhum dado disponível"
+          description="Aguardando conexão com API"
         />
       )}
 
