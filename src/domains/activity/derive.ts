@@ -81,21 +81,21 @@ function deriveFromSessions(sessions: Session[]): ActivityInfo[] {
       events.push(makeActivity("session.start", "info",
         `Sessão ${s.typeEmoji} ${s.typeLabel} em andamento`,
         s.model,
-        { detail: `${s.key} — ${s.totalTokens} tokens processados`, sessionId: s.id, createdAt: s.updatedAt }));
+        { detail: `${s.key} — ${s.totalTokens} tokens processados`, sessionId: s.id, createdAt: String(s.updatedAt) }));
     }
 
     if (s.aborted) {
       events.push(makeActivity("session.end", "error",
         `Sessão ${s.key} abortada`,
         s.model,
-        { detail: `Tipo ${s.typeLabel} (${s.type})`, sessionId: s.id, createdAt: s.updatedAt }));
+        { detail: `Tipo ${s.typeLabel} (${s.type})`, sessionId: s.id, createdAt: String(s.updatedAt) }));
     }
 
     if (!s.aborted && !isRecent && s.totalTokens > 0) {
       events.push(makeActivity("session.end", "info",
         `Sessão ${s.typeEmoji} ${s.typeLabel} concluída`,
         s.model,
-        { detail: `${s.key} — ${s.totalTokens} tokens`, sessionId: s.id, createdAt: s.updatedAt }));
+        { detail: `${s.key} — ${s.totalTokens} tokens`, sessionId: s.id, createdAt: String(s.updatedAt) }));
     }
   }
 

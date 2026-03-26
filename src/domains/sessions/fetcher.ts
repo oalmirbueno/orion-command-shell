@@ -38,20 +38,21 @@ function formatTokens(n: number): string {
 
 function toSessionView(s: Session): SessionView {
   const status = deriveStatus(s);
+  const updatedAtMs = typeof s.updatedAt === "number" ? s.updatedAt : new Date(s.updatedAt).getTime();
   return {
     id: s.id,
     key: s.key,
-    title: `${s.typeEmoji} ${s.typeLabel} — ${s.key}`,
+    title: `${s.typeEmoji || "💬"} ${s.typeLabel || s.type} — ${s.key}`,
     type: s.type,
-    typeLabel: s.typeLabel,
-    typeEmoji: s.typeEmoji,
-    agent: s.model,
-    model: s.model,
+    typeLabel: s.typeLabel || s.type,
+    typeEmoji: s.typeEmoji || "💬",
+    agent: s.model || "—",
+    model: s.model || "—",
     status,
     progress: deriveProgress(s),
-    preview: s.preview,
-    previewType: s.previewType,
-    startedAt: new Date(s.updatedAt).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }),
+    preview: s.preview || null,
+    previewType: s.previewType || null,
+    startedAt: new Date(updatedAtMs).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }),
     elapsed: formatElapsed(s.ageMs),
     tokens: formatTokens(s.totalTokens),
     inputTokens: s.inputTokens,

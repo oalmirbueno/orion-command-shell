@@ -5,8 +5,8 @@
  * Este é o formato de referência do projeto-base.
  */
 
-export type SessionType = "classification" | "enrichment" | "sync" | "analysis" | "export" | "routing";
-export type PreviewType = "text" | "json" | "markdown" | "code";
+export type SessionType = "direct" | "group" | "pipeline" | "cron" | "classification" | "enrichment" | "sync" | "analysis" | "export" | "routing" | string;
+export type PreviewType = "text" | "json" | "markdown" | "code" | string;
 
 /** Shape canônico retornado pelo OpenClaw */
 export interface Session {
@@ -15,7 +15,7 @@ export interface Session {
   type: SessionType;
   typeLabel: string;
   typeEmoji: string;
-  updatedAt: string;
+  updatedAt: string | number;
   ageMs: number;
   model: string;
   inputTokens: number;
