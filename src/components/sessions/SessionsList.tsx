@@ -1,5 +1,5 @@
 import { Bot, Clock, ChevronRight, Cpu, Flame, Pause, CheckCircle2, XCircle, Inbox } from "lucide-react";
-import type { Session, SessionStatus, SessionType } from "@/domains/sessions/types";
+import type { SessionView, SessionStatus, SessionType } from "@/domains/sessions/types";
 
 const statusConfig: Record<SessionStatus, { icon: React.ElementType; dot: string; text: string; bg: string; border: string; statusLabel: string }> = {
   running: { icon: Flame, dot: "status-online", text: "text-status-online", bg: "bg-status-online/[0.04]", border: "border-l-status-online", statusLabel: "Em execução" },
@@ -17,7 +17,7 @@ const typeBadge: Record<SessionType, { label: string; color: string }> = {
   routing: { label: "Roteamento", color: "bg-primary/10 text-primary border-primary/20" },
 };
 
-function SessionRow({ session }: { session: Session }) {
+function SessionRow({ session }: { session: SessionView }) {
   const cfg = statusConfig[session.status];
   const badge = typeBadge[session.type];
   const Icon = cfg.icon;
@@ -85,7 +85,7 @@ function SessionRow({ session }: { session: Session }) {
 }
 
 interface Props {
-  sessions: Session[];
+  sessions: SessionView[];
 }
 
 export function SessionsList({ sessions }: Props) {
