@@ -8,7 +8,11 @@ const statusConfig: Record<SessionStatus, { icon: React.ElementType; dot: string
   failed: { icon: XCircle, dot: "status-critical", text: "text-status-critical", bg: "bg-status-critical/[0.04]", border: "border-l-status-critical", statusLabel: "Falha" },
 };
 
-const typeBadge: Record<SessionType, { label: string; color: string }> = {
+const typeBadge: Record<string, { label: string; color: string }> = {
+  direct: { label: "Direta", color: "bg-primary/10 text-primary border-primary/20" },
+  group: { label: "Grupo", color: "bg-status-info/10 text-status-info border-status-info/20" },
+  pipeline: { label: "Pipeline", color: "bg-status-online/10 text-status-online border-status-online/20" },
+  cron: { label: "Cron", color: "bg-status-warning/10 text-status-warning border-status-warning/20" },
   classification: { label: "Classificação", color: "bg-primary/10 text-primary border-primary/20" },
   enrichment: { label: "Enriquecimento", color: "bg-status-info/10 text-status-info border-status-info/20" },
   sync: { label: "Sincronização", color: "bg-status-online/10 text-status-online border-status-online/20" },
@@ -16,6 +20,8 @@ const typeBadge: Record<SessionType, { label: string; color: string }> = {
   export: { label: "Exportação", color: "bg-muted-foreground/10 text-muted-foreground border-muted-foreground/20" },
   routing: { label: "Roteamento", color: "bg-primary/10 text-primary border-primary/20" },
 };
+
+const defaultBadge = { label: "Sessão", color: "bg-muted-foreground/10 text-muted-foreground border-muted-foreground/20" };
 
 function SessionRow({ session }: { session: SessionView }) {
   const cfg = statusConfig[session.status];
