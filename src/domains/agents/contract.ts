@@ -1,44 +1,49 @@
 /**
- * Agents — Contrato de Integração
+ * Agents Domain — API Contract (Canônico OpenClaw)
+ * =================================================
+ * Shape de referência baseado na rota local do OpenClaw.
  *
- * === ENDPOINTS ===
+ * === ENDPOINT PRINCIPAL ===
  *
- * GET /api/agents → Agent[]
- * [
- *   {
- *     "id":                "string",                          // unique ID
- *     "name":              "Classifier-01",                   // display name
- *     "role":              "Classificador de leads",          // role description
- *     "tier":              "orchestrator" | "core" | "support",
- *     "model":             "GPT-4o",                          // model identifier
- *     "status":            "active" | "idle" | "offline",
- *     "sessions":          3,                                 // active session count
- *     "lastActivity":      "2026-03-26T16:30:00Z",           // ISO or display string
- *     "lastActivityLabel": "há 5 min",                       // human-readable
- *     "load":              67,                                // 0-100
- *     "tokensToday":       "42k",                             // display format
- *     "availability":      "99.2%",                           // display format
- *     "currentTask":       "Classificando batch #4821",       // current task description
- *     "currentTaskAge":    "14min",                           // elapsed
- *     "dependsOn":         ["Orchestrator"],                  // agent names
- *     "feeds":             ["Enricher-01"],                   // agent names
- *     "alertCount":        0                                  // active alerts
- *   }
- * ]
+ *   GET /api/agents
  *
- * GET /api/agents/tree → AgentNode[]
- * [
- *   {
- *     "name":   "Orchestrator",
- *     "role":   "Orquestrador principal",
- *     "tier":   "orchestrator" | "core" | "support",
- *     "status": "active" | "idle" | "offline",
- *     "load":   45
- *   }
- * ]
+ *   Retorna AgentInfo[] — dados brutos de cada agente:
  *
- * === TRANSFORM ===
- * Nenhum necessário se a API seguir o formato acima.
+ *   [
+ *     {
+ *       "id":                   "agent-router-01",
+ *       "name":                 "Router",
+ *       "role":                 "Orquestração e roteamento de tarefas",
+ *       "tier":                 "orchestrator",
+ *       "model":                "gpt-4o",
+ *       "enabled":              true,
+ *       "online":               true,
+ *       "activeSessions":       3,
+ *       "totalTokensToday":     142000,
+ *       "uptimePercent":        99.8,
+ *       "cpuPercent":           45.2,
+ *       "lastActivityAt":       "2025-03-26T14:28:00Z",
+ *       "currentTask":          "Classificando batch #4821",
+ *       "currentTaskStartedAt": "2025-03-26T14:25:00Z",
+ *       "dependsOn":            ["Sync"],
+ *       "feeds":                ["Classifier", "Enricher"],
+ *       "alertCount":           0
+ *     }
+ *   ]
+ *
+ * === ENDPOINT SECUNDÁRIO ===
+ *
+ *   GET /api/agents/tree → AgentNode[]
+ *
+ * === CAMPOS DERIVADOS (transform no fetcher.ts) ===
+ *
+ *   status, sessions, load, tokensToday, availability,
+ *   lastActivity, lastActivityLabel, currentTask, currentTaskAge
+ *
+ * === ATIVAÇÃO ===
+ *
+ *   1. Rodar acoplado ao OpenClaw
+ *   2. Ou definir VITE_ORION_API_URL como override
  */
 
-export type { Agent, AgentNode, AgentStatus, AgentTier } from "./types";
+export type { AgentInfo, AgentView, AgentNode, AgentTier, AgentStatus } from "./types";
