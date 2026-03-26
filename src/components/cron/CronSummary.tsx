@@ -6,6 +6,8 @@ interface Props {
 }
 
 export function CronSummary({ summary }: Props) {
+  const isEmpty = summary.active + summary.failed + summary.disabled === 0;
+
   const items = [
     { label: "Jobs Ativos", value: summary.active, icon: Timer, text: "text-status-online", dot: "status-online" },
     { label: "Saudáveis", value: summary.healthy, icon: CheckCircle2, text: "text-status-online", dot: "status-online" },
@@ -14,19 +16,19 @@ export function CronSummary({ summary }: Props) {
   ];
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-border/30 rounded-xl overflow-hidden border border-border/50">
+    <div className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-border/30 rounded-lg overflow-hidden border border-border/50">
       {items.map((m) => {
         const Icon = m.icon;
         return (
           <div key={m.label} className="bg-card px-6 py-5 flex items-center gap-4">
-            <div className="w-11 h-11 rounded-lg bg-surface-2 border border-border/50 flex items-center justify-center">
-              <Icon className={`h-5 w-5 ${m.text}`} />
+            <div className={`w-10 h-10 rounded-lg border flex items-center justify-center ${isEmpty ? "bg-surface-2 border-border/40" : "bg-surface-2 border-border/50"}`}>
+              <Icon className={`h-5 w-5 ${isEmpty ? "text-muted-foreground/25" : m.text}`} />
             </div>
             <div>
-              <p className="text-2xl font-bold text-foreground leading-none">{m.value}</p>
+              <p className={`text-2xl font-bold leading-none ${isEmpty ? "text-muted-foreground/20" : "text-foreground"}`}>{m.value}</p>
               <div className="flex items-center gap-2 mt-1.5">
-                <div className={`status-dot ${m.dot}`} />
-                <span className="text-xs font-mono uppercase tracking-wider text-muted-foreground/60">{m.label}</span>
+                <div className={`status-dot ${isEmpty ? "bg-muted-foreground/15" : m.dot}`} />
+                <span className="text-xs font-mono uppercase tracking-wider text-muted-foreground/50">{m.label}</span>
               </div>
             </div>
           </div>

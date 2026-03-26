@@ -6,19 +6,19 @@ const statusConfig: Record<OverallStatus, {
   dot: string; border: string; bg: string; text: string;
 }> = {
   healthy: {
-    icon: CheckCircle2, label: "Todos os Sistemas Operacionais",
+    icon: CheckCircle2, label: "Sistemas Operacionais",
     sublabel: "Nenhuma anomalia detectada", dot: "status-online",
-    border: "border-status-online/20", bg: "bg-status-online/5", text: "text-status-online",
+    border: "border-status-online/20", bg: "bg-status-online/[0.04]", text: "text-status-online",
   },
   degraded: {
     icon: AlertTriangle, label: "Performance Degradada",
-    sublabel: "Alguns serviços com performance reduzida", dot: "status-warning",
-    border: "border-status-warning/20", bg: "bg-status-warning/5", text: "text-status-warning",
+    sublabel: "Serviços com performance reduzida", dot: "status-warning",
+    border: "border-status-warning/20", bg: "bg-status-warning/[0.04]", text: "text-status-warning",
   },
   critical: {
-    icon: XCircle, label: "Falha no Sistema Detectada",
+    icon: XCircle, label: "Falha Detectada",
     sublabel: "Ação imediata necessária", dot: "status-critical",
-    border: "border-status-critical/20", bg: "bg-status-critical/5", text: "text-status-critical",
+    border: "border-status-critical/20", bg: "bg-status-critical/[0.04]", text: "text-status-critical",
   },
 };
 
@@ -29,33 +29,36 @@ interface Props {
 export function SystemOverviewHeader({ header }: Props) {
   const cfg = statusConfig[header.overallStatus];
   const Icon = cfg.icon;
+  const isEmpty = header.host === "—";
 
   return (
-    <div className={`flex items-center gap-5 px-6 py-5 rounded-xl border ${cfg.border} ${cfg.bg}`}>
-      <div className={`w-12 h-12 rounded-lg ${cfg.bg} border ${cfg.border} flex items-center justify-center`}>
-        <Icon className={`h-6 w-6 ${cfg.text}`} />
+    <div className={`flex items-center gap-5 px-6 py-5 rounded-lg border ${cfg.border} ${cfg.bg}`}>
+      <div className={`w-10 h-10 rounded-lg ${cfg.bg} border ${cfg.border} flex items-center justify-center`}>
+        <Icon className={`h-5 w-5 ${isEmpty ? "text-muted-foreground/30" : cfg.text}`} />
       </div>
       <div className="flex-1">
-        <div className="flex items-center gap-3">
-          <h2 className={`text-base font-semibold ${cfg.text}`}>{cfg.label}</h2>
-          <div className={`status-dot ${cfg.dot}`} />
+        <div className="flex items-center gap-2.5">
+          <h2 className={`text-sm font-semibold ${isEmpty ? "text-muted-foreground/50" : cfg.text}`}>{isEmpty ? "Aguardando conexão" : cfg.label}</h2>
+          {!isEmpty && <div className={`status-dot ${cfg.dot}`} />}
         </div>
-        <p className="text-sm font-mono text-muted-foreground mt-1">{cfg.sublabel}</p>
+        <p className="text-xs font-mono text-muted-foreground/40 mt-1">{isEmpty ? "Conecte a API para monitorar o sistema" : cfg.sublabel}</p>
       </div>
-      <div className="flex items-center gap-6 text-right">
-        <div>
-          <p className="text-xs font-mono text-muted-foreground/50 uppercase">Host</p>
-          <p className="text-sm font-mono text-foreground">{header.host}</p>
+      {!isEmpty && (
+        <div className="flex items-center gap-6 text-right">
+          <div>
+            <p className="text-[10px] font-mono text-muted-foreground/35 uppercase">Host</p>
+            <p className="text-sm font-mono text-foreground/80">{header.host}</p>
+          </div>
+          <div>
+            <p className="text-[10px] font-mono text-muted-foreground/35 uppercase">Ativo</p>
+            <p className="text-sm font-mono text-foreground/80">{header.uptime}</p>
+          </div>
+          <div>
+            <p className="text-[10px] font-mono text-muted-foreground/35 uppercase">Última Verif.</p>
+            <p className="text-sm font-mono text-foreground/80">{header.lastCheck}</p>
+          </div>
         </div>
-        <div>
-          <p className="text-xs font-mono text-muted-foreground/50 uppercase">Uptime</p>
-          <p className="text-sm font-mono text-foreground">{header.uptime}</p>
-        </div>
-        <div>
-          <p className="text-xs font-mono text-muted-foreground/50 uppercase">Última Verif.</p>
-          <p className="text-sm font-mono text-foreground">{header.lastCheck}</p>
-        </div>
-      </div>
+      )}
     </div>
   );
 }
