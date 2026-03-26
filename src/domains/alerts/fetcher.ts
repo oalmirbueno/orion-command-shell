@@ -1,14 +1,17 @@
-// Alerts Domain — Fetchers (real-first + fallback-safe)
-//
-// Shape canônico: AlertInfo (sinais consolidados do OpenClaw)
-// Shape de UI: AlertsPageData (derivado via transform)
-//
-// Alerts é uma camada de leitura executiva. O OpenClaw consolida
-// sinais de System, Cron, Activity, Sessions e Agents em /api/alerts.
+/**
+ * Alerts Domain — Fetchers (real-first + derivação client-side)
+ *
+ * Estratégia:
+ *   1. Tenta /api/alerts (endpoint real do OpenClaw)
+ *   2. Se indisponível, deriva alertas client-side a partir de
+ *      sinais reais dos domínios System, Cron, Activity, Sessions, Agents
+ *   3. Nunca retorna dados fake — apenas sinais reais ou vazio honesto
+ */
 
 import { createRealFirstFetcher } from "../createRealFirstFetcher";
+import { deriveAlertsFromDomains } from "./derive";
 import type { AlertInfo, Alert, AlertsPageData, AlertsSummaryData, Severity } from "./types";
-import type { DomainFetcher, DomainResult } from "../types";
+import type { DomainFetcher, DomainResult, DataSource } from "../types";
 
 // ═══════════════════════════════════════════════════════
 // Transforms — canônico → view
@@ -59,7 +62,48 @@ function buildSummary(alerts: Alert[]): AlertsSummaryData {
 }
 
 // ═══════════════════════════════════════════════════════
-// Fetchers
+// Fetcher com fallback para derivação client-side
+// ═══════════════════════════════════════════════════════
+
+async function fetchAlertsRaw(): Promise<DomainResult<AlertInfo[]>> {
+  // 1. Tenta endpoint real /api/alerts
+  const realFetcher = createRealFirstFetcher<AlertInfo[], AlertInfo[]>({
+    endpoint: "/alerts",
+    fallbackData: [],
+  });
+
+  const result = await realFetcher();
+
+  // Se veio da API real com dados, usa direto
+  if (result.source === "api" && result.data.length > 0) {
+    return result;
+  }
+
+  // Se veio da API real mas vazio, respeita (não há alertas reais)
+  if (result.source === "api") {
+    return result;
+  }
+
+  // 2. Fallback: deriva alertas client-side a partir dos outros domínios
+  try {
+    const derived = await deriveAlertsFromDomains();
+    return {
+      data: derived,
+      source: "api" as DataSource, // veio de dados reais dos outros endpoints
+      timestamp: new Date(),
+    };
+  } catch {
+    console.debug("[Orion] alerts: derivação client-side falhou, retornando vazio");
+    return {
+      data: [],
+      source: "fallback" as DataSource,
+      timestamp: new Date(),
+    };
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// Fetchers públicos
 // ═══════════════════════════════════════════════════════
 
 const EMPTY_ALERTS_PAGE: AlertsPageData = {
@@ -68,12 +112,7 @@ const EMPTY_ALERTS_PAGE: AlertsPageData = {
 };
 
 export const fetchAlertsPage: DomainFetcher<AlertsPageData> = async (): Promise<DomainResult<AlertsPageData>> => {
-  const baseFetcher = createRealFirstFetcher<AlertInfo[], AlertInfo[]>({
-    endpoint: "/alerts",
-    fallbackData: [],
-  });
-
-  const result = await baseFetcher();
+  const result = await fetchAlertsRaw();
 
   if (result.data.length === 0) {
     return { data: EMPTY_ALERTS_PAGE, source: result.source, timestamp: result.timestamp };
@@ -88,12 +127,7 @@ export const fetchAlertsPage: DomainFetcher<AlertsPageData> = async (): Promise<
 };
 
 export const fetchAlerts: DomainFetcher<Alert[]> = async (): Promise<DomainResult<Alert[]>> => {
-  const baseFetcher = createRealFirstFetcher<AlertInfo[], AlertInfo[]>({
-    endpoint: "/alerts",
-    fallbackData: [],
-  });
-
-  const result = await baseFetcher();
+  const result = await fetchAlertsRaw();
   return {
     data: result.data.map(toAlert),
     source: result.source,
