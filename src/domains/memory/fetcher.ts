@@ -6,9 +6,9 @@ const EMPTY_MEMORY_PAGE: MemoryPageData = {
   snapshots: [],
   summary: {
     totalSnapshots: 0,
-    avgRelevance: 0,
-    topCategory: "—",
-    lastUpdated: "—",
+    totalCategories: 0,
+    lastCapture: "—",
+    totalSize: "—",
   },
 };
 

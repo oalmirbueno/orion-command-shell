@@ -25,14 +25,15 @@ const EMPTY_COMMAND: CommandData = {
 const EMPTY_SYSTEM_PAGE: SystemPageData = {
   header: {
     overallStatus: "healthy",
+    host: "—",
     uptime: "—",
-    lastIncident: "—",
-    activeAlerts: 0,
+    lastCheck: "—",
   },
-  resources: { cpu: 0, memory: 0, disk: 0, network: 0 },
+  gauges: [],
   services: [],
-  stability: [],
-  uptimeHistory: [],
+  signals: [],
+  uptimeDays: [],
+  uptimePercent: "—",
 };
 
 /** Unified page model — used by SystemPage */
