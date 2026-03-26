@@ -21,28 +21,17 @@ export const fetchSystemPage: DomainFetcher<SystemPageData> = createRealFirstFet
   fallbackData: FALLBACK_SYSTEM_PAGE,
 });
 
-/** Legacy individual fetchers — used by Home page components */
-const FALLBACK_COMMAND: CommandData = {
-  systemState: "degraded",
+/** Empty command status — production fallback */
+const EMPTY_COMMAND: CommandData = {
+  systemState: "nominal",
   metrics: [
-    { label: "Uptime", value: "99.97%", icon: "Clock" },
-    { label: "Agentes", value: "7/10", icon: "Bot" },
-    { label: "Sessões", value: "5 ativas", icon: "Activity" },
-    { label: "Tokens/h", value: "142k", icon: "Zap" },
+    { label: "Disponib.", value: "—", icon: "Clock" },
+    { label: "Agentes", value: "—", icon: "Bot" },
+    { label: "Sessões", value: "—", icon: "Activity" },
+    { label: "Tokens/h", value: "—", icon: "Zap" },
   ],
 };
 
-const FALLBACK_HEALTH: HealthService[] = [
-  { name: "API Gateway", status: "healthy", responseTime: "12ms", uptime: "99.99%" },
-  { name: "Core Engine", status: "healthy", responseTime: "8ms", uptime: "99.98%" },
-  { name: "Data Pipeline", status: "degraded", responseTime: "187ms", uptime: "99.91%" },
-  { name: "Auth Service", status: "healthy", responseTime: "15ms", uptime: "100%" },
-  { name: "ML Processor", status: "healthy", responseTime: "34ms", uptime: "99.95%" },
-  { name: "Cache Layer", status: "healthy", responseTime: "2ms", uptime: "100%" },
-  { name: "Queue Service", status: "healthy", responseTime: "5ms", uptime: "99.99%" },
-  { name: "Storage", status: "healthy", responseTime: "22ms", uptime: "99.97%" },
-];
-
-export const fetchCommandStatus: DomainFetcher<CommandData> = createFallbackFetcher(FALLBACK_COMMAND);
-export const fetchHealthServices: DomainFetcher<HealthService[]> = createFallbackFetcher(FALLBACK_HEALTH);
-export const fetchSystemServices: DomainFetcher<SystemPageData["services"]> = createFallbackFetcher(FALLBACK_SYSTEM_PAGE.services);
+export const fetchCommandStatus: DomainFetcher<CommandData> = createFallbackFetcher(EMPTY_COMMAND);
+export const fetchHealthServices: DomainFetcher<HealthService[]> = createFallbackFetcher([]);
+export const fetchSystemServices: DomainFetcher<SystemPageData["services"]> = createFallbackFetcher([]);
