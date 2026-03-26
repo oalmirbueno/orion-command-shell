@@ -15,7 +15,7 @@ export interface Session {
   type: SessionType;
   typeLabel: string;
   typeEmoji: string;
-  updatedAt: string;
+  updatedAt: string | number;
   ageMs: number;
   model: string;
   inputTokens: number;
