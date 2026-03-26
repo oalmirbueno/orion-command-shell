@@ -34,7 +34,7 @@ export function LiveOperations({ operations = [] }: LiveOperationsProps) {
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-medium text-foreground truncate">{op.name}</span>
                   {isHigh && !isPaused && (
-                    <span className="text-xs font-mono uppercase px-2 py-0.5 rounded bg-primary/10 text-primary border border-primary/15 font-bold">PRI</span>
+                    <span className="text-xs font-mono uppercase px-2 py-0.5 rounded bg-primary/10 text-primary border border-primary/15 font-bold">ALTA</span>
                   )}
                 </div>
                 <div className="flex items-center gap-2 mt-1">

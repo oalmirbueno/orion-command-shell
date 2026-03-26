@@ -93,7 +93,7 @@ export function ActivityFeed({ events }: ActivityFeedProps) {
           <span className="text-xs font-mono text-status-online font-semibold">{events.length} eventos</span>
         </div>
         <div className="flex-1 h-px bg-border/40" />
-        <span className="text-xs font-mono text-primary animate-pulse-glow font-medium">● AO VIVO</span>
+        <span className="text-xs font-mono text-primary animate-pulse-glow font-medium">● TEMPO REAL</span>
       </div>
 
       <div className="space-y-8">

@@ -32,7 +32,7 @@ export function OperationalHealth({ services = [] }: OperationalHealthProps) {
         <span className="w-5" />
         <span className="flex-1">Serviço</span>
         <span className="w-20 text-right">Latência</span>
-        <span className="w-20 text-right">Uptime</span>
+        <span className="w-20 text-right">Disponib.</span>
       </div>
 
       <div className="divide-y divide-border/20">
