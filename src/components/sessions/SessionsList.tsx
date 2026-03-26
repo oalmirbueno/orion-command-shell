@@ -1,11 +1,11 @@
-import { Bot, Clock, ChevronRight, Cpu, Flame, Pause, CheckCircle2, XCircle } from "lucide-react";
+import { Bot, Clock, ChevronRight, Cpu, Flame, Pause, CheckCircle2, XCircle, Inbox } from "lucide-react";
 import type { Session, SessionStatus, SessionType } from "@/domains/sessions/types";
 
 const statusConfig: Record<SessionStatus, { icon: React.ElementType; dot: string; text: string; bg: string; border: string; statusLabel: string }> = {
-  running: { icon: Flame, dot: "status-online", text: "text-status-online", bg: "bg-status-online/5", border: "border-l-status-online", statusLabel: "Em execução" },
-  paused: { icon: Pause, dot: "status-warning", text: "text-status-warning", bg: "bg-status-warning/5", border: "border-l-status-warning", statusLabel: "Pausada" },
+  running: { icon: Flame, dot: "status-online", text: "text-status-online", bg: "bg-status-online/[0.04]", border: "border-l-status-online", statusLabel: "Em execução" },
+  paused: { icon: Pause, dot: "status-warning", text: "text-status-warning", bg: "bg-status-warning/[0.04]", border: "border-l-status-warning", statusLabel: "Pausada" },
   completed: { icon: CheckCircle2, dot: "bg-primary/50", text: "text-primary", bg: "", border: "border-l-primary/30", statusLabel: "Concluída" },
-  failed: { icon: XCircle, dot: "status-critical", text: "text-status-critical", bg: "bg-status-critical/5", border: "border-l-status-critical", statusLabel: "Falha" },
+  failed: { icon: XCircle, dot: "status-critical", text: "text-status-critical", bg: "bg-status-critical/[0.04]", border: "border-l-status-critical", statusLabel: "Falha" },
 };
 
 const typeBadge: Record<SessionType, { label: string; color: string }> = {
@@ -25,46 +25,59 @@ function SessionRow({ session }: { session: Session }) {
   const isDimmed = session.status === "completed";
 
   return (
-    <div className={`border border-border/50 rounded-lg bg-card hover:bg-accent/30 transition-colors cursor-pointer border-l-[3px] ${cfg.border} ${cfg.bg} ${isDimmed ? "opacity-60 hover:opacity-80" : ""} group`}>
+    <div className={`border border-border/40 rounded-lg bg-card hover:bg-accent/20 transition-all cursor-pointer border-l-[3px] ${cfg.border} ${cfg.bg} ${isDimmed ? "opacity-50 hover:opacity-70" : ""} group`}>
       <div className="px-6 py-5">
+        {/* Header */}
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-3 flex-1 min-w-0">
-            <Icon className={`h-5 w-5 shrink-0 ${cfg.text} ${isLive ? "animate-pulse-glow" : ""}`} />
-            <h3 className="text-base font-semibold text-foreground truncate">{session.title}</h3>
-            <span className={`text-xs font-mono uppercase px-2 py-1 rounded border shrink-0 ${badge.color}`}>{badge.label}</span>
+            <div className={`w-9 h-9 rounded-lg border flex items-center justify-center shrink-0 ${isLive ? "bg-status-online/10 border-status-online/20" : "bg-surface-2 border-border/40"}`}>
+              <Icon className={`h-4 w-4 ${cfg.text}`} />
+            </div>
+            <div className="min-w-0">
+              <div className="flex items-center gap-2.5">
+                <h3 className="text-sm font-semibold text-foreground truncate">{session.title}</h3>
+                <span className={`text-[10px] font-mono uppercase px-2 py-0.5 rounded border shrink-0 ${badge.color}`}>{badge.label}</span>
+              </div>
+              <p className="text-xs text-foreground/50 mt-1 truncate">{session.preview}</p>
+            </div>
           </div>
           <div className="flex items-center gap-3 shrink-0 ml-4">
-            <span className={`text-xs font-mono uppercase font-medium ${cfg.text}`}>{cfg.statusLabel}</span>
-            <div className={`status-dot ${cfg.dot}`} />
-            <ChevronRight className="h-5 w-5 text-muted-foreground/20 group-hover:text-muted-foreground/50 transition-colors" />
+            <div className="flex items-center gap-2">
+              <div className={`status-dot ${cfg.dot}`} />
+              <span className={`text-xs font-mono uppercase font-medium ${cfg.text}`}>{cfg.statusLabel}</span>
+            </div>
+            <ChevronRight className="h-4 w-4 text-muted-foreground/15 group-hover:text-muted-foreground/40 transition-colors" />
           </div>
         </div>
 
-        <p className="text-sm text-foreground/60 mb-4 pl-8 truncate">{session.preview}</p>
-
-        <div className="mb-4 pl-8">
-          <div className="h-2 w-full bg-surface-3 rounded-full overflow-hidden">
-            <div
-              className={`h-full rounded-full transition-all duration-500 ${
-                session.status === "failed" ? "bg-status-critical/60" :
-                session.status === "paused" ? "bg-status-warning/50" :
-                session.status === "completed" ? "bg-primary/40" :
-                "bg-primary"
-              }`}
-              style={{ width: `${session.progress}%` }}
-            />
+        {/* Progress */}
+        <div className="mb-4 ml-12">
+          <div className="flex items-center gap-3">
+            <div className="flex-1 h-1.5 bg-surface-3 rounded-full overflow-hidden">
+              <div
+                className={`h-full rounded-full transition-all duration-500 ${
+                  session.status === "failed" ? "bg-status-critical/60" :
+                  session.status === "paused" ? "bg-status-warning/50" :
+                  session.status === "completed" ? "bg-primary/40" :
+                  "bg-primary"
+                }`}
+                style={{ width: `${session.progress}%` }}
+              />
+            </div>
+            <span className="text-xs font-mono text-muted-foreground/40 w-9 text-right">{session.progress}%</span>
           </div>
         </div>
 
-        <div className="flex items-center gap-5 pl-8 text-xs font-mono text-muted-foreground/60">
-          <div className="flex items-center gap-2"><Bot className="h-4 w-4" /><span>{session.agent}</span></div>
-          <div className="h-4 w-px bg-border/40" />
-          <div className="flex items-center gap-1.5"><Cpu className="h-4 w-4" /><span>{session.model}</span></div>
-          <div className="h-4 w-px bg-border/40" />
-          <div className="flex items-center gap-1.5"><Clock className="h-4 w-4" /><span>{session.elapsed}</span></div>
-          <div className="h-4 w-px bg-border/40" />
+        {/* Metadata */}
+        <div className="flex items-center gap-4 ml-12 text-xs font-mono text-muted-foreground/50">
+          <div className="flex items-center gap-1.5"><Bot className="h-3.5 w-3.5" /><span>{session.agent}</span></div>
+          <div className="w-px h-3 bg-border/30" />
+          <div className="flex items-center gap-1.5"><Cpu className="h-3.5 w-3.5" /><span>{session.model}</span></div>
+          <div className="w-px h-3 bg-border/30" />
+          <div className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" /><span>{session.elapsed}</span></div>
+          <div className="w-px h-3 bg-border/30" />
           <span>{session.tokens} tokens</span>
-          <span className="ml-auto text-muted-foreground/40">Início {session.startedAt}</span>
+          <span className="ml-auto text-muted-foreground/30">Início {session.startedAt}</span>
         </div>
       </div>
     </div>
@@ -76,6 +89,26 @@ interface Props {
 }
 
 export function SessionsList({ sessions }: Props) {
+  if (sessions.length === 0) {
+    return (
+      <section className="rounded-lg border border-border overflow-hidden">
+        <div className="orion-panel-header">
+          <div className="flex items-center gap-3">
+            <div className="w-6 h-0.5 bg-muted-foreground/40 rounded-full" />
+            <h2 className="orion-panel-title">Registro de Sessões</h2>
+          </div>
+        </div>
+        <div className="flex flex-col items-center justify-center py-16 text-center">
+          <div className="w-12 h-12 rounded-lg bg-surface-2 border border-border flex items-center justify-center mb-4">
+            <Inbox className="h-6 w-6 text-muted-foreground/30" />
+          </div>
+          <p className="text-sm font-medium text-muted-foreground/50">Nenhuma sessão registrada</p>
+          <p className="text-xs font-mono text-muted-foreground/30 mt-1.5">Aguardando conexão com API</p>
+        </div>
+      </section>
+    );
+  }
+
   const order: Record<SessionStatus, number> = { running: 0, paused: 1, failed: 2, completed: 3 };
   const sorted = [...sessions].sort((a, b) => order[a.status] - order[b.status]);
   const runningCount = sessions.filter(s => s.status === "running").length;
@@ -84,14 +117,16 @@ export function SessionsList({ sessions }: Props) {
     <section>
       <div className="flex items-center gap-3 mb-4">
         <h2 className="text-xs font-mono uppercase tracking-[0.15em] text-muted-foreground">Registro de Sessões</h2>
-        <div className="flex items-center gap-2 ml-2 px-3 py-1 rounded-full bg-status-online/10 border border-status-online/20">
-          <span className="text-xs font-mono text-status-online font-semibold">{runningCount} ao vivo</span>
-        </div>
+        {runningCount > 0 && (
+          <div className="flex items-center gap-2 ml-2 px-3 py-1 rounded-full bg-status-online/10 border border-status-online/20">
+            <span className="text-xs font-mono text-status-online font-semibold">{runningCount} em execução</span>
+          </div>
+        )}
         <div className="flex-1 h-px bg-border/40" />
-        <span className="text-xs font-mono text-primary animate-pulse-glow font-medium">● AO VIVO</span>
+        <span className="text-xs font-mono text-muted-foreground/40">{sessions.length} total</span>
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-2.5">
         {sorted.map((session) => (
           <SessionRow key={session.id} session={session} />
         ))}

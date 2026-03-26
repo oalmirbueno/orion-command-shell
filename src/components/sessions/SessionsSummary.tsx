@@ -1,4 +1,4 @@
-import { Flame, Pause, CheckCircle2, XCircle } from "lucide-react";
+import { Flame, Pause, CheckCircle2, XCircle, Inbox } from "lucide-react";
 import type { Session, SessionStatus } from "@/domains/sessions/types";
 
 const CONFIG: { status: SessionStatus; label: string; icon: React.ElementType; dot: string; text: string }[] = [
@@ -16,20 +16,22 @@ export function SessionsSummary({ sessions }: Props) {
   const counts: Record<SessionStatus, number> = { running: 0, paused: 0, completed: 0, failed: 0 };
   for (const s of sessions) counts[s.status]++;
 
+  const isEmpty = sessions.length === 0;
+
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-border/30 rounded-lg overflow-hidden border border-border/60">
+    <div className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-border/30 rounded-lg overflow-hidden border border-border/50">
       {CONFIG.map((m) => {
         const Icon = m.icon;
         return (
           <div key={m.status} className="bg-card px-6 py-5 flex items-center gap-4">
-            <div className="w-11 h-11 rounded-lg bg-surface-2 border border-border/60 flex items-center justify-center">
-              <Icon className={`h-5 w-5 ${m.text}`} />
+            <div className={`w-10 h-10 rounded-lg border flex items-center justify-center ${isEmpty ? "bg-surface-2 border-border/40" : "bg-surface-2 border-border/50"}`}>
+              <Icon className={`h-5 w-5 ${isEmpty ? "text-muted-foreground/25" : m.text}`} />
             </div>
             <div>
-              <p className="text-2xl font-bold text-foreground leading-none">{counts[m.status]}</p>
+              <p className={`text-2xl font-bold leading-none ${isEmpty ? "text-muted-foreground/20" : "text-foreground"}`}>{counts[m.status]}</p>
               <div className="flex items-center gap-2 mt-1.5">
-                <div className={`status-dot ${m.dot}`} />
-                <span className="text-xs font-mono uppercase tracking-wider text-muted-foreground/60">{m.label}</span>
+                <div className={`status-dot ${isEmpty ? "bg-muted-foreground/15" : m.dot}`} />
+                <span className="text-xs font-mono uppercase tracking-wider text-muted-foreground/50">{m.label}</span>
               </div>
             </div>
           </div>

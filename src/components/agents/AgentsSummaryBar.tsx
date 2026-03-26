@@ -6,6 +6,7 @@ interface AgentsSummaryBarProps {
 }
 
 export function AgentsSummaryBar({ agents }: AgentsSummaryBarProps) {
+  const isEmpty = agents.length === 0;
   const total = agents.length;
   const active = agents.filter(a => a.status === "active").length;
   const idle = agents.filter(a => a.status === "idle").length;
@@ -15,31 +16,31 @@ export function AgentsSummaryBar({ agents }: AgentsSummaryBarProps) {
     const num = parseFloat(a.tokensToday.replace("k", ""));
     return sum + (isNaN(num) ? 0 : num);
   }, 0);
-  const tokensLabel = `${Math.round(totalTokens)}k`;
+  const tokensLabel = isEmpty ? "—" : `${Math.round(totalTokens)}k`;
 
   const items = [
-    { label: "Total", value: total, icon: Bot, color: "text-foreground", dotClass: "bg-foreground/30" },
-    { label: "Ativos", value: active, icon: Zap, color: "text-status-online", dotClass: "status-online" },
-    { label: "Ociosos", value: idle, icon: Pause, color: "text-muted-foreground", dotClass: "bg-muted-foreground/40" },
-    { label: "Offline", value: offline, icon: WifiOff, color: "text-status-critical", dotClass: "status-critical" },
-    { label: "Orquestrador", value: orchestrators, icon: Crown, color: "text-primary", dotClass: "bg-primary/50" },
+    { label: "Total", value: isEmpty ? "—" : total, icon: Bot, color: "text-foreground", dotClass: "bg-foreground/30" },
+    { label: "Ativos", value: isEmpty ? "—" : active, icon: Zap, color: "text-status-online", dotClass: "status-online" },
+    { label: "Ociosos", value: isEmpty ? "—" : idle, icon: Pause, color: "text-muted-foreground", dotClass: "bg-muted-foreground/40" },
+    { label: "Offline", value: isEmpty ? "—" : offline, icon: WifiOff, color: "text-status-critical", dotClass: "status-critical" },
+    { label: "Orquestrador", value: isEmpty ? "—" : orchestrators, icon: Crown, color: "text-primary", dotClass: "bg-primary/50" },
     { label: "Tokens Hoje", value: tokensLabel, icon: Cpu, color: "text-foreground", dotClass: "bg-foreground/30" },
   ];
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-px bg-border/30 rounded-xl overflow-hidden border border-border/50">
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-px bg-border/30 rounded-lg overflow-hidden border border-border/50">
       {items.map((m) => {
         const Icon = m.icon;
         return (
-          <div key={m.label} className="bg-card px-6 py-5 flex items-center gap-4">
-            <div className="w-11 h-11 rounded-lg bg-surface-2 border border-border/50 flex items-center justify-center">
-              <Icon className={`h-5 w-5 ${m.color}`} />
+          <div key={m.label} className="bg-card px-5 py-5 flex items-center gap-3.5">
+            <div className={`w-10 h-10 rounded-lg border flex items-center justify-center ${isEmpty ? "bg-surface-2 border-border/40" : "bg-surface-2 border-border/50"}`}>
+              <Icon className={`h-5 w-5 ${isEmpty ? "text-muted-foreground/25" : m.color}`} />
             </div>
             <div>
-              <p className="text-2xl font-bold text-foreground leading-none">{m.value}</p>
+              <p className={`text-2xl font-bold leading-none ${isEmpty ? "text-muted-foreground/20" : "text-foreground"}`}>{m.value}</p>
               <div className="flex items-center gap-2 mt-1.5">
-                <div className={`status-dot ${m.dotClass}`} />
-                <span className="text-xs font-mono uppercase tracking-wider text-muted-foreground/60">{m.label}</span>
+                <div className={`status-dot ${isEmpty ? "bg-muted-foreground/15" : m.dotClass}`} />
+                <span className="text-xs font-mono uppercase tracking-wider text-muted-foreground/50">{m.label}</span>
               </div>
             </div>
           </div>
