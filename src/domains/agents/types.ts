@@ -1,6 +1,38 @@
-export type AgentStatus = "active" | "idle" | "offline";
+/**
+ * Agents Domain — Tipos Canônicos
+ *
+ * Shape baseado na rota local do OpenClaw (/api/agents).
+ * Este é o formato de referência do projeto-base.
+ */
+
+// ═══════════════════════════════════════════════════════
+// SHAPE CANÔNICO — retornado pelo OpenClaw
+// ═══════════════════════════════════════════════════════
+
 export type AgentTier = "orchestrator" | "core" | "support";
 
+/** /api/agents — dados brutos de cada agente */
+export interface AgentInfo {
+  id: string;
+  name: string;
+  role: string;
+  tier: AgentTier;
+  model: string;
+  enabled: boolean;
+  online: boolean;
+  activeSessions: number;
+  totalTokensToday: number;
+  uptimePercent: number;
+  cpuPercent: number;
+  lastActivityAt: string;
+  currentTask: string | null;
+  currentTaskStartedAt: string | null;
+  dependsOn: string[];
+  feeds: string[];
+  alertCount: number;
+}
+
+/** /api/agents/tree — shape simplificado para mapa */
 export interface AgentNode {
   name: string;
   role: string;
@@ -9,7 +41,13 @@ export interface AgentNode {
   load: number;
 }
 
-export interface Agent {
+// ═══════════════════════════════════════════════════════
+// SHAPE DE UI (View) — derivado via transform no fetcher
+// ═══════════════════════════════════════════════════════
+
+export type AgentStatus = "active" | "idle" | "offline";
+
+export interface AgentView {
   id: string;
   name: string;
   role: string;
@@ -22,14 +60,9 @@ export interface Agent {
   load: number;
   tokensToday: string;
   availability: string;
-  /** Current task description */
   currentTask: string;
-  /** How long ago the current task started */
   currentTaskAge: string;
-  /** Agent names this agent depends on */
   dependsOn: string[];
-  /** Agent names this agent feeds data to */
   feeds: string[];
-  /** Number of active alerts */
   alertCount: number;
 }

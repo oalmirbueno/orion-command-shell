@@ -1,8 +1,8 @@
 import { Bot, Zap, Pause, WifiOff, Crown, Cpu } from "lucide-react";
-import type { Agent } from "@/domains/agents/types";
+import type { AgentView } from "@/domains/agents/types";
 
 interface AgentsSummaryBarProps {
-  agents: Agent[];
+  agents: AgentView[];
 }
 
 export function AgentsSummaryBar({ agents }: AgentsSummaryBarProps) {

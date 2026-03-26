@@ -1,8 +1,8 @@
 import { Crown, Cpu, Users, ArrowDown, Inbox } from "lucide-react";
-import type { Agent, AgentStatus, AgentTier } from "@/domains/agents/types";
+import type { AgentView, AgentStatus, AgentTier } from "@/domains/agents/types";
 
 interface AgentArchitectureMapProps {
-  agents: Agent[];
+  agents: AgentView[];
 }
 
 const statusDot: Record<AgentStatus, string> = {
@@ -11,7 +11,7 @@ const statusDot: Record<AgentStatus, string> = {
   offline: "status-critical",
 };
 
-function MiniNode({ agent, variant = "default" }: { agent: Agent; variant?: "orchestrator" | "core" | "support" | "default" }) {
+function MiniNode({ agent, variant = "default" }: { agent: AgentView; variant?: "orchestrator" | "core" | "support" | "default" }) {
   const isOrch = variant === "orchestrator";
   const isOffline = agent.status === "offline";
   const loadColor = agent.load > 85 ? "bg-status-warning" : "bg-primary/60";

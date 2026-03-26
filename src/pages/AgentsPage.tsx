@@ -6,10 +6,10 @@ import { AgentDetailCards } from "@/components/agents/AgentDetailCards";
 import { useOrionData } from "@/hooks/useOrionData";
 import { fetchAgents } from "@/domains/agents/fetcher";
 import { OrionDataWrapper } from "@/components/orion/DataWrapper";
-import type { Agent } from "@/domains/agents/types";
+import type { AgentView } from "@/domains/agents/types";
 
 const AgentsPage = () => {
-  const { state, data, source, lastUpdated, refetch } = useOrionData<Agent[]>({
+  const { state, data, source, lastUpdated, refetch } = useOrionData<AgentView[]>({
     key: "agents",
     fetcher: fetchAgents,
   });
