@@ -34,45 +34,36 @@ export function CommandStatus({ data }: CommandStatusProps) {
   const Icon = cfg.icon;
 
   return (
-    <section>
-      <div className={`rounded-lg border ${cfg.border} ${cfg.bg} px-6 py-5`}>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className={`w-11 h-11 rounded-lg ${cfg.bg} border ${cfg.border} flex items-center justify-center`}>
-              <Icon className={`h-5 w-5 ${cfg.text}`} />
-            </div>
-            <div>
-              <div className="flex items-center gap-3">
-                <div className={`status-dot ${cfg.dot}`} />
-                <h1 className={`text-sm font-bold tracking-widest font-mono uppercase ${cfg.text}`}>{cfg.label}</h1>
-              </div>
-              <p className="text-sm text-muted-foreground/60 mt-1">{cfg.sublabel}</p>
-            </div>
+    <section className="h-full">
+      <div className={`h-full rounded-lg border ${cfg.border} ${cfg.bg} px-5 py-5 flex flex-col justify-between`}>
+        {/* Header: status */}
+        <div className="flex items-center gap-4 mb-4">
+          <div className={`w-11 h-11 rounded-lg ${cfg.bg} border ${cfg.border} flex items-center justify-center`}>
+            <Icon className={`h-5 w-5 ${cfg.text}`} />
           </div>
-
-          <div className="hidden md:flex items-center gap-8">
-            {data.metrics.map(m => {
-              const MIcon = iconMap[m.icon] || Clock;
-              return (
-                <div key={m.label} className="text-right">
-                  <div className="flex items-center gap-2 justify-end">
-                    <MIcon className="h-4 w-4 text-muted-foreground/30" />
-                    <span className="text-xs font-mono uppercase tracking-wider text-muted-foreground/50">{m.label}</span>
-                  </div>
-                  <p className="text-xl font-bold text-foreground mt-0.5 tracking-tight">{m.value}</p>
-                </div>
-              );
-            })}
+          <div>
+            <div className="flex items-center gap-3">
+              <div className={`status-dot ${cfg.dot}`} />
+              <h1 className={`text-sm font-bold tracking-widest font-mono uppercase ${cfg.text}`}>{cfg.label}</h1>
+            </div>
+            <p className="text-sm text-muted-foreground/60 mt-1">{cfg.sublabel}</p>
           </div>
         </div>
 
-        <div className="flex md:hidden items-center gap-4 mt-4 pt-4 border-t border-border/20">
-          {data.metrics.map(m => (
-            <div key={m.label} className="flex-1 text-center">
-              <span className="text-xs font-mono text-muted-foreground/40 uppercase">{m.label}</span>
-              <p className="text-base font-bold text-foreground mt-0.5">{m.value}</p>
-            </div>
-          ))}
+        {/* Metrics grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-3 border-t border-border/30">
+          {data.metrics.map(m => {
+            const MIcon = iconMap[m.icon] || Clock;
+            return (
+              <div key={m.label}>
+                <div className="flex items-center gap-1.5 mb-1">
+                  <MIcon className="h-3.5 w-3.5 text-muted-foreground/30" />
+                  <span className="text-xs font-mono uppercase tracking-wider text-muted-foreground/50">{m.label}</span>
+                </div>
+                <p className="text-xl font-bold text-foreground tracking-tight">{m.value}</p>
+              </div>
+            );
+          })}
         </div>
       </div>
     </section>
