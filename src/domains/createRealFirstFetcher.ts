@@ -19,7 +19,7 @@ interface RealFirstFetcherOptions<TRaw, TDomain> {
   fallbackData: TDomain;
   /** Optional transform from raw API response to domain type */
   transform?: (raw: TRaw) => TDomain;
-  /** Request timeout in ms (default: 8000) */
+  /** Request timeout in ms (default: 15000) */
   timeout?: number;
 }
 
@@ -27,7 +27,7 @@ export function createRealFirstFetcher<TRaw = unknown, TDomain = TRaw>({
   endpoint,
   fallbackData,
   transform,
-  timeout = 8000,
+  timeout = 15000,
 }: RealFirstFetcherOptions<TRaw, TDomain>): DomainFetcher<TDomain> {
   return async (): Promise<DomainResult<TDomain>> => {
     try {
