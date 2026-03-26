@@ -1,4 +1,4 @@
-import { CheckCircle2, AlertTriangle, XCircle, RotateCw } from "lucide-react";
+import { CheckCircle2, AlertTriangle, XCircle, RotateCw, Inbox } from "lucide-react";
 import type { SystemService, ServiceStatus } from "@/domains/system/types";
 
 const statusConfig: Record<ServiceStatus, { icon: React.ElementType; color: string; dotClass: string }> = {
@@ -13,26 +13,47 @@ interface Props {
 }
 
 export function ServicesTable({ services }: Props) {
+  if (services.length === 0) {
+    return (
+      <section className="rounded-lg border border-border overflow-hidden h-full">
+        <div className="orion-panel-header">
+          <div className="flex items-center gap-3">
+            <div className="w-6 h-0.5 bg-muted-foreground/40 rounded-full" />
+            <h2 className="orion-panel-title">Serviços Ativos</h2>
+          </div>
+        </div>
+        <div className="flex flex-col items-center justify-center py-14 text-center">
+          <div className="w-12 h-12 rounded-lg bg-surface-2 border border-border flex items-center justify-center mb-4">
+            <Inbox className="h-6 w-6 text-muted-foreground/30" />
+          </div>
+          <p className="text-sm font-medium text-muted-foreground/50">Nenhum serviço registrado</p>
+          <p className="text-xs font-mono text-muted-foreground/30 mt-1.5">Aguardando conexão com API</p>
+        </div>
+      </section>
+    );
+  }
+
   const runningCount = services.filter(s => s.status === "running").length;
+  const hasIssues = services.some(s => s.status !== "running");
 
   return (
     <section>
       <div className="flex items-center gap-3 mb-4">
         <h2 className="text-xs font-mono uppercase tracking-[0.15em] text-muted-foreground">Serviços Ativos</h2>
-        <div className="flex items-center gap-2 ml-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20">
-          <span className="text-xs font-mono text-primary font-medium">{runningCount}/{services.length}</span>
+        <div className={`flex items-center gap-2 ml-2 px-3 py-1 rounded-full border ${hasIssues ? "bg-status-warning/10 border-status-warning/20" : "bg-status-online/10 border-status-online/20"}`}>
+          <span className={`text-xs font-mono font-medium ${hasIssues ? "text-status-warning" : "text-status-online"}`}>{runningCount}/{services.length}</span>
         </div>
         <div className="flex-1 h-px bg-border/40" />
       </div>
 
-      <div className="rounded-xl border border-border/50 overflow-hidden">
-        <div className="grid grid-cols-[1fr_80px_100px_80px_70px_60px] gap-3 px-5 py-3 bg-surface-2 text-xs font-mono uppercase tracking-wider text-muted-foreground/50">
+      <div className="rounded-lg border border-border/40 overflow-hidden">
+        <div className="grid grid-cols-[1fr_70px_100px_70px_60px_50px] gap-3 px-5 py-2.5 bg-surface-2 text-[10px] font-mono uppercase tracking-wider text-muted-foreground/40">
           <span>Serviço</span>
-          <span>Port</span>
+          <span>Porta</span>
           <span>CPU / Mem</span>
-          <span>Uptime</span>
+          <span>Ativo</span>
           <span>PID</span>
-          <span className="text-center">Status</span>
+          <span className="text-center">Estado</span>
         </div>
 
         {services.map((svc) => {
@@ -43,22 +64,22 @@ export function ServicesTable({ services }: Props) {
           return (
             <div
               key={svc.name}
-              className={`grid grid-cols-[1fr_80px_100px_80px_70px_60px] gap-3 px-5 py-3.5 items-center border-t border-border/30 hover:bg-accent/30 transition-colors cursor-pointer ${isIssue ? "bg-accent/10" : ""}`}
+              className={`grid grid-cols-[1fr_70px_100px_70px_60px_50px] gap-3 px-5 py-3 items-center border-t border-border/20 hover:bg-accent/20 transition-colors cursor-pointer ${isIssue ? "bg-status-warning/[0.03]" : ""}`}
             >
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2.5">
                 <div className={`status-dot ${cfg.dotClass}`} />
-                <span className={`text-sm font-mono ${isIssue ? cfg.color : "text-foreground"}`}>{svc.name}</span>
+                <span className={`text-sm font-mono ${isIssue ? cfg.color : "text-foreground/80"}`}>{svc.name}</span>
               </div>
-              <span className="text-sm font-mono text-muted-foreground/60">{svc.port}</span>
-              <div className="text-sm font-mono text-muted-foreground/60">
+              <span className="text-xs font-mono text-muted-foreground/50">{svc.port}</span>
+              <div className="text-xs font-mono text-muted-foreground/50">
                 <span>{svc.cpu}</span>
-                <span className="text-border mx-1.5">/</span>
+                <span className="text-border/40 mx-1">/</span>
                 <span>{svc.mem}</span>
               </div>
-              <span className="text-sm font-mono text-muted-foreground/60">{svc.uptime}</span>
-              <span className="text-sm font-mono text-muted-foreground/40">{svc.pid}</span>
+              <span className="text-xs font-mono text-muted-foreground/50">{svc.uptime}</span>
+              <span className="text-xs font-mono text-muted-foreground/30">{svc.pid}</span>
               <div className="flex justify-center">
-                <Icon className={`h-4 w-4 ${cfg.color}`} />
+                <Icon className={`h-3.5 w-3.5 ${cfg.color}`} />
               </div>
             </div>
           );
