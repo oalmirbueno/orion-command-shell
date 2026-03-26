@@ -25,6 +25,9 @@ const Index = () => {
             {/* Tier 1: Overall status */}
             <CommandStatus data={data.command} />
 
+            {/* Context: weather — operational environment */}
+            <WeatherContext />
+
             {/* Tier 2: What needs attention */}
             <AttentionRequired items={data.attention} />
 
