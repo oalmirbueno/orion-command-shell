@@ -277,7 +277,7 @@ export async function deriveActivitiesFromDomains(): Promise<ActivityInfo[]> {
       memoryTotalBytes: mem.total,
       memoryUsedBytes: mem.used,
       uptimeSeconds: sys.uptime || 0,
-      state: cpuPercent > 90 ? "critical" : cpuPercent > 75 ? "degraded" : "healthy",
+      state: cpuPercent > 90 ? "critical" : cpuPercent > 75 ? "degraded" : "nominal",
     };
   }
 
