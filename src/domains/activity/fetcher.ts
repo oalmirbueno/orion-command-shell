@@ -147,12 +147,5 @@ export const fetchActivityEvents: DomainFetcher<ActivityEvent[]> = async (): Pro
   };
 };
 
-export const fetchBriefing: DomainFetcher<BriefingItem[]> = createRealFirstFetcher({
-  endpoint: "/activities/briefing",
-  fallbackData: [],
-});
-
-export const fetchAttentionItems: DomainFetcher<AttentionItem[]> = createRealFirstFetcher({
-  endpoint: "/activities/attention",
-  fallbackData: [],
-});
+// fetchBriefing and fetchAttentionItems removed — these endpoints don't exist.
+// Home derives attention/briefing from activity events inline.
