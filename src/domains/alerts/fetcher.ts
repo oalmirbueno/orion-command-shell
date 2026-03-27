@@ -67,9 +67,17 @@ function buildSummary(alerts: Alert[]): AlertsSummaryData {
 
 async function fetchAlertsRaw(): Promise<DomainResult<AlertInfo[]>> {
   // 1. Tenta endpoint real /api/alerts
-  const realFetcher = createRealFirstFetcher<AlertInfo[], AlertInfo[]>({
+  const realFetcher = createRealFirstFetcher<any, AlertInfo[]>({
     endpoint: "/alerts",
     fallbackData: [],
+    transform: (raw: any) => {
+      // Handle { alerts: [...], total } wrapper from backend
+      if (raw && typeof raw === "object" && !Array.isArray(raw) && "alerts" in raw) {
+        return (raw.alerts as any[]).map(normalizeAlert);
+      }
+      if (Array.isArray(raw)) return raw.map(normalizeAlert);
+      return [];
+    },
   });
 
   const result = await realFetcher();
