@@ -61,10 +61,29 @@ function buildSummary(alerts: Alert[]): AlertsSummaryData {
   };
 }
 
+// Normalize backend alerts to canonical AlertInfo
+function normalizeAlert(raw: any): AlertInfo {
+  return {
+    id: raw.id || `alert-${Math.random().toString(36).slice(2)}`,
+    severity: raw.severity || "info",
+    status: raw.status || "open",
+    title: raw.title || raw.message || "—",
+    message: raw.description || raw.message || "",
+    action: raw.action || null,
+    source: raw.source || "—",
+    domain: raw.domain || "system",
+    createdAt: raw.createdAt || raw.timestamp || new Date().toISOString(),
+    updatedAt: raw.updatedAt || raw.timestamp || new Date().toISOString(),
+    acknowledgedAt: raw.acknowledgedAt || null,
+    resolvedAt: raw.resolvedAt || null,
+    occurrences: raw.occurrences || 1,
+    metadata: raw.metadata || null,
+  };
+}
+
 // ═══════════════════════════════════════════════════════
 // Fetcher com fallback para derivação client-side
 // ═══════════════════════════════════════════════════════
-
 async function fetchAlertsRaw(): Promise<DomainResult<AlertInfo[]>> {
   // 1. Tenta endpoint real /api/alerts
   const realFetcher = createRealFirstFetcher<any, AlertInfo[]>({
