@@ -11,7 +11,7 @@
  * Default: /api (relativo ao host — OpenClaw no mesmo servidor).
  * Override: VITE_ORION_API_URL para apontar a um OpenClaw remoto.
  */
-export const API_BASE_URL = import.meta.env.VITE_ORION_API_URL || "/api";
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api";
 
 /** Whether we're using the default local backend or an explicit override */
 export const isUsingLocalBackend = (): boolean => API_BASE_URL === "/api";
