@@ -27,7 +27,7 @@ function JobRow({ job, onClick, onToggle }: { job: CronJob; onClick: () => void;
   const isDisabled = !job.enabled;
   const hasFailed = job.status === "failed";
 
-  const handleToggle = async (e: React.MouseEvent) => {
+  const handleSwitchClick = (e: React.MouseEvent) => {
     e.stopPropagation();
   };
 
