@@ -1,8 +1,10 @@
+import { useState } from "react";
 import {
   AlertCircle, AlertTriangle, CheckCircle2, Info, Zap,
   Bot, Server, GitBranch, Shield, Clock, ChevronRight, Inbox,
 } from "lucide-react";
 import type { ActivityEvent, EventPriority, EventCategory } from "@/domains/activity/types";
+import { ActivityDetailSheet } from "@/components/sheets/ActivityDetailSheet";
 
 const priorityConfig: Record<EventPriority, { icon: React.ElementType; dot: string; text: string; borderAccent: string; bg: string }> = {
   critical: { icon: AlertCircle, dot: "status-critical", text: "text-status-critical", borderAccent: "border-l-status-critical", bg: "bg-status-critical/[0.04]" },
@@ -24,7 +26,6 @@ const categoryConfig: Record<EventCategory, { icon: React.ElementType; label: st
 function groupByTimeBlock(events: ActivityEvent[]): { label: string; events: ActivityEvent[] }[] {
   const blocks: { label: string; events: ActivityEvent[] }[] = [];
   let currentBlock: { label: string; events: ActivityEvent[] } | null = null;
-
   for (const event of events) {
     const hour = parseInt(event.time.split(":")[0]);
     let blockLabel: string;
@@ -34,25 +35,23 @@ function groupByTimeBlock(events: ActivityEvent[]): { label: string; events: Act
     } else {
       blockLabel = hour >= 9 ? "Mais Cedo" : "Esta Manhã";
     }
-
     if (!currentBlock || currentBlock.label !== blockLabel) {
       currentBlock = { label: blockLabel, events: [] };
       blocks.push(currentBlock);
     }
     currentBlock.events.push(event);
   }
-
   return blocks;
 }
 
-function EventRow({ event }: { event: ActivityEvent }) {
+function EventRow({ event, onClick }: { event: ActivityEvent; onClick: () => void }) {
   const pcfg = priorityConfig[event.priority];
   const ccfg = categoryConfig[event.category];
   const PIcon = pcfg.icon;
   const isDimmed = event.priority === "neutral";
 
   return (
-    <div className={`flex gap-4 group cursor-pointer hover:bg-accent/20 transition-colors rounded-lg border border-border/40 border-l-[3px] ${pcfg.borderAccent} ${pcfg.bg} ${isDimmed ? "opacity-50 hover:opacity-70" : ""} px-5 py-4`}>
+    <div onClick={onClick} className={`flex gap-4 group cursor-pointer hover:bg-accent/20 transition-colors rounded-lg border border-border/40 border-l-[3px] ${pcfg.borderAccent} ${pcfg.bg} ${isDimmed ? "opacity-50 hover:opacity-70" : ""} px-5 py-4`}>
       <div className="flex flex-col items-center shrink-0 w-12 pt-0.5">
         <span className="text-xs font-mono text-primary/70 leading-none font-medium">{event.time}</span>
         <span className="text-[10px] font-mono text-muted-foreground/25 mt-1 leading-none whitespace-nowrap">{event.timeAgo}</span>
@@ -77,11 +76,11 @@ function EventRow({ event }: { event: ActivityEvent }) {
   );
 }
 
-interface ActivityFeedProps {
-  events: ActivityEvent[];
-}
+interface ActivityFeedProps { events: ActivityEvent[]; }
 
 export function ActivityFeed({ events }: ActivityFeedProps) {
+  const [selected, setSelected] = useState<ActivityEvent | null>(null);
+
   if (events.length === 0) {
     return (
       <section className="rounded-lg border border-border overflow-hidden">
@@ -113,7 +112,6 @@ export function ActivityFeed({ events }: ActivityFeedProps) {
         </div>
         <div className="flex-1 h-px bg-border/40" />
       </div>
-
       <div className="space-y-6">
         {blocks.map((block) => (
           <div key={block.label}>
@@ -123,12 +121,13 @@ export function ActivityFeed({ events }: ActivityFeedProps) {
             </div>
             <div className="space-y-2">
               {block.events.map((event) => (
-                <EventRow key={event.id} event={event} />
+                <EventRow key={event.id} event={event} onClick={() => setSelected(event)} />
               ))}
             </div>
           </div>
         ))}
       </div>
+      <ActivityDetailSheet event={selected} open={!!selected} onOpenChange={(o) => !o && setSelected(null)} />
     </section>
   );
 }

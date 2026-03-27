@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { Bot, Clock, ChevronRight, Cpu, Flame, Pause, CheckCircle2, XCircle, Inbox } from "lucide-react";
-import type { SessionView, SessionStatus, SessionType } from "@/domains/sessions/types";
+import type { SessionView, SessionStatus } from "@/domains/sessions/types";
+import { SessionDetailSheet } from "@/components/sheets/SessionDetailSheet";
 
 const statusConfig: Record<SessionStatus, { icon: React.ElementType; dot: string; text: string; bg: string; border: string; statusLabel: string }> = {
   running: { icon: Flame, dot: "status-online", text: "text-status-online", bg: "bg-status-online/[0.04]", border: "border-l-status-online", statusLabel: "Em execução" },
@@ -23,7 +25,7 @@ const typeBadge: Record<string, { label: string; color: string }> = {
 
 const defaultBadge = { label: "Sessão", color: "bg-muted-foreground/10 text-muted-foreground border-muted-foreground/20" };
 
-function SessionRow({ session }: { session: SessionView }) {
+function SessionRow({ session, onClick }: { session: SessionView; onClick: () => void }) {
   const cfg = statusConfig[session.status];
   const badge = typeBadge[session.type] || defaultBadge;
   const Icon = cfg.icon;
@@ -31,9 +33,8 @@ function SessionRow({ session }: { session: SessionView }) {
   const isDimmed = session.status === "completed";
 
   return (
-    <div className={`border border-border/40 rounded-lg bg-card hover:bg-accent/20 transition-all cursor-pointer border-l-[3px] ${cfg.border} ${cfg.bg} ${isDimmed ? "opacity-50 hover:opacity-70" : ""} group`}>
+    <div onClick={onClick} className={`border border-border/40 rounded-lg bg-card hover:bg-accent/20 transition-all cursor-pointer border-l-[3px] ${cfg.border} ${cfg.bg} ${isDimmed ? "opacity-50 hover:opacity-70" : ""} group`}>
       <div className="px-6 py-5">
-        {/* Header */}
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-3 flex-1 min-w-0">
             <div className={`w-9 h-9 rounded-lg border flex items-center justify-center shrink-0 ${isLive ? "bg-status-online/10 border-status-online/20" : "bg-surface-2 border-border/40"}`}>
@@ -55,26 +56,14 @@ function SessionRow({ session }: { session: SessionView }) {
             <ChevronRight className="h-4 w-4 text-muted-foreground/15 group-hover:text-muted-foreground/40 transition-colors" />
           </div>
         </div>
-
-        {/* Progress */}
         <div className="mb-4 ml-12">
           <div className="flex items-center gap-3">
             <div className="flex-1 h-1.5 bg-surface-3 rounded-full overflow-hidden">
-              <div
-                className={`h-full rounded-full transition-all duration-500 ${
-                  session.status === "failed" ? "bg-status-critical/60" :
-                  session.status === "paused" ? "bg-status-warning/50" :
-                  session.status === "completed" ? "bg-primary/40" :
-                  "bg-primary"
-                }`}
-                style={{ width: `${session.progress}%` }}
-              />
+              <div className={`h-full rounded-full transition-all duration-500 ${session.status === "failed" ? "bg-status-critical/60" : session.status === "paused" ? "bg-status-warning/50" : session.status === "completed" ? "bg-primary/40" : "bg-primary"}`} style={{ width: `${session.progress}%` }} />
             </div>
             <span className="text-xs font-mono text-muted-foreground/40 w-9 text-right">{session.progress}%</span>
           </div>
         </div>
-
-        {/* Metadata */}
         <div className="flex items-center gap-4 ml-12 text-xs font-mono text-muted-foreground/50">
           <div className="flex items-center gap-1.5"><Bot className="h-3.5 w-3.5" /><span>{session.agent}</span></div>
           <div className="w-px h-3 bg-border/30" />
@@ -90,11 +79,11 @@ function SessionRow({ session }: { session: SessionView }) {
   );
 }
 
-interface Props {
-  sessions: SessionView[];
-}
+interface Props { sessions: SessionView[]; }
 
 export function SessionsList({ sessions }: Props) {
+  const [selected, setSelected] = useState<SessionView | null>(null);
+
   if (sessions.length === 0) {
     return (
       <section className="rounded-lg border border-border overflow-hidden">
@@ -131,12 +120,12 @@ export function SessionsList({ sessions }: Props) {
         <div className="flex-1 h-px bg-border/40" />
         <span className="text-xs font-mono text-muted-foreground/40">{sessions.length} total</span>
       </div>
-
       <div className="space-y-2.5">
         {sorted.map((session) => (
-          <SessionRow key={session.id} session={session} />
+          <SessionRow key={session.id} session={session} onClick={() => setSelected(session)} />
         ))}
       </div>
+      <SessionDetailSheet session={selected} open={!!selected} onOpenChange={(o) => !o && setSelected(null)} />
     </section>
   );
 }
