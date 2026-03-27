@@ -11,6 +11,7 @@ export default defineConfig(({ mode }) => ({
     hmr: {
       overlay: false,
     },
+    // Proxy mantido apenas para dev local — em produção VITE_ORION_API_URL aponta direto
     proxy: {
       "/api": {
         target: "http://vault.aceleriq.online",
