@@ -37,6 +37,18 @@ const EMPTY_HOME: HomePageData = {
   briefing: [],
 };
 
+// Valida se a resposta agregada está completa (todos os blocos populados)
+function isCompleteHome(data: HomePageData): boolean {
+  return (
+    data.command?.systemState !== undefined &&
+    Array.isArray(data.attention) &&
+    Array.isArray(data.liveOps) &&
+    Array.isArray(data.agents) && data.agents.length > 0 &&
+    Array.isArray(data.health) &&
+    Array.isArray(data.briefing) && data.briefing.length > 0
+  );
+}
+
 // Fetcher do endpoint agregado (se o OpenClaw expor /api/home)
 const fetchHomeAggregated = createRealFirstFetcher<HomePageData, HomePageData>({
   endpoint: "/home",
@@ -141,10 +153,10 @@ function deriveActivityFromViews(
  * Fetcher principal da Home.
  */
 export const fetchHomePage: DomainFetcher<HomePageData> = async (): Promise<DomainResult<HomePageData>> => {
-  // Tentativa 1: endpoint agregado
+  // Tentativa 1: endpoint agregado — aceita APENAS se vier completo
   const aggregated = await fetchHomeAggregated();
 
-  if (aggregated.source === "api") {
+  if (aggregated.source === "api" && isCompleteHome(aggregated.data)) {
     return aggregated;
   }
 
