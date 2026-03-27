@@ -16,13 +16,13 @@ import type { AgentInfo } from "../agents/types";
 import type { SystemInfo, ProcessInfo } from "../system/types";
 
 // ═══════════════════════════════════════════════════════
-// Fetch helper
+// Fetch helper (standalone — used when called independently)
 // ═══════════════════════════════════════════════════════
 
 async function safeFetch<T>(endpoint: string, fallback: T): Promise<T> {
   try {
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 6000);
+    const timer = setTimeout(() => controller.abort(), 18000);
     const res = await fetch(apiUrl(endpoint), {
       signal: controller.signal,
       headers: { Accept: "application/json" },
@@ -35,6 +35,16 @@ async function safeFetch<T>(endpoint: string, fallback: T): Promise<T> {
   }
 }
 
+/** Unwrap common API wrappers */
+function unwrapArray<T>(raw: any, key: string): T[] {
+  if (Array.isArray(raw)) return raw;
+  if (raw && typeof raw === "object" && key in raw) {
+    const val = raw[key];
+    return Array.isArray(val) ? val : [];
+  }
+  return [];
+}
+
 // ═══════════════════════════════════════════════════════
 // Helpers
 // ═══════════════════════════════════════════════════════
@@ -43,6 +53,12 @@ let counter = 0;
 function nextId(prefix: string): string {
   counter += 1;
   return `derived-activity-${prefix}-${counter}`;
+}
+
+function safeTimestamp(val: unknown): string {
+  if (!val) return new Date().toISOString();
+  if (typeof val === "number") return new Date(val).toISOString();
+  return String(val);
 }
 
 function makeActivity(
@@ -70,49 +86,54 @@ function makeActivity(
 // Derivação por domínio
 // ═══════════════════════════════════════════════════════
 
-function deriveFromSessions(sessions: Session[]): ActivityInfo[] {
+export function deriveFromSessions(sessions: Session[]): ActivityInfo[] {
   const events: ActivityInfo[] = [];
 
   for (const s of sessions) {
-    const isRecent = s.ageMs < 300_000; // 5 min
-    const isRunning = !s.aborted && isRecent && s.totalTokens > 0;
+    const ageMs = s.ageMs ?? 0;
+    const isRecent = ageMs < 300_000;
+    const totalTokens = s.totalTokens ?? 0;
+    const isRunning = !s.aborted && isRecent && totalTokens > 0;
+    const emoji = s.typeEmoji || "💬";
+    const label = s.typeLabel || s.type || "session";
+    const model = s.model || "—";
 
     if (isRunning) {
       events.push(makeActivity("session.start", "info",
-        `Sessão ${s.typeEmoji} ${s.typeLabel} em andamento`,
-        s.model,
-        { detail: `${s.key} — ${s.totalTokens} tokens processados`, sessionId: s.id, createdAt: String(s.updatedAt) }));
+        `Sessão ${emoji} ${label} em andamento`,
+        model,
+        { detail: `${s.key} — ${totalTokens} tokens processados`, sessionId: s.id, createdAt: safeTimestamp(s.updatedAt) }));
     }
 
     if (s.aborted) {
       events.push(makeActivity("session.end", "error",
         `Sessão ${s.key} abortada`,
-        s.model,
-        { detail: `Tipo ${s.typeLabel} (${s.type})`, sessionId: s.id, createdAt: String(s.updatedAt) }));
+        model,
+        { detail: `Tipo ${label} (${s.type})`, sessionId: s.id, createdAt: safeTimestamp(s.updatedAt) }));
     }
 
-    if (!s.aborted && !isRecent && s.totalTokens > 0) {
+    if (!s.aborted && !isRecent && totalTokens > 0) {
       events.push(makeActivity("session.end", "info",
-        `Sessão ${s.typeEmoji} ${s.typeLabel} concluída`,
-        s.model,
-        { detail: `${s.key} — ${s.totalTokens} tokens`, sessionId: s.id, createdAt: String(s.updatedAt) }));
+        `Sessão ${emoji} ${label} concluída`,
+        model,
+        { detail: `${s.key} — ${totalTokens} tokens`, sessionId: s.id, createdAt: safeTimestamp(s.updatedAt) }));
     }
   }
 
   return events;
 }
 
-function deriveFromCron(jobs: CronJobInfo[]): ActivityInfo[] {
+export function deriveFromCron(jobs: CronJobInfo[]): ActivityInfo[] {
   const events: ActivityInfo[] = [];
 
   for (const job of jobs) {
     if (!job.enabled || !job.lastRunAt) continue;
 
     if (job.lastRunSuccess === false) {
-      events.push(makeActivity("cron.run", job.consecutiveFailures >= 3 ? "critical" : "warn",
+      events.push(makeActivity("cron.run", (job.consecutiveFailures ?? 0) >= 3 ? "critical" : "warn",
         `Cron "${job.name}" falhou`,
         `cron/${job.id}`,
-        { detail: job.lastRunError || `${job.consecutiveFailures} falha(s) consecutiva(s)`, createdAt: job.lastRunAt }));
+        { detail: job.lastRunError || `${job.consecutiveFailures ?? 0} falha(s) consecutiva(s)`, createdAt: job.lastRunAt }));
     } else {
       events.push(makeActivity("cron.run", "info",
         `Cron "${job.name}" executado com sucesso`,
@@ -124,29 +145,32 @@ function deriveFromCron(jobs: CronJobInfo[]): ActivityInfo[] {
   return events;
 }
 
-function deriveFromAgents(agents: AgentInfo[]): ActivityInfo[] {
+export function deriveFromAgents(agents: AgentInfo[]): ActivityInfo[] {
   const events: ActivityInfo[] = [];
 
   for (const agent of agents) {
-    if (!agent.enabled) continue;
+    if (!agent.enabled && agent.enabled !== undefined) continue;
 
-    if (!agent.online) {
+    const isOnline = agent.online ?? (agent as any).status === "online";
+    const name = agent.name || agent.id;
+
+    if (!isOnline) {
       events.push(makeActivity("agent.error", "warn",
-        `Agent "${agent.name}" offline`,
+        `Agent "${name}" offline`,
         `agent/${agent.id}`,
-        { detail: `${agent.role} (${agent.tier})`, agentId: agent.id, createdAt: agent.lastActivityAt }));
+        { detail: `${agent.role || "agent"} (${agent.tier || "—"})`, agentId: agent.id, createdAt: agent.lastActivityAt }));
     }
 
-    if (agent.currentTask && agent.online) {
+    if (agent.currentTask && isOnline) {
       events.push(makeActivity("agent.task", "info",
-        `Agent "${agent.name}" executando: ${agent.currentTask}`,
+        `Agent "${name}" executando: ${agent.currentTask}`,
         `agent/${agent.id}`,
         { agentId: agent.id, createdAt: agent.currentTaskStartedAt || agent.lastActivityAt }));
     }
 
-    if (agent.alertCount > 0) {
-      events.push(makeActivity("agent.error", agent.alertCount >= 3 ? "critical" : "warn",
-        `Agent "${agent.name}" com ${agent.alertCount} alerta(s)`,
+    if ((agent.alertCount ?? 0) > 0) {
+      events.push(makeActivity("agent.error", (agent.alertCount ?? 0) >= 3 ? "critical" : "warn",
+        `Agent "${name}" com ${agent.alertCount} alerta(s)`,
         `agent/${agent.id}`,
         { agentId: agent.id, createdAt: agent.lastActivityAt }));
     }
@@ -155,7 +179,7 @@ function deriveFromAgents(agents: AgentInfo[]): ActivityInfo[] {
   return events;
 }
 
-function deriveFromSystem(info: SystemInfo | null, processes: ProcessInfo[]): ActivityInfo[] {
+export function deriveFromSystem(info: SystemInfo | null, processes: ProcessInfo[]): ActivityInfo[] {
   const events: ActivityInfo[] = [];
   if (!info) return events;
 
@@ -189,33 +213,90 @@ function deriveFromSystem(info: SystemInfo | null, processes: ProcessInfo[]): Ac
 }
 
 // ═══════════════════════════════════════════════════════
-// Derivação principal
+// Derivação principal — com dados pré-carregados
+// ═══════════════════════════════════════════════════════
+
+export interface PreloadedDomainData {
+  sessions?: Session[];
+  cronJobs?: CronJobInfo[];
+  agents?: AgentInfo[];
+  systemInfo?: SystemInfo | null;
+  processes?: ProcessInfo[];
+}
+
+/**
+ * Derive activities from pre-loaded domain data (used by Home to avoid duplicate fetches).
+ */
+export function deriveActivitiesFromPreloaded(data: PreloadedDomainData): ActivityInfo[] {
+  counter = 0;
+
+  const all: ActivityInfo[] = [
+    ...deriveFromSystem(data.systemInfo ?? null, data.processes ?? []),
+    ...deriveFromAgents(data.agents ?? []),
+    ...deriveFromSessions(data.sessions ?? []),
+    ...deriveFromCron(data.cronJobs ?? []),
+  ];
+
+  all.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  return all;
+}
+
+// ═══════════════════════════════════════════════════════
+// Derivação standalone (fetches own data — used by Activity page)
 // ═══════════════════════════════════════════════════════
 
 interface SystemApiResponse {
-  info: SystemInfo;
-  processes?: ProcessInfo[];
+  system: { uptime: number; hostname?: string; memory?: { total: number; used: number; free: number } };
+  agent?: { name: string };
 }
 
 export async function deriveActivitiesFromDomains(): Promise<ActivityInfo[]> {
   counter = 0;
 
-  const [sessions, cronJobs, agents, systemData] = await Promise.all([
-    safeFetch<Session[]>("/sessions", []),
-    safeFetch<CronJobInfo[]>("/cron", []),
-    safeFetch<AgentInfo[]>("/agents", []),
-    safeFetch<SystemApiResponse | null>("/system", null),
+  const [sessionsRaw, cronRaw, agentsRaw, systemRaw] = await Promise.all([
+    safeFetch<any>("/sessions", []),
+    safeFetch<any>("/cron", []),
+    safeFetch<any>("/agents", []),
+    safeFetch<any>("/system", null),
   ]);
 
+  const sessions = unwrapArray<Session>(sessionsRaw, "sessions");
+  const cronJobs = unwrapArray<CronJobInfo>(cronRaw, "jobs");
+  const agents = unwrapArray<AgentInfo>(agentsRaw, "agents");
+
+  // Build minimal SystemInfo from real API response
+  let systemInfo: SystemInfo | null = null;
+  if (systemRaw?.system) {
+    const sys = systemRaw.system;
+    const mem = sys.memory || { total: 0, used: 0, free: 0 };
+    const cpuPercent = mem.total > 0 ? Math.round((mem.used / mem.total) * 100) : 0;
+    systemInfo = {
+      hostname: sys.hostname || "unknown",
+      platform: sys.platform || "linux",
+      arch: "",
+      nodeVersion: "",
+      cpuCount: 0,
+      cpuUsagePercent: cpuPercent,
+      memTotalBytes: mem.total,
+      memUsedBytes: mem.used,
+      memFreeBytes: mem.free,
+      diskTotalBytes: 0,
+      diskUsedBytes: 0,
+      diskFreeBytes: 0,
+      loadAvg: [0, 0, 0],
+      uptimeSeconds: sys.uptime || 0,
+      state: cpuPercent > 90 ? "critical" : cpuPercent > 75 ? "degraded" : "nominal",
+      checkedAt: new Date().toISOString(),
+    };
+  }
+
   const all: ActivityInfo[] = [
-    ...deriveFromSystem(systemData?.info ?? null, systemData?.processes ?? []),
+    ...deriveFromSystem(systemInfo, []),
     ...deriveFromAgents(agents),
     ...deriveFromSessions(sessions),
     ...deriveFromCron(cronJobs),
   ];
 
-  // Ordenar por data (mais recente primeiro)
   all.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-
   return all;
 }

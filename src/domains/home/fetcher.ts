@@ -15,7 +15,7 @@ import { fetchSessions } from "../sessions/fetcher";
 import { fetchOperationsPage } from "../operations/fetcher";
 import type { HomePageData } from "./types";
 import type { CommandData, HealthService, SystemState } from "../system/types";
-import type { AttentionItem, BriefingItem, AttentionPriority } from "../activity/types";
+import type { AttentionItem, BriefingItem, AttentionPriority, ActivityEvent } from "../activity/types";
 import type { Operation } from "../operations/types";
 import type { AgentNode } from "../agents/types";
 import type { DomainFetcher, DomainResult, DataSource } from "../types";
@@ -48,12 +48,97 @@ function settled<T>(result: PromiseSettledResult<T>, fallback: T): T {
   return result.status === "fulfilled" ? result.value : fallback;
 }
 
+// ── Inline activity derivation from already-fetched view data ──
+// Avoids duplicate API calls when Activity endpoint is empty
+
+function deriveActivityFromViews(
+  sessions: any[],
+  agents: any[],
+  system: any,
+): ActivityEvent[] {
+  const events: ActivityEvent[] = [];
+  let id = 0;
+  const nextId = () => `home-derived-${++id}`;
+
+  const formatTimeAgo = (iso: string | number) => {
+    const ts = typeof iso === "number" ? iso : new Date(iso).getTime();
+    const diff = Date.now() - ts;
+    const mins = Math.round(diff / 60_000);
+    if (mins < 1) return "Agora";
+    if (mins < 60) return `${mins}min atrás`;
+    const hrs = Math.round(mins / 60);
+    if (hrs < 24) return `${hrs}h atrás`;
+    return `${Math.round(hrs / 24)}d atrás`;
+  };
+
+  const formatTime = (iso: string | number) => {
+    const d = typeof iso === "number" ? new Date(iso) : new Date(iso);
+    return d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+  };
+
+  // From sessions — recent completions, failures
+  for (const s of sessions.slice(0, 15)) {
+    if (s.status === "failed") {
+      events.push({
+        id: nextId(), time: s.startedAt || "—", timeAgo: s.elapsed || "—",
+        priority: "warning", category: "session",
+        title: `Sessão ${s.typeLabel || s.type} abortada`,
+        description: `${s.key} — ${s.tokens || 0} tokens`, source: s.model || "—",
+      });
+    } else if (s.status === "running") {
+      events.push({
+        id: nextId(), time: s.startedAt || "—", timeAgo: s.elapsed || "—",
+        priority: "info", category: "session",
+        title: `Sessão ${s.typeEmoji || "💬"} ${s.typeLabel || s.type} em andamento`,
+        description: `${s.key} — ${s.tokens || 0} tokens`, source: s.model || "—",
+      });
+    } else if (s.status === "completed") {
+      events.push({
+        id: nextId(), time: s.startedAt || "—", timeAgo: s.elapsed || "—",
+        priority: "success", category: "session",
+        title: `Sessão ${s.typeEmoji || "💬"} ${s.typeLabel || s.type} concluída`,
+        description: `${s.key} — ${s.tokens || 0} tokens`, source: s.model || "—",
+      });
+    }
+  }
+
+  // From agents
+  for (const a of agents) {
+    if (a.status === "offline") {
+      events.push({
+        id: nextId(), time: "—", timeAgo: "—",
+        priority: "warning", category: "agent",
+        title: `Agent "${a.name}" offline`, description: a.role || "",
+        source: `agent/${a.name}`,
+      });
+    }
+  }
+
+  // From system — health signals
+  const sysHeader = system?.header;
+  if (sysHeader?.overallStatus === "critical") {
+    events.push({
+      id: nextId(), time: sysHeader.lastCheck || "—", timeAgo: "Agora",
+      priority: "critical", category: "system",
+      title: "Sistema em estado crítico",
+      description: `Host: ${sysHeader.host} | Uptime: ${sysHeader.uptime}`,
+      source: "system",
+    });
+  } else if (sysHeader?.overallStatus === "degraded") {
+    events.push({
+      id: nextId(), time: sysHeader.lastCheck || "—", timeAgo: "Agora",
+      priority: "warning", category: "system",
+      title: "Sistema degradado",
+      description: `Host: ${sysHeader.host}`,
+      source: "system",
+    });
+  }
+
+  return events;
+}
+
 /**
  * Fetcher principal da Home.
- *
- * Tenta o endpoint agregado /api/home primeiro.
- * Se vier vazio (fallback), compõe a partir dos domínios individuais.
- * Usa Promise.allSettled para resiliência — falhas parciais não travam a Home.
  */
 export const fetchHomePage: DomainFetcher<HomePageData> = async (): Promise<DomainResult<HomePageData>> => {
   // Tentativa 1: endpoint agregado
@@ -104,8 +189,21 @@ export const fetchHomePage: DomainFetcher<HomePageData> = async (): Promise<Doma
     ],
   };
 
-  // ── Attention Items (de Activity — eventos críticos/warning) ──
-  const attention: AttentionItem[] = (activityResult.data.events || [])
+  // ── Activity events — use real if available, derive from views otherwise ──
+  let activityEvents = activityResult.data.events || [];
+  if (activityEvents.length === 0) {
+    activityEvents = deriveActivityFromViews(
+      sessionsResult.data,
+      agentsResult.data,
+      systemResult.data,
+    );
+    if (activityEvents.length > 0) {
+      console.debug("[Orion] Home: Activity derivada de views —", activityEvents.length, "eventos");
+    }
+  }
+
+  // ── Attention Items (eventos críticos/warning) ──
+  const attention: AttentionItem[] = activityEvents
     .filter((e: any) => e.priority === "critical" || e.priority === "warning")
     .slice(0, 5)
     .map((e: any) => ({
@@ -137,8 +235,8 @@ export const fetchHomePage: DomainFetcher<HomePageData> = async (): Promise<Doma
     uptime: svc.uptime,
   }));
 
-  // ── Briefing (de Activity — últimos eventos como log operacional) ──
-  const briefing: BriefingItem[] = (activityResult.data.events || [])
+  // ── Briefing (últimos eventos como log operacional) ──
+  const briefing: BriefingItem[] = activityEvents
     .slice(0, 8)
     .map((e: any) => ({
       time: e.time,
