@@ -273,11 +273,20 @@ export async function deriveActivitiesFromDomains(): Promise<ActivityInfo[]> {
     systemInfo = {
       hostname: sys.hostname || "unknown",
       platform: sys.platform || "linux",
+      arch: "",
+      nodeVersion: "",
+      cpuCount: 0,
       cpuUsagePercent: cpuPercent,
-      memoryTotalBytes: mem.total,
-      memoryUsedBytes: mem.used,
+      memTotalBytes: mem.total,
+      memUsedBytes: mem.used,
+      memFreeBytes: mem.free,
+      diskTotalBytes: 0,
+      diskUsedBytes: 0,
+      diskFreeBytes: 0,
+      loadAvg: [0, 0, 0],
       uptimeSeconds: sys.uptime || 0,
       state: cpuPercent > 90 ? "critical" : cpuPercent > 75 ? "degraded" : "nominal",
+      checkedAt: new Date().toISOString(),
     };
   }
 
