@@ -1,4 +1,4 @@
-import { Flame, Clock, Pause, ArrowRight, Bot } from "lucide-react";
+import { Flame, Clock, Pause, ArrowRight, Bot, CheckCircle2 } from "lucide-react";
 import type { Operation } from "@/domains/operations/types";
 
 interface LiveOperationsProps {
@@ -15,8 +15,10 @@ export function LiveOperations({ operations = [] }: LiveOperationsProps) {
             <h2 className="orion-panel-title">Operações em Andamento</h2>
           </div>
         </div>
-        <div className="px-5 py-8 text-center">
-          <p className="text-sm text-muted-foreground/50 font-mono">Aguardando conexão com API</p>
+        <div className="px-5 py-8 text-center flex flex-col items-center">
+          <CheckCircle2 className="h-5 w-5 text-status-online/40 mb-2" />
+          <p className="text-sm text-muted-foreground/50 font-mono">Nenhuma operação ativa</p>
+          <p className="text-[10px] font-mono text-muted-foreground/25 mt-1">Sistema em estado nominal</p>
         </div>
       </section>
     );
@@ -36,26 +38,20 @@ export function LiveOperations({ operations = [] }: LiveOperationsProps) {
           <span className="text-xs font-mono text-status-online font-semibold">{runningCount} ativas</span>
         </div>
       </div>
-
       <div className="divide-y divide-border/25">
         {operations.map(op => {
           const isPaused = op.status === "paused";
           const isHigh = op.priority === "high";
           return (
             <div key={op.id} className={`flex items-center gap-4 px-5 py-4 cursor-pointer group transition-colors ${isPaused ? "opacity-40 hover:opacity-60" : isHigh ? "bg-primary/[0.02] hover:bg-primary/[0.05]" : "hover:bg-accent/20"}`}>
-              <div className="shrink-0">
-                {isPaused ? <Pause className="h-4 w-4 text-status-warning" /> : <Flame className="h-4 w-4 text-status-online" />}
-              </div>
+              <div className="shrink-0">{isPaused ? <Pause className="h-4 w-4 text-status-warning" /> : <Flame className="h-4 w-4 text-status-online" />}</div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-medium text-foreground truncate">{op.name}</span>
-                  {isHigh && !isPaused && (
-                    <span className="text-xs font-mono uppercase px-2 py-0.5 rounded bg-primary/10 text-primary border border-primary/15 font-bold">ALTA</span>
-                  )}
+                  {isHigh && !isPaused && <span className="text-xs font-mono uppercase px-2 py-0.5 rounded bg-primary/10 text-primary border border-primary/15 font-bold">ALTA</span>}
                 </div>
                 <div className="flex items-center gap-2 mt-1">
-                  <Bot className="h-3.5 w-3.5 text-muted-foreground/30" />
-                  <span className="text-xs font-mono text-muted-foreground/50">{op.agent}</span>
+                  <Bot className="h-3.5 w-3.5 text-muted-foreground/30" /><span className="text-xs font-mono text-muted-foreground/50">{op.agent}</span>
                 </div>
               </div>
               <div className="flex items-center gap-3 shrink-0 w-32">
@@ -65,8 +61,7 @@ export function LiveOperations({ operations = [] }: LiveOperationsProps) {
                 <span className="text-xs font-mono text-muted-foreground/50 w-9 text-right">{op.progress}%</span>
               </div>
               <div className="flex items-center gap-2 shrink-0">
-                <Clock className="h-3.5 w-3.5 text-muted-foreground/30" />
-                <span className="text-xs font-mono text-muted-foreground/50">{op.elapsed}</span>
+                <Clock className="h-3.5 w-3.5 text-muted-foreground/30" /><span className="text-xs font-mono text-muted-foreground/50">{op.elapsed}</span>
               </div>
               <ArrowRight className="h-4 w-4 text-muted-foreground/15 group-hover:text-muted-foreground/40 transition-colors shrink-0" />
             </div>

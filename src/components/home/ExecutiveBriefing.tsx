@@ -1,4 +1,4 @@
-import { FileText } from "lucide-react";
+import { FileText, Clock } from "lucide-react";
 import type { BriefingItem } from "@/domains/activity/types";
 
 interface ExecutiveBriefingProps {
@@ -15,8 +15,10 @@ export function ExecutiveBriefing({ items = [] }: ExecutiveBriefingProps) {
             <h2 className="orion-panel-title">Log Operacional</h2>
           </div>
         </div>
-        <div className="px-5 py-8 text-center">
-          <p className="text-sm text-muted-foreground/50 font-mono">Aguardando conexão com API</p>
+        <div className="px-5 py-6 text-center flex flex-col items-center">
+          <Clock className="h-5 w-5 text-muted-foreground/20 mb-2" />
+          <p className="text-sm text-muted-foreground/50 font-mono">Sem registros recentes</p>
+          <p className="text-[10px] font-mono text-muted-foreground/25 mt-1">Eventos aparecerão conforme o sistema operar</p>
         </div>
       </section>
     );
@@ -34,7 +36,6 @@ export function ExecutiveBriefing({ items = [] }: ExecutiveBriefingProps) {
           <span className="text-xs font-mono text-muted-foreground/40">{items.length} registros</span>
         </div>
       </div>
-
       <div className="divide-y divide-border/20">
         {items.map((item, i) => (
           <div key={i} className="flex gap-5 px-5 py-4 hover:bg-accent/15 transition-colors">

@@ -1,4 +1,4 @@
-import { AlertTriangle, AlertCircle, Info, ChevronRight } from "lucide-react";
+import { AlertTriangle, AlertCircle, Info, ChevronRight, CheckCircle2 } from "lucide-react";
 import type { AttentionItem, AttentionPriority } from "@/domains/activity/types";
 
 const priorityConfig: Record<AttentionPriority, { icon: React.ElementType; border: string; bg: string; dot: string }> = {
@@ -17,13 +17,14 @@ export function AttentionRequired({ items = [] }: AttentionRequiredProps) {
       <section className="rounded-lg border border-border overflow-hidden">
         <div className="orion-panel-header">
           <div className="flex items-center gap-3">
-            <div className="w-6 h-0.5 bg-status-warning rounded-full" />
+            <div className="w-6 h-0.5 bg-status-online rounded-full" />
             <h2 className="orion-panel-title">Atenção Necessária</h2>
           </div>
-          <span className="text-xs font-mono text-muted-foreground/40">0 itens</span>
+          <span className="text-xs font-mono text-status-online/60">Tudo em ordem</span>
         </div>
-        <div className="px-5 py-8 text-center">
-          <p className="text-sm text-muted-foreground/50 font-mono">Aguardando conexão com API</p>
+        <div className="px-5 py-6 text-center flex flex-col items-center">
+          <CheckCircle2 className="h-5 w-5 text-status-online/40 mb-2" />
+          <p className="text-sm text-muted-foreground/50 font-mono">Nenhum item requer atenção</p>
         </div>
       </section>
     );
@@ -38,7 +39,6 @@ export function AttentionRequired({ items = [] }: AttentionRequiredProps) {
         </div>
         <span className="text-xs font-mono text-status-warning font-semibold">{items.length} itens</span>
       </div>
-
       <div className="divide-y divide-border/30">
         {items.map((item) => {
           const config = priorityConfig[item.priority];

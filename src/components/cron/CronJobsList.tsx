@@ -1,8 +1,13 @@
+import { useState } from "react";
 import {
   CheckCircle2, XCircle, AlertTriangle, ChevronRight, Timer,
   ToggleLeft, ToggleRight, Inbox,
 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { apiUrl } from "@/domains/api";
+import { toast } from "@/hooks/use-toast";
 import type { CronJob, JobStatus } from "@/domains/cron/types";
+import { CronDetailSheet } from "@/components/sheets/CronDetailSheet";
 
 const statusConfig: Record<JobStatus, { dot: string; text: string; border: string; bg: string }> = {
   healthy: { dot: "status-online", text: "text-status-online", border: "border-l-status-online", bg: "" },
@@ -17,13 +22,17 @@ function ResultBadge({ result }: { result: CronJob["lastResult"] }) {
   return <span className="text-[10px] font-mono text-muted-foreground/25">—</span>;
 }
 
-function JobRow({ job }: { job: CronJob }) {
+function JobRow({ job, onClick, onToggle }: { job: CronJob; onClick: () => void; onToggle: (enabled: boolean) => void }) {
   const cfg = statusConfig[job.status];
   const isDisabled = !job.enabled;
   const hasFailed = job.status === "failed";
 
+  const handleToggle = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+  };
+
   return (
-    <div className={`rounded-lg border border-border/40 border-l-[3px] ${cfg.border} ${cfg.bg} ${isDisabled ? "opacity-40" : ""} hover:bg-accent/20 transition-colors cursor-pointer group`}>
+    <div onClick={onClick} className={`rounded-lg border border-border/40 border-l-[3px] ${cfg.border} ${cfg.bg} ${isDisabled ? "opacity-40" : ""} hover:bg-accent/20 transition-colors cursor-pointer group`}>
       <div className="px-6 py-5">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-3 min-w-0">
@@ -38,8 +47,12 @@ function JobRow({ job }: { job: CronJob }) {
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-2.5 shrink-0 ml-4">
-            {job.enabled ? <ToggleRight className="h-4 w-4 text-status-online" /> : <ToggleLeft className="h-4 w-4 text-muted-foreground/25" />}
+          <div className="flex items-center gap-2.5 shrink-0 ml-4" onClick={handleToggle}>
+            <Switch
+              checked={job.enabled}
+              onCheckedChange={(checked) => onToggle(checked)}
+              className="data-[state=checked]:bg-primary"
+            />
             <div className={`status-dot ${cfg.dot}`} />
             <ChevronRight className="h-4 w-4 text-muted-foreground/10 group-hover:text-muted-foreground/40 transition-colors" />
           </div>
@@ -53,54 +66,55 @@ function JobRow({ job }: { job: CronJob }) {
         )}
 
         <div className="flex items-center gap-4 ml-12 text-xs font-mono text-muted-foreground/40 flex-wrap">
-          <div className="flex items-center gap-1.5">
-            <span className="text-muted-foreground/30">Última</span>
-            <span className="text-foreground/60">{job.lastRun}</span>
-            <span className="text-muted-foreground/20">({job.lastRunAgo})</span>
-          </div>
+          <div className="flex items-center gap-1.5"><span className="text-muted-foreground/30">Última</span><span className="text-foreground/60">{job.lastRun}</span><span className="text-muted-foreground/20">({job.lastRunAgo})</span></div>
           <div className="w-px h-3 bg-border/20" />
-          <div className="flex items-center gap-1.5">
-            <span className="text-muted-foreground/30">Duração</span>
-            <span className="text-foreground/60">{job.lastDuration}</span>
-          </div>
+          <div className="flex items-center gap-1.5"><span className="text-muted-foreground/30">Duração</span><span className="text-foreground/60">{job.lastDuration}</span></div>
           <div className="w-px h-3 bg-border/20" />
           <ResultBadge result={job.lastResult} />
           <div className="w-px h-3 bg-border/20" />
-          <div className="flex items-center gap-1.5">
-            <span className="text-muted-foreground/30">Próxima</span>
-            <span className="text-primary/60">{job.nextRun}</span>
-            <span className="text-muted-foreground/20">{job.nextRunIn}</span>
-          </div>
-          {job.consecutiveSuccess > 0 && (
-            <><div className="w-px h-3 bg-border/20" /><span className="text-status-online/50">{job.consecutiveSuccess}× OK</span></>
-          )}
-          {job.consecutiveFails > 0 && (
-            <><div className="w-px h-3 bg-border/20" /><span className="text-status-critical/70">{job.consecutiveFails}× falhas</span></>
-          )}
+          <div className="flex items-center gap-1.5"><span className="text-muted-foreground/30">Próxima</span><span className="text-primary/60">{job.nextRun}</span><span className="text-muted-foreground/20">{job.nextRunIn}</span></div>
+          {job.consecutiveSuccess > 0 && <><div className="w-px h-3 bg-border/20" /><span className="text-status-online/50">{job.consecutiveSuccess}× OK</span></>}
+          {job.consecutiveFails > 0 && <><div className="w-px h-3 bg-border/20" /><span className="text-status-critical/70">{job.consecutiveFails}× falhas</span></>}
         </div>
       </div>
     </div>
   );
 }
 
-interface Props {
-  jobs: CronJob[];
-}
+interface Props { jobs: CronJob[]; }
 
 export function CronJobsList({ jobs }: Props) {
-  if (jobs.length === 0) {
+  const [selected, setSelected] = useState<CronJob | null>(null);
+  const [localJobs, setLocalJobs] = useState<CronJob[]>(jobs);
+
+  // Sync if props change
+  if (jobs !== localJobs && jobs.length > 0 && JSON.stringify(jobs) !== JSON.stringify(localJobs)) {
+    setLocalJobs(jobs);
+  }
+
+  const handleToggle = async (id: string, enabled: boolean) => {
+    try {
+      const res = await fetch(apiUrl("/cron"), {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, enabled }),
+      });
+      if (!res.ok) throw new Error();
+      setLocalJobs(prev => prev.map(j => j.id === id ? { ...j, enabled } : j));
+      toast({ title: enabled ? "Cron job ativado" : "Cron job desativado" });
+    } catch {
+      toast({ title: "Erro ao alterar status", variant: "destructive" });
+    }
+  };
+
+  if (localJobs.length === 0) {
     return (
       <section className="rounded-lg border border-border overflow-hidden">
         <div className="orion-panel-header">
-          <div className="flex items-center gap-3">
-            <div className="w-6 h-0.5 bg-muted-foreground/40 rounded-full" />
-            <h2 className="orion-panel-title">Registro de Jobs</h2>
-          </div>
+          <div className="flex items-center gap-3"><div className="w-6 h-0.5 bg-muted-foreground/40 rounded-full" /><h2 className="orion-panel-title">Registro de Jobs</h2></div>
         </div>
         <div className="flex flex-col items-center justify-center py-16 text-center">
-          <div className="w-12 h-12 rounded-lg bg-surface-2 border border-border flex items-center justify-center mb-4">
-            <Inbox className="h-6 w-6 text-muted-foreground/30" />
-          </div>
+          <div className="w-12 h-12 rounded-lg bg-surface-2 border border-border flex items-center justify-center mb-4"><Inbox className="h-6 w-6 text-muted-foreground/30" /></div>
           <p className="text-sm font-medium text-muted-foreground/50">Nenhum job registrado</p>
           <p className="text-xs font-mono text-muted-foreground/30 mt-1.5">Aguardando conexão com API</p>
         </div>
@@ -109,9 +123,9 @@ export function CronJobsList({ jobs }: Props) {
   }
 
   const order: Record<JobStatus, number> = { failed: 0, warning: 1, healthy: 2, disabled: 3 };
-  const sorted = [...jobs].sort((a, b) => order[a.status] - order[b.status]);
-  const enabledCount = jobs.filter(j => j.enabled).length;
-  const failedCount = jobs.filter(j => j.status === "failed").length;
+  const sorted = [...localJobs].sort((a, b) => order[a.status] - order[b.status]);
+  const enabledCount = localJobs.filter(j => j.enabled).length;
+  const failedCount = localJobs.filter(j => j.status === "failed").length;
 
   return (
     <section>
@@ -127,13 +141,14 @@ export function CronJobsList({ jobs }: Props) {
           </div>
         )}
         <div className="flex-1 h-px bg-border/40" />
-        <span className="text-xs font-mono text-muted-foreground/40">{jobs.length} total</span>
+        <span className="text-xs font-mono text-muted-foreground/40">{localJobs.length} total</span>
       </div>
       <div className="space-y-2.5">
         {sorted.map((job) => (
-          <JobRow key={job.id} job={job} />
+          <JobRow key={job.id} job={job} onClick={() => setSelected(job)} onToggle={(enabled) => handleToggle(job.id, enabled)} />
         ))}
       </div>
+      <CronDetailSheet job={selected} open={!!selected} onOpenChange={(o) => !o && setSelected(null)} onToggle={handleToggle} />
     </section>
   );
 }

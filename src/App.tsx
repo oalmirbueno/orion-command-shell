@@ -18,7 +18,14 @@ import FilesPage from "./pages/FilesPage.tsx";
 import SearchPage from "./pages/SearchPage.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 30_000,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -39,9 +46,9 @@ const App = () => (
           <Route path="/operations" element={<OperationsPage />} />
           <Route path="/files" element={<FilesPage />} />
           <Route path="/search" element={<SearchPage />} />
-          <Route path="/pipelines" element={<PlaceholderPage title="Pipelines" description="Gerenciamento de pipelines de dados" />} />
+          <Route path="/pipelines" element={<PlaceholderPage title="Pipelines" description="Módulo Pipeline — Em desenvolvimento" />} />
           <Route path="/office3d" element={<Office3DPage />} />
-          <Route path="/settings" element={<PlaceholderPage title="Configurações" description="Configuração do sistema" />} />
+          <Route path="/settings" element={<PlaceholderPage title="Configurações" description="Módulo Configurações — Em desenvolvimento" />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
