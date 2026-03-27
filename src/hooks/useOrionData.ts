@@ -63,7 +63,13 @@ export function useOrionData<T>({
   const staleTimer = useRef<ReturnType<typeof setTimeout>>();
   const mountedRef = useRef(true);
 
+  const lastFetchRef = useRef<number>(0);
+
   const load = useCallback(async () => {
+    // staleTime guard — skip if data was fetched recently (30s)
+    const now = Date.now();
+    if (data && now - lastFetchRef.current < 30_000) return;
+    lastFetchRef.current = now;
     if (forceState) {
       setState(forceState);
       return;
