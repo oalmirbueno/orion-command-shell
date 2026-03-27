@@ -141,10 +141,10 @@ function deriveActivityFromViews(
  * Fetcher principal da Home.
  */
 export const fetchHomePage: DomainFetcher<HomePageData> = async (): Promise<DomainResult<HomePageData>> => {
-  // Tentativa 1: endpoint agregado
+  // Tentativa 1: endpoint agregado — aceita APENAS se vier completo
   const aggregated = await fetchHomeAggregated();
 
-  if (aggregated.source === "api") {
+  if (aggregated.source === "api" && isCompleteHome(aggregated.data)) {
     return aggregated;
   }
 
