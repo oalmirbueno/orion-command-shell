@@ -47,7 +47,7 @@ function JobRow({ job, onClick, onToggle }: { job: CronJob; onClick: () => void;
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-2.5 shrink-0 ml-4" onClick={handleToggle}>
+          <div className="flex items-center gap-2.5 shrink-0 ml-4" onClick={handleSwitchClick}>
             <Switch
               checked={job.enabled}
               onCheckedChange={(checked) => onToggle(checked)}
