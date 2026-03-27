@@ -102,9 +102,33 @@ const EMPTY_PAGE: OperationsPageData = {
 /* ── Fetcher com fallback para derivação client-side ── */
 
 async function fetchOperationsRaw(): Promise<DomainResult<RawOperationsPage>> {
-  const realFetcher = createRealFirstFetcher<RawOperationsPage, RawOperationsPage>({
+  const realFetcher = createRealFirstFetcher<any, RawOperationsPage>({
     endpoint: "/operations",
     fallbackData: { operations: [], timeline: [] },
+    transform: (raw: any) => {
+      // Handle { operations: [...], total, hasMore } wrapper
+      const ops = raw?.operations || (Array.isArray(raw) ? raw : []);
+      const timeline = raw?.timeline || [];
+      // Normalize operation fields from backend
+      const normalizedOps = ops.map((op: any) => ({
+        id: op.id || `op-${Math.random().toString(36).slice(2)}`,
+        kind: op.kind || op.type || "task",
+        title: op.title || op.name || "—",
+        description: op.description || null,
+        status: op.status || "queued",
+        priority: op.priority || "normal",
+        progress: op.progress ?? 0,
+        source: op.source || "—",
+        agentId: op.agentId || op.agent || null,
+        sessionId: op.sessionId || null,
+        assignee: op.assignee || op.agent || null,
+        startedAt: op.startedAt || null,
+        updatedAt: op.updatedAt || new Date().toISOString(),
+        completedAt: op.completedAt || null,
+        metadata: op.metadata || null,
+      }));
+      return { operations: normalizedOps, timeline };
+    },
   });
 
   const result = await realFetcher();

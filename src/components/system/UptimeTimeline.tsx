@@ -27,8 +27,8 @@ export function UptimeTimeline({ days, uptimePercent }: Props) {
           <div className="w-12 h-12 rounded-lg bg-surface-2 border border-border flex items-center justify-center mb-4">
             <Inbox className="h-6 w-6 text-muted-foreground/30" />
           </div>
-          <p className="text-sm font-medium text-muted-foreground/50">Sem histórico disponível</p>
-          <p className="text-xs font-mono text-muted-foreground/30 mt-1.5">Aguardando conexão com API</p>
+          <p className="text-sm font-medium text-muted-foreground/50">Histórico não disponível</p>
+          <p className="text-xs font-mono text-muted-foreground/30 mt-1.5">Dados históricos de uptime serão coletados ao longo do tempo</p>
         </div>
       </section>
     );
