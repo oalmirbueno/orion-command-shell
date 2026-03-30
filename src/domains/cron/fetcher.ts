@@ -20,44 +20,79 @@ interface RealCronJob {
   enabled: boolean;
   createdAtMs?: number;
   updatedAtMs?: number;
+  description?: string;
+  sessionTarget?: string;
+  payload?: Record<string, unknown>;
+  totalRuns?: number;
+  // New backend shape
   schedule?: {
     kind?: string;
     expr?: string;
     tz?: string;
+    everyMs?: number;
   };
-  sessionTarget?: string;
-  payload?: Record<string, unknown>;
+  lastRun?: {
+    at?: string | null;
+    durationMs?: number | null;
+    ok?: boolean | null;
+    error?: string | null;
+  };
+  nextRunAt?: string | number | null;
+  stats?: {
+    consecutiveOk?: number;
+    consecutiveFail?: number;
+  };
+  // Legacy flat fields (old shape fallback)
   lastRunAt?: string | number | null;
   lastRunDurationMs?: number | null;
   lastRunSuccess?: boolean | null;
   lastRunError?: string | null;
-  nextRunAt?: string | number | null;
   consecutiveSuccesses?: number;
   consecutiveFailures?: number;
-  totalRuns?: number;
-  description?: string;
 }
 
-function realToCronJobInfo(raw: RealCronJob): CronJobInfo {
+function normalizeBackendCron(raw: RealCronJob): CronJobInfo {
   const toIso = (v: string | number | null | undefined): string | null => {
     if (!v) return null;
     if (typeof v === "number") return new Date(v).toISOString();
     return v;
   };
 
+  // Handle nested lastRun object vs legacy flat fields
+  const lastRunAt = raw.lastRun?.at ?? raw.lastRunAt ?? null;
+  const lastRunDurationMs = raw.lastRun?.durationMs ?? raw.lastRunDurationMs ?? null;
+  const lastRunOk = raw.lastRun?.ok ?? raw.lastRunSuccess ?? null;
+  const lastRunError = raw.lastRun?.error ?? raw.lastRunError ?? null;
+
+  // Handle nested stats vs legacy flat fields
+  const consecutiveOk = raw.stats?.consecutiveOk ?? raw.consecutiveSuccesses ?? 0;
+  const consecutiveFail = raw.stats?.consecutiveFail ?? raw.consecutiveFailures ?? 0;
+
+  // Build schedule string
+  let scheduleStr = "—";
+  if (raw.schedule) {
+    if (raw.schedule.expr) {
+      scheduleStr = raw.schedule.expr;
+    } else if (raw.schedule.everyMs) {
+      scheduleStr = `every:${raw.schedule.everyMs}`;
+    } else if (raw.schedule.kind) {
+      scheduleStr = raw.schedule.kind;
+    }
+  }
+
   return {
     id: raw.id,
     name: raw.name,
     description: raw.description || raw.name,
-    schedule: raw.schedule?.expr || "—",
+    schedule: scheduleStr,
     enabled: raw.enabled,
-    lastRunAt: toIso(raw.lastRunAt),
-    lastRunDurationMs: raw.lastRunDurationMs ?? null,
-    lastRunSuccess: raw.lastRunSuccess ?? null,
-    lastRunError: raw.lastRunError ?? null,
+    lastRunAt: toIso(lastRunAt),
+    lastRunDurationMs: lastRunDurationMs,
+    lastRunSuccess: lastRunOk,
+    lastRunError: lastRunError,
     nextRunAt: toIso(raw.nextRunAt),
-    consecutiveSuccesses: raw.consecutiveSuccesses ?? 0,
-    consecutiveFailures: raw.consecutiveFailures ?? 0,
+    consecutiveSuccesses: consecutiveOk,
+    consecutiveFailures: consecutiveFail,
     totalRuns: raw.totalRuns ?? 0,
     createdAt: raw.createdAtMs ? new Date(raw.createdAtMs).toISOString() : new Date().toISOString(),
   };
