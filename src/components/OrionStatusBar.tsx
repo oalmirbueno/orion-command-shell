@@ -94,8 +94,10 @@ export function OrionStatusBar() {
   const displayTime = updatedAt || lastUpdated;
   const timeStr = displayTime ? format(displayTime, "HH:mm:ss") : "—";
 
-  const panel = panelConfig[metrics.panelStatus];
-  const { health } = metrics;
+  const defaultHealth: SubsystemHealth = { backend: "unknown", openclaw: "unknown", stats: "unknown" };
+  const health = metrics?.health ?? defaultHealth;
+  const panelStatus = metrics?.panelStatus ?? "offline";
+  const panel = panelConfig[panelStatus];
 
   // Format values
   const cpuStr = metrics.cpu !== null ? `${Math.round(metrics.cpu)}%` : "—";
