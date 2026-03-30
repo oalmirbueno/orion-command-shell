@@ -130,6 +130,7 @@ function toActivityEvent(info: ActivityInfo): ActivityEvent {
     title,
     description,
     source: info.source,
+    metadata: info.metadata,
   };
 }
 
