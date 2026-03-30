@@ -52,15 +52,11 @@ export function OrionStatusBar() {
       </div>
 
       <div className="flex items-center gap-4">
-        {sourceLabel && (
-          <>
             <div className={`flex items-center gap-1.5 ${sourceColor}`}>
-              <span className={`h-1.5 w-1.5 rounded-full ${source === "api" ? "bg-status-online animate-pulse" : "bg-muted-foreground/40"}`} />
+              <span className={`h-1.5 w-1.5 rounded-full ${dotColor}`} />
               <span>{sourceLabel}</span>
             </div>
             <Sep />
-          </>
-        )}
 
         <div className="flex items-center gap-2">
           <Shield className="h-3.5 w-3.5 text-muted-foreground/40" />
