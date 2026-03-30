@@ -49,6 +49,7 @@ export function AgentDetailSheet({ agent, open, onOpenChange }: Props) {
   // ── Profile state ──
   const [profile, setProfile] = useState<AgentProfile | null>(null);
   const [profileLoading, setProfileLoading] = useState(false);
+  const [profileSource, setProfileSource] = useState<"live" | "fallback">("fallback");
 
   // ── Logs state ──
   const [logs, setLogs] = useState<LogEntry[]>([]);
@@ -93,8 +94,20 @@ export function AgentDetailSheet({ agent, open, onOpenChange }: Props) {
     setProfileLoading(true);
     fetch(apiUrl(`/agents/${agent.id}`))
       .then(r => r.ok ? r.json() : Promise.reject())
-      .then(d => { if (!cancelled) setProfile({ personality: d.personality || d.soul?.personality || "", objective: d.objective || d.soul?.objective || d.purpose || "", scope: d.scope || d.soul?.scope || "", behavior: d.behavior || d.soul?.behavior || "", soul: d.soul?.summary || d.soulSummary || d.identity || "", instructions: d.instructions || d.soul?.instructions || d.systemPrompt || "" }); })
-      .catch(() => { if (!cancelled) setProfile(null); })
+      .then(d => {
+        if (cancelled) return;
+        const p: AgentProfile = {
+          personality: d.personality || d.soul?.personality || "",
+          objective: d.objective || d.soul?.objective || d.purpose || "",
+          scope: d.scope || d.soul?.scope || "",
+          behavior: d.behavior || d.soul?.behavior || "",
+          soul: d.soul?.summary || d.soulSummary || d.identity || "",
+          instructions: d.instructions || d.soul?.instructions || d.systemPrompt || "",
+        };
+        setProfile(p);
+        setProfileSource(Object.values(p).some(v => v) ? "live" : "fallback");
+      })
+      .catch(() => { if (!cancelled) { setProfile(null); setProfileSource("fallback"); } })
       .finally(() => { if (!cancelled) setProfileLoading(false); });
     return () => { cancelled = true; };
   }, [open, agent?.id]);
@@ -205,6 +218,10 @@ export function AgentDetailSheet({ agent, open, onOpenChange }: Props) {
                 <div className="flex items-center gap-2 mt-1">
                   <Badge variant="outline" className={`text-[10px] font-mono px-2 py-0 ${badge.cls}`}>{badge.label}</Badge>
                   <Badge variant="outline" className="text-[10px] font-mono px-2 py-0 border-border/40 text-muted-foreground">{tier}</Badge>
+                  <Badge variant="outline" className={`text-[10px] font-mono px-1.5 py-0 ${profileSource === "live" ? "border-status-online/40 text-status-online" : "border-border/30 text-muted-foreground/40"}`}>
+                    <span className={`inline-block w-1.5 h-1.5 rounded-full mr-1 ${profileSource === "live" ? "bg-status-online" : "bg-muted-foreground/30"}`} />
+                    {profileSource === "live" ? "LIVE" : "OFFLINE"}
+                  </Badge>
                 </div>
               </div>
               <div className="flex items-center gap-3 shrink-0">
@@ -255,7 +272,7 @@ export function AgentDetailSheet({ agent, open, onOpenChange }: Props) {
 
             <Separator className="bg-border/30" />
 
-            <Sec icon={Brain} title="Perfil">
+             <Sec icon={Brain} title="Perfil" badge={profileSource === "live" ? "live" : "fallback"}>
               {profileLoading ? (
                 <div className="space-y-2 ml-5">{[1,2,3].map(i => <div key={i} className="h-3 rounded bg-muted/30 animate-pulse" style={{ width: `${80 - i * 15}%` }} />)}</div>
               ) : profile && Object.values(profile).some(v => v) ? (
@@ -516,12 +533,17 @@ export function AgentDetailSheet({ agent, open, onOpenChange }: Props) {
 // SUB-COMPONENTS
 // ════════════════════════════════════════════════════
 
-function Sec({ icon: Icon, title, children }: { icon: React.ElementType; title: string; children: React.ReactNode }) {
+function Sec({ icon: Icon, title, children, badge }: { icon: React.ElementType; title: string; children: React.ReactNode; badge?: "live" | "fallback" }) {
   return (
     <div>
       <div className="flex items-center gap-2 mb-3">
         <Icon className="h-3.5 w-3.5 text-muted-foreground/40" />
         <h4 className="text-xs font-mono uppercase tracking-wider text-muted-foreground/50">{title}</h4>
+        {badge && (
+          <span className={`text-[9px] font-mono px-1.5 py-0 rounded border ${badge === "live" ? "border-status-online/30 text-status-online" : "border-border/30 text-muted-foreground/30"}`}>
+            {badge === "live" ? "API" : "LOCAL"}
+          </span>
+        )}
       </div>
       <div className="space-y-2.5">{children}</div>
     </div>
