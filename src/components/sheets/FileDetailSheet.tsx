@@ -165,7 +165,7 @@ export function FileDetailSheet({ file, open, onOpenChange }: Props) {
   if (!file) return null;
 
   const tc = typeConfig[file.type] || defaultType;
-  const imageUrl = isImage ? apiUrl(`/files/read?path=${encodeURIComponent(file.path)}`) : null;
+  const imageUrl = isImage ? apiUrl(`/files?path=${encodeURIComponent(file.path)}`) : null;
 
   return (
     <Sheet open={open} onOpenChange={handleOpenChange}>
