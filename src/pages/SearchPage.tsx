@@ -55,6 +55,22 @@ function highlightTerm(text: string, term: string) {
   }
 }
 
+/* ── search history ── */
+
+const HISTORY_KEY = "orion_search_history";
+const MAX_HISTORY = 8;
+
+function loadHistory(): string[] {
+  try {
+    const raw = localStorage.getItem(HISTORY_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch { return []; }
+}
+
+function saveHistory(items: string[]) {
+  try { localStorage.setItem(HISTORY_KEY, JSON.stringify(items.slice(0, MAX_HISTORY))); } catch {}
+}
+
 /* ── page ── */
 
 const SearchPage = () => {
@@ -66,10 +82,34 @@ const SearchPage = () => {
   const [error, setError] = useState<string | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
   const abortRef = useRef<AbortController>();
+  const [history, setHistory] = useState<string[]>(loadHistory);
 
   // Detail sheet state
   const [selectedSnapshot, setSelectedSnapshot] = useState<MemorySnapshot | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
+
+  const addToHistory = useCallback((term: string) => {
+    const t = term.trim();
+    if (t.length < 2) return;
+    setHistory((prev) => {
+      const next = [t, ...prev.filter((h) => h !== t)].slice(0, MAX_HISTORY);
+      saveHistory(next);
+      return next;
+    });
+  }, []);
+
+  const removeFromHistory = useCallback((term: string) => {
+    setHistory((prev) => {
+      const next = prev.filter((h) => h !== term);
+      saveHistory(next);
+      return next;
+    });
+  }, []);
+
+  const clearHistory = useCallback(() => {
+    setHistory([]);
+    saveHistory([]);
+  }, []);
 
   const doSearch = useCallback(async (q: string, scope: SearchScope) => {
     if (!q.trim() || q.trim().length < 2) return;
