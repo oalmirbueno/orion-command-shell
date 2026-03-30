@@ -207,7 +207,6 @@ function mergeMetrics(prev: SystemMetrics, next: SystemMetrics): SystemMetrics {
   };
 }
 
-
 export function useSystemMetrics() {
   const lastValid = useRef<SystemMetrics>(emptyMetrics());
 
