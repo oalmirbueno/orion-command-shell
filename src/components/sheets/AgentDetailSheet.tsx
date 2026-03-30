@@ -1,15 +1,17 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
   Bot, Cpu, Zap, Activity, Clock, Layers, ArrowDownRight,
-  ArrowUpRight, AlertTriangle, Briefcase, RotateCcw, Loader2,
+  ArrowUpRight, AlertTriangle, Briefcase, RotateCcw, Loader2, Terminal, RefreshCw,
 } from "lucide-react";
 import { apiUrl } from "@/domains/api";
 import { toast } from "@/hooks/use-toast";
 import type { AgentView } from "@/domains/agents/types";
+
+interface LogEntry { ts: string; level: string; message: string; }
 
 const statusBadge: Record<string, { label: string; className: string }> = {
   active:  { label: "Ativo",   className: "bg-status-online/15 text-status-online border-status-online/30" },
@@ -31,6 +33,45 @@ interface Props {
 
 export function AgentDetailSheet({ agent, open, onOpenChange }: Props) {
   const [restarting, setRestarting] = useState(false);
+  const [logs, setLogs] = useState<LogEntry[]>([]);
+  const [logsLoading, setLogsLoading] = useState(false);
+  const [logsError, setLogsError] = useState(false);
+  const logsEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open || !agent) { setLogs([]); return; }
+
+    let cancelled = false;
+    const fetchLogs = async () => {
+      setLogsLoading(true);
+      setLogsError(false);
+      try {
+        const res = await fetch(apiUrl(`/agents/${agent.id}/logs`));
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        if (!cancelled) {
+          const entries: LogEntry[] = (data.logs || data || []).map((l: any) => ({
+            ts: l.timestamp || l.ts || l.at || "",
+            level: l.level || "info",
+            message: l.message || l.msg || l.text || String(l),
+          }));
+          setLogs(entries);
+        }
+      } catch {
+        if (!cancelled) setLogsError(true);
+      } finally {
+        if (!cancelled) setLogsLoading(false);
+      }
+    };
+
+    fetchLogs();
+    const interval = setInterval(fetchLogs, 10_000);
+    return () => { cancelled = true; clearInterval(interval); };
+  }, [open, agent?.id]);
+
+  useEffect(() => {
+    logsEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [logs]);
 
   if (!agent) return null;
 
@@ -154,6 +195,38 @@ export function AgentDetailSheet({ agent, open, onOpenChange }: Props) {
               </Section>
             </>
           )}
+
+          <Separator className="bg-border/30" />
+
+          {/* Logs */}
+          <Section icon={Terminal} title="Logs recentes">
+            {logsLoading && logs.length === 0 ? (
+              <div className="space-y-2 ml-5">
+                {[1,2,3].map(i => <div key={i} className="h-4 w-full rounded bg-muted/30 animate-pulse" />)}
+              </div>
+            ) : logsError ? (
+              <p className="text-xs text-muted-foreground/40 italic ml-5">Erro ao carregar logs</p>
+            ) : logs.length === 0 ? (
+              <p className="text-xs text-muted-foreground/40 italic ml-5">Nenhum log disponível</p>
+            ) : (
+              <div className="ml-5 max-h-48 overflow-y-auto rounded-lg border border-border/30 bg-muted/10 p-3 space-y-1.5 scrollbar-thin">
+                {logs.map((log, i) => (
+                  <div key={i} className="flex gap-2 text-[11px] font-mono leading-relaxed">
+                    <span className="text-muted-foreground/30 shrink-0 w-16 truncate">
+                      {log.ts ? new Date(log.ts).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" }) : "—"}
+                    </span>
+                    <span className={`shrink-0 w-10 uppercase ${
+                      log.level === "error" ? "text-status-critical" :
+                      log.level === "warn" ? "text-status-warning" :
+                      "text-muted-foreground/50"
+                    }`}>{log.level}</span>
+                    <span className="text-foreground/70 break-all">{log.message}</span>
+                  </div>
+                ))}
+                <div ref={logsEndRef} />
+              </div>
+            )}
+          </Section>
 
           <Separator className="bg-border/30" />
 
