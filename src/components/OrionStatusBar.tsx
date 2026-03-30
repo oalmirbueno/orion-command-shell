@@ -1,5 +1,5 @@
 import { Cpu, HardDrive, MemoryStick, Clock, Activity, Server } from "lucide-react";
-import { useSystemMetrics, type SubsystemStatus, type PanelStatus } from "@/hooks/useSystemMetrics";
+import { useSystemMetrics, type SubsystemHealth, type SubsystemStatus, type PanelStatus } from "@/hooks/useSystemMetrics";
 import { useLastUpdated } from "@/hooks/useLastUpdated";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { format } from "date-fns";
