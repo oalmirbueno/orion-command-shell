@@ -35,7 +35,8 @@ export function OrionLoading({ title = "Carregando...", description, className, 
 
 /* ── Empty ── */
 
-export function OrionEmpty({ title = "Sem dados", description = "Nada para exibir ainda", className, compact }: StateProps) {
+export function OrionEmpty({ title = "Sem dados", description = "Nada para exibir ainda", className, compact, icon }: StateProps) {
+  const Icon = icon || Inbox;
   return (
     <div className={cn(
       "flex flex-col items-center justify-center text-center",
@@ -43,7 +44,7 @@ export function OrionEmpty({ title = "Sem dados", description = "Nada para exibi
       className,
     )}>
       <div className="w-12 h-12 rounded-lg bg-surface-2 border border-border flex items-center justify-center mb-4">
-        <Inbox className="h-6 w-6 text-muted-foreground/40" />
+        <Icon className="h-6 w-6 text-muted-foreground/40" />
       </div>
       <p className="text-sm font-medium text-muted-foreground">{title}</p>
       <p className="text-xs text-muted-foreground/50 font-mono mt-1.5">{description}</p>
