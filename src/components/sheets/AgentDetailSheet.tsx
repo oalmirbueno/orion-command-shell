@@ -7,6 +7,7 @@ import {
   Bot, Cpu, Zap, Activity, Clock, Layers, ArrowDownRight,
   ArrowUpRight, AlertTriangle, Briefcase, RotateCcw, Loader2, Terminal, RefreshCw,
   Fingerprint, Brain, Target, Shield, Sparkles, Hash, Copy, Check, ListChecks, CheckCircle2, XCircle, Clock3,
+  Settings2, Save, Pencil,
 } from "lucide-react";
 import { apiUrl } from "@/domains/api";
 import { toast } from "@/hooks/use-toast";
