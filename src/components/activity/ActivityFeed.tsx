@@ -80,6 +80,7 @@ interface ActivityFeedProps { events: ActivityEvent[]; }
 
 export function ActivityFeed({ events }: ActivityFeedProps) {
   const [selected, setSelected] = useState<ActivityEvent | null>(null);
+  if (!events || events.length === 0) {
 
   if (events.length === 0) {
     return (
