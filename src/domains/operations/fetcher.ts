@@ -10,6 +10,7 @@
 
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import type { OperationSection } from "./types.page";
 import { createRealFirstFetcher } from "../createRealFirstFetcher";
 import { deriveOperationsFromDomains } from "./derive";
 import type {
