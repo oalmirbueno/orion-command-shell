@@ -85,24 +85,23 @@ async function fetchMetrics(): Promise<{ metrics: SystemMetrics; source: "api" |
     clearTimeout(timeout);
     const latencyMs = Math.round(performance.now() - start);
 
-    let sysOk = false;
-    let statsOk = false;
     let sys: RawSystem | null = null;
     let stats: RawStats | null = null;
-    let anyOk = false;
+    let sysOk = false;
+    let statsOk = false;
 
     if (sysRes.status === "fulfilled" && sysRes.value.ok) {
       const ct = sysRes.value.headers.get("content-type") || "";
       if (ct.includes("json")) {
         sys = await sysRes.value.json();
-        anyOk = true;
+        sysOk = true;
       }
     }
     if (statsRes.status === "fulfilled" && statsRes.value.ok) {
       const ct = statsRes.value.headers.get("content-type") || "";
       if (ct.includes("json")) {
         stats = await statsRes.value.json();
-        anyOk = true;
+        statsOk = true;
       }
     }
 
