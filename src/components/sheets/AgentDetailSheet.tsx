@@ -56,11 +56,13 @@ export function AgentDetailSheet({ agent, open, onOpenChange }: Props) {
   const [logsLoading, setLogsLoading] = useState(false);
   const [logsError, setLogsError] = useState(false);
   const [logFilter, setLogFilter] = useState<"all" | "info" | "warn" | "error">("all");
+  const [logsSource, setLogsSource] = useState<"live" | "fallback">("fallback");
   const logsEndRef = useRef<HTMLDivElement>(null);
 
   // ── Task history ──
   const [taskHistory, setTaskHistory] = useState<TaskHistoryEntry[]>([]);
   const [taskHistoryLoading, setTaskHistoryLoading] = useState(false);
+  const [taskHistorySource, setTaskHistorySource] = useState<"live" | "fallback">("fallback");
   const [taskVisible, setTaskVisible] = useState(5);
 
   // ── Config controls ──
