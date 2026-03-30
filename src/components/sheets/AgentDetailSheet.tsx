@@ -14,6 +14,7 @@ import {
 import { apiUrl } from "@/domains/api";
 import { toast } from "@/hooks/use-toast";
 import type { AgentView, AgentProfile, AgentOperationalStatus, AgentScopeType } from "@/domains/agents/types";
+import { fetchAgentProfile, saveAgentProfile, type ProfileSource } from "@/domains/agents/profileStore";
 
 // ── Types ────────────────────────────────────────────
 interface LogEntry { ts: string; level: string; message: string }
