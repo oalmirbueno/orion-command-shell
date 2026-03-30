@@ -19,17 +19,24 @@ import type { AgentInfo } from "../agents/types";
 // Fetch helper
 // ═══════════════════════════════════════════════════════
 
-async function safeFetch<T>(endpoint: string, fallback: T): Promise<T> {
+async function safeFetch<T>(endpoint: string, fallback: T, unwrapKeys?: string[]): Promise<T> {
   try {
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 6000);
+    const timer = setTimeout(() => controller.abort(), 12000);
     const res = await fetch(apiUrl(endpoint), {
       signal: controller.signal,
       headers: { Accept: "application/json" },
     });
     clearTimeout(timer);
     if (!res.ok) return fallback;
-    return (await res.json()) as T;
+    const json = await res.json();
+    // Unwrap { sessions: [], items: [], agents: [] } wrappers
+    if (unwrapKeys && json && typeof json === "object" && !Array.isArray(json)) {
+      for (const key of unwrapKeys) {
+        if (Array.isArray(json[key])) return json[key] as T;
+      }
+    }
+    return json as T;
   } catch {
     return fallback;
   }
@@ -95,41 +102,65 @@ function deriveFromCron(jobs: CronJobInfo[]): { ops: OperationInfo[]; events: Ti
   const events: TimelineEventInfo[] = [];
 
   for (const job of jobs) {
-    if (!job.enabled || !job.lastRunAt) continue;
+    if (!job.enabled) continue;
 
-    const isFailed = job.lastRunSuccess === false;
-    const status: OperationStatus = isFailed ? "failed" : "done";
+    // Past run → done/failed operation
+    if (job.lastRunAt) {
+      const isFailed = job.lastRunSuccess === false;
+      const status: OperationStatus = isFailed ? "failed" : "done";
 
-    ops.push({
-      id: `cron-${job.id}`,
-      kind: "cron",
-      title: `Cron: ${job.name}`,
-      description: job.lastRunError || job.description || null,
-      status,
-      priority: job.consecutiveFailures >= 3 ? "high" : "normal",
-      progress: 100,
-      source: "cron",
-      agentId: null,
-      sessionId: null,
-      assignee: null,
-      startedAt: job.lastRunAt,
-      updatedAt: job.lastRunAt,
-      completedAt: job.lastRunAt,
-      metadata: {
-        schedule: job.schedule,
-        consecutiveFailures: job.consecutiveFailures,
-        durationMs: job.lastRunDurationMs,
-      },
-    });
+      ops.push({
+        id: `cron-${job.id}`,
+        kind: "cron",
+        title: `Cron: ${job.name}`,
+        description: job.lastRunError || job.description || null,
+        status,
+        priority: job.consecutiveFailures >= 3 ? "high" : "normal",
+        progress: 100,
+        source: "cron",
+        agentId: null,
+        sessionId: null,
+        assignee: null,
+        startedAt: job.lastRunAt,
+        updatedAt: job.lastRunAt,
+        completedAt: job.lastRunAt,
+        metadata: {
+          schedule: job.schedule,
+          consecutiveFailures: job.consecutiveFailures,
+          durationMs: job.lastRunDurationMs,
+        },
+      });
 
-    events.push({
-      id: `cron-ev-${job.id}`,
-      operationId: `cron-${job.id}`,
-      action: isFailed ? "failed" : "completed",
-      agent: null,
-      detail: isFailed ? (job.lastRunError || "Falha na execução") : `Concluído em ${job.lastRunDurationMs ?? 0}ms`,
-      createdAt: job.lastRunAt,
-    });
+      events.push({
+        id: `cron-ev-${job.id}`,
+        operationId: `cron-${job.id}`,
+        action: isFailed ? "failed" : "completed",
+        agent: null,
+        detail: isFailed ? (job.lastRunError || "Falha na execução") : `Concluído em ${job.lastRunDurationMs ?? 0}ms`,
+        createdAt: job.lastRunAt,
+      });
+    }
+
+    // Upcoming run → queued operation
+    if (job.nextRunAt) {
+      ops.push({
+        id: `cron-next-${job.id}`,
+        kind: "cron",
+        title: `Agendado: ${job.name}`,
+        description: job.description || `Schedule: ${job.schedule}`,
+        status: "queued",
+        priority: "normal",
+        progress: 0,
+        source: "cron",
+        agentId: null,
+        sessionId: null,
+        assignee: null,
+        startedAt: null,
+        updatedAt: job.nextRunAt,
+        completedAt: null,
+        metadata: { schedule: job.schedule, nextRunAt: job.nextRunAt },
+      });
+    }
   }
 
   return { ops, events };
@@ -230,10 +261,10 @@ export interface DerivedOperations {
 
 export async function deriveOperationsFromDomains(): Promise<DerivedOperations> {
   const [sessions, cronJobs, activities, agents] = await Promise.all([
-    safeFetch<Session[]>("/sessions", []),
-    safeFetch<CronJobInfo[]>("/cron", []),
-    safeFetch<ActivityInfo[]>("/activities", []),
-    safeFetch<AgentInfo[]>("/agents", []),
+    safeFetch<Session[]>("/sessions", [], ["sessions", "items"]),
+    safeFetch<CronJobInfo[]>("/cron", [], ["jobs", "items", "cron"]),
+    safeFetch<ActivityInfo[]>("/activities", [], ["activities", "events", "items"]),
+    safeFetch<AgentInfo[]>("/agents", [], ["agents", "items"]),
   ]);
 
   const fromSessions = deriveFromSessions(sessions);

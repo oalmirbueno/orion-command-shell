@@ -10,6 +10,7 @@
 
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import type { OperationSection } from "./types.page";
 import { createRealFirstFetcher } from "../createRealFirstFetcher";
 import { deriveOperationsFromDomains } from "./derive";
 import type {
@@ -81,11 +82,48 @@ function buildSummary(tasks: OperationTask[]): OperationsSummaryData {
   };
 }
 
+function categorize(tasks: OperationTask[]): OperationSection {
+  const now = new Date();
+  const nowMs = now.getTime();
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 6, 0, 0);
+  const overnightStart = new Date(todayStart.getTime() - 6 * 3600_000);
+
+  const running: OperationTask[] = [];
+  const completed: OperationTask[] = [];
+  const failed: OperationTask[] = [];
+  const overnight: OperationTask[] = [];
+  const upcoming: OperationTask[] = [];
+
+  for (const t of tasks) {
+    const updatedMs = new Date(t.updatedAt).getTime();
+    const isOvernight = updatedMs >= overnightStart.getTime() && updatedMs < todayStart.getTime();
+    const isFuture = updatedMs > nowMs;
+
+    if (t.status === "queued" && isFuture) {
+      upcoming.push(t);
+    } else if (t.status === "running" || t.status === "queued" || t.status === "paused") {
+      running.push(t);
+    } else if (t.status === "failed") {
+      failed.push(t);
+      if (isOvernight) overnight.push(t);
+    } else if (t.status === "done") {
+      if (isOvernight) overnight.push(t);
+      completed.push(t);
+    }
+  }
+
+  // Sort upcoming by time
+  upcoming.sort((a, b) => new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime());
+
+  return { running, completed, failed, overnight, upcoming };
+}
+
 function buildPageData(operations: OperationInfo[], timeline: TimelineEventInfo[]): OperationsPageData {
   const tasks = operations.map(toOperationTask);
   const timelineEvents = timeline.map(ev => toTimelineEvent(ev, operations));
   const liveOps = operations.map(toLiveOp).filter((o): o is Operation => o !== null);
-  return { tasks, timeline: timelineEvents, liveOps, summary: buildSummary(tasks) };
+  const sections = categorize(tasks);
+  return { tasks, timeline: timelineEvents, liveOps, summary: buildSummary(tasks), sections };
 }
 
 /* ── Raw API shape ── */
@@ -94,9 +132,12 @@ interface RawOperationsPage {
   timeline: TimelineEventInfo[];
 }
 
+const EMPTY_SECTIONS: OperationSection = { running: [], completed: [], failed: [], overnight: [], upcoming: [] };
+
 const EMPTY_PAGE: OperationsPageData = {
   tasks: [], timeline: [], liveOps: [],
   summary: { total: 0, running: 0, queued: 0, done: 0, failed: 0, criticalActive: 0 },
+  sections: EMPTY_SECTIONS,
 };
 
 /* ── Fetcher com fallback para derivação client-side ── */
