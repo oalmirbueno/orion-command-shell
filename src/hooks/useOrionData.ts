@@ -1,8 +1,10 @@
 /**
- * useOrionData — Domain-aware data fetching hook with auto-refresh.
+ * useOrionData — Domain-aware data fetching hook powered by React Query.
+ * Data persists across navigations via the shared QueryClient cache.
  */
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useCallback, useRef, useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { DataState, DataSource, DomainFetcher } from "@/domains/types";
 import { useLastUpdated } from "./useLastUpdated";
 
@@ -32,6 +34,12 @@ interface UseOrionDataResult<T> {
   isStale: boolean;
 }
 
+interface FetcherResult<T> {
+  data: T;
+  source: DataSource;
+  timestamp: Date;
+}
+
 export function useOrionData<T>({
   key,
   fetcher,
@@ -40,134 +48,86 @@ export function useOrionData<T>({
   autoLoad = true,
   refreshInterval = 0,
 }: UseOrionDataOptions<T>): UseOrionDataResult<T> {
-  const [state, setState] = useState<DataState>(forceState || (autoLoad ? "loading" : "empty"));
-  const [data, setData] = useState<T | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
-  const [source, setSource] = useState<DataSource>("fallback");
-  const staleTimer = useRef<ReturnType<typeof setTimeout>>();
-  const mountedRef = useRef(true);
-  const lastFetchRef = useRef<number>(0);
-  const intervalRef = useRef<ReturnType<typeof setInterval>>();
-
   const globalUpdated = useLastUpdated();
+  const staleTimer = useRef<ReturnType<typeof setTimeout>>();
+  const queryClient = useQueryClient();
 
-  const load = useCallback(async (silent = false) => {
-    const now = Date.now();
-    if (data && now - lastFetchRef.current < 10_000) return;
-    lastFetchRef.current = now;
+  const queryFn = useCallback(async (): Promise<FetcherResult<T>> => {
+    const result = await fetcher();
+    return {
+      data: result.data as T,
+      source: result.source,
+      timestamp: result.timestamp,
+    };
+  }, [fetcher]);
 
-    if (forceState) {
-      setState(forceState);
-      return;
-    }
+  const {
+    data: result,
+    error: queryError,
+    isLoading: isInitialLoading,
+    isFetching,
+    refetch: rqRefetch,
+    dataUpdatedAt,
+  } = useQuery<FetcherResult<T>>({
+    queryKey: ["orion", key],
+    queryFn,
+    enabled: autoLoad && !forceState,
+    staleTime: 30_000,
+    gcTime: 5 * 60_000, // keep cache for 5 min after unmount
+    refetchInterval: refreshInterval > 0 ? refreshInterval : false,
+    refetchIntervalInBackground: false,
+    refetchOnWindowFocus: "always",
+    retry: 1,
+  });
 
-    // Silent refresh: don't show loading state, keep current data visible
-    if (!silent) {
-      setState("loading");
-    }
-    setError(null);
-
-    try {
-      const result = await fetcher();
-      if (!mountedRef.current) return;
-
-      const isEmpty =
-        result.data === undefined ||
-        result.data === null ||
-        (Array.isArray(result.data) && result.data.length === 0);
-
-      if (isEmpty) {
-        setState("empty");
-        setData(null);
-      } else {
-        setState("ready");
-        setData(result.data);
-        setSource(result.source);
-        setLastUpdated(result.timestamp);
-
-        // Update global status bar
-        try {
-          globalUpdated.setLastUpdated(result.timestamp, result.source);
-        } catch {}
-
-        if (staleAfter > 0) {
-          if (staleTimer.current) clearTimeout(staleTimer.current);
-          staleTimer.current = setTimeout(() => {
-            if (mountedRef.current) setState("stale");
-          }, staleAfter);
-        }
-      }
-    } catch (err) {
-      if (!mountedRef.current) return;
-      // On silent refresh failure, keep current data
-      if (!silent || !data) {
-        setState("error");
-        setError(err instanceof Error ? err.message : "Falha ao carregar dados");
-      }
-    }
-  }, [key, fetcher, forceState, staleAfter]);
-
-  // Initial load
+  // Update global status bar timestamp
   useEffect(() => {
-    mountedRef.current = true;
-    if (autoLoad) {
-      load(false);
+    if (result?.timestamp && result?.source) {
+      try {
+        globalUpdated.setLastUpdated(result.timestamp, result.source);
+      } catch {}
     }
-    return () => {
-      mountedRef.current = false;
-    };
-  }, [key, autoLoad]);
+  }, [result?.timestamp, result?.source]);
 
-  // Auto-refresh with visibility API
+  // Stale timer
   useEffect(() => {
-    if (!refreshInterval || refreshInterval <= 0) return;
-
-    const startInterval = () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-      intervalRef.current = setInterval(() => {
-        if (!document.hidden) {
-          load(true); // silent refresh
-        }
-      }, refreshInterval);
-    };
-
-    const handleVisibility = () => {
-      if (document.hidden) {
-        if (intervalRef.current) {
-          clearInterval(intervalRef.current);
-          intervalRef.current = undefined;
-        }
-      } else {
-        // Refresh immediately on return, then restart interval
-        load(true);
-        startInterval();
-      }
-    };
-
-    startInterval();
-    document.addEventListener("visibilitychange", handleVisibility);
-
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-      document.removeEventListener("visibilitychange", handleVisibility);
-    };
-  }, [refreshInterval, load]);
-
-  // Cleanup stale timer
-  useEffect(() => {
+    if (staleAfter > 0 && result) {
+      if (staleTimer.current) clearTimeout(staleTimer.current);
+      staleTimer.current = setTimeout(() => {}, staleAfter);
+    }
     return () => {
       if (staleTimer.current) clearTimeout(staleTimer.current);
     };
-  }, []);
+  }, [staleAfter, dataUpdatedAt]);
 
-  const resolvedState = forceState || state;
+  // Derive state
+  let resolvedState: DataState;
+  if (forceState) {
+    resolvedState = forceState;
+  } else if (isInitialLoading && !result) {
+    resolvedState = "loading";
+  } else if (queryError && !result) {
+    resolvedState = "error";
+  } else if (result) {
+    const isEmpty =
+      result.data === undefined ||
+      result.data === null ||
+      (Array.isArray(result.data) && result.data.length === 0);
+    resolvedState = isEmpty ? "empty" : "ready";
+  } else {
+    resolvedState = "empty";
+  }
+
+  const data = result?.data ?? null;
+  const source = result?.source ?? "fallback";
+  const lastUpdated = result?.timestamp ?? null;
+  const errorMsg = queryError instanceof Error ? queryError.message : queryError ? "Falha ao carregar dados" : null;
 
   return {
     state: resolvedState,
     data,
-    error,
-    refetch: () => { lastFetchRef.current = 0; load(false); },
+    error: errorMsg,
+    refetch: () => rqRefetch(),
     lastUpdated,
     source,
     isLoading: resolvedState === "loading",
@@ -176,4 +136,20 @@ export function useOrionData<T>({
     isError: resolvedState === "error",
     isStale: resolvedState === "stale",
   };
+}
+
+/** Prefetch a domain's data into the shared cache */
+export function prefetchOrionData<T>(
+  queryClient: ReturnType<typeof useQueryClient>,
+  key: string,
+  fetcher: DomainFetcher<T>,
+) {
+  queryClient.prefetchQuery({
+    queryKey: ["orion", key],
+    queryFn: async () => {
+      const result = await fetcher();
+      return { data: result.data as T, source: result.source, timestamp: result.timestamp };
+    },
+    staleTime: 30_000,
+  });
 }
