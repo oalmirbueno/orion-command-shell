@@ -5,6 +5,7 @@ import { OperationsKanban } from "@/components/operations/OperationsKanban";
 import { OperationsTimeline } from "@/components/operations/OperationsTimeline";
 import { useOrionData } from "@/hooks/useOrionData";
 import { fetchOperationsPage } from "@/domains/operations/fetcher";
+import { OperationsSkeleton } from "@/components/skeletons/DomainSkeletons";
 import type { OperationsPageData } from "@/domains/operations/types.page";
 
 const OperationsPage = () => {
