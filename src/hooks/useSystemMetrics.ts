@@ -7,6 +7,17 @@
 import { useQuery } from "@tanstack/react-query";
 import { apiUrl } from "@/domains/api";
 
+/** Per-subsystem health */
+export type SubsystemStatus = "online" | "offline" | "unknown";
+/** Global panel status derived from subsystems */
+export type PanelStatus = "live" | "partial" | "offline" | "stale";
+
+export interface SubsystemHealth {
+  backend: SubsystemStatus;
+  openclaw: SubsystemStatus;
+  stats: SubsystemStatus;
+}
+
 export interface SystemMetrics {
   cpu: number | null;
   ram: number | null;
@@ -17,12 +28,14 @@ export interface SystemMetrics {
   diskTotalGB: string | null;
   uptime: string | null;
   latencyMs: number | null;
-  backendOnline: boolean;
-  openclawOnline: boolean;
   activeServices: number | null;
   totalServices: number | null;
   hostname: string | null;
   platform: string | null;
+  /** Granular per-subsystem status */
+  health: SubsystemHealth;
+  /** Derived global status */
+  panelStatus: PanelStatus;
 }
 
 interface RawSystem {
