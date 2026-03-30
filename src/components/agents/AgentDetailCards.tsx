@@ -5,10 +5,10 @@ import { AgentDetailSheet } from "@/components/sheets/AgentDetailSheet";
 
 interface AgentDetailCardsProps { agents: AgentView[]; }
 
-const statusConfig: Record<AgentStatus, { label: string; dot: string; text: string; border: string; bg: string }> = {
-  active: { label: "Ativo", dot: "status-online", text: "text-status-online", border: "border-l-status-online", bg: "" },
-  idle: { label: "Ocioso", dot: "bg-muted-foreground/40", text: "text-muted-foreground", border: "border-l-muted-foreground/30", bg: "" },
-  offline: { label: "Offline", dot: "status-critical", text: "text-status-critical", border: "border-l-status-critical", bg: "bg-status-critical/[0.03]" },
+const statusConfig: Record<AgentStatus, { label: string; dotClass: string; text: string; border: string; bg: string; pulse: boolean }> = {
+  active: { label: "Ativo", dotClass: "bg-status-online", text: "text-status-online", border: "border-l-status-online", bg: "", pulse: true },
+  idle: { label: "Ocioso", dotClass: "bg-muted-foreground/40", text: "text-muted-foreground", border: "border-l-muted-foreground/30", bg: "", pulse: false },
+  offline: { label: "Offline", dotClass: "bg-status-critical", text: "text-status-critical", border: "border-l-status-critical", bg: "bg-status-critical/[0.03]", pulse: false },
 };
 
 const tierConfig: Record<AgentTier, { label: string; icon: React.ElementType; badgeClass: string; description: string }> = {
@@ -17,12 +17,33 @@ const tierConfig: Record<AgentTier, { label: string; icon: React.ElementType; ba
   support: { label: "Suporte", icon: Users, badgeClass: "orion-badge-neutral", description: "Infraestrutura e operações auxiliares" },
 };
 
+function LoadGauge({ value }: { value: number }) {
+  const color = value > 85 ? "text-status-critical" : value > 60 ? "text-status-warning" : "text-status-online";
+  const bgColor = value > 85 ? "bg-status-critical" : value > 60 ? "bg-status-warning" : "bg-status-online";
+  const radius = 16;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - (value / 100) * circumference;
+
+  return (
+    <div className="relative w-11 h-11 shrink-0">
+      <svg className="w-full h-full -rotate-90" viewBox="0 0 40 40">
+        <circle cx="20" cy="20" r={radius} fill="none" strokeWidth="3" className="stroke-muted/20" />
+        <circle cx="20" cy="20" r={radius} fill="none" strokeWidth="3" strokeLinecap="round"
+          className={`${bgColor.replace("bg-", "stroke-")} transition-all duration-700`}
+          strokeDasharray={circumference} strokeDashoffset={offset} />
+      </svg>
+      <span className={`absolute inset-0 flex items-center justify-center text-[10px] font-mono font-bold ${color}`}>
+        {value}
+      </span>
+    </div>
+  );
+}
+
 function AgentCard({ agent, onClick }: { agent: AgentView; onClick: () => void }) {
   const cfg = statusConfig[agent.status];
   const tier = tierConfig[agent.tier];
   const isOrch = agent.tier === "orchestrator";
   const isOffline = agent.status === "offline";
-  const loadColor = agent.load > 85 ? "bg-status-warning" : "bg-primary/60";
 
   return (
     <div onClick={onClick} className={`rounded-lg border border-border/40 border-l-[3px] ${cfg.border} ${cfg.bg} ${isOrch ? "bg-primary/[0.03] border-primary/25" : ""} ${isOffline ? "opacity-50" : ""} hover:bg-accent/20 transition-all cursor-pointer group`}>
@@ -35,7 +56,10 @@ function AgentCard({ agent, onClick }: { agent: AgentView; onClick: () => void }
             <div>
               <div className="flex items-center gap-2.5">
                 <h3 className={`text-sm font-semibold ${isOrch ? "text-primary" : "text-foreground"}`}>{agent.name}</h3>
-                <div className={`status-dot ${cfg.dot}`} />
+                <span className={`relative flex h-2.5 w-2.5`}>
+                  {cfg.pulse && <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${cfg.dotClass} opacity-40`} />}
+                  <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${cfg.dotClass}`} />
+                </span>
                 <span className={`text-xs font-mono uppercase ${cfg.text}`}>{cfg.label}</span>
               </div>
               <p className="text-xs text-muted-foreground/40 mt-0.5">{agent.role} · <span className="text-muted-foreground/30">{agent.model}</span></p>
@@ -51,11 +75,13 @@ function AgentCard({ agent, onClick }: { agent: AgentView; onClick: () => void }
             <span className={`orion-badge ${tier.badgeClass}`}>{tier.label}</span>
           </div>
         </div>
+
         <div className="flex items-start gap-3 mb-4 ml-[52px]">
           <Activity className="h-3.5 w-3.5 text-muted-foreground/25 shrink-0 mt-0.5" />
           <span className="text-xs text-foreground/55 leading-relaxed">{agent.currentTask}</span>
           <span className="text-[10px] font-mono text-muted-foreground/25 shrink-0 ml-auto">{agent.currentTaskAge}</span>
         </div>
+
         {(agent.dependsOn.length > 0 || agent.feeds.length > 0) && (
           <div className="flex items-center gap-4 mb-4 ml-[52px] flex-wrap">
             {agent.dependsOn.length > 0 && (
@@ -73,17 +99,31 @@ function AgentCard({ agent, onClick }: { agent: AgentView; onClick: () => void }
             )}
           </div>
         )}
-        <div className="flex items-center gap-4 pt-3 border-t border-border/15 ml-[52px] flex-wrap">
-          <div className="flex items-center gap-1.5"><Zap className="h-3.5 w-3.5 text-muted-foreground/20" /><span className="text-[10px] font-mono text-muted-foreground/35">Sessões</span><span className={`text-xs font-mono font-medium ${agent.sessions > 0 ? "text-foreground" : "text-muted-foreground/25"}`}>{agent.sessions}</span></div>
-          <div className="w-px h-3 bg-border/15" />
-          <div className="flex items-center gap-1.5"><span className="text-[10px] font-mono text-muted-foreground/35">Tokens</span><span className="text-xs font-mono text-foreground/70">{agent.tokensToday}</span></div>
-          <div className="w-px h-3 bg-border/15" />
-          <div className="flex items-center gap-1.5"><span className="text-[10px] font-mono text-muted-foreground/35">Disponib.</span><span className={`text-xs font-mono ${parseFloat(agent.availability) < 99 ? "text-status-warning" : "text-foreground/70"}`}>{agent.availability}</span></div>
+
+        {/* Metrics bar with load gauge */}
+        <div className="flex items-center gap-4 pt-3 border-t border-border/15 ml-[52px]">
           {agent.status !== "offline" && agent.load > 0 && (
-            <><div className="w-px h-3 bg-border/15" /><div className="flex items-center gap-2 flex-1 max-w-[120px]"><span className="text-[10px] font-mono text-muted-foreground/35">Carga</span><div className="flex-1 h-1.5 bg-surface-3 rounded-full overflow-hidden"><div className={`h-full rounded-full ${loadColor}`} style={{ width: `${agent.load}%` }} /></div><span className="text-[10px] font-mono text-muted-foreground/25">{agent.load}%</span></div></>
+            <LoadGauge value={Number(agent.load)} />
           )}
+          <div className="flex items-center gap-4 flex-wrap flex-1">
+            <MetricPill icon={Zap} label="Sessões" value={String(agent.sessions)} highlight={agent.sessions > 0} />
+            <MetricPill label="Tokens" value={String(agent.tokensToday)} />
+            <MetricPill label="Disponib." value={String(agent.availability)} warn={parseFloat(String(agent.availability)) < 99} />
+          </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+function MetricPill({ icon: Icon, label, value, highlight, warn }: {
+  icon?: React.ElementType; label: string; value: string; highlight?: boolean; warn?: boolean;
+}) {
+  return (
+    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-muted/15 border border-border/20">
+      {Icon && <Icon className="h-3 w-3 text-muted-foreground/25" />}
+      <span className="text-[10px] font-mono text-muted-foreground/40">{label}</span>
+      <span className={`text-xs font-mono font-medium ${warn ? "text-status-warning" : highlight ? "text-foreground" : "text-foreground/70"}`}>{value}</span>
     </div>
   );
 }
