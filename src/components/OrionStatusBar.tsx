@@ -1,5 +1,5 @@
 import { Cpu, HardDrive, MemoryStick, Clock, Activity, Server } from "lucide-react";
-import { useSystemMetrics, type SubsystemStatus, type PanelStatus } from "@/hooks/useSystemMetrics";
+import { useSystemMetrics, type SubsystemHealth, type SubsystemStatus, type PanelStatus } from "@/hooks/useSystemMetrics";
 import { useLastUpdated } from "@/hooks/useLastUpdated";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { format } from "date-fns";
@@ -94,8 +94,10 @@ export function OrionStatusBar() {
   const displayTime = updatedAt || lastUpdated;
   const timeStr = displayTime ? format(displayTime, "HH:mm:ss") : "—";
 
-  const panel = panelConfig[metrics.panelStatus];
-  const { health } = metrics;
+  const defaultHealth: SubsystemHealth = { backend: "unknown", openclaw: "unknown", stats: "unknown" };
+  const health = metrics?.health ?? defaultHealth;
+  const panelStatus = metrics?.panelStatus ?? "offline";
+  const panel = panelConfig[panelStatus];
 
   // Format values
   const cpuStr = metrics.cpu !== null ? `${Math.round(metrics.cpu)}%` : "—";
