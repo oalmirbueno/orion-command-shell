@@ -49,7 +49,7 @@ const OperationsPage = () => {
 
           {/* Seções complementares */}
           <div className="mt-8">
-            <OperationsSections sections={pageData.sections ?? defaultSections} />
+            <OperationsSections sections={pageData.sections ?? defaultSections} onTaskClick={handleTaskClick} />
           </div>
 
           {/* Timeline */}
