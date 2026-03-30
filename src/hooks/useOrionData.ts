@@ -7,7 +7,6 @@ import { useCallback, useRef, useEffect } from "react";
 import { useQuery, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import type { DataState, DataSource, DomainFetcher } from "@/domains/types";
 import { useLastUpdated } from "./useLastUpdated";
-import { useDomainHealthReporter } from "./useDomainHealth";
 
 export type { DataState, DataSource };
 
@@ -52,7 +51,6 @@ export function useOrionData<T>({
   const globalUpdated = useLastUpdated();
   const staleTimer = useRef<ReturnType<typeof setTimeout>>();
   const queryClient = useQueryClient();
-  const healthReporter = useDomainHealthReporter();
 
   const queryFn = useCallback(async (): Promise<FetcherResult<T>> => {
     const result = await fetcher();
@@ -83,23 +81,14 @@ export function useOrionData<T>({
     retry: 1,
   });
 
-  // Update global status bar timestamp + domain health
+  // Update global status bar timestamp
   useEffect(() => {
     if (result?.timestamp && result?.source) {
       try {
         globalUpdated.setLastUpdated(result.timestamp, result.source);
       } catch {}
-      healthReporter.reportSuccess(key, result.source);
     }
   }, [result?.timestamp, result?.source, key]);
-
-  // Report errors to domain health
-  useEffect(() => {
-    if (queryError && !result) {
-      const msg = queryError instanceof Error ? queryError.message : "Fetch failed";
-      healthReporter.reportError(key, msg);
-    }
-  }, [queryError, !result, key]);
 
   // Stale timer
   useEffect(() => {
