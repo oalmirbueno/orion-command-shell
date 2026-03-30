@@ -100,10 +100,10 @@ export function CronJobsList({ jobs }: Props) {
     // Optimistic update
     setLocalJobs(prev => prev.map(j => j.id === id ? { ...j, enabled } : j));
     try {
-      const res = await fetch(apiUrl("/cron"), {
-        method: "PUT",
+      const res = await fetch(apiUrl(`/cron/${id}`), {
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, enabled }),
+        body: JSON.stringify({ enabled }),
       });
       if (!res.ok) throw new Error();
       toast({ title: enabled ? "Cron job ativado" : "Cron job desativado" });
