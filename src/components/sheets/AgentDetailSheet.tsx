@@ -263,9 +263,9 @@ else { setLogs(filtered.map((a: any) => ({ ts: a.timestamp || "", level: a.statu
                 <div className="flex items-center gap-2 mt-1">
                   <Badge variant="outline" className={`text-[10px] font-mono px-2 py-0 ${badge.cls}`}>{badge.label}</Badge>
                   <Badge variant="outline" className="text-[10px] font-mono px-2 py-0 border-border/40 text-muted-foreground">{tier}</Badge>
-                  <Badge variant="outline" className={`text-[10px] font-mono px-1.5 py-0 ${profileSource === "live" ? "border-status-online/40 text-status-online" : "border-border/30 text-muted-foreground/40"}`}>
-                    <span className={`inline-block w-1.5 h-1.5 rounded-full mr-1 ${profileSource === "live" ? "bg-status-online" : "bg-muted-foreground/30"}`} />
-                    {profileSource === "live" ? "LIVE" : "OFFLINE"}
+                  <Badge variant="outline" className={`text-[10px] font-mono px-1.5 py-0 ${profileSource === "api" ? "border-status-online/40 text-status-online" : profileSource === "mission-control" ? "border-primary/40 text-primary" : "border-border/30 text-muted-foreground/40"}`}>
+                    <span className={`inline-block w-1.5 h-1.5 rounded-full mr-1 ${profileSource === "api" ? "bg-status-online" : profileSource === "mission-control" ? "bg-primary" : "bg-muted-foreground/30"}`} />
+                    {profileSource === "api" ? "API" : profileSource === "mission-control" ? "MISSION CONTROL" : "BOOTSTRAP"}
                   </Badge>
                 </div>
               </div>
