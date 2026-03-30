@@ -69,6 +69,8 @@ export function AgentDetailSheet({ agent, open, onOpenChange }: Props) {
   const [saving, setSaving] = useState(false);
   const [copiedId, setCopiedId] = useState(false);
   const [newTopicId, setNewTopicId] = useState("");
+  const [saveStatus, setSaveStatus] = useState<"idle" | "persisted" | "unconfirmed" | "error">("idle");
+  const [saveError, setSaveError] = useState("");
   const [controls, setControls] = useState({
     displayName: "", shortDesc: "", role: "", notes: "",
     scopeType: "global" as AgentScopeType,
