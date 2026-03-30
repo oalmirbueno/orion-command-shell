@@ -1,11 +1,14 @@
 import { useState } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
   Bot, Cpu, Zap, Activity, Clock, Layers, ArrowDownRight,
-  ArrowUpRight, AlertTriangle, Briefcase,
+  ArrowUpRight, AlertTriangle, Briefcase, RotateCcw, Loader2,
 } from "lucide-react";
+import { apiUrl } from "@/domains/api";
+import { toast } from "@/hooks/use-toast";
 import type { AgentView } from "@/domains/agents/types";
 
 const statusBadge: Record<string, { label: string; className: string }> = {
@@ -27,7 +30,25 @@ interface Props {
 }
 
 export function AgentDetailSheet({ agent, open, onOpenChange }: Props) {
+  const [restarting, setRestarting] = useState(false);
+
   if (!agent) return null;
+
+  const handleRestart = async () => {
+    setRestarting(true);
+    try {
+      const res = await fetch(apiUrl(`/agents/${agent.id}/restart`), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      toast({ title: `"${agent.name}" reiniciado com sucesso` });
+    } catch {
+      toast({ title: "Erro ao reiniciar agente", variant: "destructive" });
+    } finally {
+      setRestarting(false);
+    }
+  };
 
   const badge = statusBadge[agent.status] || statusBadge.idle;
   const tier = tierLabel[agent.tier] || agent.tier;
@@ -133,6 +154,22 @@ export function AgentDetailSheet({ agent, open, onOpenChange }: Props) {
               </Section>
             </>
           )}
+
+          <Separator className="bg-border/30" />
+
+          <Button
+            onClick={handleRestart}
+            disabled={restarting || agent.status === "offline"}
+            className="w-full"
+            variant="outline"
+          >
+            {restarting ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <RotateCcw className="h-4 w-4 mr-2" />
+            )}
+            {restarting ? "Reiniciando…" : "Reiniciar agente"}
+          </Button>
         </div>
       </SheetContent>
     </Sheet>
