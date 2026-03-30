@@ -154,6 +154,22 @@ export function AgentDetailSheet({ agent, open, onOpenChange }: Props) {
               </Section>
             </>
           )}
+
+          <Separator className="bg-border/30" />
+
+          <Button
+            onClick={handleRestart}
+            disabled={restarting || agent.status === "offline"}
+            className="w-full"
+            variant="outline"
+          >
+            {restarting ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <RotateCcw className="h-4 w-4 mr-2" />
+            )}
+            {restarting ? "Reiniciando…" : "Reiniciar agente"}
+          </Button>
         </div>
       </SheetContent>
     </Sheet>
