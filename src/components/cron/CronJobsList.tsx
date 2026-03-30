@@ -165,7 +165,7 @@ export function CronJobsList({ jobs, refetchList }: Props) {
         <div className="flex-1 h-px bg-border/40" />
         <span className="text-xs font-mono text-muted-foreground/40">{localJobs.length} total</span>
       </div>
-      <div className="space-y-2.5">
+      <div className="space-y-2.5 max-h-[calc(100vh-280px)] overflow-y-auto orion-thin-scroll pr-1">
         {sorted.map((job) => (
           <JobRow key={job.id} job={job} onClick={() => setSelected(job)} onToggle={(enabled) => handleToggle(job.id, enabled)} isToggling={togglingIds.has(job.id)} />
         ))}

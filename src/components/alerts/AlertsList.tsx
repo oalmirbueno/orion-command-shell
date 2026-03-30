@@ -122,7 +122,7 @@ export function AlertsList({ alerts }: Props) {
         <span className="text-xs font-mono text-muted-foreground/40">{alerts.length} total</span>
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-6 max-h-[calc(100vh-280px)] overflow-y-auto orion-thin-scroll pr-1">
         {groups.map((group) => {
           const cfg = severityConfig[group.severity];
           return (

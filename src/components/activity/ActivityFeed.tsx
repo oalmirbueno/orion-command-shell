@@ -112,7 +112,7 @@ export function ActivityFeed({ events }: ActivityFeedProps) {
         </div>
         <div className="flex-1 h-px bg-border/40" />
       </div>
-      <div className="space-y-6">
+      <div className="space-y-6 max-h-[calc(100vh-280px)] overflow-y-auto orion-thin-scroll pr-1">
         {blocks.map((block) => (
           <div key={block.label}>
             <div className="flex items-center gap-2.5 mb-3">

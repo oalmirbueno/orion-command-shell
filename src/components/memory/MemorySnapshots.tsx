@@ -115,7 +115,7 @@ export function MemorySnapshots({ snapshots }: MemorySnapshotsProps) {
           })}
         </div>
       </div>
-      <div className="space-y-2.5">
+      <div className="space-y-2.5 max-h-[calc(100vh-340px)] overflow-y-auto orion-thin-scroll pr-1">
         {filtered.map((snapshot) => <SnapshotCard key={snapshot.id} snapshot={snapshot} onClick={() => setSelected(snapshot)} />)}
         {filtered.length === 0 && (
           <div className="flex flex-col items-center justify-center py-12 text-center">
