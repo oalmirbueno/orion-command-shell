@@ -205,17 +205,52 @@ else { setLogs(filtered.map((a: any) => ({ ts: a.timestamp || "", level: a.statu
 
   const handleSave = async () => {
     setSaving(true);
+    setSaveStatus("idle");
+    setSaveError("");
     try {
       const payload = { ...controls };
-      const res = await fetch(apiUrl(`/agents/${agent.id}`), { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+      let res: Response;
+      try {
+        res = await fetch(apiUrl(`/agents/${agent.id}`), { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+      } catch {
+        setSaveStatus("error");
+        setSaveError("Backend inacessível — verifique se a API está online");
+        toast({ title: "Backend inacessível", description: "Não foi possível conectar ao servidor", variant: "destructive" });
+        return;
+      }
+
+      if (res.status === 404) {
+        setSaveStatus("error");
+        setSaveError(`PUT /api/agents/${agent.id} não existe no backend`);
+        toast({ title: "Rota de save não encontrada", description: `O backend não suporta PUT /api/agents/${agent.id}`, variant: "destructive" });
+        return;
+      }
+      if (res.status === 405) {
+        setSaveStatus("error");
+        setSaveError("Método PUT não permitido nesta rota");
+        toast({ title: "Método não permitido", description: "O backend não aceita PUT nesta rota", variant: "destructive" });
+        return;
+      }
       if (!res.ok) {
         const errText = await res.text().catch(() => res.statusText);
+        setSaveStatus("error");
+        setSaveError(`HTTP ${res.status}: ${errText}`);
         throw new Error(errText || `HTTP ${res.status}`);
       }
 
       // Refetch to verify persistence
-      const verifyRes = await fetch(apiUrl(`/agents/${agent.id}`));
+      let verifyRes: Response;
+      try {
+        verifyRes = await fetch(apiUrl(`/agents/${agent.id}`));
+      } catch {
+        setSaveStatus("unconfirmed");
+        toast({ title: "Configuração enviada, mas não confirmada pelo backend", description: "Não foi possível verificar a persistência.", variant: "destructive" });
+        setEditing(false);
+        return;
+      }
+
       if (!verifyRes.ok) {
+        setSaveStatus("unconfirmed");
         toast({ title: "Configuração enviada, mas não confirmada pelo backend", description: "O backend não retornou os dados atualizados.", variant: "destructive" });
         setEditing(false);
         return;
@@ -231,10 +266,11 @@ else { setLogs(filtered.map((a: any) => ({ ts: a.timestamp || "", level: a.statu
       if (payload.groupEnabled !== undefined && returned.groupEnabled !== undefined && returned.groupEnabled !== payload.groupEnabled) mismatches.push("grupo");
 
       if (mismatches.length > 0) {
+        setSaveStatus("unconfirmed");
         toast({ title: "Configuração enviada, mas não confirmada pelo backend", description: `Campos divergentes: ${mismatches.join(", ")}`, variant: "destructive" });
       } else {
+        setSaveStatus("persisted");
         toast({ title: "Configurações salvas e confirmadas" });
-        // Update local state with returned data
         setControls(c => ({
           ...c,
           displayName: returned.displayName ?? returned.name ?? c.displayName,
@@ -251,6 +287,7 @@ else { setLogs(filtered.map((a: any) => ({ ts: a.timestamp || "", level: a.statu
       }
       setEditing(false);
     } catch (err: any) {
+      if (saveStatus === "idle") setSaveStatus("error");
       toast({ title: "Erro ao salvar", description: err?.message || "Falha na comunicação com o backend", variant: "destructive" });
     } finally { setSaving(false); }
   };
