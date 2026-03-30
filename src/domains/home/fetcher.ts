@@ -157,6 +157,32 @@ export const fetchHomePage: DomainFetcher<HomePageData> = async (): Promise<Doma
   const aggregated = await fetchHomeAggregated();
 
   if (aggregated.source === "api" && isCompleteHome(aggregated.data)) {
+    // Normalizar systemState
+    if ((aggregated.data.command?.systemState as string) === "attention") {
+      aggregated.data.command.systemState = "degraded";
+    }
+
+    // Normalizar attention items
+    if (aggregated.data.attention) {
+      aggregated.data.attention = aggregated.data.attention.map((item: any) => ({
+        id: item.id,
+        priority: item.priority || (item.level === "critical" ? "critical" : item.level === "warning" ? "warning" : "info"),
+        title: item.title,
+        context: item.context || item.description || "",
+        timestamp: item.timestamp,
+      }));
+    }
+
+    // Normalizar health items
+    if (aggregated.data.health) {
+      aggregated.data.health = aggregated.data.health.map((item: any) => ({
+        name: item.name,
+        status: item.status === "healthy" ? "healthy" : item.status === "warning" ? "degraded" : item.status === "critical" ? "down" : item.status,
+        responseTime: item.value || item.responseTime || "—",
+        uptime: item.detail || item.uptime || "—",
+      }));
+    }
+
     return aggregated;
   }
 
