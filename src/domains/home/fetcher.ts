@@ -158,7 +158,7 @@ export const fetchHomePage: DomainFetcher<HomePageData> = async (): Promise<Doma
 
   if (aggregated.source === "api" && isCompleteHome(aggregated.data)) {
     // Normalizar systemState
-    if (aggregated.data.command?.systemState === "attention") {
+    if ((aggregated.data.command?.systemState as string) === "attention") {
       aggregated.data.command.systemState = "degraded";
     }
 
