@@ -5,6 +5,7 @@ import { AlertsSummary } from "@/components/alerts/AlertsSummary";
 import { AlertsList } from "@/components/alerts/AlertsList";
 import { useOrionData } from "@/hooks/useOrionData";
 import { fetchAlertsPage } from "@/domains/alerts/fetcher";
+import { AlertsSkeleton } from "@/components/skeletons/DomainSkeletons";
 import type { AlertsPageData } from "@/domains/alerts/types";
 
 const AlertsPage = () => {
