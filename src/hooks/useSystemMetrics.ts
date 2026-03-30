@@ -96,7 +96,8 @@ async function fetchMetrics(): Promise<{ metrics: SystemMetrics; latencyMs: numb
       fetch(apiUrl("/system/stats"), { signal: statsController.signal, headers: { accept: "application/json" } }),
     ]);
 
-    clearTimeout(timeout);
+    clearTimeout(sysTimeout);
+    clearTimeout(statsTimeout);
     const latencyMs = Math.round(performance.now() - start);
 
     let sys: RawSystem | null = null;
