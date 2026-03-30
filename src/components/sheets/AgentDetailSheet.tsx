@@ -58,7 +58,7 @@ export function AgentDetailSheet({ agent, open, onOpenChange }: Props) {
 
   // Fetch task history from activities
   useEffect(() => {
-    if (!open || !agent) { setTaskHistory([]); return; }
+    if (!open || !agent) { setTaskHistory([]); setTaskVisible(5); return; }
     let cancelled = false;
     const fetchHistory = async () => {
       setTaskHistoryLoading(true);
