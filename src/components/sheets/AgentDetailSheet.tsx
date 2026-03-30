@@ -98,12 +98,21 @@ export function AgentDetailSheet({ agent, open, onOpenChange }: Props) {
       .then(d => {
         if (cancelled) return;
         const p: AgentProfile = {
+          id: d.id || agent.id,
+          name: d.name || agent.name,
+          role: d.role || agent.role,
+          description: d.description || "",
           personality: d.personality || d.soul?.personality || "",
           objective: d.objective || d.soul?.objective || d.purpose || "",
           scope: d.scope || d.soul?.scope || "",
           behavior: d.behavior || d.soul?.behavior || "",
           soul: d.soul?.summary || d.soulSummary || d.identity || "",
           instructions: d.instructions || d.soul?.instructions || d.systemPrompt || "",
+          operationalStatus: d.operationalStatus || undefined,
+          scopeType: d.scopeType || undefined,
+          topicIds: d.topicIds || undefined,
+          dmEnabled: d.dmEnabled,
+          groupEnabled: d.groupEnabled,
         };
         setProfile(p);
         setProfileSource(Object.values(p).some(v => v) ? "live" : "fallback");
