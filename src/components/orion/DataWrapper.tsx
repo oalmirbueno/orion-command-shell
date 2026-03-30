@@ -59,6 +59,7 @@ export function OrionDataWrapper({
   emptyIcon,
   errorTitle,
   errorDescription,
+  skeleton,
 }: OrionDataWrapperProps) {
   return (
     <div className={cn("relative", className)}>
