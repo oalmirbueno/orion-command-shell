@@ -636,3 +636,50 @@ function ProfileBlock({ icon: Icon, label, value }: { icon?: React.ElementType; 
     </div>
   );
 }
+
+function ControlRow({ label, value, sub }: { label: string; value: string; sub?: string }) {
+  return (
+    <div className="flex items-center gap-3">
+      <span className="text-xs text-muted-foreground/50 w-28 shrink-0">{label}</span>
+      <span className="text-sm text-foreground/80 truncate">{value}</span>
+      {sub && <span className="text-[10px] font-mono text-muted-foreground/30">({sub})</span>}
+    </div>
+  );
+}
+
+function EditField({ label, value, onChange, textarea }: { label: string; value: string; onChange: (v: string) => void; textarea?: boolean }) {
+  return (
+    <div>
+      <p className="text-[10px] font-mono text-muted-foreground/40 mb-1">{label}</p>
+      {textarea ? (
+        <textarea
+          value={value}
+          onChange={e => onChange(e.target.value)}
+          rows={2}
+          className="w-full px-3 py-1.5 rounded-md border border-border/40 bg-muted/10 text-xs text-foreground/80 placeholder:text-muted-foreground/25 focus:outline-none focus:border-primary/40 resize-none"
+        />
+      ) : (
+        <input
+          value={value}
+          onChange={e => onChange(e.target.value)}
+          className="w-full px-3 py-1.5 rounded-md border border-border/40 bg-muted/10 text-xs text-foreground/80 placeholder:text-muted-foreground/25 focus:outline-none focus:border-primary/40"
+        />
+      )}
+    </div>
+  );
+}
+
+function ChipSelect({ selected, onClick, children, activeClass }: { selected: boolean; onClick: () => void; children: React.ReactNode; activeClass?: string }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`px-2.5 py-1 rounded-md text-[10px] font-mono border transition-colors cursor-pointer ${
+        selected
+          ? activeClass || "bg-primary/15 text-primary border-primary/30"
+          : "bg-muted/10 text-muted-foreground/50 border-border/30 hover:bg-muted/20"
+      }`}
+    >
+      {children}
+    </button>
+  );
+}
