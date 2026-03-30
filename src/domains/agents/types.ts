@@ -47,6 +47,31 @@ export interface AgentNode {
 
 export type AgentStatus = "active" | "idle" | "offline";
 
+export type AgentOperationalStatus = "active" | "paused" | "readonly";
+export type AgentScopeType = "global" | "dm" | "topic" | "mixed";
+
+/**
+ * GET /api/agents/:id — perfil/configuração completa do agente.
+ * Shape canônico para leitura e escrita (PUT /api/agents/:id).
+ */
+export interface AgentProfile {
+  id: string;
+  name: string;
+  role: string;
+  description?: string;
+  soul?: string;
+  objective?: string;
+  personality?: string;
+  scope?: string;
+  behavior?: string;
+  instructions?: string;
+  operationalStatus?: AgentOperationalStatus;
+  scopeType?: AgentScopeType;
+  topicIds?: string[];
+  dmEnabled?: boolean;
+  groupEnabled?: boolean;
+}
+
 export interface AgentView {
   id: string;
   name: string;

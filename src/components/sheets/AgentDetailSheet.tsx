@@ -13,12 +13,11 @@ import {
 } from "lucide-react";
 import { apiUrl } from "@/domains/api";
 import { toast } from "@/hooks/use-toast";
-import type { AgentView } from "@/domains/agents/types";
+import type { AgentView, AgentProfile, AgentOperationalStatus, AgentScopeType } from "@/domains/agents/types";
 
 // ── Types ────────────────────────────────────────────
 interface LogEntry { ts: string; level: string; message: string }
 interface TaskHistoryEntry { id: string; description: string; status: string; timestamp: string; duration?: string }
-interface AgentProfile { personality: string; objective: string; scope: string; behavior: string; soul: string; instructions: string }
 
 // ── Constants ────────────────────────────────────────
 const statusBadge: Record<string, { label: string; cls: string }> = {
@@ -72,10 +71,10 @@ export function AgentDetailSheet({ agent, open, onOpenChange }: Props) {
   const [newTopicId, setNewTopicId] = useState("");
   const [controls, setControls] = useState({
     displayName: "", shortDesc: "", role: "", notes: "",
-    scopeType: "global" as "global" | "dm" | "topic" | "mixed",
+    scopeType: "global" as AgentScopeType,
     topicIds: [] as string[],
     dmEnabled: true, groupEnabled: true,
-    opStatus: "ativo" as "ativo" | "pausado" | "somente_leitura",
+    opStatus: "active" as AgentOperationalStatus,
   });
 
   // ── Reset on open ──
@@ -99,12 +98,21 @@ export function AgentDetailSheet({ agent, open, onOpenChange }: Props) {
       .then(d => {
         if (cancelled) return;
         const p: AgentProfile = {
+          id: d.id || agent.id,
+          name: d.name || agent.name,
+          role: d.role || agent.role,
+          description: d.description || "",
           personality: d.personality || d.soul?.personality || "",
           objective: d.objective || d.soul?.objective || d.purpose || "",
           scope: d.scope || d.soul?.scope || "",
           behavior: d.behavior || d.soul?.behavior || "",
           soul: d.soul?.summary || d.soulSummary || d.identity || "",
           instructions: d.instructions || d.soul?.instructions || d.systemPrompt || "",
+          operationalStatus: d.operationalStatus || undefined,
+          scopeType: d.scopeType || undefined,
+          topicIds: d.topicIds || undefined,
+          dmEnabled: d.dmEnabled,
+          groupEnabled: d.groupEnabled,
         };
         setProfile(p);
         setProfileSource(Object.values(p).some(v => v) ? "live" : "fallback");
@@ -456,7 +464,7 @@ else { setLogs(filtered.map((a: any) => ({ ts: a.timestamp || "", level: a.statu
                     <div>
                       <p className="text-[10px] font-mono text-muted-foreground/40 mb-1.5">Status operacional</p>
                       <div className="flex gap-1.5">
-                        {([["ativo", "Ativo", "bg-status-online/15 text-status-online border-status-online/30"], ["pausado", "Pausado", "bg-status-warning/15 text-status-warning border-status-warning/30"], ["somente_leitura", "Somente leitura", "bg-muted text-muted-foreground border-border/40"]] as const).map(([val, lbl, cls]) => (
+                        {([["active", "Ativo", "bg-status-online/15 text-status-online border-status-online/30"], ["paused", "Pausado", "bg-status-warning/15 text-status-warning border-status-warning/30"], ["readonly", "Somente leitura", "bg-muted text-muted-foreground border-border/40"]] as const).map(([val, lbl, cls]) => (
                           <Chip key={val} selected={controls.opStatus === val} onClick={() => setControls(c => ({ ...c, opStatus: val }))} activeClass={cls}>{lbl}</Chip>
                         ))}
                       </div>
