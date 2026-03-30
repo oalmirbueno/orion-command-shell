@@ -36,6 +36,7 @@ export function AgentDetailSheet({ agent, open, onOpenChange }: Props) {
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [logsLoading, setLogsLoading] = useState(false);
   const [logsError, setLogsError] = useState(false);
+  const [logFilter, setLogFilter] = useState<"all" | "info" | "warn" | "error">("all");
   const logsEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -200,6 +201,24 @@ export function AgentDetailSheet({ agent, open, onOpenChange }: Props) {
 
           {/* Logs */}
           <Section icon={Terminal} title="Logs recentes">
+            {/* Filter chips */}
+            <div className="flex gap-1.5 ml-5 mb-2">
+              {(["all", "info", "warn", "error"] as const).map(level => (
+                <button
+                  key={level}
+                  onClick={() => setLogFilter(level)}
+                  className={`px-2 py-0.5 rounded text-[10px] font-mono uppercase transition-colors cursor-pointer ${
+                    logFilter === level
+                      ? level === "error" ? "bg-status-critical/20 text-status-critical"
+                        : level === "warn" ? "bg-status-warning/20 text-status-warning"
+                        : "bg-primary/20 text-primary"
+                      : "bg-muted/20 text-muted-foreground/50 hover:bg-muted/40"
+                  }`}
+                >
+                  {level === "all" ? "Todos" : level}
+                </button>
+              ))}
+            </div>
             {logsLoading && logs.length === 0 ? (
               <div className="space-y-2 ml-5">
                 {[1,2,3].map(i => <div key={i} className="h-4 w-full rounded bg-muted/30 animate-pulse" />)}
@@ -208,24 +227,29 @@ export function AgentDetailSheet({ agent, open, onOpenChange }: Props) {
               <p className="text-xs text-muted-foreground/40 italic ml-5">Erro ao carregar logs</p>
             ) : logs.length === 0 ? (
               <p className="text-xs text-muted-foreground/40 italic ml-5">Nenhum log disponível</p>
-            ) : (
-              <div className="ml-5 max-h-48 overflow-y-auto rounded-lg border border-border/30 bg-muted/10 p-3 space-y-1.5 scrollbar-thin">
-                {logs.map((log, i) => (
-                  <div key={i} className="flex gap-2 text-[11px] font-mono leading-relaxed">
-                    <span className="text-muted-foreground/30 shrink-0 w-16 truncate">
-                      {log.ts ? new Date(log.ts).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" }) : "—"}
-                    </span>
-                    <span className={`shrink-0 w-10 uppercase ${
-                      log.level === "error" ? "text-status-critical" :
-                      log.level === "warn" ? "text-status-warning" :
-                      "text-muted-foreground/50"
-                    }`}>{log.level}</span>
-                    <span className="text-foreground/70 break-all">{log.message}</span>
-                  </div>
-                ))}
-                <div ref={logsEndRef} />
-              </div>
-            )}
+            ) : (() => {
+              const filtered = logFilter === "all" ? logs : logs.filter(l => l.level === logFilter);
+              return filtered.length === 0 ? (
+                <p className="text-xs text-muted-foreground/40 italic ml-5">Nenhum log "{logFilter}"</p>
+              ) : (
+                <div className="ml-5 max-h-48 overflow-y-auto rounded-lg border border-border/30 bg-muted/10 p-3 space-y-1.5 scrollbar-thin">
+                  {filtered.map((log, i) => (
+                    <div key={i} className="flex gap-2 text-[11px] font-mono leading-relaxed">
+                      <span className="text-muted-foreground/30 shrink-0 w-16 truncate">
+                        {log.ts ? new Date(log.ts).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" }) : "—"}
+                      </span>
+                      <span className={`shrink-0 w-10 uppercase ${
+                        log.level === "error" ? "text-status-critical" :
+                        log.level === "warn" ? "text-status-warning" :
+                        "text-muted-foreground/50"
+                      }`}>{log.level}</span>
+                      <span className="text-foreground/70 break-all">{log.message}</span>
+                    </div>
+                  ))}
+                  <div ref={logsEndRef} />
+                </div>
+              );
+            })()}
           </Section>
 
           <Separator className="bg-border/30" />
