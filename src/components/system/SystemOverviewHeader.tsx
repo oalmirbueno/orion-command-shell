@@ -27,6 +27,7 @@ interface Props {
 }
 
 export function SystemOverviewHeader({ header }: Props) {
+  if (!header) return null;
   const cfg = statusConfig[header.overallStatus];
   const Icon = cfg.icon;
   const isEmpty = header.host === "—";
