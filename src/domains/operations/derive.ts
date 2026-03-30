@@ -237,10 +237,10 @@ export interface DerivedOperations {
 
 export async function deriveOperationsFromDomains(): Promise<DerivedOperations> {
   const [sessions, cronJobs, activities, agents] = await Promise.all([
-    safeFetch<Session[]>("/sessions", []),
-    safeFetch<CronJobInfo[]>("/cron", []),
-    safeFetch<ActivityInfo[]>("/activities", []),
-    safeFetch<AgentInfo[]>("/agents", []),
+    safeFetch<Session[]>("/sessions", [], ["sessions", "items"]),
+    safeFetch<CronJobInfo[]>("/cron", [], ["jobs", "items", "cron"]),
+    safeFetch<ActivityInfo[]>("/activities", [], ["activities", "events", "items"]),
+    safeFetch<AgentInfo[]>("/agents", [], ["agents", "items"]),
   ]);
 
   const fromSessions = deriveFromSessions(sessions);
