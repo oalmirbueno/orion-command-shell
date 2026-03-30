@@ -418,3 +418,15 @@ function MetricCard({ label, value }: { label: string; value: string }) {
     </div>
   );
 }
+
+function ProfileBlock({ icon: Icon, label, value }: { icon?: React.ElementType; label: string; value: string }) {
+  return (
+    <div>
+      <div className="flex items-center gap-1.5 mb-1">
+        {Icon && <Icon className="h-3 w-3 text-muted-foreground/30" />}
+        <p className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground/40">{label}</p>
+      </div>
+      <p className="text-xs text-foreground/65 leading-relaxed">{value}</p>
+    </div>
+  );
+}
