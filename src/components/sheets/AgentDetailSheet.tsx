@@ -56,11 +56,13 @@ export function AgentDetailSheet({ agent, open, onOpenChange }: Props) {
   const [logsLoading, setLogsLoading] = useState(false);
   const [logsError, setLogsError] = useState(false);
   const [logFilter, setLogFilter] = useState<"all" | "info" | "warn" | "error">("all");
+  const [logsSource, setLogsSource] = useState<"live" | "fallback">("fallback");
   const logsEndRef = useRef<HTMLDivElement>(null);
 
   // ── Task history ──
   const [taskHistory, setTaskHistory] = useState<TaskHistoryEntry[]>([]);
   const [taskHistoryLoading, setTaskHistoryLoading] = useState(false);
+  const [taskHistorySource, setTaskHistorySource] = useState<"live" | "fallback">("fallback");
   const [taskVisible, setTaskVisible] = useState(5);
 
   // ── Config controls ──
@@ -130,13 +132,13 @@ export function AgentDetailSheet({ agent, open, onOpenChange }: Props) {
           if (!cancelled) {
             const filtered = all.filter((a: any) => a.agent === agent.name || a.agent === agent.id || a.agentId === agent.id).slice(0, 50);
             if (filtered.length === 0) { unavailable = true; setLogs([]); }
-            else setLogs(filtered.map((a: any) => ({ ts: a.timestamp || "", level: a.status === "error" ? "error" : a.status === "warning" ? "warn" : "info", message: a.description || a.message || String(a) })));
+else { setLogs(filtered.map((a: any) => ({ ts: a.timestamp || "", level: a.status === "error" ? "error" : a.status === "warning" ? "warn" : "info", message: a.description || a.message || String(a) }))); setLogsSource("fallback"); }
           }
           return;
         }
         if (!res.ok) throw new Error();
         const data = await res.json();
-        if (!cancelled) setLogs((data.logs || data || []).map((l: any) => ({ ts: l.timestamp || l.ts || "", level: l.level || "info", message: l.message || l.msg || String(l) })));
+        if (!cancelled) { setLogs((data.logs || data || []).map((l: any) => ({ ts: l.timestamp || l.ts || "", level: l.level || "info", message: l.message || l.msg || String(l) }))); setLogsSource("live"); }
       } catch { if (!cancelled) setLogsError(true); }
       finally { if (!cancelled) setLogsLoading(false); }
     };
@@ -157,7 +159,9 @@ export function AgentDetailSheet({ agent, open, onOpenChange }: Props) {
       .then(data => {
         if (cancelled) return;
         const all = data.activities || data || [];
-        setTaskHistory(all.filter((a: any) => a.agent === agent.name || a.agent === agent.id || a.agentId === agent.id).map((a: any) => ({ id: a.id || crypto.randomUUID(), description: a.description || a.message || "", status: a.status || "success", timestamp: a.timestamp || "", duration: a.duration_ms ? `${(a.duration_ms / 1000).toFixed(1)}s` : undefined })));
+        const filtered = all.filter((a: any) => a.agent === agent.name || a.agent === agent.id || a.agentId === agent.id).map((a: any) => ({ id: a.id || crypto.randomUUID(), description: a.description || a.message || "", status: a.status || "success", timestamp: a.timestamp || "", duration: a.duration_ms ? `${(a.duration_ms / 1000).toFixed(1)}s` : undefined }));
+        setTaskHistory(filtered);
+        setTaskHistorySource(filtered.length > 0 ? "live" : "fallback");
       })
       .catch(() => {})
       .finally(() => { if (!cancelled) setTaskHistoryLoading(false); });
@@ -341,7 +345,7 @@ export function AgentDetailSheet({ agent, open, onOpenChange }: Props) {
 
           {/* ═══════ TAB: Configuração ═══════ */}
           <TabsContent value="config" className="px-6 py-5 space-y-5 mt-0">
-            <Sec icon={Settings2} title="Controle Operacional">
+            <Sec icon={Settings2} title="Controle Operacional" badge={profileSource}>
               <div className="ml-5 space-y-3">
                 {!editing ? (
                   <>
@@ -432,7 +436,7 @@ export function AgentDetailSheet({ agent, open, onOpenChange }: Props) {
 
           {/* ═══════ TAB: Operação ═══════ */}
           <TabsContent value="operation" className="px-6 py-5 space-y-5 mt-0">
-            <Sec icon={Activity} title="Atividade Atual">
+            <Sec icon={Activity} title="Atividade Atual" badge={taskHistorySource}>
               <InfoRow label="Sessões ativas" value={String(agent.sessions)} />
               <InfoRow label="Última atividade" value={agent.lastActivityLabel || agent.lastActivity} />
             </Sec>
@@ -452,7 +456,7 @@ export function AgentDetailSheet({ agent, open, onOpenChange }: Props) {
 
             <Separator className="bg-border/30" />
 
-            <Sec icon={ListChecks} title={`Histórico${taskHistory.length > 0 ? ` (${taskHistory.length})` : ""}`}>
+            <Sec icon={ListChecks} title={`Histórico${taskHistory.length > 0 ? ` (${taskHistory.length})` : ""}`} badge={taskHistorySource}>
               {taskHistoryLoading ? (
                 <div className="space-y-2 ml-5">{[1,2,3].map(i => <div key={i} className="h-8 rounded bg-muted/30 animate-pulse" />)}</div>
               ) : taskHistory.length === 0 ? (
