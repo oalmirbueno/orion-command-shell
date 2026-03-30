@@ -107,7 +107,7 @@ function TaskCard({ task, onClick }: { task: OperationTask; onClick?: () => void
 
 /* ── Kanban Column ── */
 
-function KanbanColumn({ column, tasks }: { column: ColumnDef; tasks: OperationTask[] }) {
+function KanbanColumn({ column, tasks, onTaskClick }: { column: ColumnDef; tasks: OperationTask[]; onTaskClick?: (task: OperationTask) => void }) {
   const Icon = column.icon;
   return (
     <div className="flex flex-col min-w-0">
