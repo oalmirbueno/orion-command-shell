@@ -159,7 +159,9 @@ export function AgentDetailSheet({ agent, open, onOpenChange }: Props) {
       .then(data => {
         if (cancelled) return;
         const all = data.activities || data || [];
-        setTaskHistory(all.filter((a: any) => a.agent === agent.name || a.agent === agent.id || a.agentId === agent.id).map((a: any) => ({ id: a.id || crypto.randomUUID(), description: a.description || a.message || "", status: a.status || "success", timestamp: a.timestamp || "", duration: a.duration_ms ? `${(a.duration_ms / 1000).toFixed(1)}s` : undefined })));
+        const filtered = all.filter((a: any) => a.agent === agent.name || a.agent === agent.id || a.agentId === agent.id).map((a: any) => ({ id: a.id || crypto.randomUUID(), description: a.description || a.message || "", status: a.status || "success", timestamp: a.timestamp || "", duration: a.duration_ms ? `${(a.duration_ms / 1000).toFixed(1)}s` : undefined }));
+        setTaskHistory(filtered);
+        setTaskHistorySource(filtered.length > 0 ? "live" : "fallback");
       })
       .catch(() => {})
       .finally(() => { if (!cancelled) setTaskHistoryLoading(false); });
