@@ -4,7 +4,7 @@ import { OrionBreadcrumb } from "@/components/orion";
 import {
   Search, Brain, Activity, Bot, FileText,
   Clock, ChevronRight, Inbox, AlertTriangle, Loader2,
-  RefreshCw, Tag,
+  RefreshCw, Tag, X, History,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { apiUrl } from "@/domains/api";
