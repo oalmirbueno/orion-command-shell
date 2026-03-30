@@ -180,7 +180,7 @@ function emptyMetrics(): SystemMetrics {
     uptime: null, latencyMs: null,
     activeServices: null, totalServices: null, hostname: null, platform: null,
     health: { backend: "unknown", openclaw: "unknown", stats: "unknown" },
-    panelStatus: "offline",
+    panelStatus: "stale",
   };
 }
 

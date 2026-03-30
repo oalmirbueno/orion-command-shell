@@ -96,7 +96,7 @@ export function OrionStatusBar() {
 
   const defaultHealth: SubsystemHealth = { backend: "unknown", openclaw: "unknown", stats: "unknown" };
   const health = metrics?.health ?? defaultHealth;
-  const panelStatus = metrics?.panelStatus ?? "offline";
+  const panelStatus = metrics?.panelStatus ?? "stale";
   const panel = panelConfig[panelStatus];
 
   // Format values
