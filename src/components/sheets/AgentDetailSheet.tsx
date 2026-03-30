@@ -94,8 +94,20 @@ export function AgentDetailSheet({ agent, open, onOpenChange }: Props) {
     setProfileLoading(true);
     fetch(apiUrl(`/agents/${agent.id}`))
       .then(r => r.ok ? r.json() : Promise.reject())
-      .then(d => { if (!cancelled) setProfile({ personality: d.personality || d.soul?.personality || "", objective: d.objective || d.soul?.objective || d.purpose || "", scope: d.scope || d.soul?.scope || "", behavior: d.behavior || d.soul?.behavior || "", soul: d.soul?.summary || d.soulSummary || d.identity || "", instructions: d.instructions || d.soul?.instructions || d.systemPrompt || "" }); })
-      .catch(() => { if (!cancelled) setProfile(null); })
+      .then(d => {
+        if (cancelled) return;
+        const p: AgentProfile = {
+          personality: d.personality || d.soul?.personality || "",
+          objective: d.objective || d.soul?.objective || d.purpose || "",
+          scope: d.scope || d.soul?.scope || "",
+          behavior: d.behavior || d.soul?.behavior || "",
+          soul: d.soul?.summary || d.soulSummary || d.identity || "",
+          instructions: d.instructions || d.soul?.instructions || d.systemPrompt || "",
+        };
+        setProfile(p);
+        setProfileSource(Object.values(p).some(v => v) ? "live" : "fallback");
+      })
+      .catch(() => { if (!cancelled) { setProfile(null); setProfileSource("fallback"); } })
       .finally(() => { if (!cancelled) setProfileLoading(false); });
     return () => { cancelled = true; };
   }, [open, agent?.id]);
