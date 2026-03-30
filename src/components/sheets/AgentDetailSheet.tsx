@@ -1,11 +1,14 @@
 import { useState } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
   Bot, Cpu, Zap, Activity, Clock, Layers, ArrowDownRight,
-  ArrowUpRight, AlertTriangle, Briefcase,
+  ArrowUpRight, AlertTriangle, Briefcase, RotateCcw, Loader2,
 } from "lucide-react";
+import { apiUrl } from "@/domains/api";
+import { toast } from "@/hooks/use-toast";
 import type { AgentView } from "@/domains/agents/types";
 
 const statusBadge: Record<string, { label: string; className: string }> = {
