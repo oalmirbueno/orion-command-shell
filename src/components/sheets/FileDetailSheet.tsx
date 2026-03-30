@@ -101,45 +101,40 @@ export function FileDetailSheet({ file, open, onOpenChange }: Props) {
     let cancelled = false;
     setContentState("loading");
 
-    const encodedPath = encodeURIComponent(file.path);
-    // Try candidate routes in order — backend may expose any of these
-    const candidates = [
-      apiUrl(`/files/read?path=${encodedPath}`),
-      apiUrl(`/files/content?path=${encodedPath}`),
-      apiUrl(`/files?path=${encodedPath}`),
-    ];
+    const url = apiUrl(`/files?path=${encodeURIComponent(file.path)}`);
+    fetch(url, { headers: { Accept: "application/json" } })
+      .then(async (r) => {
+        if (!r.ok) throw new Error(`${r.status} ${r.statusText}`);
+        const ct = r.headers.get("content-type") || "";
+        if (ct.includes("text/html")) throw new Error("Resposta HTML inesperada");
 
-    const tryFetch = async () => {
-      for (const url of candidates) {
-        try {
-          const r = await fetch(url, { headers: { Accept: "text/plain, application/json" } });
-          if (!r.ok) continue;
-
-          const ct = r.headers.get("content-type") || "";
-          // Guard: if backend returned HTML (SPA fallback / 404 page), skip
-          if (ct.includes("text/html")) continue;
-
-          const text = await r.text();
-          // Extra guard: if it looks like an HTML page, skip
-          if (text.trimStart().startsWith("<!DOCTYPE") || text.trimStart().startsWith("<html")) continue;
-
-          if (!cancelled) {
-            setContent(text);
-            setContentState("loaded");
-          }
-          return;
-        } catch {
-          // try next candidate
+        const text = await r.text();
+        if (text.trimStart().startsWith("<!DOCTYPE") || text.trimStart().startsWith("<html")) {
+          throw new Error("Resposta HTML inesperada");
         }
-      }
-      // All candidates failed
-      if (!cancelled) {
-        setContentError("Rota de conteúdo não disponível no backend");
-        setContentState("error");
-      }
-    };
 
-    tryFetch();
+        // API returns { path, content } JSON
+        try {
+          const json = JSON.parse(text);
+          if (json.content != null) return json.content as string;
+        } catch {
+          // not JSON — use raw text
+        }
+        return text;
+      })
+      .then((text) => {
+        if (!cancelled) {
+          setContent(text);
+          setContentState("loaded");
+        }
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          setContentError(err.message || "Falha ao carregar conteúdo");
+          setContentState("error");
+        }
+      });
+
     return () => { cancelled = true; };
   }, [file?.path, open]);
 
