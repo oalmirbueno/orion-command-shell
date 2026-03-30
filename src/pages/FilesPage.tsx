@@ -5,6 +5,7 @@ import { useOrionData } from "@/hooks/useOrionData";
 import { fetchFilesPage } from "@/domains/files/fetcher";
 import { FilesSummary } from "@/components/files/FilesSummary";
 import { FilesList } from "@/components/files/FilesList";
+import { FilesSkeleton } from "@/components/skeletons/DomainSkeletons";
 import type { FilesPageData } from "@/domains/files/types";
 
 const FilesPage = () => {
