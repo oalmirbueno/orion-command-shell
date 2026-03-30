@@ -5,10 +5,10 @@ import { AgentDetailSheet } from "@/components/sheets/AgentDetailSheet";
 
 interface AgentDetailCardsProps { agents: AgentView[]; }
 
-const statusConfig: Record<AgentStatus, { label: string; dot: string; text: string; border: string; bg: string }> = {
-  active: { label: "Ativo", dot: "status-online", text: "text-status-online", border: "border-l-status-online", bg: "" },
-  idle: { label: "Ocioso", dot: "bg-muted-foreground/40", text: "text-muted-foreground", border: "border-l-muted-foreground/30", bg: "" },
-  offline: { label: "Offline", dot: "status-critical", text: "text-status-critical", border: "border-l-status-critical", bg: "bg-status-critical/[0.03]" },
+const statusConfig: Record<AgentStatus, { label: string; dotClass: string; text: string; border: string; bg: string; pulse: boolean }> = {
+  active: { label: "Ativo", dotClass: "bg-status-online", text: "text-status-online", border: "border-l-status-online", bg: "", pulse: true },
+  idle: { label: "Ocioso", dotClass: "bg-muted-foreground/40", text: "text-muted-foreground", border: "border-l-muted-foreground/30", bg: "", pulse: false },
+  offline: { label: "Offline", dotClass: "bg-status-critical", text: "text-status-critical", border: "border-l-status-critical", bg: "bg-status-critical/[0.03]", pulse: false },
 };
 
 const tierConfig: Record<AgentTier, { label: string; icon: React.ElementType; badgeClass: string; description: string }> = {
