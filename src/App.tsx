@@ -18,6 +18,7 @@ import OperationsPage from "./pages/OperationsPage.tsx";
 import FilesPage from "./pages/FilesPage.tsx";
 import SearchPage from "./pages/SearchPage.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import { PageTransition } from "./components/PageTransition.tsx";
 
 const queryClient = new QueryClient({
   defaultOptions: {
