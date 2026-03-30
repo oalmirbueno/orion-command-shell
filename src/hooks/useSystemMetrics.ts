@@ -84,13 +84,16 @@ function derivePanelStatus(h: SubsystemHealth): PanelStatus {
 
 async function fetchMetrics(): Promise<{ metrics: SystemMetrics; latencyMs: number }> {
   const start = performance.now();
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 8000);
+  // Separate controllers so a slow /system doesn't abort /system/stats
+  const sysController = new AbortController();
+  const statsController = new AbortController();
+  const sysTimeout = setTimeout(() => sysController.abort(), 18000);
+  const statsTimeout = setTimeout(() => statsController.abort(), 10000);
 
   try {
     const [sysRes, statsRes] = await Promise.allSettled([
-      fetch(apiUrl("/system"), { signal: controller.signal, headers: { accept: "application/json" } }),
-      fetch(apiUrl("/system/stats"), { signal: controller.signal, headers: { accept: "application/json" } }),
+      fetch(apiUrl("/system"), { signal: sysController.signal, headers: { accept: "application/json" } }),
+      fetch(apiUrl("/system/stats"), { signal: statsController.signal, headers: { accept: "application/json" } }),
     ]);
 
     clearTimeout(timeout);
