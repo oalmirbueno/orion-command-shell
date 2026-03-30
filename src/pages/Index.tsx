@@ -1,6 +1,7 @@
 import { OrionLayout } from "@/components/OrionLayout";
 import { OrionDataWrapper } from "@/components/orion/DataWrapper";
 import { useOrionData } from "@/hooks/useOrionData";
+import { HomeSkeleton } from "@/components/skeletons/DomainSkeletons";
 import { fetchHomePage } from "@/domains/home/fetcher";
 import type { HomePageData } from "@/domains/home/types";
 import { CommandStatus } from "@/components/home/CommandStatus";
