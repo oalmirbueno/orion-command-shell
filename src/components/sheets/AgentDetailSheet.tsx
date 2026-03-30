@@ -239,9 +239,10 @@ export function AgentDetailSheet({ agent, open, onOpenChange }: Props) {
           shortDesc: controls.shortDesc,
           role: controls.role,
           notes: controls.notes,
-          mode: controls.mode,
-          target: controls.target,
-          targetType: controls.targetType,
+          scopeType: controls.scopeType,
+          topicIds: controls.topicIds,
+          dmEnabled: controls.dmEnabled,
+          groupEnabled: controls.groupEnabled,
           opStatus: controls.opStatus,
         }),
       });
