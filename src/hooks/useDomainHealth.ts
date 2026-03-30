@@ -76,7 +76,7 @@ const KEY_TO_DOMAIN: Record<string, DomainKey> = {
 class DomainHealthStore {
   private entries: Record<DomainKey, DomainHealthEntry>;
   private listeners = new Set<() => void>();
-  private version = 0;
+  private cachedSnapshot: DomainHealthSnapshot | null = null;
 
   constructor() {
     this.entries = {} as Record<DomainKey, DomainHealthEntry>;
@@ -85,7 +85,7 @@ class DomainHealthStore {
     }
   }
 
-  getSnapshot = (): DomainHealthSnapshot => {
+  private buildSnapshot(): DomainHealthSnapshot {
     const now = Date.now();
     const domains = {} as Record<DomainKey, DomainHealthEntry>;
     let liveCount = 0;
@@ -94,7 +94,6 @@ class DomainHealthStore {
 
     for (const d of ALL_DOMAINS) {
       const entry = this.entries[d];
-      // Re-derive status based on freshness
       let status = entry.status;
       if (entry.lastUpdated && status === "live") {
         const age = now - entry.lastUpdated.getTime();
@@ -116,6 +115,14 @@ class DomainHealthStore {
     else global = "loading";
 
     return { domains, global, liveCount, totalTracked };
+  }
+
+  /** Returns a stable reference — only rebuilt on emit() */
+  getSnapshot = (): DomainHealthSnapshot => {
+    if (!this.cachedSnapshot) {
+      this.cachedSnapshot = this.buildSnapshot();
+    }
+    return this.cachedSnapshot;
   };
 
   subscribe = (listener: () => void) => {
