@@ -5,6 +5,7 @@ import { ActivitySummary } from "@/components/activity/ActivitySummary";
 import { ActivityFeed } from "@/components/activity/ActivityFeed";
 import { useOrionData } from "@/hooks/useOrionData";
 import { fetchActivityPage } from "@/domains/activity/fetcher";
+import { ActivitySkeleton } from "@/components/skeletons/DomainSkeletons";
 import type { ActivityPageData } from "@/domains/activity/types";
 
 const ActivityPage = () => {
@@ -20,7 +21,7 @@ const ActivityPage = () => {
     <OrionLayout title="Atividade">
       <div className="space-y-8">
         <OrionBreadcrumb items={["Mission Control", "Atividade"]} />
-        <OrionDataWrapper state={state} source={source} lastUpdated={lastUpdated} onRetry={refetch} emptyTitle="Sem atividade recente" emptyDescription="Eventos aparecerão aqui quando houver atividade no sistema">
+        <OrionDataWrapper state={state} source={source} lastUpdated={lastUpdated} onRetry={refetch} emptyTitle="Sem atividade recente" emptyDescription="Eventos aparecerão aqui quando houver atividade no sistema" skeleton={<ActivitySkeleton />}>
           <ActivitySummary summary={pageData.summary} />
           <div className="mt-8">
             <ActivityFeed events={pageData.events} />

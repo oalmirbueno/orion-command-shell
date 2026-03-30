@@ -33,6 +33,8 @@ interface OrionDataWrapperProps {
   errorTitle?: string;
   /** Custom description for the error state */
   errorDescription?: string;
+  /** Domain-specific skeleton shown during loading instead of generic spinner */
+  skeleton?: React.ReactNode;
 }
 
 const sourceLabels: Record<DataSource, { label: string; className: string }> = {
@@ -57,12 +59,13 @@ export function OrionDataWrapper({
   emptyIcon,
   errorTitle,
   errorDescription,
+  skeleton,
 }: OrionDataWrapperProps) {
   return (
     <div className={cn("relative", className)}>
       {/* State-driven content */}
       {state === "loading" && (
-        <OrionLoading compact={compact} />
+        skeleton || <OrionLoading compact={compact} />
       )}
 
       {state === "empty" && (

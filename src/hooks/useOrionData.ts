@@ -4,7 +4,7 @@
  */
 
 import { useCallback, useRef, useEffect } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import type { DataState, DataSource, DomainFetcher } from "@/domains/types";
 import { useLastUpdated } from "./useLastUpdated";
 
@@ -73,7 +73,8 @@ export function useOrionData<T>({
     queryFn,
     enabled: autoLoad && !forceState,
     staleTime: 30_000,
-    gcTime: 5 * 60_000, // keep cache for 5 min after unmount
+    gcTime: 5 * 60_000,
+    placeholderData: keepPreviousData,
     refetchInterval: refreshInterval > 0 ? refreshInterval : false,
     refetchIntervalInBackground: false,
     refetchOnWindowFocus: "always",
