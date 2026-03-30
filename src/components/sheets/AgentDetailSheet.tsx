@@ -49,6 +49,7 @@ export function AgentDetailSheet({ agent, open, onOpenChange }: Props) {
   // ── Profile state ──
   const [profile, setProfile] = useState<AgentProfile | null>(null);
   const [profileLoading, setProfileLoading] = useState(false);
+  const [profileSource, setProfileSource] = useState<"live" | "fallback">("fallback");
 
   // ── Logs state ──
   const [logs, setLogs] = useState<LogEntry[]>([]);
