@@ -54,6 +54,10 @@ function formatUptime(seconds: number): string {
   return `${days}d ${hours}h`;
 }
 
+function fmtGB(bytes: number): string {
+  return (bytes / 1e9).toFixed(1) + " GB";
+}
+
 async function fetchMetrics(): Promise<{ metrics: SystemMetrics; source: "api" | "offline"; latencyMs: number }> {
   const start = performance.now();
   const controller = new AbortController();
