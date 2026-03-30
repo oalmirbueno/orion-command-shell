@@ -85,8 +85,8 @@ async function fetchMetrics(): Promise<{ metrics: SystemMetrics; source: "api" |
     clearTimeout(timeout);
     const latencyMs = Math.round(performance.now() - start);
 
-    let sys: RawSystem | null = null;
-    let stats: RawStats | null = null;
+    let sysOk = false;
+    let statsOk = false;
     let anyOk = false;
 
     if (sysRes.status === "fulfilled" && sysRes.value.ok) {
