@@ -31,6 +31,45 @@ interface Props {
 
 export function AgentDetailSheet({ agent, open, onOpenChange }: Props) {
   const [restarting, setRestarting] = useState(false);
+  const [logs, setLogs] = useState<LogEntry[]>([]);
+  const [logsLoading, setLogsLoading] = useState(false);
+  const [logsError, setLogsError] = useState(false);
+  const logsEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open || !agent) { setLogs([]); return; }
+
+    let cancelled = false;
+    const fetchLogs = async () => {
+      setLogsLoading(true);
+      setLogsError(false);
+      try {
+        const res = await fetch(apiUrl(`/agents/${agent.id}/logs`));
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        if (!cancelled) {
+          const entries: LogEntry[] = (data.logs || data || []).map((l: any) => ({
+            ts: l.timestamp || l.ts || l.at || "",
+            level: l.level || "info",
+            message: l.message || l.msg || l.text || String(l),
+          }));
+          setLogs(entries);
+        }
+      } catch {
+        if (!cancelled) setLogsError(true);
+      } finally {
+        if (!cancelled) setLogsLoading(false);
+      }
+    };
+
+    fetchLogs();
+    const interval = setInterval(fetchLogs, 10_000);
+    return () => { cancelled = true; clearInterval(interval); };
+  }, [open, agent?.id]);
+
+  useEffect(() => {
+    logsEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [logs]);
 
   if (!agent) return null;
 
