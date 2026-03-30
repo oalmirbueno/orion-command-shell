@@ -4,7 +4,7 @@ import { OrionBreadcrumb } from "@/components/orion";
 import {
   Search, Brain, Activity, Bot, FileText,
   Clock, ChevronRight, Inbox, AlertTriangle, Loader2,
-  RefreshCw, Tag,
+  RefreshCw, Tag, X, History,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { apiUrl } from "@/domains/api";
@@ -55,6 +55,22 @@ function highlightTerm(text: string, term: string) {
   }
 }
 
+/* ── search history ── */
+
+const HISTORY_KEY = "orion_search_history";
+const MAX_HISTORY = 8;
+
+function loadHistory(): string[] {
+  try {
+    const raw = localStorage.getItem(HISTORY_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch { return []; }
+}
+
+function saveHistory(items: string[]) {
+  try { localStorage.setItem(HISTORY_KEY, JSON.stringify(items.slice(0, MAX_HISTORY))); } catch {}
+}
+
 /* ── page ── */
 
 const SearchPage = () => {
@@ -66,10 +82,34 @@ const SearchPage = () => {
   const [error, setError] = useState<string | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
   const abortRef = useRef<AbortController>();
+  const [history, setHistory] = useState<string[]>(loadHistory);
 
   // Detail sheet state
   const [selectedSnapshot, setSelectedSnapshot] = useState<MemorySnapshot | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
+
+  const addToHistory = useCallback((term: string) => {
+    const t = term.trim();
+    if (t.length < 2) return;
+    setHistory((prev) => {
+      const next = [t, ...prev.filter((h) => h !== t)].slice(0, MAX_HISTORY);
+      saveHistory(next);
+      return next;
+    });
+  }, []);
+
+  const removeFromHistory = useCallback((term: string) => {
+    setHistory((prev) => {
+      const next = prev.filter((h) => h !== term);
+      saveHistory(next);
+      return next;
+    });
+  }, []);
+
+  const clearHistory = useCallback(() => {
+    setHistory([]);
+    saveHistory([]);
+  }, []);
 
   const doSearch = useCallback(async (q: string, scope: SearchScope) => {
     if (!q.trim() || q.trim().length < 2) return;
@@ -166,6 +206,7 @@ const SearchPage = () => {
       // Sort by score desc
       allResults.sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
       setResults(allResults);
+      addToHistory(q);
     } catch (err: any) {
       if (err?.name === "AbortError") return;
       setError("Erro ao buscar. Tente novamente.");
@@ -294,6 +335,41 @@ const SearchPage = () => {
               <kbd className="text-[10px] font-mono px-2 py-1 rounded border border-border/20 text-muted-foreground/30 bg-accent/5">K</kbd>
               <span className="text-[10px] font-mono text-muted-foreground/20 ml-1">acesso rápido</span>
             </div>
+
+            {/* Search history */}
+            {history.length > 0 && (
+              <div className="mt-8 w-full max-w-md">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-1.5 text-[10px] font-mono uppercase text-muted-foreground/35">
+                    <History className="h-3 w-3" /> Buscas recentes
+                  </div>
+                  <button
+                    onClick={clearHistory}
+                    className="text-[10px] font-mono text-muted-foreground/25 hover:text-muted-foreground/50 transition-colors"
+                  >
+                    Limpar
+                  </button>
+                </div>
+                <div className="flex flex-wrap justify-center gap-1.5">
+                  {history.map((term) => (
+                    <div key={term} className="group flex items-center gap-1 text-xs font-mono px-2.5 py-1.5 rounded-full border border-border/25 bg-accent/5 hover:bg-accent/15 hover:border-border/40 transition-colors">
+                      <button
+                        onClick={() => { setQuery(term); doSearch(term, activeScope); }}
+                        className="text-muted-foreground/50 group-hover:text-foreground/70 transition-colors"
+                      >
+                        {term}
+                      </button>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); removeFromHistory(term); }}
+                        className="text-muted-foreground/20 hover:text-destructive/60 transition-colors ml-0.5"
+                      >
+                        <X className="h-2.5 w-2.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         ) : filteredResults.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center rounded-xl border border-border/30 bg-card">
