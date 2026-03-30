@@ -30,6 +30,7 @@ interface RawSystem {
     uptime?: number;
     uptimeFormatted?: string;
     hostname?: string;
+    platform?: string;
     memory?: { total: number; free: number; used: number };
   };
   integrations?: Array<{ status: string }>;
