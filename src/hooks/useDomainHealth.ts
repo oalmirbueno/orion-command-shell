@@ -131,7 +131,7 @@ class DomainHealthStore {
   };
 
   private emit() {
-    this.version++;
+    this.cachedSnapshot = this.buildSnapshot();
     for (const fn of this.listeners) fn();
   }
 
