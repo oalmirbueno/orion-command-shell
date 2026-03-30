@@ -14,6 +14,7 @@ import {
 import { apiUrl } from "@/domains/api";
 import { toast } from "@/hooks/use-toast";
 import type { AgentView, AgentProfile, AgentOperationalStatus, AgentScopeType } from "@/domains/agents/types";
+import { fetchAgentProfile, saveAgentProfile, type ProfileSource } from "@/domains/agents/profileStore";
 
 // ── Types ────────────────────────────────────────────
 interface LogEntry { ts: string; level: string; message: string }
@@ -48,7 +49,7 @@ export function AgentDetailSheet({ agent, open, onOpenChange }: Props) {
   // ── Profile state ──
   const [profile, setProfile] = useState<AgentProfile | null>(null);
   const [profileLoading, setProfileLoading] = useState(false);
-  const [profileSource, setProfileSource] = useState<"live" | "fallback">("fallback");
+  const [profileSource, setProfileSource] = useState<ProfileSource>("bootstrap");
 
   // ── Logs state ──
   const [logs, setLogs] = useState<LogEntry[]>([]);
@@ -95,31 +96,25 @@ export function AgentDetailSheet({ agent, open, onOpenChange }: Props) {
     if (!open || !agent) { setProfile(null); return; }
     let cancelled = false;
     setProfileLoading(true);
-    fetch(apiUrl(`/agents/${agent.id}`))
-      .then(r => r.ok ? r.json() : Promise.reject())
-      .then(d => {
+    fetchAgentProfile(agent)
+      .then(result => {
         if (cancelled) return;
-        const p: AgentProfile = {
-          id: d.id || agent.id,
-          name: d.name || agent.name,
-          role: d.role || agent.role,
-          description: d.description || "",
-          personality: d.personality || d.soul?.personality || "",
-          objective: d.objective || d.soul?.objective || d.purpose || "",
-          scope: d.scope || d.soul?.scope || "",
-          behavior: d.behavior || d.soul?.behavior || "",
-          soul: d.soul?.summary || d.soulSummary || d.identity || "",
-          instructions: d.instructions || d.soul?.instructions || d.systemPrompt || "",
-          operationalStatus: d.operationalStatus || undefined,
-          scopeType: d.scopeType || undefined,
-          topicIds: d.topicIds || undefined,
-          dmEnabled: d.dmEnabled,
-          groupEnabled: d.groupEnabled,
-        };
-        setProfile(p);
-        setProfileSource(Object.values(p).some(v => v) ? "live" : "fallback");
+        setProfile(result.profile);
+        setProfileSource(result.source);
+        // Hydrate controls from persisted profile
+        const p = result.profile;
+        setControls(c => ({
+          ...c,
+          displayName: p.name || agent.name,
+          role: p.role || agent.role,
+          shortDesc: p.description || "",
+          scopeType: p.scopeType || c.scopeType,
+          topicIds: p.topicIds || c.topicIds,
+          dmEnabled: p.dmEnabled ?? c.dmEnabled,
+          groupEnabled: p.groupEnabled ?? c.groupEnabled,
+          opStatus: p.operationalStatus || c.opStatus,
+        }));
       })
-      .catch(() => { if (!cancelled) { setProfile(null); setProfileSource("fallback"); } })
       .finally(() => { if (!cancelled) setProfileLoading(false); });
     return () => { cancelled = true; };
   }, [open, agent?.id]);
@@ -208,87 +203,45 @@ else { setLogs(filtered.map((a: any) => ({ ts: a.timestamp || "", level: a.statu
     setSaveStatus("idle");
     setSaveError("");
     try {
-      const payload = { ...controls };
-      let res: Response;
-      try {
-        res = await fetch(apiUrl(`/agents/${agent.id}`), { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
-      } catch {
-        setSaveStatus("error");
-        setSaveError("Backend inacessível — verifique se a API está online");
-        toast({ title: "Backend inacessível", description: "Não foi possível conectar ao servidor", variant: "destructive" });
-        return;
-      }
+      const profileToSave: AgentProfile = {
+        id: agent.id,
+        name: controls.displayName,
+        role: controls.role,
+        description: controls.shortDesc,
+        soul: profile?.soul,
+        objective: profile?.objective,
+        personality: profile?.personality,
+        scope: profile?.scope,
+        behavior: profile?.behavior,
+        instructions: profile?.instructions,
+        operationalStatus: controls.opStatus,
+        scopeType: controls.scopeType,
+        topicIds: controls.topicIds,
+        dmEnabled: controls.dmEnabled,
+        groupEnabled: controls.groupEnabled,
+      };
 
-      if (res.status === 404) {
-        setSaveStatus("error");
-        setSaveError(`PUT /api/agents/${agent.id} não existe no backend`);
-        toast({ title: "Rota de save não encontrada", description: `O backend não suporta PUT /api/agents/${agent.id}`, variant: "destructive" });
-        return;
-      }
-      if (res.status === 405) {
-        setSaveStatus("error");
-        setSaveError("Método PUT não permitido nesta rota");
-        toast({ title: "Método não permitido", description: "O backend não aceita PUT nesta rota", variant: "destructive" });
-        return;
-      }
-      if (!res.ok) {
-        const errText = await res.text().catch(() => res.statusText);
-        setSaveStatus("error");
-        setSaveError(`HTTP ${res.status}: ${errText}`);
-        throw new Error(errText || `HTTP ${res.status}`);
-      }
+      const result = await saveAgentProfile(agent.id, profileToSave);
 
-      // Refetch to verify persistence
-      let verifyRes: Response;
-      try {
-        verifyRes = await fetch(apiUrl(`/agents/${agent.id}`));
-      } catch {
+      if (result.mismatches && result.mismatches.length > 0) {
         setSaveStatus("unconfirmed");
-        toast({ title: "Configuração enviada, mas não confirmada pelo backend", description: "Não foi possível verificar a persistência.", variant: "destructive" });
-        setEditing(false);
-        return;
-      }
-
-      if (!verifyRes.ok) {
-        setSaveStatus("unconfirmed");
-        toast({ title: "Configuração enviada, mas não confirmada pelo backend", description: "O backend não retornou os dados atualizados.", variant: "destructive" });
-        setEditing(false);
-        return;
-      }
-
-      const returned = await verifyRes.json();
-      const mismatches: string[] = [];
-      if (payload.displayName && returned.displayName !== undefined && returned.displayName !== payload.displayName) mismatches.push("nome");
-      if (payload.role && returned.role !== undefined && returned.role !== payload.role) mismatches.push("função");
-      if (payload.scopeType && returned.scopeType !== undefined && returned.scopeType !== payload.scopeType) mismatches.push("escopo");
-      if (payload.opStatus && returned.opStatus !== undefined && returned.opStatus !== payload.opStatus) mismatches.push("status operacional");
-      if (payload.dmEnabled !== undefined && returned.dmEnabled !== undefined && returned.dmEnabled !== payload.dmEnabled) mismatches.push("DM");
-      if (payload.groupEnabled !== undefined && returned.groupEnabled !== undefined && returned.groupEnabled !== payload.groupEnabled) mismatches.push("grupo");
-
-      if (mismatches.length > 0) {
-        setSaveStatus("unconfirmed");
-        toast({ title: "Configuração enviada, mas não confirmada pelo backend", description: `Campos divergentes: ${mismatches.join(", ")}`, variant: "destructive" });
+        toast({ title: "Configuração enviada, mas não confirmada pelo backend", description: `Campos divergentes: ${result.mismatches.join(", ")}`, variant: "destructive" });
+      } else if (result.error) {
+        setSaveStatus("persisted");
+        setSaveError(result.error);
+        toast({ title: "Salvo localmente", description: result.error });
       } else {
         setSaveStatus("persisted");
-        toast({ title: "Configurações salvas e confirmadas" });
-        setControls(c => ({
-          ...c,
-          displayName: returned.displayName ?? returned.name ?? c.displayName,
-          role: returned.role ?? c.role,
-          shortDesc: returned.shortDesc ?? returned.description ?? c.shortDesc,
-          notes: returned.notes ?? c.notes,
-          scopeType: returned.scopeType ?? c.scopeType,
-          topicIds: returned.topicIds ?? c.topicIds,
-          dmEnabled: returned.dmEnabled ?? c.dmEnabled,
-          groupEnabled: returned.groupEnabled ?? c.groupEnabled,
-          opStatus: returned.opStatus ?? c.opStatus,
-        }));
-        setProfileSource("live");
+        toast({ title: result.source === "api" ? "Salvo e confirmado pela API" : "Salvo no Mission Control" });
       }
+
+      setProfile(profileToSave);
+      setProfileSource(result.source);
       setEditing(false);
     } catch (err: any) {
-      if (saveStatus === "idle") setSaveStatus("error");
-      toast({ title: "Erro ao salvar", description: err?.message || "Falha na comunicação com o backend", variant: "destructive" });
+      setSaveStatus("error");
+      setSaveError(err?.message || "Falha inesperada");
+      toast({ title: "Erro ao salvar", description: err?.message || "Falha na comunicação", variant: "destructive" });
     } finally { setSaving(false); }
   };
 
@@ -310,9 +263,9 @@ else { setLogs(filtered.map((a: any) => ({ ts: a.timestamp || "", level: a.statu
                 <div className="flex items-center gap-2 mt-1">
                   <Badge variant="outline" className={`text-[10px] font-mono px-2 py-0 ${badge.cls}`}>{badge.label}</Badge>
                   <Badge variant="outline" className="text-[10px] font-mono px-2 py-0 border-border/40 text-muted-foreground">{tier}</Badge>
-                  <Badge variant="outline" className={`text-[10px] font-mono px-1.5 py-0 ${profileSource === "live" ? "border-status-online/40 text-status-online" : "border-border/30 text-muted-foreground/40"}`}>
-                    <span className={`inline-block w-1.5 h-1.5 rounded-full mr-1 ${profileSource === "live" ? "bg-status-online" : "bg-muted-foreground/30"}`} />
-                    {profileSource === "live" ? "LIVE" : "OFFLINE"}
+                  <Badge variant="outline" className={`text-[10px] font-mono px-1.5 py-0 ${profileSource === "api" ? "border-status-online/40 text-status-online" : profileSource === "mission-control" ? "border-primary/40 text-primary" : "border-border/30 text-muted-foreground/40"}`}>
+                    <span className={`inline-block w-1.5 h-1.5 rounded-full mr-1 ${profileSource === "api" ? "bg-status-online" : profileSource === "mission-control" ? "bg-primary" : "bg-muted-foreground/30"}`} />
+                    {profileSource === "api" ? "API" : profileSource === "mission-control" ? "MISSION CONTROL" : "BOOTSTRAP"}
                   </Badge>
                 </div>
               </div>
@@ -364,7 +317,7 @@ else { setLogs(filtered.map((a: any) => ({ ts: a.timestamp || "", level: a.statu
 
             <Separator className="bg-border/30" />
 
-             <Sec icon={Brain} title="Perfil" badge={profileSource === "live" ? "live" : "fallback"}>
+             <Sec icon={Brain} title="Perfil" badge={profileSource === "api" ? "live" : profileSource === "mission-control" ? "live" : "fallback"}>
               {profileLoading ? (
                 <div className="space-y-2 ml-5">{[1,2,3].map(i => <div key={i} className="h-3 rounded bg-muted/30 animate-pulse" style={{ width: `${80 - i * 15}%` }} />)}</div>
               ) : profile && Object.values(profile).some(v => v) ? (
@@ -433,7 +386,7 @@ else { setLogs(filtered.map((a: any) => ({ ts: a.timestamp || "", level: a.statu
 
           {/* ═══════ TAB: Configuração ═══════ */}
           <TabsContent value="config" className="px-6 py-5 space-y-5 mt-0">
-            <Sec icon={Settings2} title="Controle Operacional" badge={profileSource}>
+            <Sec icon={Settings2} title="Controle Operacional" badge={profileSource === "bootstrap" ? "fallback" : "live"}>
               <div className="ml-5 space-y-3">
                 {!editing ? (
                   <>
