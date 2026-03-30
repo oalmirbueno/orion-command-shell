@@ -19,7 +19,7 @@ const SessionsPage = () => {
     <OrionLayout title="Sessões">
       <div className="space-y-8">
         <OrionBreadcrumb items={["Mission Control", "Sessões"]} />
-        <OrionDataWrapper state={state} source={source} lastUpdated={lastUpdated} onRetry={refetch}>
+        <OrionDataWrapper state={state} source={source} lastUpdated={lastUpdated} onRetry={refetch} emptyTitle="Nenhuma sessão encontrada" emptyDescription="Sessões aparecerão aqui quando agentes estiverem ativos">
           <SessionsSummary sessions={sessions} />
           <div className="mt-8">
             <SessionsList sessions={sessions} />

@@ -22,7 +22,7 @@ const SystemPage = () => {
     <OrionLayout title="Sistema">
       <div className="space-y-8">
         <OrionBreadcrumb items={["Mission Control", "Sistema"]} />
-        <OrionDataWrapper state={state} source={source} lastUpdated={lastUpdated} onRetry={refetch}>
+        <OrionDataWrapper state={state} source={source} lastUpdated={lastUpdated} onRetry={refetch} emptyTitle="Dados do sistema indisponíveis" emptyDescription="Aguardando conexão com o backend de monitoramento">
           {page && (
             <>
               <SystemOverviewHeader header={page.header} />

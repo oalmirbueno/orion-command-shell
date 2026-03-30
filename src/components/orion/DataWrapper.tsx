@@ -23,6 +23,16 @@ interface OrionDataWrapperProps {
   className?: string;
   /** Hide the source indicator entirely (for inline usage) */
   hideSource?: boolean;
+  /** Custom title for the empty state */
+  emptyTitle?: string;
+  /** Custom description for the empty state */
+  emptyDescription?: string;
+  /** Custom icon for the empty state */
+  emptyIcon?: React.ElementType;
+  /** Custom title for the error state */
+  errorTitle?: string;
+  /** Custom description for the error state */
+  errorDescription?: string;
 }
 
 const sourceLabels: Record<DataSource, { label: string; className: string }> = {
@@ -42,6 +52,11 @@ export function OrionDataWrapper({
   sourceLabel,
   className,
   hideSource,
+  emptyTitle,
+  emptyDescription,
+  emptyIcon,
+  errorTitle,
+  errorDescription,
 }: OrionDataWrapperProps) {
   return (
     <div className={cn("relative", className)}>
@@ -53,16 +68,17 @@ export function OrionDataWrapper({
       {state === "empty" && (
         <OrionEmpty
           compact={compact}
-          title="Nenhum dado disponível"
-          description="Aguardando conexão com API"
+          title={emptyTitle || "Nenhum dado disponível"}
+          description={emptyDescription || "Aguardando conexão com API"}
+          icon={emptyIcon}
         />
       )}
 
       {state === "error" && (
         <OrionError
           compact={compact}
-          title="Falha na conexão"
-          description={error || "Não foi possível conectar à fonte de dados"}
+          title={errorTitle || "Falha na conexão"}
+          description={errorDescription || error || "Não foi possível conectar à fonte de dados"}
           onRetry={onRetry}
         />
       )}
