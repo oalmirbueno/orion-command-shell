@@ -198,6 +198,38 @@ export function AgentDetailSheet({ agent, open, onOpenChange }: Props) {
 
           <Separator className="bg-border/30" />
 
+          {/* Logs */}
+          <Section icon={Terminal} title="Logs recentes">
+            {logsLoading && logs.length === 0 ? (
+              <div className="space-y-2 ml-5">
+                {[1,2,3].map(i => <div key={i} className="h-4 w-full rounded bg-muted/30 animate-pulse" />)}
+              </div>
+            ) : logsError ? (
+              <p className="text-xs text-muted-foreground/40 italic ml-5">Erro ao carregar logs</p>
+            ) : logs.length === 0 ? (
+              <p className="text-xs text-muted-foreground/40 italic ml-5">Nenhum log disponível</p>
+            ) : (
+              <div className="ml-5 max-h-48 overflow-y-auto rounded-lg border border-border/30 bg-muted/10 p-3 space-y-1.5 scrollbar-thin">
+                {logs.map((log, i) => (
+                  <div key={i} className="flex gap-2 text-[11px] font-mono leading-relaxed">
+                    <span className="text-muted-foreground/30 shrink-0 w-16 truncate">
+                      {log.ts ? new Date(log.ts).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" }) : "—"}
+                    </span>
+                    <span className={`shrink-0 w-10 uppercase ${
+                      log.level === "error" ? "text-status-critical" :
+                      log.level === "warn" ? "text-status-warning" :
+                      "text-muted-foreground/50"
+                    }`}>{log.level}</span>
+                    <span className="text-foreground/70 break-all">{log.message}</span>
+                  </div>
+                ))}
+                <div ref={logsEndRef} />
+              </div>
+            )}
+          </Section>
+
+          <Separator className="bg-border/30" />
+
           <Button
             onClick={handleRestart}
             disabled={restarting || agent.status === "offline"}
