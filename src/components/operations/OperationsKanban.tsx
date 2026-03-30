@@ -43,7 +43,7 @@ function TaskCard({ task, onClick }: { task: OperationTask; onClick?: () => void
   const isFailed = task.status === "failed";
 
   return (
-    <div className={cn(
+    <div onClick={onClick} className={cn(
       "group rounded-lg border px-5 py-4 transition-all cursor-pointer",
       "hover:border-primary/30 hover:shadow-[0_0_15px_-3px_hsl(var(--primary)/0.15)]",
       isFailed && "border-status-critical/25 bg-status-critical/[0.03]",
