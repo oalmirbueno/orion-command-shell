@@ -87,6 +87,8 @@ async function fetchMetrics(): Promise<{ metrics: SystemMetrics; source: "api" |
 
     let sysOk = false;
     let statsOk = false;
+    let sys: RawSystem | null = null;
+    let stats: RawStats | null = null;
     let anyOk = false;
 
     if (sysRes.status === "fulfilled" && sysRes.value.ok) {
