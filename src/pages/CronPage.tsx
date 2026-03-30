@@ -11,6 +11,7 @@ const CronPage = () => {
   const { state, data, source, lastUpdated, refetch } = useOrionData<CronPageData>({
     key: "cron-page",
     fetcher: fetchCronPage,
+    refreshInterval: 30_000,
   });
 
   const jobs = data?.jobs ?? [];

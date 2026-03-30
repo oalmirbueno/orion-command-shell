@@ -11,6 +11,7 @@ const SessionsPage = () => {
   const { state, data, source, lastUpdated, refetch } = useOrionData<SessionView[]>({
     key: "sessions",
     fetcher: fetchSessions,
+    refreshInterval: 30_000,
   });
 
   const sessions = data || [];

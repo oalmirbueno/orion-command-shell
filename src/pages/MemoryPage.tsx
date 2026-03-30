@@ -11,6 +11,7 @@ const MemoryPage = () => {
   const { state, data, source, lastUpdated, refetch } = useOrionData<MemoryPageData>({
     key: "memory-page",
     fetcher: fetchMemoryPage,
+    refreshInterval: 120_000,
   });
 
   const snapshots = data?.snapshots || [];

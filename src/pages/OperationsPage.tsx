@@ -11,6 +11,7 @@ const OperationsPage = () => {
   const { state, data, source, lastUpdated, refetch } = useOrionData<OperationsPageData>({
     key: "operations-page",
     fetcher: fetchOperationsPage,
+    refreshInterval: 15_000,
   });
 
   const pageData = data || { tasks: [], timeline: [], liveOps: [] };

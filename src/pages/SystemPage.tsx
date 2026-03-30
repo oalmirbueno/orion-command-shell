@@ -14,6 +14,7 @@ const SystemPage = () => {
   const { state, data, source, lastUpdated, refetch } = useOrionData<SystemPageData>({
     key: "system-page",
     fetcher: fetchSystemPage,
+    refreshInterval: 60_000,
   });
 
   const page = data;

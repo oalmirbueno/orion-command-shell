@@ -1,10 +1,18 @@
 import { Cpu, HardDrive, MemoryStick, Shield, Clock, Wifi, Activity } from "lucide-react";
+import { useLastUpdated } from "@/hooks/useLastUpdated";
+import { format } from "date-fns";
 
 function Sep() {
   return <div className="w-px h-3.5 bg-border" />;
 }
 
 export function OrionStatusBar() {
+  const { lastUpdated, source } = useLastUpdated();
+
+  const timeStr = lastUpdated ? format(lastUpdated, "HH:mm:ss") : "—";
+  const sourceLabel = source === "api" ? "Live" : source === "cache" ? "Cache" : source === "fallback" ? "Fallback" : "";
+  const sourceColor = source === "api" ? "text-status-online" : "text-muted-foreground/60";
+
   return (
     <footer className="h-8 flex items-center justify-between px-5 border-t border-border surface-0 text-xs font-mono text-muted-foreground/60 shrink-0 select-none">
       <div className="flex items-center gap-4">
@@ -40,6 +48,16 @@ export function OrionStatusBar() {
       </div>
 
       <div className="flex items-center gap-4">
+        {sourceLabel && (
+          <>
+            <div className={`flex items-center gap-1.5 ${sourceColor}`}>
+              <span className={`h-1.5 w-1.5 rounded-full ${source === "api" ? "bg-status-online animate-pulse" : "bg-muted-foreground/40"}`} />
+              <span>{sourceLabel}</span>
+            </div>
+            <Sep />
+          </>
+        )}
+
         <div className="flex items-center gap-2">
           <Shield className="h-3.5 w-3.5 text-muted-foreground/40" />
           <span className="text-muted-foreground/40">—</span>
@@ -56,7 +74,7 @@ export function OrionStatusBar() {
 
         <div className="flex items-center gap-2">
           <Clock className="h-3.5 w-3.5" />
-          <span>ATIVO —</span>
+          <span>Atualizado {timeStr}</span>
         </div>
       </div>
     </footer>

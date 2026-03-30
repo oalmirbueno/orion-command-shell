@@ -11,6 +11,7 @@ const ActivityPage = () => {
   const { state, data, source, lastUpdated, refetch } = useOrionData<ActivityPageData>({
     key: "activity-page",
     fetcher: fetchActivityPage,
+    refreshInterval: 60_000,
   });
 
   const pageData = data || { events: [], summary: { total: 0, critical: 0, warning: 0, resolved: 0 } };
