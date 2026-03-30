@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Flame, CheckCircle2, AlertTriangle, Moon, CalendarClock,
   Bot, Clock, RotateCcw, ArrowRight, Zap, AlertCircle,
@@ -6,6 +7,7 @@ import { OrionSectionHeader } from "@/components/orion/primitives";
 import { cn } from "@/lib/utils";
 import type { OperationTask, TaskPriority } from "@/domains/operations/types";
 import type { OperationSection } from "@/domains/operations/types.page";
+import { OperationDetailSheet } from "@/components/sheets/OperationDetailSheet";
 
 /* ── Priority badge ── */
 
@@ -18,19 +20,22 @@ const priorityStyles: Record<TaskPriority, { label: string; cls: string }> = {
 
 /* ── Compact operation card ── */
 
-function OpCard({ task, showTimer }: { task: OperationTask; showTimer?: boolean }) {
+function OpCard({ task, showTimer, onClick }: { task: OperationTask; showTimer?: boolean; onClick: () => void }) {
   const pri = priorityStyles[task.priority];
   const isActive = task.status === "running";
   const isFailed = task.status === "failed";
 
   return (
-    <div className={cn(
-      "group rounded-lg border px-5 py-4 transition-all cursor-pointer",
-      "hover:border-primary/30 hover:shadow-[0_0_15px_-3px_hsl(var(--primary)/0.15)]",
-      isFailed && "border-status-critical/25 bg-status-critical/[0.03]",
-      isActive && "border-status-online/20 bg-status-online/[0.02]",
-      !isActive && !isFailed && "border-border/40 bg-card/50",
-    )}>
+    <div
+      onClick={onClick}
+      className={cn(
+        "group rounded-lg border px-5 py-4 transition-all cursor-pointer",
+        "hover:border-primary/30 hover:shadow-[0_0_15px_-3px_hsl(var(--primary)/0.15)]",
+        isFailed && "border-status-critical/25 bg-status-critical/[0.03]",
+        isActive && "border-status-online/20 bg-status-online/[0.02]",
+        !isActive && !isFailed && "border-border/40 bg-card/50",
+      )}
+    >
       <div className="flex items-start justify-between gap-2 mb-1.5">
         <h4 className="text-sm font-medium text-foreground leading-snug line-clamp-2">{task.title}</h4>
         <span className={cn("text-[10px] font-mono uppercase px-1.5 py-0.5 rounded border shrink-0 mt-0.5", pri.cls)}>
@@ -42,7 +47,6 @@ function OpCard({ task, showTimer }: { task: OperationTask; showTimer?: boolean 
         <p className="text-xs text-foreground/40 leading-relaxed mb-2.5 line-clamp-1">{task.description}</p>
       )}
 
-      {/* Progress bar for active/failed */}
       {task.status !== "queued" && task.progress > 0 && (
         <div className="flex items-center gap-2 mb-2.5">
           <div className="flex-1 h-1.5 bg-surface-3 rounded-full overflow-hidden">
@@ -89,16 +93,16 @@ function Section({
   count,
   color,
   emptyText,
-  children,
   tasks,
+  onTaskClick,
 }: {
   icon: React.ElementType;
   label: string;
   count: number;
   color: string;
   emptyText: string;
-  children?: React.ReactNode;
-  tasks?: OperationTask[];
+  tasks: OperationTask[];
+  onTaskClick: (task: OperationTask) => void;
 }) {
   return (
     <section className="space-y-3">
@@ -116,7 +120,9 @@ function Section({
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2.5">
-          {tasks?.map(t => <OpCard key={t.id} task={t} showTimer={t.status === "running"} />) ?? children}
+          {tasks.map(t => (
+            <OpCard key={t.id} task={t} showTimer={t.status === "running"} onClick={() => onTaskClick(t)} />
+          ))}
         </div>
       )}
     </section>
@@ -159,11 +165,18 @@ interface Props {
 }
 
 export function OperationsSections({ sections }: Props) {
+  const [selectedTask, setSelectedTask] = useState<OperationTask | null>(null);
+  const [sheetOpen, setSheetOpen] = useState(false);
+
+  const handleClick = (task: OperationTask) => {
+    setSelectedTask(task);
+    setSheetOpen(true);
+  };
+
   return (
     <div className="space-y-6">
       <SummaryBar sections={sections} />
 
-      {/* Em Andamento */}
       <Section
         icon={Flame}
         label="Em Andamento"
@@ -171,9 +184,9 @@ export function OperationsSections({ sections }: Props) {
         color="text-status-online"
         emptyText="Nenhuma operação ativa no momento"
         tasks={sections.running}
+        onTaskClick={handleClick}
       />
 
-      {/* Falhas / Bloqueios */}
       {sections.failed.length > 0 && (
         <Section
           icon={AlertTriangle}
@@ -182,10 +195,10 @@ export function OperationsSections({ sections }: Props) {
           color="text-status-critical"
           emptyText="Nenhuma falha"
           tasks={sections.failed}
+          onTaskClick={handleClick}
         />
       )}
 
-      {/* Madrugada */}
       {sections.overnight.length > 0 && (
         <Section
           icon={Moon}
@@ -194,10 +207,10 @@ export function OperationsSections({ sections }: Props) {
           color="text-foreground/60"
           emptyText="Nenhuma execução noturna"
           tasks={sections.overnight}
+          onTaskClick={handleClick}
         />
       )}
 
-      {/* Concluído recentemente */}
       <Section
         icon={CheckCircle2}
         label="Concluído Recentemente"
@@ -205,9 +218,9 @@ export function OperationsSections({ sections }: Props) {
         color="text-primary"
         emptyText="Nenhuma conclusão recente"
         tasks={sections.completed}
+        onTaskClick={handleClick}
       />
 
-      {/* Próximas operações */}
       {sections.upcoming.length > 0 && (
         <Section
           icon={CalendarClock}
@@ -216,8 +229,15 @@ export function OperationsSections({ sections }: Props) {
           color="text-muted-foreground"
           emptyText="Nenhuma operação agendada"
           tasks={sections.upcoming}
+          onTaskClick={handleClick}
         />
       )}
+
+      <OperationDetailSheet
+        task={selectedTask}
+        open={sheetOpen}
+        onOpenChange={setSheetOpen}
+      />
     </div>
   );
 }
