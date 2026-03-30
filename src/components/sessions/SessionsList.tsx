@@ -120,7 +120,7 @@ export function SessionsList({ sessions }: Props) {
         <div className="flex-1 h-px bg-border/40" />
         <span className="text-xs font-mono text-muted-foreground/40">{sessions.length} total</span>
       </div>
-      <div className="space-y-2.5">
+      <div className="space-y-2.5 max-h-[calc(100vh-280px)] overflow-y-auto orion-thin-scroll pr-1">
         {sorted.map((session) => (
           <SessionRow key={session.id} session={session} onClick={() => setSelected(session)} />
         ))}

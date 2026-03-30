@@ -90,7 +90,7 @@ export function FilesList({ files }: FilesListProps) {
           <input type="text" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} placeholder="Buscar arquivo..." className="bg-transparent text-xs text-foreground placeholder:text-muted-foreground/30 outline-none w-full" />
         </div>
       </div>
-      <div className="space-y-1.5">
+      <div className="space-y-1.5 max-h-[calc(100vh-320px)] overflow-y-auto orion-thin-scroll pr-1">
         {filtered.map((file) => <FileRow key={file.id} file={file} onClick={() => setSelected(file)} />)}
         {filtered.length === 0 && (
           <div className="flex flex-col items-center justify-center py-12 text-center">
