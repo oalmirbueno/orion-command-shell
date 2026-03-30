@@ -84,19 +84,24 @@ function buildSummary(tasks: OperationTask[]): OperationsSummaryData {
 
 function categorize(tasks: OperationTask[]): OperationSection {
   const now = new Date();
-  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 6, 0, 0); // 6am
-  const overnightStart = new Date(todayStart.getTime() - 6 * 3600_000); // midnight
+  const nowMs = now.getTime();
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 6, 0, 0);
+  const overnightStart = new Date(todayStart.getTime() - 6 * 3600_000);
 
   const running: OperationTask[] = [];
   const completed: OperationTask[] = [];
   const failed: OperationTask[] = [];
   const overnight: OperationTask[] = [];
+  const upcoming: OperationTask[] = [];
 
   for (const t of tasks) {
     const updatedMs = new Date(t.updatedAt).getTime();
     const isOvernight = updatedMs >= overnightStart.getTime() && updatedMs < todayStart.getTime();
+    const isFuture = updatedMs > nowMs;
 
-    if (t.status === "running" || t.status === "queued" || t.status === "paused") {
+    if (t.status === "queued" && isFuture) {
+      upcoming.push(t);
+    } else if (t.status === "running" || t.status === "queued" || t.status === "paused") {
       running.push(t);
     } else if (t.status === "failed") {
       failed.push(t);
@@ -107,7 +112,10 @@ function categorize(tasks: OperationTask[]): OperationSection {
     }
   }
 
-  return { running, completed, failed, overnight, upcoming: [] };
+  // Sort upcoming by time
+  upcoming.sort((a, b) => new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime());
+
+  return { running, completed, failed, overnight, upcoming };
 }
 
 function buildPageData(operations: OperationInfo[], timeline: TimelineEventInfo[]): OperationsPageData {
