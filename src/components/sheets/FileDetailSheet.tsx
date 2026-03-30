@@ -157,7 +157,8 @@ export function FileDetailSheet({ file, open, onOpenChange }: Props) {
 
   const handleDownload = () => {
     if (!file) return;
-    const url = apiUrl(`/files/content?path=${encodeURIComponent(file.path)}`);
+    const encodedPath = encodeURIComponent(file.path);
+    const url = apiUrl(`/files/read?path=${encodedPath}`);
     window.open(url, "_blank");
   };
 
