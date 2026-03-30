@@ -206,6 +206,7 @@ const SearchPage = () => {
       // Sort by score desc
       allResults.sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
       setResults(allResults);
+      addToHistory(q);
     } catch (err: any) {
       if (err?.name === "AbortError") return;
       setError("Erro ao buscar. Tente novamente.");
