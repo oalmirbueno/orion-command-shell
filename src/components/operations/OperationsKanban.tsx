@@ -37,7 +37,7 @@ const priorityStyles: Record<TaskPriority, { label: string; cls: string }> = {
 
 /* ── Task Card ── */
 
-function TaskCard({ task }: { task: OperationTask }) {
+function TaskCard({ task, onClick }: { task: OperationTask; onClick?: () => void }) {
   const pri = priorityStyles[task.priority];
   const isActive = task.status === "running";
   const isFailed = task.status === "failed";
