@@ -184,7 +184,8 @@ async function fetchMetrics(): Promise<{ metrics: SystemMetrics; latencyMs: numb
       latencyMs,
     };
   } catch {
-    clearTimeout(timeout);
+    clearTimeout(sysTimeout);
+    clearTimeout(statsTimeout);
     const latencyMs = Math.round(performance.now() - start);
     return {
       metrics: emptyMetrics(),
