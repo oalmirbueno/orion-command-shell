@@ -13,6 +13,7 @@ import { toast } from "@/hooks/use-toast";
 import type { AgentView } from "@/domains/agents/types";
 
 interface LogEntry { ts: string; level: string; message: string; }
+interface TaskHistoryEntry { id: string; description: string; status: string; timestamp: string; duration?: string; }
 
 interface AgentProfile {
   personality: string;
