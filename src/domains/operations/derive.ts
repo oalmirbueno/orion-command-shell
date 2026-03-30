@@ -19,17 +19,24 @@ import type { AgentInfo } from "../agents/types";
 // Fetch helper
 // ═══════════════════════════════════════════════════════
 
-async function safeFetch<T>(endpoint: string, fallback: T): Promise<T> {
+async function safeFetch<T>(endpoint: string, fallback: T, unwrapKeys?: string[]): Promise<T> {
   try {
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 6000);
+    const timer = setTimeout(() => controller.abort(), 12000);
     const res = await fetch(apiUrl(endpoint), {
       signal: controller.signal,
       headers: { Accept: "application/json" },
     });
     clearTimeout(timer);
     if (!res.ok) return fallback;
-    return (await res.json()) as T;
+    const json = await res.json();
+    // Unwrap { sessions: [], items: [], agents: [] } wrappers
+    if (unwrapKeys && json && typeof json === "object" && !Array.isArray(json)) {
+      for (const key of unwrapKeys) {
+        if (Array.isArray(json[key])) return json[key] as T;
+      }
+    }
+    return json as T;
   } catch {
     return fallback;
   }
