@@ -43,12 +43,40 @@ export function AgentDetailSheet({ agent, open, onOpenChange }: Props) {
     if (!open || !agent) { setLogs([]); return; }
 
     let cancelled = false;
+    let endpointUnavailable = false;
+
     const fetchLogs = async () => {
+      if (endpointUnavailable) return;
       setLogsLoading(true);
       setLogsError(false);
       try {
+        // Try dedicated logs endpoint first
         const res = await fetch(apiUrl(`/agents/${agent.id}/logs`));
-        if (!res.ok) throw new Error();
+        if (res.status === 404) {
+          // Endpoint doesn't exist — try activities filtered by agent
+          const fallback = await fetch(apiUrl(`/activities`));
+          if (!fallback.ok) throw new Error("activities-failed");
+          const fbData = await fallback.json();
+          const allActivities = fbData.activities || fbData || [];
+          if (!cancelled) {
+            const filtered = allActivities
+              .filter((a: any) => a.agent === agent.name || a.agent === agent.id || a.agentId === agent.id)
+              .slice(0, 50);
+            if (filtered.length === 0) {
+              // No agent-specific data available at all
+              endpointUnavailable = true;
+              setLogs([]);
+            } else {
+              setLogs(filtered.map((a: any) => ({
+                ts: a.timestamp || "",
+                level: a.status === "error" ? "error" : a.status === "warning" ? "warn" : "info",
+                message: a.description || a.message || a.content || String(a),
+              })));
+            }
+          }
+          return;
+        }
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         if (!cancelled) {
           const entries: LogEntry[] = (data.logs || data || []).map((l: any) => ({
@@ -224,9 +252,9 @@ export function AgentDetailSheet({ agent, open, onOpenChange }: Props) {
                 {[1,2,3].map(i => <div key={i} className="h-4 w-full rounded bg-muted/30 animate-pulse" />)}
               </div>
             ) : logsError ? (
-              <p className="text-xs text-muted-foreground/40 italic ml-5">Erro ao carregar logs</p>
+              <p className="text-xs text-muted-foreground/40 italic ml-5">Não foi possível conectar ao endpoint de logs</p>
             ) : logs.length === 0 ? (
-              <p className="text-xs text-muted-foreground/40 italic ml-5">Nenhum log disponível</p>
+              <p className="text-xs text-muted-foreground/40 italic ml-5">Nenhuma atividade registrada para este agente</p>
             ) : (() => {
               const filtered = logFilter === "all" ? logs : logs.filter(l => l.level === logFilter);
               return filtered.length === 0 ? (
