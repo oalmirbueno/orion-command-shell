@@ -13,7 +13,6 @@
 import { useEffect, useRef, useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { apiUrl } from "@/domains/api";
-import { getDomainHealthStore, type DomainKey } from "./useDomainHealth";
 
 export type StreamStatus = "connecting" | "connected" | "disconnected" | "unsupported";
 
