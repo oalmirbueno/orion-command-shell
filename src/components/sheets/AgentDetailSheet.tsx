@@ -6,12 +6,22 @@ import { Separator } from "@/components/ui/separator";
 import {
   Bot, Cpu, Zap, Activity, Clock, Layers, ArrowDownRight,
   ArrowUpRight, AlertTriangle, Briefcase, RotateCcw, Loader2, Terminal, RefreshCw,
+  Fingerprint, Brain, Target, Shield, Sparkles, Hash, Copy, Check,
 } from "lucide-react";
 import { apiUrl } from "@/domains/api";
 import { toast } from "@/hooks/use-toast";
 import type { AgentView } from "@/domains/agents/types";
 
 interface LogEntry { ts: string; level: string; message: string; }
+
+interface AgentProfile {
+  personality: string;
+  objective: string;
+  scope: string;
+  behavior: string;
+  soul: string;
+  instructions: string;
+}
 
 const statusBadge: Record<string, { label: string; className: string }> = {
   active:  { label: "Ativo",   className: "bg-status-online/15 text-status-online border-status-online/30" },
@@ -37,7 +47,41 @@ export function AgentDetailSheet({ agent, open, onOpenChange }: Props) {
   const [logsLoading, setLogsLoading] = useState(false);
   const [logsError, setLogsError] = useState(false);
   const [logFilter, setLogFilter] = useState<"all" | "info" | "warn" | "error">("all");
+  const [profile, setProfile] = useState<AgentProfile | null>(null);
+  const [profileLoading, setProfileLoading] = useState(false);
+  const [copiedId, setCopiedId] = useState(false);
   const logsEndRef = useRef<HTMLDivElement>(null);
+
+  // Fetch agent profile/soul
+  useEffect(() => {
+    if (!open || !agent) { setProfile(null); return; }
+    let cancelled = false;
+    const fetchProfile = async () => {
+      setProfileLoading(true);
+      try {
+        const res = await fetch(apiUrl(`/agents/${agent.id}`));
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        if (!cancelled) {
+          setProfile({
+            personality: data.personality || data.soul?.personality || "",
+            objective: data.objective || data.soul?.objective || data.purpose || "",
+            scope: data.scope || data.soul?.scope || "",
+            behavior: data.behavior || data.soul?.behavior || data.expectedBehavior || "",
+            soul: data.soul?.summary || data.soulSummary || data.identity || "",
+            instructions: data.instructions || data.soul?.instructions || data.systemPrompt || "",
+          });
+        }
+      } catch {
+        // No profile endpoint — leave null, UI shows fallback
+        if (!cancelled) setProfile(null);
+      } finally {
+        if (!cancelled) setProfileLoading(false);
+      }
+    };
+    fetchProfile();
+    return () => { cancelled = true; };
+  }, [open, agent?.id]);
 
   useEffect(() => {
     if (!open || !agent) { setLogs([]); return; }
@@ -146,10 +190,54 @@ export function AgentDetailSheet({ agent, open, onOpenChange }: Props) {
         </SheetHeader>
 
         <div className="space-y-5 mt-6">
-          {/* Role & Model */}
-          <Section icon={Briefcase} title="Função">
-            <Row label="Role" value={agent.role} />
+          {/* Identity */}
+          <Section icon={Fingerprint} title="Identidade">
+            <Row label="Nome" value={agent.name} />
+            <div className="flex items-center gap-3 ml-5">
+              <span className="text-xs text-muted-foreground/50 w-28 shrink-0">ID</span>
+              <code className="text-[11px] font-mono text-foreground/60 truncate">{agent.id}</code>
+              <button
+                onClick={() => { navigator.clipboard.writeText(agent.id); setCopiedId(true); setTimeout(() => setCopiedId(false), 1500); }}
+                className="shrink-0 text-muted-foreground/30 hover:text-foreground/60 transition-colors cursor-pointer"
+              >
+                {copiedId ? <Check className="h-3 w-3 text-status-online" /> : <Copy className="h-3 w-3" />}
+              </button>
+            </div>
+            <Row label="Função" value={agent.role} />
+            <Row label="Tier" value={tier} />
             <Row label="Modelo" value={agent.model} mono />
+            <Row label="Status" value={badge.label} />
+          </Section>
+
+          <Separator className="bg-border/30" />
+
+          {/* Agent Profile / Soul */}
+          <Section icon={Brain} title="Perfil do Agente">
+            {profileLoading ? (
+              <div className="space-y-2 ml-5">
+                {[1,2,3].map(i => <div key={i} className="h-3 rounded bg-muted/30 animate-pulse" style={{ width: `${80 - i * 15}%` }} />)}
+              </div>
+            ) : profile && Object.values(profile).some(v => v) ? (
+              <div className="space-y-3 ml-5">
+                {profile.soul && <ProfileBlock icon={Sparkles} label="SOUL" value={profile.soul} />}
+                {profile.objective && <ProfileBlock icon={Target} label="Objetivo" value={profile.objective} />}
+                {profile.personality && <ProfileBlock label="Personalidade" value={profile.personality} />}
+                {profile.scope && <ProfileBlock label="Escopo" value={profile.scope} />}
+                {profile.behavior && <ProfileBlock icon={Shield} label="Comportamento" value={profile.behavior} />}
+                {profile.instructions && (
+                  <div className="rounded-lg border border-border/30 bg-muted/10 p-3">
+                    <p className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground/40 mb-1.5">Instruções</p>
+                    <p className="text-xs text-foreground/60 leading-relaxed whitespace-pre-wrap">{profile.instructions}</p>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="ml-5 rounded-lg border border-dashed border-border/30 p-4 text-center">
+                <Brain className="h-5 w-5 text-muted-foreground/20 mx-auto mb-2" />
+                <p className="text-xs text-muted-foreground/40">Perfil não disponível via API</p>
+                <p className="text-[10px] font-mono text-muted-foreground/25 mt-1">Endpoint: GET /api/agents/{agent.id}</p>
+              </div>
+            )}
           </Section>
 
           <Separator className="bg-border/30" />
@@ -327,6 +415,18 @@ function MetricCard({ label, value }: { label: string; value: string }) {
     <div className="rounded-lg border border-border/30 bg-muted/20 p-3 text-center">
       <p className="text-base font-bold text-foreground">{value}</p>
       <p className="text-[10px] font-mono text-muted-foreground/40 mt-0.5">{label}</p>
+    </div>
+  );
+}
+
+function ProfileBlock({ icon: Icon, label, value }: { icon?: React.ElementType; label: string; value: string }) {
+  return (
+    <div>
+      <div className="flex items-center gap-1.5 mb-1">
+        {Icon && <Icon className="h-3 w-3 text-muted-foreground/30" />}
+        <p className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground/40">{label}</p>
+      </div>
+      <p className="text-xs text-foreground/65 leading-relaxed">{value}</p>
     </div>
   );
 }
