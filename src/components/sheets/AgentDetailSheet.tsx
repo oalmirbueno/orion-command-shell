@@ -300,6 +300,81 @@ export function AgentDetailSheet({ agent, open, onOpenChange }: Props) {
 
           <Separator className="bg-border/30" />
 
+          {/* Operational Controls */}
+          <Section icon={Settings2} title="Controle Operacional">
+            <div className="ml-5 space-y-3">
+              {!editing ? (
+                <>
+                  <ControlRow label="Nome" value={controls.displayName} />
+                  <ControlRow label="Descrição" value={controls.shortDesc || "—"} />
+                  <ControlRow label="Função" value={controls.role} />
+                  <ControlRow label="Observações" value={controls.notes || "—"} />
+                  <ControlRow label="Modo" value={{ geral: "Geral", por_dm: "Por DM", por_topico: "Por Tópico" }[controls.mode]} />
+                  <ControlRow label="Alvo" value={controls.target || "—"} sub={{ topic: "Topic ID", dm: "DM", grupo: "Grupo" }[controls.targetType]} />
+                  <ControlRow label="Status Op." value={{ ativo: "Ativo", pausado: "Pausado", somente_leitura: "Somente leitura" }[controls.opStatus]} />
+                  <button
+                    onClick={() => setEditing(true)}
+                    className="flex items-center gap-1.5 text-[11px] font-mono text-primary/70 hover:text-primary transition-colors cursor-pointer mt-1"
+                  >
+                    <Pencil className="h-3 w-3" /> Editar
+                  </button>
+                </>
+              ) : (
+                <>
+                  <EditField label="Nome" value={controls.displayName} onChange={v => setControls(c => ({ ...c, displayName: v }))} />
+                  <EditField label="Descrição curta" value={controls.shortDesc} onChange={v => setControls(c => ({ ...c, shortDesc: v }))} />
+                  <EditField label="Função" value={controls.role} onChange={v => setControls(c => ({ ...c, role: v }))} />
+                  <EditField label="Observações" value={controls.notes} onChange={v => setControls(c => ({ ...c, notes: v }))} textarea />
+
+                  <div>
+                    <p className="text-[10px] font-mono text-muted-foreground/40 mb-1.5">Modo de atuação</p>
+                    <div className="flex gap-1.5">
+                      {([["geral", "Geral"], ["por_dm", "Por DM"], ["por_topico", "Por Tópico"]] as const).map(([val, lbl]) => (
+                        <ChipSelect key={val} selected={controls.mode === val} onClick={() => setControls(c => ({ ...c, mode: val }))}>{lbl}</ChipSelect>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <p className="text-[10px] font-mono text-muted-foreground/40 mb-1.5">Alvo principal</p>
+                    <div className="flex gap-1.5 mb-2">
+                      {([["topic", "Topic ID"], ["dm", "DM"], ["grupo", "Grupo"]] as const).map(([val, lbl]) => (
+                        <ChipSelect key={val} selected={controls.targetType === val} onClick={() => setControls(c => ({ ...c, targetType: val }))}>{lbl}</ChipSelect>
+                      ))}
+                    </div>
+                    <input
+                      value={controls.target}
+                      onChange={e => setControls(c => ({ ...c, target: e.target.value }))}
+                      placeholder="ID ou referência do alvo"
+                      className="w-full px-3 py-1.5 rounded-md border border-border/40 bg-muted/10 text-xs font-mono text-foreground/80 placeholder:text-muted-foreground/25 focus:outline-none focus:border-primary/40"
+                    />
+                  </div>
+
+                  <div>
+                    <p className="text-[10px] font-mono text-muted-foreground/40 mb-1.5">Status operacional</p>
+                    <div className="flex gap-1.5">
+                      {([["ativo", "Ativo", "bg-status-online/15 text-status-online border-status-online/30"], ["pausado", "Pausado", "bg-status-warning/15 text-status-warning border-status-warning/30"], ["somente_leitura", "Somente leitura", "bg-muted text-muted-foreground border-border/40"]] as const).map(([val, lbl, cls]) => (
+                        <ChipSelect key={val} selected={controls.opStatus === val} onClick={() => setControls(c => ({ ...c, opStatus: val }))} activeClass={cls}>{lbl}</ChipSelect>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2 pt-1">
+                    <Button size="sm" onClick={handleSaveControls} disabled={saving} className="flex-1">
+                      {saving ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : <Save className="h-3.5 w-3.5 mr-1.5" />}
+                      {saving ? "Salvando…" : "Salvar"}
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={() => setEditing(false)} disabled={saving}>
+                      Cancelar
+                    </Button>
+                  </div>
+                </>
+              )}
+            </div>
+          </Section>
+
+          <Separator className="bg-border/30" />
+
           {/* Agent Profile / Soul */}
           <Section icon={Brain} title="Perfil do Agente">
             {profileLoading ? (
