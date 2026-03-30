@@ -71,12 +71,6 @@ export function useOrionStream(options: StreamOptions = {}) {
     const queryKey = DOMAIN_QUERY_MAP[domain];
     if (!queryKey) return;
 
-    // Report to domain health store
-    const domainKey = SSE_TO_DOMAIN[domain];
-    if (domainKey) {
-      getDomainHealthStore().reportStreamEvent(domainKey);
-    }
-
     // For status-bar-metrics, the query stores { metrics, latencyMs }
     if (domain === "system" || domain === "system.stats") {
       // Invalidate to trigger a fresh fetch — SSE payload may be partial
