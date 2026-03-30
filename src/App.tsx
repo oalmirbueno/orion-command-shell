@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { LastUpdatedProvider } from "@/hooks/useLastUpdated";
 import Index from "./pages/Index.tsx";
 import PlaceholderPage from "./pages/PlaceholderPage.tsx";
 import SystemPage from "./pages/SystemPage.tsx";
