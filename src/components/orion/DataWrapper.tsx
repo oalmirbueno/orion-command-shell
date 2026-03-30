@@ -33,6 +33,8 @@ interface OrionDataWrapperProps {
   errorTitle?: string;
   /** Custom description for the error state */
   errorDescription?: string;
+  /** Domain-specific skeleton shown during loading instead of generic spinner */
+  skeleton?: React.ReactNode;
 }
 
 const sourceLabels: Record<DataSource, { label: string; className: string }> = {
