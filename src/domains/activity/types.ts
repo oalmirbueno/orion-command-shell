@@ -41,6 +41,7 @@ export interface ActivityEvent {
   title: string;
   description: string;
   source: string;
+  metadata?: Record<string, unknown> | null;
 }
 
 export interface ActivityPageData {

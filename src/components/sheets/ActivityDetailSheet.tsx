@@ -6,7 +6,7 @@ import { Separator } from "@/components/ui/separator";
 import {
   AlertCircle, AlertTriangle, CheckCircle2, Info, Clock,
   Bot, Server, GitBranch, Shield, Zap, Copy, ChevronDown, ChevronUp,
-  Tag, Radio,
+  Tag, Radio, Code2,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import type { ActivityEvent, EventPriority, EventCategory } from "@/domains/activity/types";
@@ -28,6 +28,18 @@ const categoryConfig: Record<EventCategory, { icon: React.ElementType; label: st
   deploy:   { icon: GitBranch, label: "Deploy", className: "bg-primary/10 text-primary border-primary/20" },
 };
 
+function formatMetadataValue(value: unknown): string {
+  if (value === null || value === undefined) return "—";
+  if (typeof value === "string") return value;
+  if (typeof value === "number") return String(value);
+  if (typeof value === "boolean") return value ? "true" : "false";
+  return JSON.stringify(value, null, 2);
+}
+
+function formatMetadataLabel(key: string): string {
+  return key.replace(/_/g, " ").replace(/([a-z])([A-Z])/g, "$1 $2");
+}
+
 interface Props {
   event: ActivityEvent | null;
   open: boolean;
@@ -36,6 +48,7 @@ interface Props {
 
 export function ActivityDetailSheet({ event, open, onOpenChange }: Props) {
   const [expanded, setExpanded] = useState(false);
+  const [metaExpanded, setMetaExpanded] = useState(false);
 
   if (!event) return null;
 
@@ -44,8 +57,12 @@ export function ActivityDetailSheet({ event, open, onOpenChange }: Props) {
   const PIcon = pcfg.icon;
   const CIcon = ccfg.icon;
 
+  const meta = event.metadata;
+  const metaEntries = meta ? Object.entries(meta).filter(([, v]) => v !== null && v !== undefined) : [];
+  const hasMetadata = metaEntries.length > 0;
+
   const handleCopy = () => {
-    const text = [
+    const parts = [
       `Título: ${event.title}`,
       `Prioridade: ${event.priority}`,
       `Categoria: ${event.category}`,
@@ -53,8 +70,11 @@ export function ActivityDetailSheet({ event, open, onOpenChange }: Props) {
       `Origem: ${event.source}`,
       `Descrição: ${event.description || "—"}`,
       `ID: ${event.id}`,
-    ].join("\n");
-    navigator.clipboard.writeText(text);
+    ];
+    if (hasMetadata) {
+      parts.push(`Metadata: ${JSON.stringify(meta, null, 2)}`);
+    }
+    navigator.clipboard.writeText(parts.join("\n"));
     toast({ title: "Detalhes copiados" });
   };
 
@@ -81,7 +101,6 @@ export function ActivityDetailSheet({ event, open, onOpenChange }: Props) {
         </SheetHeader>
 
         <div className="space-y-5 mt-6">
-          {/* Categoria */}
           <Section icon={Tag} title="Categoria">
             <div className="flex items-center gap-2 ml-5">
               <CIcon className="h-3.5 w-3.5" />
@@ -93,7 +112,6 @@ export function ActivityDetailSheet({ event, open, onOpenChange }: Props) {
 
           <Separator className="bg-border/30" />
 
-          {/* Metadados */}
           <Section icon={Clock} title="Tempo">
             <Row label="Horário" value={event.time} mono />
             <Row label="Relativo" value={event.timeAgo} />
@@ -133,9 +151,60 @@ export function ActivityDetailSheet({ event, open, onOpenChange }: Props) {
             </div>
           </div>
 
+          {/* Metadata técnica */}
+          {hasMetadata && (
+            <>
+              <Separator className="bg-border/30" />
+              <div>
+                <button
+                  onClick={() => setMetaExpanded(!metaExpanded)}
+                  className="flex items-center gap-2 w-full group"
+                >
+                  <Code2 className="h-3.5 w-3.5 text-muted-foreground/40" />
+                  <h4 className="text-xs font-mono uppercase tracking-wider text-muted-foreground/50">
+                    Metadata técnica
+                  </h4>
+                  <Badge variant="outline" className="text-[10px] font-mono px-1.5 py-0 bg-muted/50 text-muted-foreground/50 border-border/30 ml-1">
+                    {metaEntries.length}
+                  </Badge>
+                  <div className="flex-1" />
+                  {metaExpanded
+                    ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground/30 group-hover:text-muted-foreground/60 transition-colors" />
+                    : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground/30 group-hover:text-muted-foreground/60 transition-colors" />
+                  }
+                </button>
+
+                {metaExpanded && (
+                  <div className="mt-3 rounded-lg border border-border/40 bg-surface-2 overflow-hidden">
+                    <div className="divide-y divide-border/20">
+                      {metaEntries.map(([key, value]) => {
+                        const formatted = formatMetadataValue(value);
+                        const isComplex = typeof value === "object" && value !== null;
+
+                        return (
+                          <div key={key} className="px-4 py-2.5">
+                            <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground/40 capitalize">
+                              {formatMetadataLabel(key)}
+                            </span>
+                            {isComplex ? (
+                              <pre className="mt-1.5 text-xs font-mono text-foreground/60 whitespace-pre-wrap break-all bg-background/50 rounded p-2 border border-border/20 max-h-40 overflow-y-auto">
+                                {formatted}
+                              </pre>
+                            ) : (
+                              <p className="mt-0.5 text-sm text-foreground/70 font-mono">{formatted}</p>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+
           <Separator className="bg-border/30" />
 
-          {/* Ações */}
           <Button onClick={handleCopy} variant="outline" className="w-full">
             <Copy className="h-4 w-4 mr-2" />
             Copiar detalhes
