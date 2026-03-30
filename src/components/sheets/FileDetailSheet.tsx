@@ -150,10 +150,15 @@ export function FileDetailSheet({ file, open, onOpenChange }: Props) {
     }
   };
 
-  const handleDownload = () => {
+  const handleOpenAction = () => {
     if (!file) return;
-    const encodedPath = encodeURIComponent(file.path);
-    const url = apiUrl(`/files/read?path=${encodedPath}`);
+    if (canPreview && !isImage) {
+      // Text files: just expand in sheet
+      setExpanded(true);
+      return;
+    }
+    // Binary/image/pdf: open API URL in new tab
+    const url = apiUrl(`/files?path=${encodeURIComponent(file.path)}`);
     window.open(url, "_blank");
   };
 
