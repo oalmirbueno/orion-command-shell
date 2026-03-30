@@ -220,14 +220,15 @@ export const fetchCronPage: DomainFetcher<CronPageData> = async (): Promise<Doma
     fallbackData: [],
     transform: (raw) => {
       if (!Array.isArray(raw)) return [];
-      return raw.map((item) => {
-        // If it has schedule.expr, it's the real shape
-        if (item && typeof item === "object" && "schedule" in item && typeof (item as RealCronJob).schedule === "object") {
-          return realToCronJobInfo(item as RealCronJob);
+      return raw.map((item: any) => {
+        if (!item || typeof item !== "object") return null;
+        // Detect backend shape: has nested lastRun, stats, or schedule object
+        if ("lastRun" in item || "stats" in item || (item.schedule && typeof item.schedule === "object")) {
+          return normalizeBackendCron(item as RealCronJob);
         }
         // Already canonical
         return item as CronJobInfo;
-      });
+      }).filter(Boolean) as CronJobInfo[];
     },
   });
 
