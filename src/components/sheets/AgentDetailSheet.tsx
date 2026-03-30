@@ -252,9 +252,9 @@ export function AgentDetailSheet({ agent, open, onOpenChange }: Props) {
                 {[1,2,3].map(i => <div key={i} className="h-4 w-full rounded bg-muted/30 animate-pulse" />)}
               </div>
             ) : logsError ? (
-              <p className="text-xs text-muted-foreground/40 italic ml-5">Erro ao carregar logs</p>
+              <p className="text-xs text-muted-foreground/40 italic ml-5">Não foi possível conectar ao endpoint de logs</p>
             ) : logs.length === 0 ? (
-              <p className="text-xs text-muted-foreground/40 italic ml-5">Nenhum log disponível</p>
+              <p className="text-xs text-muted-foreground/40 italic ml-5">Nenhuma atividade registrada para este agente</p>
             ) : (() => {
               const filtered = logFilter === "all" ? logs : logs.filter(l => l.level === logFilter);
               return filtered.length === 0 ? (
