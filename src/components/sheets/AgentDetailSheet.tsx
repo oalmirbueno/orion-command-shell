@@ -132,7 +132,7 @@ export function AgentDetailSheet({ agent, open, onOpenChange }: Props) {
           if (!cancelled) {
             const filtered = all.filter((a: any) => a.agent === agent.name || a.agent === agent.id || a.agentId === agent.id).slice(0, 50);
             if (filtered.length === 0) { unavailable = true; setLogs([]); }
-133:             else { setLogs(filtered.map((a: any) => ({ ts: a.timestamp || "", level: a.status === "error" ? "error" : a.status === "warning" ? "warn" : "info", message: a.description || a.message || String(a) }))); setLogsSource("fallback"); }
+else { setLogs(filtered.map((a: any) => ({ ts: a.timestamp || "", level: a.status === "error" ? "error" : a.status === "warning" ? "warn" : "info", message: a.description || a.message || String(a) }))); setLogsSource("fallback"); }
           }
           return;
         }
