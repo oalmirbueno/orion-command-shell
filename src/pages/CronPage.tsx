@@ -5,6 +5,7 @@ import { CronSummary } from "@/components/cron/CronSummary";
 import { CronJobsList } from "@/components/cron/CronJobsList";
 import { useOrionData } from "@/hooks/useOrionData";
 import { fetchCronPage } from "@/domains/cron/fetcher";
+import { CronSkeleton } from "@/components/skeletons/DomainSkeletons";
 import type { CronPageData } from "@/domains/cron/types";
 
 const CronPage = () => {
