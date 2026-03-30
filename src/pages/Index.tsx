@@ -21,7 +21,7 @@ const Index = () => {
 
   return (
     <OrionLayout title="Comando">
-      <OrionDataWrapper state={state} source={source} lastUpdated={lastUpdated} onRetry={refetch} compact hideSource>
+      <OrionDataWrapper state={state} source={source} lastUpdated={lastUpdated} onRetry={refetch} compact hideSource skeleton={<HomeSkeleton />}>
         {data && (
           <div className="space-y-5">
             {/* Tier 1: Status + Weather side by side */}

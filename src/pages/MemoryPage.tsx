@@ -22,7 +22,7 @@ const MemoryPage = () => {
     <OrionLayout title="Memória">
       <div className="space-y-8">
         <OrionBreadcrumb items={["Mission Control", "Memória"]} />
-        <OrionDataWrapper state={state} source={source} lastUpdated={lastUpdated} onRetry={refetch} emptyTitle="Nenhum snapshot de memória" emptyDescription="Snapshots aparecerão aqui quando agentes gravarem contexto">
+        <OrionDataWrapper state={state} source={source} lastUpdated={lastUpdated} onRetry={refetch} emptyTitle="Nenhum snapshot de memória" emptyDescription="Snapshots aparecerão aqui quando agentes gravarem contexto" skeleton={<MemorySkeleton />}>
           {summary && <MemorySummary summary={summary} />}
           <MemorySnapshots snapshots={snapshots} />
         </OrionDataWrapper>

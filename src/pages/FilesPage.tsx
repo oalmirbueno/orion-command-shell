@@ -22,7 +22,7 @@ const FilesPage = () => {
     <OrionLayout title="Arquivos">
       <div className="space-y-8">
         <OrionBreadcrumb items={["Mission Control", "Arquivos"]} />
-        <OrionDataWrapper state={state} source={source} lastUpdated={lastUpdated} onRetry={refetch} emptyTitle="Nenhum arquivo encontrado" emptyDescription="Arquivos do workspace aparecerão aqui">
+        <OrionDataWrapper state={state} source={source} lastUpdated={lastUpdated} onRetry={refetch} emptyTitle="Nenhum arquivo encontrado" emptyDescription="Arquivos do workspace aparecerão aqui" skeleton={<FilesSkeleton />}>
           {summary && <FilesSummary summary={summary} />}
           <FilesList files={files} />
         </OrionDataWrapper>

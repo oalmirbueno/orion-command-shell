@@ -21,7 +21,7 @@ const OperationsPage = () => {
     <OrionLayout title="Operações">
       <div className="space-y-8">
         <OrionBreadcrumb items={["Mission Control", "Operações"]} />
-        <OrionDataWrapper state={state} source={source} lastUpdated={lastUpdated} onRetry={refetch} emptyTitle="Nenhuma operação em andamento" emptyDescription="Operações aparecerão aqui quando tarefas forem executadas">
+        <OrionDataWrapper state={state} source={source} lastUpdated={lastUpdated} onRetry={refetch} emptyTitle="Nenhuma operação em andamento" emptyDescription="Operações aparecerão aqui quando tarefas forem executadas" skeleton={<OperationsSkeleton />}>
           <OperationsKanban tasks={pageData.tasks} />
           <div className="mt-8">
             <OperationsTimeline events={pageData.timeline} />

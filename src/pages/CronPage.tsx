@@ -29,6 +29,7 @@ const CronPage = () => {
           onRetry={refetch}
           emptyTitle="Nenhum cron job configurado"
           emptyDescription="Crie um cron job para automatizar tarefas recorrentes"
+          skeleton={<CronSkeleton />}
         >
           <CronSummary summary={summary} />
           <CronJobsList jobs={jobs} refetchList={refetch} />
