@@ -13,22 +13,38 @@
 import { useEffect, useRef, useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { apiUrl } from "@/domains/api";
+import { getDomainHealthStore, type DomainKey } from "./useDomainHealth";
 
 export type StreamStatus = "connecting" | "connected" | "disconnected" | "unsupported";
 
 /** Domain event names the backend can push */
 const DOMAIN_QUERY_MAP: Record<string, string> = {
-  "system":     "status-bar-metrics",
+  "system":       "status-bar-metrics",
   "system.stats": "status-bar-metrics",
-  "sessions":   "sessions-page",
-  "agents":     "agents-page",
-  "activities":  "activity-page",
-  "cron":       "cron-page",
-  "operations": "operations-page",
-  "alerts":     "alerts-page",
-  "memory":     "memory-page",
-  "files":      "files-page",
-  "home":       "home-page",
+  "sessions":     "sessions-page",
+  "agents":       "agents-page",
+  "activities":   "activity-page",
+  "cron":         "cron-page",
+  "operations":   "operations-page",
+  "alerts":       "alerts-page",
+  "memory":       "memory-page",
+  "files":        "files-page",
+  "home":         "home-page",
+};
+
+/** Map SSE event names to DomainKey for health tracking */
+const SSE_TO_DOMAIN: Record<string, DomainKey> = {
+  "system":       "system",
+  "system.stats": "system",
+  "sessions":     "sessions",
+  "agents":       "agents",
+  "activities":   "activity",
+  "cron":         "cron",
+  "operations":   "operations",
+  "alerts":       "alerts",
+  "memory":       "memory",
+  "files":        "files",
+  "home":         "home",
 };
 
 interface StreamOptions {
@@ -69,6 +85,12 @@ export function useOrionStream(options: StreamOptions = {}) {
   const injectData = useCallback((domain: string, rawData: unknown) => {
     const queryKey = DOMAIN_QUERY_MAP[domain];
     if (!queryKey) return;
+
+    // Report to domain health store
+    const domainKey = SSE_TO_DOMAIN[domain];
+    if (domainKey) {
+      getDomainHealthStore().reportStreamEvent(domainKey);
+    }
 
     // For status-bar-metrics, the query stores { metrics, latencyMs }
     if (domain === "system" || domain === "system.stats") {

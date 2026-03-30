@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { LastUpdatedProvider } from "@/hooks/useLastUpdated";
+import { DomainHealthProvider } from "@/hooks/useDomainHealth";
 import { useOrionStream } from "@/hooks/useOrionStream";
 import Index from "./pages/Index.tsx";
 import PlaceholderPage from "./pages/PlaceholderPage.tsx";
@@ -68,9 +69,11 @@ function AppShell() {
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <LastUpdatedProvider>
-      <TooltipProvider>
-        <AppShell />
-      </TooltipProvider>
+      <DomainHealthProvider>
+        <TooltipProvider>
+          <AppShell />
+        </TooltipProvider>
+      </DomainHealthProvider>
     </LastUpdatedProvider>
   </QueryClientProvider>
 );
