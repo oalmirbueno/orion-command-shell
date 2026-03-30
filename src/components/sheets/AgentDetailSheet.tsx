@@ -71,10 +71,10 @@ export function AgentDetailSheet({ agent, open, onOpenChange }: Props) {
   const [newTopicId, setNewTopicId] = useState("");
   const [controls, setControls] = useState({
     displayName: "", shortDesc: "", role: "", notes: "",
-    scopeType: "global" as "global" | "dm" | "topic" | "mixed",
+    scopeType: "global" as AgentScopeType,
     topicIds: [] as string[],
     dmEnabled: true, groupEnabled: true,
-    opStatus: "ativo" as "ativo" | "pausado" | "somente_leitura",
+    opStatus: "active" as AgentOperationalStatus,
   });
 
   // ── Reset on open ──
