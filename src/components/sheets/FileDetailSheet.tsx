@@ -285,8 +285,12 @@ export function FileDetailSheet({ file, open, onOpenChange }: Props) {
 
             {/* ── Actions ── */}
             <div className="flex gap-2">
-              <Button variant="outline" size="sm" className="flex-1 h-9 text-xs border-border/40" onClick={handleDownload}>
-                <Download className="h-3.5 w-3.5 mr-1.5" /> Abrir / Download
+              <Button variant="outline" size="sm" className="flex-1 h-9 text-xs border-border/40" onClick={handleOpenAction}>
+                {canPreview && !isImage ? (
+                  <><ChevronDown className="h-3.5 w-3.5 mr-1.5" /> Expandir conteúdo</>
+                ) : (
+                  <><Download className="h-3.5 w-3.5 mr-1.5" /> Abrir / Download</>
+                )}
               </Button>
               {contentState === "loaded" && content && (
                 <Button variant="outline" size="sm" className="h-9 text-xs border-border/40" onClick={handleCopy}>
