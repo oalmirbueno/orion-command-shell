@@ -436,7 +436,7 @@ export function AgentDetailSheet({ agent, open, onOpenChange }: Props) {
 
           {/* ═══════ TAB: Operação ═══════ */}
           <TabsContent value="operation" className="px-6 py-5 space-y-5 mt-0">
-            <Sec icon={Activity} title="Atividade Atual">
+            <Sec icon={Activity} title="Atividade Atual" badge={taskHistorySource}>
               <InfoRow label="Sessões ativas" value={String(agent.sessions)} />
               <InfoRow label="Última atividade" value={agent.lastActivityLabel || agent.lastActivity} />
             </Sec>
