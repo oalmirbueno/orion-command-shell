@@ -15,69 +15,51 @@ import type { DomainFetcher, DomainResult } from "../types";
 
 interface RealCronJob {
   id: string;
-  agentId?: string;
   name: string;
   enabled: boolean;
-  createdAtMs?: number;
-  updatedAtMs?: number;
-  description?: string;
-  sessionTarget?: string;
-  payload?: Record<string, unknown>;
-  totalRuns?: number;
-  // New backend shape
   schedule?: {
     kind?: string;
     expr?: string;
     tz?: string;
     everyMs?: number;
   };
-  lastRun?: {
-    at?: string | null;
-    durationMs?: number | null;
-    ok?: boolean | null;
-    error?: string | null;
+  scheduleDisplay?: string;
+  timezone?: string;
+  nextRun?: string | null;
+  lastRun?: string | null;
+  state?: {
+    nextRunAtMs?: number;
+    lastRunAtMs?: number;
+    lastRunStatus?: string | null;
+    lastDurationMs?: number | null;
+    consecutiveErrors?: number;
+    lastDelivered?: boolean;
+    lastDeliveryStatus?: string;
   };
-  nextRunAt?: string | number | null;
-  stats?: {
-    consecutiveOk?: number;
-    consecutiveFail?: number;
-  };
-  // Legacy flat fields (old shape fallback)
-  lastRunAt?: string | number | null;
-  lastRunDurationMs?: number | null;
-  lastRunSuccess?: boolean | null;
-  lastRunError?: string | null;
-  consecutiveSuccesses?: number;
-  consecutiveFailures?: number;
+  // Legacy flat fields
+  description?: string;
+  totalRuns?: number;
+  createdAtMs?: number;
 }
 
 function normalizeBackendCron(raw: RealCronJob): CronJobInfo {
-  const toIso = (v: string | number | null | undefined): string | null => {
-    if (!v) return null;
-    if (typeof v === "number") return new Date(v).toISOString();
-    return v;
-  };
+  // lastRun and nextRun are ISO strings at root level
+  const lastRunAt = raw.lastRun ?? (raw.state?.lastRunAtMs ? new Date(raw.state.lastRunAtMs).toISOString() : null);
+  const nextRunAt = raw.nextRun ?? (raw.state?.nextRunAtMs ? new Date(raw.state.nextRunAtMs).toISOString() : null);
+  const lastDurationMs = raw.state?.lastDurationMs ?? null;
+  const lastRunStatus = raw.state?.lastRunStatus ?? null;
+  const consecutiveErrors = raw.state?.consecutiveErrors ?? 0;
+  const lastRunSuccess = lastRunStatus === "ok" ? true : lastRunStatus ? false : null;
+  const lastRunError = lastRunStatus && lastRunStatus !== "ok" ? "Última execução falhou" : null;
 
-  // Handle nested lastRun object vs legacy flat fields
-  const lastRunAt = raw.lastRun?.at ?? raw.lastRunAt ?? null;
-  const lastRunDurationMs = raw.lastRun?.durationMs ?? raw.lastRunDurationMs ?? null;
-  const lastRunOk = raw.lastRun?.ok ?? raw.lastRunSuccess ?? null;
-  const lastRunError = raw.lastRun?.error ?? raw.lastRunError ?? null;
-
-  // Handle nested stats vs legacy flat fields
-  const consecutiveOk = raw.stats?.consecutiveOk ?? raw.consecutiveSuccesses ?? 0;
-  const consecutiveFail = raw.stats?.consecutiveFail ?? raw.consecutiveFailures ?? 0;
-
-  // Build schedule string
+  // Schedule string
   let scheduleStr = "—";
-  if (raw.schedule) {
-    if (raw.schedule.expr) {
-      scheduleStr = raw.schedule.expr;
-    } else if (raw.schedule.everyMs) {
-      scheduleStr = `every:${raw.schedule.everyMs}`;
-    } else if (raw.schedule.kind) {
-      scheduleStr = raw.schedule.kind;
-    }
+  if (raw.schedule?.expr) {
+    scheduleStr = raw.schedule.expr;
+  } else if (raw.schedule?.everyMs) {
+    scheduleStr = `every:${raw.schedule.everyMs}`;
+  } else if (raw.scheduleDisplay) {
+    scheduleStr = raw.scheduleDisplay;
   }
 
   return {
@@ -86,13 +68,13 @@ function normalizeBackendCron(raw: RealCronJob): CronJobInfo {
     description: raw.description || raw.name,
     schedule: scheduleStr,
     enabled: raw.enabled,
-    lastRunAt: toIso(lastRunAt),
-    lastRunDurationMs: lastRunDurationMs,
-    lastRunSuccess: lastRunOk,
+    lastRunAt: lastRunAt,
+    lastRunDurationMs: lastDurationMs,
+    lastRunSuccess: lastRunSuccess,
     lastRunError: lastRunError,
-    nextRunAt: toIso(raw.nextRunAt),
-    consecutiveSuccesses: consecutiveOk,
-    consecutiveFailures: consecutiveFail,
+    nextRunAt: nextRunAt,
+    consecutiveSuccesses: consecutiveErrors === 0 ? 1 : 0,
+    consecutiveFailures: consecutiveErrors,
     totalRuns: raw.totalRuns ?? 0,
     createdAt: raw.createdAtMs ? new Date(raw.createdAtMs).toISOString() : new Date().toISOString(),
   };
