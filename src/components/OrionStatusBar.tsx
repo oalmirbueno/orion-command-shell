@@ -10,8 +10,12 @@ export function OrionStatusBar() {
   const { lastUpdated, source } = useLastUpdated();
 
   const timeStr = lastUpdated ? format(lastUpdated, "HH:mm:ss") : "—";
-  const sourceLabel = source === "api" ? "Live" : source === "cache" ? "Cache" : source === "fallback" ? "Fallback" : "";
-  const sourceColor = source === "api" ? "text-status-online" : "text-muted-foreground/60";
+
+  const isLive = source === "api";
+  const isOffline = !lastUpdated && !source;
+  const sourceLabel = isLive ? "Live" : source === "cache" ? "Cache" : source === "fallback" ? "Fallback" : "Offline";
+  const sourceColor = isLive ? "text-status-online" : isOffline ? "text-status-critical/60" : "text-muted-foreground/60";
+  const dotColor = isLive ? "bg-status-online animate-pulse" : isOffline ? "bg-status-critical/50" : "bg-muted-foreground/40";
 
   return (
     <footer className="h-8 flex items-center justify-between px-5 border-t border-border surface-0 text-xs font-mono text-muted-foreground/60 shrink-0 select-none">
@@ -48,15 +52,11 @@ export function OrionStatusBar() {
       </div>
 
       <div className="flex items-center gap-4">
-        {sourceLabel && (
-          <>
             <div className={`flex items-center gap-1.5 ${sourceColor}`}>
-              <span className={`h-1.5 w-1.5 rounded-full ${source === "api" ? "bg-status-online animate-pulse" : "bg-muted-foreground/40"}`} />
+              <span className={`h-1.5 w-1.5 rounded-full ${dotColor}`} />
               <span>{sourceLabel}</span>
             </div>
             <Sep />
-          </>
-        )}
 
         <div className="flex items-center gap-2">
           <Shield className="h-3.5 w-3.5 text-muted-foreground/40" />
