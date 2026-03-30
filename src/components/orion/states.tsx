@@ -12,6 +12,7 @@ interface StateProps {
   description?: string;
   className?: string;
   compact?: boolean;
+  icon?: React.ElementType;
 }
 
 /* ── Loading ── */
