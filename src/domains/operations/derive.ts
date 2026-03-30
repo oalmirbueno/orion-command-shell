@@ -102,41 +102,65 @@ function deriveFromCron(jobs: CronJobInfo[]): { ops: OperationInfo[]; events: Ti
   const events: TimelineEventInfo[] = [];
 
   for (const job of jobs) {
-    if (!job.enabled || !job.lastRunAt) continue;
+    if (!job.enabled) continue;
 
-    const isFailed = job.lastRunSuccess === false;
-    const status: OperationStatus = isFailed ? "failed" : "done";
+    // Past run → done/failed operation
+    if (job.lastRunAt) {
+      const isFailed = job.lastRunSuccess === false;
+      const status: OperationStatus = isFailed ? "failed" : "done";
 
-    ops.push({
-      id: `cron-${job.id}`,
-      kind: "cron",
-      title: `Cron: ${job.name}`,
-      description: job.lastRunError || job.description || null,
-      status,
-      priority: job.consecutiveFailures >= 3 ? "high" : "normal",
-      progress: 100,
-      source: "cron",
-      agentId: null,
-      sessionId: null,
-      assignee: null,
-      startedAt: job.lastRunAt,
-      updatedAt: job.lastRunAt,
-      completedAt: job.lastRunAt,
-      metadata: {
-        schedule: job.schedule,
-        consecutiveFailures: job.consecutiveFailures,
-        durationMs: job.lastRunDurationMs,
-      },
-    });
+      ops.push({
+        id: `cron-${job.id}`,
+        kind: "cron",
+        title: `Cron: ${job.name}`,
+        description: job.lastRunError || job.description || null,
+        status,
+        priority: job.consecutiveFailures >= 3 ? "high" : "normal",
+        progress: 100,
+        source: "cron",
+        agentId: null,
+        sessionId: null,
+        assignee: null,
+        startedAt: job.lastRunAt,
+        updatedAt: job.lastRunAt,
+        completedAt: job.lastRunAt,
+        metadata: {
+          schedule: job.schedule,
+          consecutiveFailures: job.consecutiveFailures,
+          durationMs: job.lastRunDurationMs,
+        },
+      });
 
-    events.push({
-      id: `cron-ev-${job.id}`,
-      operationId: `cron-${job.id}`,
-      action: isFailed ? "failed" : "completed",
-      agent: null,
-      detail: isFailed ? (job.lastRunError || "Falha na execução") : `Concluído em ${job.lastRunDurationMs ?? 0}ms`,
-      createdAt: job.lastRunAt,
-    });
+      events.push({
+        id: `cron-ev-${job.id}`,
+        operationId: `cron-${job.id}`,
+        action: isFailed ? "failed" : "completed",
+        agent: null,
+        detail: isFailed ? (job.lastRunError || "Falha na execução") : `Concluído em ${job.lastRunDurationMs ?? 0}ms`,
+        createdAt: job.lastRunAt,
+      });
+    }
+
+    // Upcoming run → queued operation
+    if (job.nextRunAt) {
+      ops.push({
+        id: `cron-next-${job.id}`,
+        kind: "cron",
+        title: `Agendado: ${job.name}`,
+        description: job.description || `Schedule: ${job.schedule}`,
+        status: "queued",
+        priority: "normal",
+        progress: 0,
+        source: "cron",
+        agentId: null,
+        sessionId: null,
+        assignee: null,
+        startedAt: null,
+        updatedAt: job.nextRunAt,
+        completedAt: null,
+        metadata: { schedule: job.schedule, nextRunAt: job.nextRunAt },
+      });
+    }
   }
 
   return { ops, events };
