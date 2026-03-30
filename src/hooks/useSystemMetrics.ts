@@ -100,15 +100,11 @@ async function fetchMetrics(): Promise<{ metrics: SystemMetrics; source: "api" |
     }
 
     const mem = sys?.system?.memory;
-    const ramPct = stats?.ram
-      ? Math.round((stats.ram.used / stats.ram.total) * 100)
-      : mem
-        ? Math.round((mem.used / mem.total) * 100)
-        : null;
+    const ramRaw = stats?.ram || (mem ? { used: mem.used, total: mem.total } : null);
+    const ramPct = ramRaw ? Math.round((ramRaw.used / ramRaw.total) * 100) : null;
 
-    const diskPct = stats?.disk
-      ? Math.round((stats.disk.used / stats.disk.total) * 100)
-      : null;
+    const diskRaw = stats?.disk || null;
+    const diskPct = diskRaw ? Math.round((diskRaw.used / diskRaw.total) * 100) : null;
 
     const uptimeStr = stats?.uptime
       || (sys?.system?.uptimeFormatted)
@@ -121,7 +117,11 @@ async function fetchMetrics(): Promise<{ metrics: SystemMetrics; source: "api" |
       metrics: {
         cpu: stats?.cpu ?? null,
         ram: ramPct,
+        ramUsedGB: ramRaw ? fmtGB(ramRaw.used) : null,
+        ramTotalGB: ramRaw ? fmtGB(ramRaw.total) : null,
         disk: diskPct,
+        diskUsedGB: diskRaw ? fmtGB(diskRaw.used * 1e9) : null,
+        diskTotalGB: diskRaw ? fmtGB(diskRaw.total * 1e9) : null,
         uptime: uptimeStr,
         latencyMs,
         backendOnline: true,
@@ -129,6 +129,7 @@ async function fetchMetrics(): Promise<{ metrics: SystemMetrics; source: "api" |
         activeServices: stats?.activeServices ?? connectedCount,
         totalServices: stats?.totalServices ?? integrations.length,
         hostname: sys?.system?.hostname ?? null,
+        platform: sys?.system?.platform ?? null,
       },
       source: "api",
       latencyMs,
