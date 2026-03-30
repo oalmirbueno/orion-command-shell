@@ -10,7 +10,11 @@ import { apiUrl } from "@/domains/api";
 export interface SystemMetrics {
   cpu: number | null;
   ram: number | null;
+  ramUsedGB: string | null;
+  ramTotalGB: string | null;
   disk: number | null;
+  diskUsedGB: string | null;
+  diskTotalGB: string | null;
   uptime: string | null;
   latencyMs: number | null;
   backendOnline: boolean;
@@ -18,6 +22,7 @@ export interface SystemMetrics {
   activeServices: number | null;
   totalServices: number | null;
   hostname: string | null;
+  platform: string | null;
 }
 
 interface RawSystem {
