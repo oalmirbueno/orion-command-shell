@@ -30,30 +30,32 @@ const queryClient = new QueryClient({
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/agents" element={<AgentsPage />} />
-          <Route path="/missions" element={<PlaceholderPage title="Missões" description="Rastreamento e orquestração de missões" />} />
-          <Route path="/sessions" element={<SessionsPage />} />
-          <Route path="/activity" element={<ActivityPage />} />
-          <Route path="/memory" element={<MemoryPage />} />
-          <Route path="/system" element={<SystemPage />} />
-          <Route path="/cron" element={<CronPage />} />
-          <Route path="/alerts" element={<AlertsPage />} />
-          <Route path="/operations" element={<OperationsPage />} />
-          <Route path="/files" element={<FilesPage />} />
-          <Route path="/search" element={<SearchPage />} />
-          <Route path="/pipelines" element={<PlaceholderPage title="Pipelines" description="Módulo Pipeline — Em desenvolvimento" />} />
-          <Route path="/office3d" element={<Office3DPage />} />
-          <Route path="/settings" element={<PlaceholderPage title="Configurações" description="Módulo Configurações — Em desenvolvimento" />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
+    <LastUpdatedProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/agents" element={<AgentsPage />} />
+            <Route path="/missions" element={<PlaceholderPage title="Missões" description="Rastreamento e orquestração de missões" />} />
+            <Route path="/sessions" element={<SessionsPage />} />
+            <Route path="/activity" element={<ActivityPage />} />
+            <Route path="/memory" element={<MemoryPage />} />
+            <Route path="/system" element={<SystemPage />} />
+            <Route path="/cron" element={<CronPage />} />
+            <Route path="/alerts" element={<AlertsPage />} />
+            <Route path="/operations" element={<OperationsPage />} />
+            <Route path="/files" element={<FilesPage />} />
+            <Route path="/search" element={<SearchPage />} />
+            <Route path="/pipelines" element={<PlaceholderPage title="Pipelines" description="Módulo Pipeline — Em desenvolvimento" />} />
+            <Route path="/office3d" element={<Office3DPage />} />
+            <Route path="/settings" element={<PlaceholderPage title="Configurações" description="Módulo Configurações — Em desenvolvimento" />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </LastUpdatedProvider>
   </QueryClientProvider>
 );
 

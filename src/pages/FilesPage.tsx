@@ -11,6 +11,7 @@ const FilesPage = () => {
   const { state, data, source, lastUpdated, refetch } = useOrionData<FilesPageData>({
     key: "files-page",
     fetcher: fetchFilesPage,
+    refreshInterval: 120_000,
   });
 
   const files = data?.files || [];

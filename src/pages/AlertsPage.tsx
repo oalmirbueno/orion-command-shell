@@ -11,6 +11,7 @@ const AlertsPage = () => {
   const { state, data, source, lastUpdated, refetch } = useOrionData<AlertsPageData>({
     key: "alerts-page",
     fetcher: fetchAlertsPage,
+    refreshInterval: 30_000,
   });
 
   return (

@@ -15,6 +15,7 @@ const Index = () => {
   const { state, data, source, lastUpdated, refetch } = useOrionData<HomePageData>({
     key: "home-page",
     fetcher: fetchHomePage,
+    refreshInterval: 30_000,
   });
 
   return (

@@ -12,6 +12,7 @@ const AgentsPage = () => {
   const { state, data, source, lastUpdated, refetch } = useOrionData<AgentView[]>({
     key: "agents",
     fetcher: fetchAgents,
+    refreshInterval: 30_000,
   });
 
   const agents = data || [];
