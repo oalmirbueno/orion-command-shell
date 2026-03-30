@@ -190,10 +190,54 @@ export function AgentDetailSheet({ agent, open, onOpenChange }: Props) {
         </SheetHeader>
 
         <div className="space-y-5 mt-6">
-          {/* Role & Model */}
-          <Section icon={Briefcase} title="Função">
-            <Row label="Role" value={agent.role} />
+          {/* Identity */}
+          <Section icon={Fingerprint} title="Identidade">
+            <Row label="Nome" value={agent.name} />
+            <div className="flex items-center gap-3 ml-5">
+              <span className="text-xs text-muted-foreground/50 w-28 shrink-0">ID</span>
+              <code className="text-[11px] font-mono text-foreground/60 truncate">{agent.id}</code>
+              <button
+                onClick={() => { navigator.clipboard.writeText(agent.id); setCopiedId(true); setTimeout(() => setCopiedId(false), 1500); }}
+                className="shrink-0 text-muted-foreground/30 hover:text-foreground/60 transition-colors cursor-pointer"
+              >
+                {copiedId ? <Check className="h-3 w-3 text-status-online" /> : <Copy className="h-3 w-3" />}
+              </button>
+            </div>
+            <Row label="Função" value={agent.role} />
+            <Row label="Tier" value={tier} />
             <Row label="Modelo" value={agent.model} mono />
+            <Row label="Status" value={badge.label} />
+          </Section>
+
+          <Separator className="bg-border/30" />
+
+          {/* Agent Profile / Soul */}
+          <Section icon={Brain} title="Perfil do Agente">
+            {profileLoading ? (
+              <div className="space-y-2 ml-5">
+                {[1,2,3].map(i => <div key={i} className="h-3 rounded bg-muted/30 animate-pulse" style={{ width: `${80 - i * 15}%` }} />)}
+              </div>
+            ) : profile && Object.values(profile).some(v => v) ? (
+              <div className="space-y-3 ml-5">
+                {profile.soul && <ProfileBlock icon={Sparkles} label="SOUL" value={profile.soul} />}
+                {profile.objective && <ProfileBlock icon={Target} label="Objetivo" value={profile.objective} />}
+                {profile.personality && <ProfileBlock label="Personalidade" value={profile.personality} />}
+                {profile.scope && <ProfileBlock label="Escopo" value={profile.scope} />}
+                {profile.behavior && <ProfileBlock icon={Shield} label="Comportamento" value={profile.behavior} />}
+                {profile.instructions && (
+                  <div className="rounded-lg border border-border/30 bg-muted/10 p-3">
+                    <p className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground/40 mb-1.5">Instruções</p>
+                    <p className="text-xs text-foreground/60 leading-relaxed whitespace-pre-wrap">{profile.instructions}</p>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="ml-5 rounded-lg border border-dashed border-border/30 p-4 text-center">
+                <Brain className="h-5 w-5 text-muted-foreground/20 mx-auto mb-2" />
+                <p className="text-xs text-muted-foreground/40">Perfil não disponível via API</p>
+                <p className="text-[10px] font-mono text-muted-foreground/25 mt-1">Endpoint: GET /api/agents/{agent.id}</p>
+              </div>
+            )}
           </Section>
 
           <Separator className="bg-border/30" />
