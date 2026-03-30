@@ -13,7 +13,7 @@ interface Props {
   signals: StabilitySignal[];
 }
 
-export function StabilitySignals({ signals }: Props) {
+export function StabilitySignals({ signals = [] }: Props) {
   if (signals.length === 0) {
     return (
       <section className="rounded-lg border border-border overflow-hidden h-full">

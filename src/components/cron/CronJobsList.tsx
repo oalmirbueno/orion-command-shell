@@ -83,7 +83,7 @@ interface Props {
   refetchList?: () => void;
 }
 
-export function CronJobsList({ jobs, refetchList }: Props) {
+export function CronJobsList({ jobs = [], refetchList }: Props) {
   const [localJobs, setLocalJobs] = useState<CronJob[]>(jobs);
   const [selected, setSelected] = useState<CronJob | null>(null);
   const [togglingIds, setTogglingIds] = useState<Set<string>>(new Set());

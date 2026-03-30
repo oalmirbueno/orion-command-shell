@@ -70,7 +70,7 @@ interface OperationsTimelineProps {
   events: TimelineEvent[];
 }
 
-export function OperationsTimeline({ events }: OperationsTimelineProps) {
+export function OperationsTimeline({ events = [] }: OperationsTimelineProps) {
   return (
     <section className="space-y-4">
       <OrionSectionHeader

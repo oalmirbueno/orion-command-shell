@@ -128,7 +128,7 @@ function MetricPill({ icon: Icon, label, value, highlight, warn }: {
   );
 }
 
-export function AgentDetailCards({ agents }: AgentDetailCardsProps) {
+export function AgentDetailCards({ agents = [] }: AgentDetailCardsProps) {
   const [selected, setSelected] = useState<AgentView | null>(null);
 
   if (agents.length === 0) {

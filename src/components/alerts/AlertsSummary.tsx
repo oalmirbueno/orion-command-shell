@@ -13,6 +13,7 @@ const CELLS = [
 ];
 
 export function AlertsSummary({ summary }: Props) {
+  if (!summary) return null;
   const isEmpty = summary.critical + summary.warning + summary.info + summary.resolved === 0;
   const hasCritical = summary.critical > 0;
 

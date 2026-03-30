@@ -6,6 +6,7 @@ interface FilesSummaryProps {
 }
 
 export function FilesSummary({ summary }: FilesSummaryProps) {
+  if (!summary) return null;
   const items = [
     { label: "Arquivos", value: summary.totalFiles || "—", icon: FolderOpen, text: "text-primary", dot: "bg-primary/50" },
     { label: "Categorias", value: summary.categories || "—", icon: Layers, text: "text-foreground", dot: "bg-foreground/30" },
