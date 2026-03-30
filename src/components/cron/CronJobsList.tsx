@@ -22,7 +22,7 @@ function ResultBadge({ result }: { result: CronJob["lastResult"] }) {
   return <span className="text-[10px] font-mono text-muted-foreground/25">—</span>;
 }
 
-function JobRow({ job, onClick, onToggle }: { job: CronJob; onClick: () => void; onToggle: (enabled: boolean) => void }) {
+function JobRow({ job, onClick, onToggle, isToggling }: { job: CronJob; onClick: () => void; onToggle: (enabled: boolean) => void; isToggling: boolean }) {
   const cfg = statusConfig[job.status];
   const isDisabled = !job.enabled;
   const hasFailed = job.status === "failed";
@@ -50,8 +50,9 @@ function JobRow({ job, onClick, onToggle }: { job: CronJob; onClick: () => void;
           <div className="flex items-center gap-2.5 shrink-0 ml-4" onClick={handleSwitchClick}>
             <Switch
               checked={job.enabled}
+              disabled={isToggling}
               onCheckedChange={(checked) => onToggle(checked)}
-              className="data-[state=checked]:bg-primary"
+              className={`data-[state=checked]:bg-primary ${isToggling ? "opacity-50" : ""}`}
             />
             <div className={`status-dot ${cfg.dot}`} />
             <ChevronRight className="h-4 w-4 text-muted-foreground/10 group-hover:text-muted-foreground/40 transition-colors" />
@@ -92,18 +93,26 @@ export function CronJobsList({ jobs }: Props) {
     setLocalJobs(jobs);
   }
 
+  const [togglingIds, setTogglingIds] = useState<Set<string>>(new Set());
+
   const handleToggle = async (id: string, enabled: boolean) => {
+    setTogglingIds(prev => new Set(prev).add(id));
+    // Optimistic update
+    setLocalJobs(prev => prev.map(j => j.id === id ? { ...j, enabled } : j));
     try {
       const res = await fetch(apiUrl("/cron"), {
-        method: "PATCH",
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id, enabled }),
       });
       if (!res.ok) throw new Error();
-      setLocalJobs(prev => prev.map(j => j.id === id ? { ...j, enabled } : j));
       toast({ title: enabled ? "Cron job ativado" : "Cron job desativado" });
     } catch {
+      // Revert on error
+      setLocalJobs(prev => prev.map(j => j.id === id ? { ...j, enabled: !enabled } : j));
       toast({ title: "Erro ao alterar status", variant: "destructive" });
+    } finally {
+      setTogglingIds(prev => { const s = new Set(prev); s.delete(id); return s; });
     }
   };
 
@@ -145,7 +154,7 @@ export function CronJobsList({ jobs }: Props) {
       </div>
       <div className="space-y-2.5">
         {sorted.map((job) => (
-          <JobRow key={job.id} job={job} onClick={() => setSelected(job)} onToggle={(enabled) => handleToggle(job.id, enabled)} />
+          <JobRow key={job.id} job={job} onClick={() => setSelected(job)} onToggle={(enabled) => handleToggle(job.id, enabled)} isToggling={togglingIds.has(job.id)} />
         ))}
       </div>
       <CronDetailSheet job={selected} open={!!selected} onOpenChange={(o) => !o && setSelected(null)} onToggle={handleToggle} />
