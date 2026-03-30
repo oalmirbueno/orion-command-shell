@@ -96,15 +96,15 @@ export function OrionStatusBar() {
 
   const defaultHealth: SubsystemHealth = { backend: "unknown", openclaw: "unknown", stats: "unknown" };
   const health = metrics?.health ?? defaultHealth;
-  const panelStatus = metrics?.panelStatus ?? "offline";
+  const panelStatus = metrics?.panelStatus ?? "stale";
   const panel = panelConfig[panelStatus];
 
   // Format values
-  const cpuStr = metrics.cpu !== null ? `${Math.round(metrics.cpu)}%` : "—";
-  const ramStr = metrics.ram !== null ? `${metrics.ram}%` : "—";
-  const diskStr = metrics.disk !== null ? `${metrics.disk}%` : "—";
-  const latStr = metrics.latencyMs !== null && health.backend === "online" ? `${metrics.latencyMs}ms` : "—";
-  const uptimeStr = metrics.uptime || "—";
+  const cpuStr = metrics?.cpu != null ? `${Math.round(metrics.cpu)}%` : "—";
+  const ramStr = metrics?.ram != null ? `${metrics.ram}%` : "—";
+  const diskStr = metrics?.disk != null ? `${metrics.disk}%` : "—";
+  const latStr = metrics?.latencyMs != null && health.backend === "online" ? `${metrics.latencyMs}ms` : "—";
+  const uptimeStr = metrics?.uptime || "—";
 
   // Tooltips
   const cpuTip = metrics.cpu !== null ? `CPU: ${Math.round(metrics.cpu)}%` : undefined;
