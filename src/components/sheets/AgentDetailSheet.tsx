@@ -36,6 +36,7 @@ export function AgentDetailSheet({ agent, open, onOpenChange }: Props) {
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [logsLoading, setLogsLoading] = useState(false);
   const [logsError, setLogsError] = useState(false);
+  const [logFilter, setLogFilter] = useState<"all" | "info" | "warn" | "error">("all");
   const logsEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
