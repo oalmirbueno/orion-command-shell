@@ -13,12 +13,11 @@ import {
 } from "lucide-react";
 import { apiUrl } from "@/domains/api";
 import { toast } from "@/hooks/use-toast";
-import type { AgentView } from "@/domains/agents/types";
+import type { AgentView, AgentProfile, AgentOperationalStatus, AgentScopeType } from "@/domains/agents/types";
 
 // ── Types ────────────────────────────────────────────
 interface LogEntry { ts: string; level: string; message: string }
 interface TaskHistoryEntry { id: string; description: string; status: string; timestamp: string; duration?: string }
-interface AgentProfile { personality: string; objective: string; scope: string; behavior: string; soul: string; instructions: string }
 
 // ── Constants ────────────────────────────────────────
 const statusBadge: Record<string, { label: string; cls: string }> = {
