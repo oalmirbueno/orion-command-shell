@@ -226,6 +226,32 @@ export function AgentDetailSheet({ agent, open, onOpenChange }: Props) {
       setRestarting(false);
     }
   };
+  const handleSaveControls = async () => {
+    setSaving(true);
+    try {
+      const res = await fetch(apiUrl(`/agents/${agent.id}`), {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          displayName: controls.displayName,
+          shortDesc: controls.shortDesc,
+          role: controls.role,
+          notes: controls.notes,
+          mode: controls.mode,
+          target: controls.target,
+          targetType: controls.targetType,
+          opStatus: controls.opStatus,
+        }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      toast({ title: "Configurações salvas" });
+      setEditing(false);
+    } catch {
+      toast({ title: "Erro ao salvar configurações", variant: "destructive" });
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const badge = statusBadge[agent.status] || statusBadge.idle;
   const tier = tierLabel[agent.tier] || agent.tier;
