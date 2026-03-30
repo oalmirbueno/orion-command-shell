@@ -345,7 +345,7 @@ export function AgentDetailSheet({ agent, open, onOpenChange }: Props) {
 
           {/* ═══════ TAB: Configuração ═══════ */}
           <TabsContent value="config" className="px-6 py-5 space-y-5 mt-0">
-            <Sec icon={Settings2} title="Controle Operacional">
+            <Sec icon={Settings2} title="Controle Operacional" badge={profileSource}>
               <div className="ml-5 space-y-3">
                 {!editing ? (
                   <>
