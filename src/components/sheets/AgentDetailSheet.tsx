@@ -70,7 +70,6 @@ export function AgentDetailSheet({ agent, open, onOpenChange }: Props) {
         if (!cancelled) {
           const filtered = all
             .filter((a: any) => a.agent === agent.name || a.agent === agent.id || a.agentId === agent.id)
-            .slice(0, 20)
             .map((a: any) => ({
               id: a.id || crypto.randomUUID(),
               description: a.description || a.message || a.content || "",
