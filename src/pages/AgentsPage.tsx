@@ -20,7 +20,7 @@ const AgentsPage = () => {
     <OrionLayout title="Agentes">
       <div className="space-y-8">
         <OrionBreadcrumb items={["Mission Control", "Agentes"]} />
-        <OrionDataWrapper state={state} source={source} lastUpdated={lastUpdated} onRetry={refetch}>
+        <OrionDataWrapper state={state} source={source} lastUpdated={lastUpdated} onRetry={refetch} emptyTitle="Nenhum agente configurado" emptyDescription="Configure agentes no backend para visualizá-los aqui">
           <AgentsSummaryBar agents={agents} />
           <div className="mt-8">
             <AgentArchitectureMap agents={agents} />

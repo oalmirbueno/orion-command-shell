@@ -1,21 +1,16 @@
 import { OrionLayout } from "@/components/OrionLayout";
 import { OrionBreadcrumb } from "@/components/orion";
+import { OrionDataWrapper } from "@/components/orion/DataWrapper";
 import { CronSummary } from "@/components/cron/CronSummary";
 import { CronJobsList } from "@/components/cron/CronJobsList";
-import { useQuery } from "@tanstack/react-query";
+import { useOrionData } from "@/hooks/useOrionData";
 import { fetchCronPage } from "@/domains/cron/fetcher";
-import { Skeleton } from "@/components/ui/skeleton";
+import type { CronPageData } from "@/domains/cron/types";
 
 const CronPage = () => {
-  const { data, isLoading, refetch } = useQuery({
-    queryKey: ["cron-page"],
-    queryFn: async () => {
-      const result = await fetchCronPage();
-      return result.data;
-    },
-    staleTime: 30_000,
-    refetchInterval: 15_000,
-    refetchOnWindowFocus: false,
+  const { state, data, source, lastUpdated, refetch } = useOrionData<CronPageData>({
+    key: "cron-page",
+    fetcher: fetchCronPage,
   });
 
   const jobs = data?.jobs ?? [];
@@ -25,19 +20,17 @@ const CronPage = () => {
     <OrionLayout title="Cron">
       <div className="space-y-8">
         <OrionBreadcrumb items={["Mission Control", "Cron Jobs"]} />
-        {isLoading && !data ? (
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-20 rounded-lg" />)}
-            </div>
-            {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-24 rounded-lg" />)}
-          </div>
-        ) : (
-          <>
-            <CronSummary summary={summary} />
-            <CronJobsList jobs={jobs} refetchList={refetch} />
-          </>
-        )}
+        <OrionDataWrapper
+          state={state}
+          source={source}
+          lastUpdated={lastUpdated}
+          onRetry={refetch}
+          emptyTitle="Nenhum cron job configurado"
+          emptyDescription="Crie um cron job para automatizar tarefas recorrentes"
+        >
+          <CronSummary summary={summary} />
+          <CronJobsList jobs={jobs} refetchList={refetch} />
+        </OrionDataWrapper>
       </div>
     </OrionLayout>
   );
