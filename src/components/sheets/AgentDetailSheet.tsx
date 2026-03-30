@@ -464,7 +464,7 @@ else { setLogs(filtered.map((a: any) => ({ ts: a.timestamp || "", level: a.statu
                     <div>
                       <p className="text-[10px] font-mono text-muted-foreground/40 mb-1.5">Status operacional</p>
                       <div className="flex gap-1.5">
-                        {([["ativo", "Ativo", "bg-status-online/15 text-status-online border-status-online/30"], ["pausado", "Pausado", "bg-status-warning/15 text-status-warning border-status-warning/30"], ["somente_leitura", "Somente leitura", "bg-muted text-muted-foreground border-border/40"]] as const).map(([val, lbl, cls]) => (
+                        {([["active", "Ativo", "bg-status-online/15 text-status-online border-status-online/30"], ["paused", "Pausado", "bg-status-warning/15 text-status-warning border-status-warning/30"], ["readonly", "Somente leitura", "bg-muted text-muted-foreground border-border/40"]] as const).map(([val, lbl, cls]) => (
                           <Chip key={val} selected={controls.opStatus === val} onClick={() => setControls(c => ({ ...c, opStatus: val }))} activeClass={cls}>{lbl}</Chip>
                         ))}
                       </div>
