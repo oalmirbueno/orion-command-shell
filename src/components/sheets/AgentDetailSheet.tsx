@@ -1,6 +1,24 @@
+import { useState } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Bot, Cpu, Zap, Activity } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import {
+  Bot, Cpu, Zap, Activity, Clock, Layers, ArrowDownRight,
+  ArrowUpRight, AlertTriangle, Briefcase,
+} from "lucide-react";
 import type { AgentView } from "@/domains/agents/types";
+
+const statusBadge: Record<string, { label: string; className: string }> = {
+  active:  { label: "Ativo",   className: "bg-status-online/15 text-status-online border-status-online/30" },
+  idle:    { label: "Ocioso",  className: "bg-muted text-muted-foreground border-border/40" },
+  offline: { label: "Offline", className: "bg-status-critical/15 text-status-critical border-status-critical/30" },
+};
+
+const tierLabel: Record<string, string> = {
+  orchestrator: "Orquestrador",
+  core: "Núcleo",
+  support: "Suporte",
+};
 
 interface Props {
   agent: AgentView | null;
@@ -11,52 +29,109 @@ interface Props {
 export function AgentDetailSheet({ agent, open, onOpenChange }: Props) {
   if (!agent) return null;
 
+  const badge = statusBadge[agent.status] || statusBadge.idle;
+  const tier = tierLabel[agent.tier] || agent.tier;
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="bg-card border-border overflow-y-auto">
+      <SheetContent className="bg-card border-border overflow-y-auto sm:max-w-md">
         <SheetHeader>
-          <SheetTitle className="text-foreground flex items-center gap-2">
-            <Bot className="h-5 w-5" /> {agent.name}
-          </SheetTitle>
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-surface-2 border border-border/40 flex items-center justify-center shrink-0">
+              <Bot className="h-4 w-4 text-muted-foreground/60" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <SheetTitle className="text-foreground text-base truncate">{agent.name}</SheetTitle>
+              <div className="flex items-center gap-2 mt-1">
+                <Badge variant="outline" className={`text-[10px] font-mono px-2 py-0 ${badge.className}`}>
+                  {badge.label}
+                </Badge>
+                <Badge variant="outline" className="text-[10px] font-mono px-2 py-0 border-border/40 text-muted-foreground">
+                  {tier}
+                </Badge>
+              </div>
+            </div>
+          </div>
         </SheetHeader>
+
         <div className="space-y-5 mt-6">
-          <Row label="Role" value={agent.role} />
-          <Row label="Tier" value={agent.tier} />
-          <Row label="Modelo" value={agent.model} />
-          <Row label="Status" value={agent.status} />
-          <Row label="Disponibilidade" value={agent.availability} />
+          {/* Role & Model */}
+          <Section icon={Briefcase} title="Função">
+            <Row label="Role" value={agent.role} />
+            <Row label="Modelo" value={agent.model} mono />
+          </Section>
 
-          <div className="rounded-lg border border-border/40 bg-surface-2 p-4">
-            <h4 className="text-xs font-mono uppercase tracking-wider text-muted-foreground/50 mb-3">Métricas</h4>
-            <div className="grid grid-cols-2 gap-4">
-              <Metric icon={Zap} label="Sessões ativas" value={String(agent.sessions)} />
-              <Metric icon={Cpu} label="Carga" value={`${agent.load}%`} />
-              <Metric icon={Activity} label="Tokens hoje" value={agent.tokensToday} />
-              <Metric icon={Activity} label="Alertas" value={String(agent.alertCount)} />
+          <Separator className="bg-border/30" />
+
+          {/* Sessions & Activity */}
+          <Section icon={Activity} title="Atividade">
+            <Row label="Sessões ativas" value={String(agent.sessions)} />
+            <Row label="Última atividade" value={agent.lastActivityLabel || agent.lastActivity} />
+          </Section>
+
+          <Separator className="bg-border/30" />
+
+          {/* Current Task */}
+          <Section icon={Clock} title="Tarefa Atual">
+            {agent.currentTask ? (
+              <>
+                <p className="text-sm text-foreground/80 ml-5">{agent.currentTask}</p>
+                {agent.currentTaskAge && (
+                  <p className="text-[10px] font-mono text-muted-foreground/30 ml-5 mt-1">{agent.currentTaskAge}</p>
+                )}
+              </>
+            ) : (
+              <p className="text-xs text-muted-foreground/40 italic ml-5">Nenhuma tarefa em execução</p>
+            )}
+          </Section>
+
+          <Separator className="bg-border/30" />
+
+          {/* Metrics */}
+          <Section icon={Cpu} title="Métricas">
+            <div className="grid grid-cols-3 gap-3 ml-5">
+              <MetricCard label="Carga" value={`${agent.load}%`} />
+              <MetricCard label="Tokens hoje" value={String(agent.tokensToday)} />
+              <MetricCard label="Disponibilidade" value={String(agent.availability)} />
             </div>
-          </div>
+          </Section>
 
-          <div className="rounded-lg border border-border/40 bg-surface-2 p-4">
-            <h4 className="text-xs font-mono uppercase tracking-wider text-muted-foreground/50 mb-3">Tarefa Atual</h4>
-            <p className="text-sm text-foreground/70">{agent.currentTask || "—"}</p>
-            <p className="text-[10px] font-mono text-muted-foreground/30 mt-1">{agent.currentTaskAge}</p>
-          </div>
-
-          {agent.dependsOn.length > 0 && (
-            <div>
-              <h4 className="text-xs font-mono uppercase tracking-wider text-muted-foreground/50 mb-2">Depende de</h4>
-              <div className="flex flex-wrap gap-1.5">
-                {agent.dependsOn.map(d => <span key={d} className="orion-tag">{d}</span>)}
+          {/* Alerts */}
+          {(agent.alertCount ?? 0) > 0 && (
+            <>
+              <Separator className="bg-border/30" />
+              <div className="flex items-center gap-2 rounded-lg border border-status-warning/20 bg-status-warning/5 px-4 py-3">
+                <AlertTriangle className="h-4 w-4 text-status-warning" />
+                <span className="text-sm text-status-warning font-medium">{agent.alertCount} alerta{agent.alertCount! > 1 ? "s" : ""}</span>
               </div>
-            </div>
+            </>
           )}
-          {agent.feeds.length > 0 && (
-            <div>
-              <h4 className="text-xs font-mono uppercase tracking-wider text-muted-foreground/50 mb-2">Alimenta</h4>
-              <div className="flex flex-wrap gap-1.5">
-                {agent.feeds.map(f => <span key={f} className="orion-tag">{f}</span>)}
-              </div>
-            </div>
+
+          {/* Dependencies */}
+          {(agent.dependsOn?.length ?? 0) > 0 && (
+            <>
+              <Separator className="bg-border/30" />
+              <Section icon={ArrowDownRight} title="Depende de">
+                <div className="flex flex-wrap gap-1.5 ml-5">
+                  {agent.dependsOn!.map(d => (
+                    <Badge key={d} variant="outline" className="text-[10px] font-mono border-border/40 text-muted-foreground">{d}</Badge>
+                  ))}
+                </div>
+              </Section>
+            </>
+          )}
+
+          {(agent.feeds?.length ?? 0) > 0 && (
+            <>
+              <Separator className="bg-border/30" />
+              <Section icon={ArrowUpRight} title="Alimenta">
+                <div className="flex flex-wrap gap-1.5 ml-5">
+                  {agent.feeds!.map(f => (
+                    <Badge key={f} variant="outline" className="text-[10px] font-mono border-border/40 text-muted-foreground">{f}</Badge>
+                  ))}
+                </div>
+              </Section>
+            </>
           )}
         </div>
       </SheetContent>
@@ -64,23 +139,32 @@ export function AgentDetailSheet({ agent, open, onOpenChange }: Props) {
   );
 }
 
-function Row({ label, value }: { label: string; value: string }) {
+function Section({ icon: Icon, title, children }: { icon: React.ElementType; title: string; children: React.ReactNode }) {
   return (
-    <div className="flex items-center gap-3">
-      <span className="text-xs text-muted-foreground/50 w-28 shrink-0">{label}</span>
-      <span className="text-sm font-mono text-foreground/80">{value}</span>
+    <div>
+      <div className="flex items-center gap-2 mb-3">
+        <Icon className="h-3.5 w-3.5 text-muted-foreground/40" />
+        <h4 className="text-xs font-mono uppercase tracking-wider text-muted-foreground/50">{title}</h4>
+      </div>
+      <div className="space-y-2.5">{children}</div>
     </div>
   );
 }
 
-function Metric({ icon: Icon, label, value }: { icon: React.ElementType; label: string; value: string }) {
+function Row({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
   return (
-    <div className="flex items-center gap-2">
-      <Icon className="h-3.5 w-3.5 text-muted-foreground/30" />
-      <div>
-        <p className="text-xs text-muted-foreground/40">{label}</p>
-        <p className="text-sm font-mono font-medium text-foreground">{value}</p>
-      </div>
+    <div className="flex items-center gap-3 ml-5">
+      <span className="text-xs text-muted-foreground/50 w-28 shrink-0">{label}</span>
+      <span className={`text-sm text-foreground/80 truncate ${mono ? "font-mono text-xs" : ""}`}>{value}</span>
+    </div>
+  );
+}
+
+function MetricCard({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-lg border border-border/30 bg-muted/20 p-3 text-center">
+      <p className="text-base font-bold text-foreground">{value}</p>
+      <p className="text-[10px] font-mono text-muted-foreground/40 mt-0.5">{label}</p>
     </div>
   );
 }
