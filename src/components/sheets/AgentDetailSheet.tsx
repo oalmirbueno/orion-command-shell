@@ -65,11 +65,13 @@ export function AgentDetailSheet({ agent, open, onOpenChange }: Props) {
     shortDesc: "",
     role: "",
     notes: "",
-    mode: "geral" as "geral" | "por_dm" | "por_topico",
-    target: "" as string,
-    targetType: "topic" as "topic" | "dm" | "grupo",
+    scopeType: "global" as "global" | "dm" | "topic" | "mixed",
+    topicIds: [] as string[],
+    dmEnabled: true,
+    groupEnabled: true,
     opStatus: "ativo" as "ativo" | "pausado" | "somente_leitura",
   });
+  const [newTopicId, setNewTopicId] = useState("");
 
   // Sync controls with agent data on open
   useEffect(() => {
