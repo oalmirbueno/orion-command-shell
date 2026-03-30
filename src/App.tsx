@@ -69,9 +69,11 @@ function AppShell() {
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <LastUpdatedProvider>
-      <TooltipProvider>
-        <AppShell />
-      </TooltipProvider>
+      <DomainHealthProvider>
+        <TooltipProvider>
+          <AppShell />
+        </TooltipProvider>
+      </DomainHealthProvider>
     </LastUpdatedProvider>
   </QueryClientProvider>
 );
