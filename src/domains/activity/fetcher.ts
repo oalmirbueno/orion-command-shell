@@ -147,16 +147,19 @@ const EMPTY_PAGE: ActivityPageData = {
 };
 
 export const fetchActivityPage: DomainFetcher<ActivityPageData> = async (): Promise<DomainResult<ActivityPageData>> => {
-  const baseFetcher = createRealFirstFetcher<ActivitiesApiResponse | ActivityInfo[], ActivityInfo[]>({
+  const baseFetcher = createRealFirstFetcher<ActivitiesApiResponse | BackendActivity[], ActivityInfo[]>({
     endpoint: "/activities",
     fallbackData: [],
     transform: (raw) => {
-      // Handle { activities: [...] } wrapper
+      let items: BackendActivity[];
       if (raw && typeof raw === "object" && !Array.isArray(raw) && "activities" in raw) {
-        return (raw as ActivitiesApiResponse).activities;
+        items = (raw as ActivitiesApiResponse).activities;
+      } else if (Array.isArray(raw)) {
+        items = raw as BackendActivity[];
+      } else {
+        return [];
       }
-      if (Array.isArray(raw)) return raw;
-      return [];
+      return items.map(normalizeBackendActivity);
     },
   });
 
