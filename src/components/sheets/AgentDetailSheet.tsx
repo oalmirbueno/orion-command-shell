@@ -218,6 +218,10 @@ export function AgentDetailSheet({ agent, open, onOpenChange }: Props) {
                 <div className="flex items-center gap-2 mt-1">
                   <Badge variant="outline" className={`text-[10px] font-mono px-2 py-0 ${badge.cls}`}>{badge.label}</Badge>
                   <Badge variant="outline" className="text-[10px] font-mono px-2 py-0 border-border/40 text-muted-foreground">{tier}</Badge>
+                  <Badge variant="outline" className={`text-[10px] font-mono px-1.5 py-0 ${profileSource === "live" ? "border-status-online/40 text-status-online" : "border-border/30 text-muted-foreground/40"}`}>
+                    <span className={`inline-block w-1.5 h-1.5 rounded-full mr-1 ${profileSource === "live" ? "bg-status-online" : "bg-muted-foreground/30"}`} />
+                    {profileSource === "live" ? "LIVE" : "OFFLINE"}
+                  </Badge>
                 </div>
               </div>
               <div className="flex items-center gap-3 shrink-0">
