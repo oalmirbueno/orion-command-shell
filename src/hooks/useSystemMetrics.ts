@@ -1,11 +1,22 @@
 /**
  * useSystemMetrics — Lightweight hook for the status bar.
  * Fetches /api/system + /api/system/stats on a fast interval (15s).
- * Exposes CPU, RAM, Disk, Uptime, Latency, backend status, and source.
+ * Exposes per-subsystem health and a derived global panel status.
  */
 
 import { useQuery } from "@tanstack/react-query";
 import { apiUrl } from "@/domains/api";
+
+/** Per-subsystem health */
+export type SubsystemStatus = "online" | "offline" | "unknown";
+/** Global panel status derived from subsystems */
+export type PanelStatus = "live" | "partial" | "offline" | "stale";
+
+export interface SubsystemHealth {
+  backend: SubsystemStatus;
+  openclaw: SubsystemStatus;
+  stats: SubsystemStatus;
+}
 
 export interface SystemMetrics {
   cpu: number | null;
@@ -17,12 +28,12 @@ export interface SystemMetrics {
   diskTotalGB: string | null;
   uptime: string | null;
   latencyMs: number | null;
-  backendOnline: boolean;
-  openclawOnline: boolean;
   activeServices: number | null;
   totalServices: number | null;
   hostname: string | null;
   platform: string | null;
+  health: SubsystemHealth;
+  panelStatus: PanelStatus;
 }
 
 interface RawSystem {
@@ -58,7 +69,16 @@ function fmtGB(bytes: number): string {
   return (bytes / 1e9).toFixed(1) + " GB";
 }
 
-async function fetchMetrics(): Promise<{ metrics: SystemMetrics; source: "api" | "offline"; latencyMs: number }> {
+function derivePanelStatus(h: SubsystemHealth): PanelStatus {
+  const statuses = [h.backend, h.openclaw, h.stats];
+  const onlineCount = statuses.filter(s => s === "online").length;
+  const offlineCount = statuses.filter(s => s === "offline").length;
+  if (onlineCount === statuses.length) return "live";
+  if (offlineCount === statuses.length) return "offline";
+  return "partial";
+}
+
+async function fetchMetrics(): Promise<{ metrics: SystemMetrics; latencyMs: number }> {
   const start = performance.now();
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 8000);
@@ -74,27 +94,34 @@ async function fetchMetrics(): Promise<{ metrics: SystemMetrics; source: "api" |
 
     let sys: RawSystem | null = null;
     let stats: RawStats | null = null;
-    let anyOk = false;
+    let sysOk = false;
+    let statsOk = false;
 
     if (sysRes.status === "fulfilled" && sysRes.value.ok) {
       const ct = sysRes.value.headers.get("content-type") || "";
       if (ct.includes("json")) {
         sys = await sysRes.value.json();
-        anyOk = true;
+        sysOk = true;
       }
     }
     if (statsRes.status === "fulfilled" && statsRes.value.ok) {
       const ct = statsRes.value.headers.get("content-type") || "";
       if (ct.includes("json")) {
         stats = await statsRes.value.json();
-        anyOk = true;
+        statsOk = true;
       }
     }
 
-    if (!anyOk) {
+    // Derive per-subsystem health
+    const health: SubsystemHealth = {
+      backend: (sysOk || statsOk) ? "online" : "offline",
+      openclaw: sysOk && sys?.system ? "online" : sysOk ? "offline" : "unknown",
+      stats: statsOk ? "online" : sysOk ? "offline" : "unknown",
+    };
+
+    if (!sysOk && !statsOk) {
       return {
-        metrics: emptyMetrics(),
-        source: "offline",
+        metrics: { ...emptyMetrics(), latencyMs, health, panelStatus: "offline" },
         latencyMs,
       };
     }
@@ -107,7 +134,7 @@ async function fetchMetrics(): Promise<{ metrics: SystemMetrics; source: "api" |
     const diskPct = diskRaw ? Math.round((diskRaw.used / diskRaw.total) * 100) : null;
 
     const uptimeStr = stats?.uptime
-      || (sys?.system?.uptimeFormatted)
+      || sys?.system?.uptimeFormatted
       || (sys?.system?.uptime ? formatUptime(sys.system.uptime) : null);
 
     const integrations = sys?.integrations || [];
@@ -124,22 +151,21 @@ async function fetchMetrics(): Promise<{ metrics: SystemMetrics; source: "api" |
         diskTotalGB: diskRaw ? fmtGB(diskRaw.total * 1e9) : null,
         uptime: uptimeStr,
         latencyMs,
-        backendOnline: true,
-        openclawOnline: !!sys?.system,
         activeServices: stats?.activeServices ?? connectedCount,
         totalServices: stats?.totalServices ?? integrations.length,
         hostname: sys?.system?.hostname ?? null,
         platform: sys?.system?.platform ?? null,
+        health,
+        panelStatus: derivePanelStatus(health),
       },
-      source: "api",
       latencyMs,
     };
   } catch {
     clearTimeout(timeout);
+    const latencyMs = Math.round(performance.now() - start);
     return {
       metrics: emptyMetrics(),
-      source: "offline",
-      latencyMs: Math.round(performance.now() - start),
+      latencyMs,
     };
   }
 }
@@ -149,8 +175,9 @@ function emptyMetrics(): SystemMetrics {
     cpu: null, ram: null, ramUsedGB: null, ramTotalGB: null,
     disk: null, diskUsedGB: null, diskTotalGB: null,
     uptime: null, latencyMs: null,
-    backendOnline: false, openclawOnline: false,
     activeServices: null, totalServices: null, hostname: null, platform: null,
+    health: { backend: "unknown", openclaw: "unknown", stats: "unknown" },
+    panelStatus: "offline",
   };
 }
 
@@ -167,8 +194,7 @@ export function useSystemMetrics() {
   });
 
   const metrics = data?.metrics ?? emptyMetrics();
-  const source = data?.source ?? "offline";
   const updatedAt = dataUpdatedAt ? new Date(dataUpdatedAt) : null;
 
-  return { metrics, source, updatedAt };
+  return { metrics, updatedAt };
 }
