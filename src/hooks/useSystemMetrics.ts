@@ -4,6 +4,7 @@
  * Exposes per-subsystem health and a derived global panel status.
  */
 
+import { useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { apiUrl } from "@/domains/api";
 
