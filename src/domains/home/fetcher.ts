@@ -183,6 +183,21 @@ export const fetchHomePage: DomainFetcher<HomePageData> = async (): Promise<Doma
       }));
     }
 
+    // Normalizar briefing items (API retorna {title, description, timestamp}, frontend espera {time, content, source})
+    if (aggregated.data.briefing) {
+      aggregated.data.briefing = aggregated.data.briefing.map((item: any) => {
+        // Se já está no formato correto, manter
+        if (item.content && item.time) return item;
+        // Normalizar do formato da API
+        const ts = item.timestamp ? new Date(item.timestamp) : null;
+        return {
+          time: ts ? ts.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }) : "—",
+          content: item.title || item.description || "—",
+          source: item.type || item.source || "system",
+        };
+      });
+    }
+
     return aggregated;
   }
 
