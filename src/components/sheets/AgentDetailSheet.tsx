@@ -6,13 +6,14 @@ import { Separator } from "@/components/ui/separator";
 import {
   Bot, Cpu, Zap, Activity, Clock, Layers, ArrowDownRight,
   ArrowUpRight, AlertTriangle, Briefcase, RotateCcw, Loader2, Terminal, RefreshCw,
-  Fingerprint, Brain, Target, Shield, Sparkles, Hash, Copy, Check,
+  Fingerprint, Brain, Target, Shield, Sparkles, Hash, Copy, Check, ListChecks, CheckCircle2, XCircle, Clock3,
 } from "lucide-react";
 import { apiUrl } from "@/domains/api";
 import { toast } from "@/hooks/use-toast";
 import type { AgentView } from "@/domains/agents/types";
 
 interface LogEntry { ts: string; level: string; message: string; }
+interface TaskHistoryEntry { id: string; description: string; status: string; timestamp: string; duration?: string; }
 
 interface AgentProfile {
   personality: string;
@@ -50,7 +51,40 @@ export function AgentDetailSheet({ agent, open, onOpenChange }: Props) {
   const [profile, setProfile] = useState<AgentProfile | null>(null);
   const [profileLoading, setProfileLoading] = useState(false);
   const [copiedId, setCopiedId] = useState(false);
+  const [taskHistory, setTaskHistory] = useState<TaskHistoryEntry[]>([]);
+  const [taskHistoryLoading, setTaskHistoryLoading] = useState(false);
   const logsEndRef = useRef<HTMLDivElement>(null);
+
+  // Fetch task history from activities
+  useEffect(() => {
+    if (!open || !agent) { setTaskHistory([]); return; }
+    let cancelled = false;
+    const fetchHistory = async () => {
+      setTaskHistoryLoading(true);
+      try {
+        const res = await fetch(apiUrl("/activities"));
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        const all = data.activities || data || [];
+        if (!cancelled) {
+          const filtered = all
+            .filter((a: any) => a.agent === agent.name || a.agent === agent.id || a.agentId === agent.id)
+            .slice(0, 20)
+            .map((a: any) => ({
+              id: a.id || crypto.randomUUID(),
+              description: a.description || a.message || a.content || "",
+              status: a.status || "success",
+              timestamp: a.timestamp || "",
+              duration: a.duration_ms ? `${(a.duration_ms / 1000).toFixed(1)}s` : undefined,
+            }));
+          setTaskHistory(filtered);
+        }
+      } catch { /* silent */ }
+      finally { if (!cancelled) setTaskHistoryLoading(false); }
+    };
+    fetchHistory();
+    return () => { cancelled = true; };
+  }, [open, agent?.id]);
 
   // Fetch agent profile/soul
   useEffect(() => {
@@ -266,7 +300,41 @@ export function AgentDetailSheet({ agent, open, onOpenChange }: Props) {
 
           <Separator className="bg-border/30" />
 
-          {/* Metrics */}
+          {/* Task History */}
+          <Section icon={ListChecks} title="Histórico de Tarefas">
+            {taskHistoryLoading ? (
+              <div className="space-y-2 ml-5">
+                {[1,2,3].map(i => <div key={i} className="h-8 rounded bg-muted/30 animate-pulse" />)}
+              </div>
+            ) : taskHistory.length === 0 ? (
+              <p className="text-xs text-muted-foreground/40 italic ml-5">Nenhuma tarefa registrada</p>
+            ) : (
+              <div className="ml-5 space-y-1.5 max-h-56 overflow-y-auto scrollbar-thin pr-1">
+                {taskHistory.map(task => (
+                  <div key={task.id} className="flex items-start gap-2.5 rounded-md border border-border/20 bg-muted/10 px-3 py-2">
+                    {task.status === "success" ? (
+                      <CheckCircle2 className="h-3.5 w-3.5 text-status-online shrink-0 mt-0.5" />
+                    ) : task.status === "error" ? (
+                      <XCircle className="h-3.5 w-3.5 text-status-critical shrink-0 mt-0.5" />
+                    ) : (
+                      <Clock3 className="h-3.5 w-3.5 text-muted-foreground/40 shrink-0 mt-0.5" />
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs text-foreground/70 leading-relaxed truncate">{task.description}</p>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <span className="text-[10px] font-mono text-muted-foreground/30">
+                          {task.timestamp ? new Date(task.timestamp).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }) : "—"}
+                        </span>
+                        {task.duration && <span className="text-[10px] font-mono text-muted-foreground/25">{task.duration}</span>}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </Section>
+
+          <Separator className="bg-border/30" />
           <Section icon={Cpu} title="Métricas">
             <div className="grid grid-cols-3 gap-3 ml-5">
               <MetricCard label="Carga" value={`${agent.load}%`} />
