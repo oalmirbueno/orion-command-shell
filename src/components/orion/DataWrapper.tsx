@@ -65,7 +65,7 @@ export function OrionDataWrapper({
     <div className={cn("relative", className)}>
       {/* State-driven content */}
       {state === "loading" && (
-        <OrionLoading compact={compact} />
+        skeleton || <OrionLoading compact={compact} />
       )}
 
       {state === "empty" && (
