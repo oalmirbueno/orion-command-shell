@@ -196,12 +196,53 @@ else { setLogs(filtered.map((a: any) => ({ ts: a.timestamp || "", level: a.statu
   const handleSave = async () => {
     setSaving(true);
     try {
-      const res = await fetch(apiUrl(`/agents/${agent.id}`), { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(controls) });
-      if (!res.ok) throw new Error();
-      toast({ title: "Configurações salvas" });
+      const payload = { ...controls };
+      const res = await fetch(apiUrl(`/agents/${agent.id}`), { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+      if (!res.ok) {
+        const errText = await res.text().catch(() => res.statusText);
+        throw new Error(errText || `HTTP ${res.status}`);
+      }
+
+      // Refetch to verify persistence
+      const verifyRes = await fetch(apiUrl(`/agents/${agent.id}`));
+      if (!verifyRes.ok) {
+        toast({ title: "Configuração enviada, mas não confirmada pelo backend", description: "O backend não retornou os dados atualizados.", variant: "destructive" });
+        setEditing(false);
+        return;
+      }
+
+      const returned = await verifyRes.json();
+      const mismatches: string[] = [];
+      if (payload.displayName && returned.displayName !== undefined && returned.displayName !== payload.displayName) mismatches.push("nome");
+      if (payload.role && returned.role !== undefined && returned.role !== payload.role) mismatches.push("função");
+      if (payload.scopeType && returned.scopeType !== undefined && returned.scopeType !== payload.scopeType) mismatches.push("escopo");
+      if (payload.opStatus && returned.opStatus !== undefined && returned.opStatus !== payload.opStatus) mismatches.push("status operacional");
+      if (payload.dmEnabled !== undefined && returned.dmEnabled !== undefined && returned.dmEnabled !== payload.dmEnabled) mismatches.push("DM");
+      if (payload.groupEnabled !== undefined && returned.groupEnabled !== undefined && returned.groupEnabled !== payload.groupEnabled) mismatches.push("grupo");
+
+      if (mismatches.length > 0) {
+        toast({ title: "Configuração enviada, mas não confirmada pelo backend", description: `Campos divergentes: ${mismatches.join(", ")}`, variant: "destructive" });
+      } else {
+        toast({ title: "Configurações salvas e confirmadas" });
+        // Update local state with returned data
+        setControls(c => ({
+          ...c,
+          displayName: returned.displayName ?? returned.name ?? c.displayName,
+          role: returned.role ?? c.role,
+          shortDesc: returned.shortDesc ?? returned.description ?? c.shortDesc,
+          notes: returned.notes ?? c.notes,
+          scopeType: returned.scopeType ?? c.scopeType,
+          topicIds: returned.topicIds ?? c.topicIds,
+          dmEnabled: returned.dmEnabled ?? c.dmEnabled,
+          groupEnabled: returned.groupEnabled ?? c.groupEnabled,
+          opStatus: returned.opStatus ?? c.opStatus,
+        }));
+        setProfileSource("live");
+      }
       setEditing(false);
-    } catch { toast({ title: "Erro ao salvar", variant: "destructive" }); }
-    finally { setSaving(false); }
+    } catch (err: any) {
+      toast({ title: "Erro ao salvar", description: err?.message || "Falha na comunicação com o backend", variant: "destructive" });
+    } finally { setSaving(false); }
   };
 
   const badge = statusBadge[agent.status] || statusBadge.idle;
