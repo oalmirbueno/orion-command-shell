@@ -116,14 +116,19 @@ function formatTimeAgo(iso: string): string {
 }
 
 function toActivityEvent(info: ActivityInfo): ActivityEvent {
+  const title = info.message || info.detail || "Evento sem título";
+  const description = info.detail && info.detail !== info.message
+    ? info.detail
+    : info.message || "";
+
   return {
     id: info.id,
     time: formatTime(info.createdAt),
     timeAgo: formatTimeAgo(info.createdAt),
     priority: levelToPriority(info.level, info.type),
     category: typeToCategory(info.type),
-    title: info.message,
-    description: info.detail || "",
+    title,
+    description,
     source: info.source,
   };
 }
