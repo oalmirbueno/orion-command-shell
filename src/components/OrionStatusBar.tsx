@@ -1,6 +1,7 @@
-import { Cpu, HardDrive, MemoryStick, Clock, Activity, Server } from "lucide-react";
+import { Cpu, HardDrive, MemoryStick, Clock, Activity, Server, Radio } from "lucide-react";
 import { useSystemMetrics, type SubsystemHealth, type SubsystemStatus, type PanelStatus } from "@/hooks/useSystemMetrics";
 import { useLastUpdated } from "@/hooks/useLastUpdated";
+import { useDomainHealth, type DomainHealthStatus, type GlobalHealthStatus } from "@/hooks/useDomainHealth";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { format } from "date-fns";
 
@@ -22,19 +23,26 @@ function latColor(ms: number | null): string {
   return "text-foreground/70";
 }
 
-/* ── Panel status visual config ── */
+/* ── Combined panel status (merges system metrics health + domain health) ── */
 
-const panelConfig: Record<PanelStatus, { label: string; color: string; dot: string; tip: string }> = {
-  live:    { label: "Live",     color: "text-status-online",        dot: "bg-status-online animate-pulse",  tip: "Todos os subsistemas respondendo" },
-  partial: { label: "Parcial",  color: "text-status-warning",       dot: "bg-status-warning animate-pulse", tip: "Parte dos subsistemas respondendo" },
-  offline: { label: "Offline",  color: "text-status-critical/60",   dot: "bg-status-critical/50",           tip: "Sem conexão com o backend" },
-  stale:   { label: "Cache",    color: "text-muted-foreground/60",  dot: "bg-muted-foreground/40",          tip: "Usando dados em cache local" },
+const globalConfig: Record<GlobalHealthStatus, { label: string; color: string; dot: string }> = {
+  live:    { label: "Live",     color: "text-status-online",       dot: "bg-status-online animate-pulse" },
+  partial: { label: "Parcial",  color: "text-status-warning",      dot: "bg-status-warning animate-pulse" },
+  offline: { label: "Offline",  color: "text-status-critical/60",  dot: "bg-status-critical/50" },
+  loading: { label: "Loading",  color: "text-muted-foreground/60", dot: "bg-muted-foreground/40 animate-pulse" },
+};
+
+const domainStatusLabel: Record<DomainHealthStatus, { label: string; color: string }> = {
+  live:    { label: "Live",    color: "text-status-online" },
+  stale:   { label: "Stale",   color: "text-status-warning" },
+  loading: { label: "...",     color: "text-muted-foreground/40" },
+  offline: { label: "Offline", color: "text-status-critical/60" },
 };
 
 const subsysConfig: Record<SubsystemStatus, { color: string; dot: string; label: string }> = {
   online:  { color: "text-status-online",      dot: "bg-status-online animate-pulse", label: "Online" },
   offline: { color: "text-status-critical/60",  dot: "bg-status-critical/50",          label: "Offline" },
-  unknown: { color: "text-muted-foreground/40", dot: "bg-muted-foreground/30",         label: "Indeterminado" },
+  unknown: { color: "text-muted-foreground/40", dot: "bg-muted-foreground/30",         label: "—" },
 };
 
 /* ── Shared components ── */
@@ -90,14 +98,17 @@ function SubsystemPill({ status, label, tooltip }: { status: SubsystemStatus; la
 export function OrionStatusBar() {
   const { metrics, updatedAt } = useSystemMetrics();
   const { lastUpdated } = useLastUpdated();
+  const domainHealth = useDomainHealth();
 
   const displayTime = updatedAt || lastUpdated;
   const timeStr = displayTime ? format(displayTime, "HH:mm:ss") : "—";
 
   const defaultHealth: SubsystemHealth = { backend: "unknown", openclaw: "unknown", stats: "unknown" };
   const health = metrics?.health ?? defaultHealth;
-  const panelStatus = metrics?.panelStatus ?? "stale";
-  const panel = panelConfig[panelStatus];
+
+  // Derive effective global status: merge system metrics health with domain health
+  const effectiveGlobal = deriveEffectiveGlobal(health, domainHealth.global);
+  const globalCfg = globalConfig[effectiveGlobal];
 
   // Format values
   const cpuStr = metrics?.cpu != null ? `${Math.round(metrics.cpu)}%` : "—";
@@ -126,12 +137,17 @@ export function OrionStatusBar() {
     ? `OpenClaw respondendo${metrics.platform ? ` · ${metrics.platform}` : ""}`
     : health.openclaw === "offline" ? "OpenClaw indisponível" : "Aguardando primeira verificação";
 
-  // Panel-level tooltip with breakdown
+  // Domain-level health breakdown for tooltip
+  const domainLines = Object.entries(domainHealth.domains).map(([key, entry]) => {
+    const st = domainStatusLabel[entry.status];
+    return `${key}: ${st.label}`;
+  });
   const panelTip = [
-    panel.tip,
+    `Domínios: ${domainHealth.liveCount}/${domainHealth.totalTracked} live`,
     `Backend: ${subsysConfig[health.backend].label}`,
     `OpenClaw: ${subsysConfig[health.openclaw].label}`,
-    `Métricas: ${subsysConfig[health.stats].label}`,
+    "",
+    ...domainLines,
   ].join("\n");
 
   return (
@@ -151,12 +167,17 @@ export function OrionStatusBar() {
 
       {/* Right: Status indicators */}
       <div className="flex items-center gap-4">
-        {/* Global panel status */}
+        {/* Global panel status with domain health */}
         <Tooltip>
           <TooltipTrigger asChild>
-            <div className={`flex items-center gap-1.5 cursor-default ${panel.color}`}>
-              <span className={`h-1.5 w-1.5 rounded-full ${panel.dot}`} />
-              <span className="font-medium">{panel.label}</span>
+            <div className={`flex items-center gap-1.5 cursor-default ${globalCfg.color}`}>
+              <span className={`h-1.5 w-1.5 rounded-full ${globalCfg.dot}`} />
+              <span className="font-medium">{globalCfg.label}</span>
+              {domainHealth.liveCount > 0 && (
+                <span className="text-muted-foreground/40 ml-0.5">
+                  {domainHealth.liveCount}/{domainHealth.totalTracked}
+                </span>
+              )}
             </div>
           </TooltipTrigger>
           <TooltipContent side="top" className="text-xs font-mono whitespace-pre-line max-w-xs">
@@ -196,4 +217,24 @@ export function OrionStatusBar() {
       </div>
     </footer>
   );
+}
+
+/** Merge system metrics panel status with domain-level health for accurate global */
+function deriveEffectiveGlobal(
+  sysHealth: SubsystemHealth,
+  domainGlobal: GlobalHealthStatus,
+): GlobalHealthStatus {
+  const backendUp = sysHealth.backend === "online";
+  const anyDomainLive = domainGlobal === "live" || domainGlobal === "partial";
+
+  // If backend is online AND domains are getting data → live
+  if (backendUp && domainGlobal === "live") return "live";
+  // If backend is online but only some domains have data → partial (not offline)
+  if (backendUp) return "partial";
+  // If backend unknown/offline but domains have cached data → partial
+  if (anyDomainLive) return "partial";
+  // If domains are still loading (first mount) → loading (not offline)
+  if (domainGlobal === "loading") return "loading";
+  // Only truly offline if both backend and domains confirm
+  return "offline";
 }
