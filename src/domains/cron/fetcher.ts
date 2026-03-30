@@ -120,8 +120,19 @@ const CRON_LABELS: Record<string, string> = {
   "0 0 1 * *": "Mensalmente",
 };
 
-function humanSchedule(cron: string): string {
-  return CRON_LABELS[cron] || cron;
+function humanEveryMs(ms: number): string {
+  if (ms < 60_000) return `A cada ${Math.round(ms / 1000)}s`;
+  if (ms < 3_600_000) return `A cada ${Math.round(ms / 60_000)} min`;
+  if (ms < 86_400_000) return `A cada ${Math.round(ms / 3_600_000)}h`;
+  return `A cada ${Math.round(ms / 86_400_000)}d`;
+}
+
+function humanSchedule(schedule: string): string {
+  if (schedule.startsWith("every:")) {
+    const ms = parseInt(schedule.replace("every:", ""), 10);
+    if (!isNaN(ms)) return humanEveryMs(ms);
+  }
+  return CRON_LABELS[schedule] || schedule;
 }
 
 function formatDuration(ms: number): string {
