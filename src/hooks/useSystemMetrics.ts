@@ -73,9 +73,12 @@ function derivePanelStatus(h: SubsystemHealth): PanelStatus {
   const statuses = [h.backend, h.openclaw, h.stats];
   const onlineCount = statuses.filter(s => s === "online").length;
   const offlineCount = statuses.filter(s => s === "offline").length;
+  const unknownCount = statuses.filter(s => s === "unknown").length;
+  if (unknownCount === statuses.length) return "stale";
   if (onlineCount === statuses.length) return "live";
   if (offlineCount === statuses.length) return "offline";
-  return "partial";
+  if (onlineCount > 0) return "partial";
+  return "offline";
 }
 
 async function fetchMetrics(): Promise<{ metrics: SystemMetrics; latencyMs: number }> {
