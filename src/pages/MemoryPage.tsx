@@ -5,6 +5,7 @@ import { useOrionData } from "@/hooks/useOrionData";
 import { fetchMemoryPage } from "@/domains/memory/fetcher";
 import { MemorySummary } from "@/components/memory/MemorySummary";
 import { MemorySnapshots } from "@/components/memory/MemorySnapshots";
+import { MemorySkeleton } from "@/components/skeletons/DomainSkeletons";
 import type { MemoryPageData } from "@/domains/memory/types";
 
 const MemoryPage = () => {
