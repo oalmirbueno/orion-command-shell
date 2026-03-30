@@ -11,6 +11,8 @@ import { apiUrl } from "@/domains/api";
 import { toast } from "@/hooks/use-toast";
 import type { AgentView } from "@/domains/agents/types";
 
+interface LogEntry { ts: string; level: string; message: string; }
+
 const statusBadge: Record<string, { label: string; className: string }> = {
   active:  { label: "Ativo",   className: "bg-status-online/15 text-status-online border-status-online/30" },
   idle:    { label: "Ocioso",  className: "bg-muted text-muted-foreground border-border/40" },
