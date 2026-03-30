@@ -6,6 +6,7 @@ import { AgentDetailCards } from "@/components/agents/AgentDetailCards";
 import { useOrionData } from "@/hooks/useOrionData";
 import { fetchAgents } from "@/domains/agents/fetcher";
 import { OrionDataWrapper } from "@/components/orion/DataWrapper";
+import { AgentsSkeleton } from "@/components/skeletons/DomainSkeletons";
 import type { AgentView } from "@/domains/agents/types";
 
 const AgentsPage = () => {
