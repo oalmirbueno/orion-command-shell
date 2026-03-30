@@ -22,18 +22,22 @@ function latColor(ms: number | null): string {
   return "text-foreground/70";
 }
 
-const panelConfig: Record<PanelStatus, { label: string; color: string; dot: string }> = {
-  live:    { label: "Live",    color: "text-status-online",       dot: "bg-status-online animate-pulse" },
-  partial: { label: "Parcial", color: "text-status-warning",      dot: "bg-status-warning animate-pulse" },
-  offline: { label: "Offline", color: "text-status-critical/60",  dot: "bg-status-critical/50" },
-  stale:   { label: "Stale",   color: "text-muted-foreground/60", dot: "bg-muted-foreground/40 animate-pulse" },
+/* ── Panel status visual config ── */
+
+const panelConfig: Record<PanelStatus, { label: string; color: string; dot: string; tip: string }> = {
+  live:    { label: "Live",     color: "text-status-online",        dot: "bg-status-online animate-pulse",  tip: "Todos os subsistemas respondendo" },
+  partial: { label: "Parcial",  color: "text-status-warning",       dot: "bg-status-warning animate-pulse", tip: "Parte dos subsistemas respondendo" },
+  offline: { label: "Offline",  color: "text-status-critical/60",   dot: "bg-status-critical/50",           tip: "Sem conexão com o backend" },
+  stale:   { label: "Cache",    color: "text-muted-foreground/60",  dot: "bg-muted-foreground/40",          tip: "Usando dados em cache local" },
 };
 
 const subsysConfig: Record<SubsystemStatus, { color: string; dot: string; label: string }> = {
   online:  { color: "text-status-online",      dot: "bg-status-online animate-pulse", label: "Online" },
   offline: { color: "text-status-critical/60",  dot: "bg-status-critical/50",          label: "Offline" },
-  unknown: { color: "text-muted-foreground/40", dot: "bg-muted-foreground/30",         label: "—" },
+  unknown: { color: "text-muted-foreground/40", dot: "bg-muted-foreground/30",         label: "Indeterminado" },
 };
+
+/* ── Shared components ── */
 
 function MetricCell({ icon: Icon, label, value, color, tooltip }: {
   icon: React.ElementType;
@@ -81,6 +85,8 @@ function SubsystemPill({ status, label, tooltip }: { status: SubsystemStatus; la
   );
 }
 
+/* ── Main status bar ── */
+
 export function OrionStatusBar() {
   const { metrics, updatedAt } = useSystemMetrics();
   const { lastUpdated } = useLastUpdated();
@@ -88,15 +94,19 @@ export function OrionStatusBar() {
   const displayTime = updatedAt || lastUpdated;
   const timeStr = displayTime ? format(displayTime, "HH:mm:ss") : "—";
 
-  const health = metrics.health;
-  const globalCfg = panelConfig[metrics.panelStatus];
+  const defaultHealth: SubsystemHealth = { backend: "unknown", openclaw: "unknown", stats: "unknown" };
+  const health = metrics?.health ?? defaultHealth;
+  const panelStatus = metrics?.panelStatus ?? "stale";
+  const panel = panelConfig[panelStatus];
 
-  const cpuStr = metrics.cpu != null ? `${Math.round(metrics.cpu)}%` : "—";
-  const ramStr = metrics.ram != null ? `${metrics.ram}%` : "—";
-  const diskStr = metrics.disk != null ? `${metrics.disk}%` : "—";
-  const latStr = metrics.latencyMs != null && health.backend === "online" ? `${metrics.latencyMs}ms` : "—";
-  const uptimeStr = metrics.uptime || "—";
+  // Format values
+  const cpuStr = metrics?.cpu != null ? `${Math.round(metrics.cpu)}%` : "—";
+  const ramStr = metrics?.ram != null ? `${metrics.ram}%` : "—";
+  const diskStr = metrics?.disk != null ? `${metrics.disk}%` : "—";
+  const latStr = metrics?.latencyMs != null && health.backend === "online" ? `${metrics.latencyMs}ms` : "—";
+  const uptimeStr = metrics?.uptime || "—";
 
+  // Tooltips
   const cpuTip = metrics.cpu !== null ? `CPU: ${Math.round(metrics.cpu)}%` : undefined;
   const ramTip = metrics.ramUsedGB && metrics.ramTotalGB
     ? `Memória: ${metrics.ramUsedGB} / ${metrics.ramTotalGB}` : undefined;
@@ -116,15 +126,17 @@ export function OrionStatusBar() {
     ? `OpenClaw respondendo${metrics.platform ? ` · ${metrics.platform}` : ""}`
     : health.openclaw === "offline" ? "OpenClaw indisponível" : "Aguardando primeira verificação";
 
+  // Panel-level tooltip with breakdown
   const panelTip = [
-    `Status: ${globalCfg.label}`,
+    panel.tip,
     `Backend: ${subsysConfig[health.backend].label}`,
     `OpenClaw: ${subsysConfig[health.openclaw].label}`,
-    `Stats: ${subsysConfig[health.stats].label}`,
+    `Métricas: ${subsysConfig[health.stats].label}`,
   ].join("\n");
 
   return (
     <footer className="h-8 flex items-center justify-between px-5 border-t border-border surface-0 text-xs font-mono text-muted-foreground/60 shrink-0 select-none">
+      {/* Left: Resource metrics */}
       <div className="flex items-center gap-4">
         <MetricCell icon={Cpu} label="CPU" value={cpuStr} color={pctColor(metrics.cpu)} tooltip={cpuTip} />
         <Sep />
@@ -137,12 +149,14 @@ export function OrionStatusBar() {
         <MetricCell icon={Clock} label="UP" value={uptimeStr} tooltip={uptimeTip} />
       </div>
 
+      {/* Right: Status indicators */}
       <div className="flex items-center gap-4">
+        {/* Global panel status */}
         <Tooltip>
           <TooltipTrigger asChild>
-            <div className={`flex items-center gap-1.5 cursor-default ${globalCfg.color}`}>
-              <span className={`h-1.5 w-1.5 rounded-full ${globalCfg.dot}`} />
-              <span className="font-medium">{globalCfg.label}</span>
+            <div className={`flex items-center gap-1.5 cursor-default ${panel.color}`}>
+              <span className={`h-1.5 w-1.5 rounded-full ${panel.dot}`} />
+              <span className="font-medium">{panel.label}</span>
             </div>
           </TooltipTrigger>
           <TooltipContent side="top" className="text-xs font-mono whitespace-pre-line max-w-xs">
@@ -151,10 +165,12 @@ export function OrionStatusBar() {
         </Tooltip>
         <Sep />
 
+        {/* Per-subsystem pills */}
         <SubsystemPill status={health.backend} label="Backend" tooltip={backendTip} />
         <Sep />
         <SubsystemPill status={health.openclaw} label="OpenClaw" tooltip={openclawTip} />
 
+        {/* Services count */}
         {metrics.activeServices !== null && metrics.totalServices !== null && metrics.totalServices > 0 && (
           <>
             <Sep />

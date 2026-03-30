@@ -88,7 +88,7 @@ export function useOrionData<T>({
         globalUpdated.setLastUpdated(result.timestamp, result.source);
       } catch {}
     }
-  }, [result?.timestamp, result?.source, key]);
+  }, [result?.timestamp, result?.source]);
 
   // Stale timer
   useEffect(() => {
