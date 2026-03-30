@@ -487,17 +487,22 @@ else { setLogs(filtered.map((a: any) => ({ ts: a.timestamp || "", level: a.statu
 
           {/* ═══════ TAB: Logs ═══════ */}
           <TabsContent value="logs" className="px-6 py-5 space-y-4 mt-0">
-            <div className="flex gap-1.5">
-              {(["all", "info", "warn", "error"] as const).map(level => (
-                <button key={level} onClick={() => setLogFilter(level)}
-                  className={`px-2.5 py-1 rounded text-[10px] font-mono uppercase transition-colors cursor-pointer ${
-                    logFilter === level
-                      ? level === "error" ? "bg-status-critical/20 text-status-critical" : level === "warn" ? "bg-status-warning/20 text-status-warning" : "bg-primary/20 text-primary"
-                      : "bg-muted/20 text-muted-foreground/50 hover:bg-muted/40"
-                  }`}>
-                  {level === "all" ? "Todos" : level}
-                </button>
-              ))}
+            <div className="flex items-center justify-between">
+              <div className="flex gap-1.5">
+                {(["all", "info", "warn", "error"] as const).map(level => (
+                  <button key={level} onClick={() => setLogFilter(level)}
+                    className={`px-2.5 py-1 rounded text-[10px] font-mono uppercase transition-colors cursor-pointer ${
+                      logFilter === level
+                        ? level === "error" ? "bg-status-critical/20 text-status-critical" : level === "warn" ? "bg-status-warning/20 text-status-warning" : "bg-primary/20 text-primary"
+                        : "bg-muted/20 text-muted-foreground/50 hover:bg-muted/40"
+                    }`}>
+                    {level === "all" ? "Todos" : level}
+                  </button>
+                ))}
+              </div>
+              <span className={`text-[9px] font-mono px-1.5 py-0.5 rounded border ${logsSource === "live" ? "border-status-online/30 text-status-online" : "border-border/30 text-muted-foreground/30"}`}>
+                {logsSource === "live" ? "API" : "LOCAL"}
+              </span>
             </div>
 
             {logsLoading && logs.length === 0 ? (
