@@ -47,7 +47,41 @@ export function AgentDetailSheet({ agent, open, onOpenChange }: Props) {
   const [logsLoading, setLogsLoading] = useState(false);
   const [logsError, setLogsError] = useState(false);
   const [logFilter, setLogFilter] = useState<"all" | "info" | "warn" | "error">("all");
+  const [profile, setProfile] = useState<AgentProfile | null>(null);
+  const [profileLoading, setProfileLoading] = useState(false);
+  const [copiedId, setCopiedId] = useState(false);
   const logsEndRef = useRef<HTMLDivElement>(null);
+
+  // Fetch agent profile/soul
+  useEffect(() => {
+    if (!open || !agent) { setProfile(null); return; }
+    let cancelled = false;
+    const fetchProfile = async () => {
+      setProfileLoading(true);
+      try {
+        const res = await fetch(apiUrl(`/agents/${agent.id}`));
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        if (!cancelled) {
+          setProfile({
+            personality: data.personality || data.soul?.personality || "",
+            objective: data.objective || data.soul?.objective || data.purpose || "",
+            scope: data.scope || data.soul?.scope || "",
+            behavior: data.behavior || data.soul?.behavior || data.expectedBehavior || "",
+            soul: data.soul?.summary || data.soulSummary || data.identity || "",
+            instructions: data.instructions || data.soul?.instructions || data.systemPrompt || "",
+          });
+        }
+      } catch {
+        // No profile endpoint — leave null, UI shows fallback
+        if (!cancelled) setProfile(null);
+      } finally {
+        if (!cancelled) setProfileLoading(false);
+      }
+    };
+    fetchProfile();
+    return () => { cancelled = true; };
+  }, [open, agent?.id]);
 
   useEffect(() => {
     if (!open || !agent) { setLogs([]); return; }
