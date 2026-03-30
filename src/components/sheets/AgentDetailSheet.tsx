@@ -69,6 +69,8 @@ export function AgentDetailSheet({ agent, open, onOpenChange }: Props) {
   const [saving, setSaving] = useState(false);
   const [copiedId, setCopiedId] = useState(false);
   const [newTopicId, setNewTopicId] = useState("");
+  const [saveStatus, setSaveStatus] = useState<"idle" | "persisted" | "unconfirmed" | "error">("idle");
+  const [saveError, setSaveError] = useState("");
   const [controls, setControls] = useState({
     displayName: "", shortDesc: "", role: "", notes: "",
     scopeType: "global" as AgentScopeType,
@@ -203,17 +205,52 @@ else { setLogs(filtered.map((a: any) => ({ ts: a.timestamp || "", level: a.statu
 
   const handleSave = async () => {
     setSaving(true);
+    setSaveStatus("idle");
+    setSaveError("");
     try {
       const payload = { ...controls };
-      const res = await fetch(apiUrl(`/agents/${agent.id}`), { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+      let res: Response;
+      try {
+        res = await fetch(apiUrl(`/agents/${agent.id}`), { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+      } catch {
+        setSaveStatus("error");
+        setSaveError("Backend inacessível — verifique se a API está online");
+        toast({ title: "Backend inacessível", description: "Não foi possível conectar ao servidor", variant: "destructive" });
+        return;
+      }
+
+      if (res.status === 404) {
+        setSaveStatus("error");
+        setSaveError(`PUT /api/agents/${agent.id} não existe no backend`);
+        toast({ title: "Rota de save não encontrada", description: `O backend não suporta PUT /api/agents/${agent.id}`, variant: "destructive" });
+        return;
+      }
+      if (res.status === 405) {
+        setSaveStatus("error");
+        setSaveError("Método PUT não permitido nesta rota");
+        toast({ title: "Método não permitido", description: "O backend não aceita PUT nesta rota", variant: "destructive" });
+        return;
+      }
       if (!res.ok) {
         const errText = await res.text().catch(() => res.statusText);
+        setSaveStatus("error");
+        setSaveError(`HTTP ${res.status}: ${errText}`);
         throw new Error(errText || `HTTP ${res.status}`);
       }
 
       // Refetch to verify persistence
-      const verifyRes = await fetch(apiUrl(`/agents/${agent.id}`));
+      let verifyRes: Response;
+      try {
+        verifyRes = await fetch(apiUrl(`/agents/${agent.id}`));
+      } catch {
+        setSaveStatus("unconfirmed");
+        toast({ title: "Configuração enviada, mas não confirmada pelo backend", description: "Não foi possível verificar a persistência.", variant: "destructive" });
+        setEditing(false);
+        return;
+      }
+
       if (!verifyRes.ok) {
+        setSaveStatus("unconfirmed");
         toast({ title: "Configuração enviada, mas não confirmada pelo backend", description: "O backend não retornou os dados atualizados.", variant: "destructive" });
         setEditing(false);
         return;
@@ -229,10 +266,11 @@ else { setLogs(filtered.map((a: any) => ({ ts: a.timestamp || "", level: a.statu
       if (payload.groupEnabled !== undefined && returned.groupEnabled !== undefined && returned.groupEnabled !== payload.groupEnabled) mismatches.push("grupo");
 
       if (mismatches.length > 0) {
+        setSaveStatus("unconfirmed");
         toast({ title: "Configuração enviada, mas não confirmada pelo backend", description: `Campos divergentes: ${mismatches.join(", ")}`, variant: "destructive" });
       } else {
+        setSaveStatus("persisted");
         toast({ title: "Configurações salvas e confirmadas" });
-        // Update local state with returned data
         setControls(c => ({
           ...c,
           displayName: returned.displayName ?? returned.name ?? c.displayName,
@@ -249,6 +287,7 @@ else { setLogs(filtered.map((a: any) => ({ ts: a.timestamp || "", level: a.statu
       }
       setEditing(false);
     } catch (err: any) {
+      if (saveStatus === "idle") setSaveStatus("error");
       toast({ title: "Erro ao salvar", description: err?.message || "Falha na comunicação com o backend", variant: "destructive" });
     } finally { setSaving(false); }
   };
@@ -470,12 +509,33 @@ else { setLogs(filtered.map((a: any) => ({ ts: a.timestamp || "", level: a.statu
                       </div>
                     </div>
 
+                    {/* Save status badge */}
+                    {saveStatus !== "idle" && (
+                      <div className={`flex items-center gap-2 rounded-lg border px-3 py-2 ${
+                        saveStatus === "persisted" ? "border-status-online/30 bg-status-online/5" :
+                        saveStatus === "unconfirmed" ? "border-status-warning/30 bg-status-warning/5" :
+                        "border-status-critical/30 bg-status-critical/5"
+                      }`}>
+                        {saveStatus === "persisted" && <CheckCircle2 className="h-3.5 w-3.5 text-status-online shrink-0" />}
+                        {saveStatus === "unconfirmed" && <AlertTriangle className="h-3.5 w-3.5 text-status-warning shrink-0" />}
+                        {saveStatus === "error" && <XCircle className="h-3.5 w-3.5 text-status-critical shrink-0" />}
+                        <div className="min-w-0">
+                          <p className="text-[11px] font-medium text-foreground/80">
+                            {saveStatus === "persisted" && "Persistido"}
+                            {saveStatus === "unconfirmed" && "Não confirmado"}
+                            {saveStatus === "error" && "Erro"}
+                          </p>
+                          {saveError && <p className="text-[10px] font-mono text-muted-foreground/60 truncate">{saveError}</p>}
+                        </div>
+                      </div>
+                    )}
+
                     <div className="flex gap-2 pt-2">
                       <Button size="sm" onClick={handleSave} disabled={saving} className="flex-1">
                         {saving ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : <Save className="h-3.5 w-3.5 mr-1.5" />}
                         {saving ? "Salvando…" : "Salvar"}
                       </Button>
-                      <Button size="sm" variant="outline" onClick={() => setEditing(false)} disabled={saving}>Cancelar</Button>
+                      <Button size="sm" variant="outline" onClick={() => { setEditing(false); setSaveStatus("idle"); setSaveError(""); }} disabled={saving}>Cancelar</Button>
                     </div>
                   </>
                 )}
