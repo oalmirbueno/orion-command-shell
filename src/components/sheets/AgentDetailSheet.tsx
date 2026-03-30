@@ -509,12 +509,33 @@ else { setLogs(filtered.map((a: any) => ({ ts: a.timestamp || "", level: a.statu
                       </div>
                     </div>
 
+                    {/* Save status badge */}
+                    {saveStatus !== "idle" && (
+                      <div className={`flex items-center gap-2 rounded-lg border px-3 py-2 ${
+                        saveStatus === "persisted" ? "border-status-online/30 bg-status-online/5" :
+                        saveStatus === "unconfirmed" ? "border-status-warning/30 bg-status-warning/5" :
+                        "border-status-critical/30 bg-status-critical/5"
+                      }`}>
+                        {saveStatus === "persisted" && <CheckCircle2 className="h-3.5 w-3.5 text-status-online shrink-0" />}
+                        {saveStatus === "unconfirmed" && <AlertTriangle className="h-3.5 w-3.5 text-status-warning shrink-0" />}
+                        {saveStatus === "error" && <XCircle className="h-3.5 w-3.5 text-status-critical shrink-0" />}
+                        <div className="min-w-0">
+                          <p className="text-[11px] font-medium text-foreground/80">
+                            {saveStatus === "persisted" && "Persistido"}
+                            {saveStatus === "unconfirmed" && "Não confirmado"}
+                            {saveStatus === "error" && "Erro"}
+                          </p>
+                          {saveError && <p className="text-[10px] font-mono text-muted-foreground/60 truncate">{saveError}</p>}
+                        </div>
+                      </div>
+                    )}
+
                     <div className="flex gap-2 pt-2">
                       <Button size="sm" onClick={handleSave} disabled={saving} className="flex-1">
                         {saving ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : <Save className="h-3.5 w-3.5 mr-1.5" />}
                         {saving ? "Salvando…" : "Salvar"}
                       </Button>
-                      <Button size="sm" variant="outline" onClick={() => setEditing(false)} disabled={saving}>Cancelar</Button>
+                      <Button size="sm" variant="outline" onClick={() => { setEditing(false); setSaveStatus("idle"); setSaveError(""); }} disabled={saving}>Cancelar</Button>
                     </div>
                   </>
                 )}
