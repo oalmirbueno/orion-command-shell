@@ -272,7 +272,7 @@ export function AgentDetailSheet({ agent, open, onOpenChange }: Props) {
 
             <Separator className="bg-border/30" />
 
-            <Sec icon={Brain} title="Perfil">
+             <Sec icon={Brain} title="Perfil" badge={profileSource === "live" ? "live" : "fallback"}>
               {profileLoading ? (
                 <div className="space-y-2 ml-5">{[1,2,3].map(i => <div key={i} className="h-3 rounded bg-muted/30 animate-pulse" style={{ width: `${80 - i * 15}%` }} />)}</div>
               ) : profile && Object.values(profile).some(v => v) ? (
