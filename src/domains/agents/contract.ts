@@ -46,4 +46,7 @@
  *   2. Ou definir VITE_ORION_API_URL como override
  */
 
-export type { AgentInfo, AgentView, AgentNode, AgentTier, AgentStatus } from "./types";
+export type {
+  AgentInfo, AgentView, AgentNode, AgentTier, AgentStatus,
+  AgentProfile, AgentOperationalStatus, AgentScopeType,
+} from "./types";
