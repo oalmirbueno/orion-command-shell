@@ -146,9 +146,11 @@ async function fetchMetrics(): Promise<{ metrics: SystemMetrics; source: "api" |
 
 function emptyMetrics(): SystemMetrics {
   return {
-    cpu: null, ram: null, disk: null, uptime: null, latencyMs: null,
+    cpu: null, ram: null, ramUsedGB: null, ramTotalGB: null,
+    disk: null, diskUsedGB: null, diskTotalGB: null,
+    uptime: null, latencyMs: null,
     backendOnline: false, openclawOnline: false,
-    activeServices: null, totalServices: null, hostname: null,
+    activeServices: null, totalServices: null, hostname: null, platform: null,
   };
 }
 
