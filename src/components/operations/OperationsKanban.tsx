@@ -129,7 +129,7 @@ function KanbanColumn({ column, tasks, onTaskClick }: { column: ColumnDef; tasks
               <span className="text-xs font-mono text-muted-foreground/30">{column.emptyLabel}</span>
             </div>
           ) : (
-            tasks.map(task => <TaskCard key={task.id} task={task} />)
+            tasks.map(task => <TaskCard key={task.id} task={task} onClick={() => onTaskClick?.(task)} />)
           )}
         </div>
       </div>
