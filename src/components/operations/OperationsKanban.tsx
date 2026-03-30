@@ -37,13 +37,13 @@ const priorityStyles: Record<TaskPriority, { label: string; cls: string }> = {
 
 /* ── Task Card ── */
 
-function TaskCard({ task }: { task: OperationTask }) {
+function TaskCard({ task, onClick }: { task: OperationTask; onClick?: () => void }) {
   const pri = priorityStyles[task.priority];
   const isActive = task.status === "running";
   const isFailed = task.status === "failed";
 
   return (
-    <div className={cn(
+    <div onClick={onClick} className={cn(
       "group rounded-lg border px-5 py-4 transition-all cursor-pointer",
       "hover:border-primary/30 hover:shadow-[0_0_15px_-3px_hsl(var(--primary)/0.15)]",
       isFailed && "border-status-critical/25 bg-status-critical/[0.03]",
@@ -107,7 +107,7 @@ function TaskCard({ task }: { task: OperationTask }) {
 
 /* ── Kanban Column ── */
 
-function KanbanColumn({ column, tasks }: { column: ColumnDef; tasks: OperationTask[] }) {
+function KanbanColumn({ column, tasks, onTaskClick }: { column: ColumnDef; tasks: OperationTask[]; onTaskClick?: (task: OperationTask) => void }) {
   const Icon = column.icon;
   return (
     <div className="flex flex-col min-w-0">
@@ -129,7 +129,7 @@ function KanbanColumn({ column, tasks }: { column: ColumnDef; tasks: OperationTa
               <span className="text-xs font-mono text-muted-foreground/30">{column.emptyLabel}</span>
             </div>
           ) : (
-            tasks.map(task => <TaskCard key={task.id} task={task} />)
+            tasks.map(task => <TaskCard key={task.id} task={task} onClick={() => onTaskClick?.(task)} />)
           )}
         </div>
       </div>
@@ -176,9 +176,10 @@ function KanbanSummaryBar({ tasks }: { tasks: OperationTask[] }) {
 
 interface OperationsKanbanProps {
   tasks: OperationTask[];
+  onTaskClick?: (task: OperationTask) => void;
 }
 
-export function OperationsKanban({ tasks = [] }: OperationsKanbanProps) {
+export function OperationsKanban({ tasks = [], onTaskClick }: OperationsKanbanProps) {
   return (
     <section className="space-y-4">
       <OrionSectionHeader
@@ -194,6 +195,7 @@ export function OperationsKanban({ tasks = [] }: OperationsKanbanProps) {
             key={col.key}
             column={col}
             tasks={tasks.filter(t => t.status === col.key)}
+            onTaskClick={onTaskClick}
           />
         ))}
       </div>

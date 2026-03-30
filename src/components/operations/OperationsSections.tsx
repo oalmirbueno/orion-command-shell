@@ -1,4 +1,3 @@
-import { useState } from "react";
 import {
   Flame, CheckCircle2, AlertTriangle, Moon, CalendarClock,
   Bot, Clock, RotateCcw, ArrowRight, Zap, AlertCircle,
@@ -7,7 +6,6 @@ import { OrionSectionHeader } from "@/components/orion/primitives";
 import { cn } from "@/lib/utils";
 import type { OperationTask, TaskPriority } from "@/domains/operations/types";
 import type { OperationSection } from "@/domains/operations/types.page";
-import { OperationDetailSheet } from "@/components/sheets/OperationDetailSheet";
 
 /* ── Priority badge ── */
 
@@ -162,16 +160,11 @@ function SummaryBar({ sections }: { sections: OperationSection }) {
 
 interface Props {
   sections: OperationSection;
+  onTaskClick?: (task: OperationTask) => void;
 }
 
-export function OperationsSections({ sections }: Props) {
-  const [selectedTask, setSelectedTask] = useState<OperationTask | null>(null);
-  const [sheetOpen, setSheetOpen] = useState(false);
-
-  const handleClick = (task: OperationTask) => {
-    setSelectedTask(task);
-    setSheetOpen(true);
-  };
+export function OperationsSections({ sections, onTaskClick }: Props) {
+  const handleClick = onTaskClick || (() => {});
 
   return (
     <div className="space-y-6">
@@ -232,12 +225,6 @@ export function OperationsSections({ sections }: Props) {
           onTaskClick={handleClick}
         />
       )}
-
-      <OperationDetailSheet
-        task={selectedTask}
-        open={sheetOpen}
-        onOpenChange={setSheetOpen}
-      />
     </div>
   );
 }

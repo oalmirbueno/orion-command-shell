@@ -1,12 +1,16 @@
+import { useState } from "react";
 import { OrionLayout } from "@/components/OrionLayout";
 import { OrionBreadcrumb } from "@/components/orion";
 import { OrionDataWrapper } from "@/components/orion/DataWrapper";
+import { OperationsKanban } from "@/components/operations/OperationsKanban";
 import { OperationsSections } from "@/components/operations/OperationsSections";
 import { OperationsTimeline } from "@/components/operations/OperationsTimeline";
+import { OperationDetailSheet } from "@/components/sheets/OperationDetailSheet";
 import { useOrionData } from "@/hooks/useOrionData";
 import { fetchOperationsPage } from "@/domains/operations/fetcher";
 import { OperationsSkeleton } from "@/components/skeletons/DomainSkeletons";
 import type { OperationsPageData } from "@/domains/operations/types.page";
+import type { OperationTask } from "@/domains/operations/types";
 
 const defaultSections = { running: [], completed: [], failed: [], overnight: [], upcoming: [] };
 
@@ -16,6 +20,14 @@ const OperationsPage = () => {
     fetcher: fetchOperationsPage,
     refreshInterval: 15_000,
   });
+
+  const [selectedTask, setSelectedTask] = useState<OperationTask | null>(null);
+  const [sheetOpen, setSheetOpen] = useState(false);
+
+  const handleTaskClick = (task: OperationTask) => {
+    setSelectedTask(task);
+    setSheetOpen(true);
+  };
 
   const pageData = data || { tasks: [], timeline: [], liveOps: [], sections: defaultSections };
 
@@ -32,7 +44,15 @@ const OperationsPage = () => {
           emptyDescription="Operações aparecerão aqui quando tarefas forem executadas"
           skeleton={<OperationsSkeleton />}
         >
-          <OperationsSections sections={pageData.sections ?? defaultSections} />
+          {/* Kanban — visão central do fluxo */}
+          <OperationsKanban tasks={pageData.tasks} onTaskClick={handleTaskClick} />
+
+          {/* Seções complementares */}
+          <div className="mt-8">
+            <OperationsSections sections={pageData.sections ?? defaultSections} onTaskClick={handleTaskClick} />
+          </div>
+
+          {/* Timeline */}
           {pageData.timeline.length > 0 && (
             <div className="mt-8">
               <OperationsTimeline events={pageData.timeline} />
@@ -40,6 +60,12 @@ const OperationsPage = () => {
           )}
         </OrionDataWrapper>
       </div>
+
+      <OperationDetailSheet
+        task={selectedTask}
+        open={sheetOpen}
+        onOpenChange={setSheetOpen}
+      />
     </OrionLayout>
   );
 };
