@@ -1,37 +1,21 @@
 /**
- * useOrionData — Domain-aware data fetching hook.
- *
- * Accepts a DomainFetcher function and manages the full lifecycle:
- * loading → ready | error | empty | stale
- *
- * The fetcher is the single point of integration. Currently backed by
- * fallback data per domain. To connect real APIs, replace the fetcher
- * in the domain's fetcher.ts — no component changes needed.
- *
- * Usage:
- *   const { state, data, refetch } = useOrionData({
- *     key: "agents",
- *     fetcher: fetchAgents,
- *   });
+ * useOrionData — Domain-aware data fetching hook with auto-refresh.
  */
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import type { DataState, DataSource, DomainFetcher } from "@/domains/types";
+import { useLastUpdated } from "./useLastUpdated";
 
-// Re-export for backward compatibility
 export type { DataState, DataSource };
 
 interface UseOrionDataOptions<T> {
-  /** Unique key for this data source */
   key: string;
-  /** Domain fetcher function — the single integration point */
   fetcher: DomainFetcher<T>;
-  /** Mark data as stale after this many ms (0 = never) */
   staleAfter?: number;
-  /** Whether to start loading automatically */
   autoLoad?: boolean;
-  /** Force a specific state — useful for testing UI states */
   forceState?: DataState;
+  /** Auto-refresh interval in ms (0 = disabled). Pauses when tab is hidden. */
+  refreshInterval?: number;
 }
 
 interface UseOrionDataResult<T> {
@@ -54,6 +38,7 @@ export function useOrionData<T>({
   forceState,
   staleAfter = 0,
   autoLoad = true,
+  refreshInterval = 0,
 }: UseOrionDataOptions<T>): UseOrionDataResult<T> {
   const [state, setState] = useState<DataState>(forceState || (autoLoad ? "loading" : "empty"));
   const [data, setData] = useState<T | null>(null);
@@ -62,25 +47,29 @@ export function useOrionData<T>({
   const [source, setSource] = useState<DataSource>("fallback");
   const staleTimer = useRef<ReturnType<typeof setTimeout>>();
   const mountedRef = useRef(true);
-
   const lastFetchRef = useRef<number>(0);
+  const intervalRef = useRef<ReturnType<typeof setInterval>>();
 
-  const load = useCallback(async () => {
-    // staleTime guard — skip if data was fetched recently (30s)
+  const globalUpdated = useLastUpdated();
+
+  const load = useCallback(async (silent = false) => {
     const now = Date.now();
-    if (data && now - lastFetchRef.current < 30_000) return;
+    if (data && now - lastFetchRef.current < 10_000) return;
     lastFetchRef.current = now;
+
     if (forceState) {
       setState(forceState);
       return;
     }
 
-    setState("loading");
+    // Silent refresh: don't show loading state, keep current data visible
+    if (!silent) {
+      setState("loading");
+    }
     setError(null);
 
     try {
       const result = await fetcher();
-
       if (!mountedRef.current) return;
 
       const isEmpty =
@@ -97,6 +86,11 @@ export function useOrionData<T>({
         setSource(result.source);
         setLastUpdated(result.timestamp);
 
+        // Update global status bar
+        try {
+          globalUpdated.setLastUpdated(result.timestamp, result.source);
+        } catch {}
+
         if (staleAfter > 0) {
           if (staleTimer.current) clearTimeout(staleTimer.current);
           staleTimer.current = setTimeout(() => {
@@ -106,21 +100,61 @@ export function useOrionData<T>({
       }
     } catch (err) {
       if (!mountedRef.current) return;
-      setState("error");
-      setError(err instanceof Error ? err.message : "Falha ao carregar dados");
+      // On silent refresh failure, keep current data
+      if (!silent || !data) {
+        setState("error");
+        setError(err instanceof Error ? err.message : "Falha ao carregar dados");
+      }
     }
   }, [key, fetcher, forceState, staleAfter]);
 
+  // Initial load
   useEffect(() => {
     mountedRef.current = true;
     if (autoLoad) {
-      load();
+      load(false);
     }
     return () => {
       mountedRef.current = false;
     };
   }, [key, autoLoad]);
 
+  // Auto-refresh with visibility API
+  useEffect(() => {
+    if (!refreshInterval || refreshInterval <= 0) return;
+
+    const startInterval = () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      intervalRef.current = setInterval(() => {
+        if (!document.hidden) {
+          load(true); // silent refresh
+        }
+      }, refreshInterval);
+    };
+
+    const handleVisibility = () => {
+      if (document.hidden) {
+        if (intervalRef.current) {
+          clearInterval(intervalRef.current);
+          intervalRef.current = undefined;
+        }
+      } else {
+        // Refresh immediately on return, then restart interval
+        load(true);
+        startInterval();
+      }
+    };
+
+    startInterval();
+    document.addEventListener("visibilitychange", handleVisibility);
+
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
+  }, [refreshInterval, load]);
+
+  // Cleanup stale timer
   useEffect(() => {
     return () => {
       if (staleTimer.current) clearTimeout(staleTimer.current);
@@ -133,7 +167,7 @@ export function useOrionData<T>({
     state: resolvedState,
     data,
     error,
-    refetch: load,
+    refetch: () => { lastFetchRef.current = 0; load(false); },
     lastUpdated,
     source,
     isLoading: resolvedState === "loading",
