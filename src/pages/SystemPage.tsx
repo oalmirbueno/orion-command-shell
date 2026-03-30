@@ -8,6 +8,7 @@ import { ResourceGauges } from "@/components/system/ResourceGauges";
 import { ServicesTable } from "@/components/system/ServicesTable";
 import { StabilitySignals } from "@/components/system/StabilitySignals";
 import { UptimeTimeline } from "@/components/system/UptimeTimeline";
+import { SystemSkeleton } from "@/components/skeletons/DomainSkeletons";
 import type { SystemPageData } from "@/domains/system/types";
 
 const SystemPage = () => {
