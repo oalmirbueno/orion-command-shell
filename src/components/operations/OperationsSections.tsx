@@ -1,4 +1,3 @@
-import { useState } from "react";
 import {
   Flame, CheckCircle2, AlertTriangle, Moon, CalendarClock,
   Bot, Clock, RotateCcw, ArrowRight, Zap, AlertCircle,
@@ -7,7 +6,6 @@ import { OrionSectionHeader } from "@/components/orion/primitives";
 import { cn } from "@/lib/utils";
 import type { OperationTask, TaskPriority } from "@/domains/operations/types";
 import type { OperationSection } from "@/domains/operations/types.page";
-import { OperationDetailSheet } from "@/components/sheets/OperationDetailSheet";
 
 /* ── Priority badge ── */
 
