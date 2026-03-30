@@ -31,20 +31,6 @@ const DOMAIN_QUERY_MAP: Record<string, string> = {
   "home":         "home-page",
 };
 
-/** Map SSE event names to DomainKey for health tracking */
-const SSE_TO_DOMAIN: Record<string, DomainKey> = {
-  "system":       "system",
-  "system.stats": "system",
-  "sessions":     "sessions",
-  "agents":       "agents",
-  "activities":   "activity",
-  "cron":         "cron",
-  "operations":   "operations",
-  "alerts":       "alerts",
-  "memory":       "memory",
-  "files":        "files",
-  "home":         "home",
-};
 
 interface StreamOptions {
   /** Override stream endpoint. Default: /api/stream */
