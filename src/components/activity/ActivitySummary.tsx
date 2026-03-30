@@ -17,6 +17,7 @@ const FIELDS = [
 ];
 
 export function ActivitySummary({ summary }: ActivitySummaryProps) {
+  if (!summary) return null;
   const isEmpty = summary.total === 0;
 
   return (

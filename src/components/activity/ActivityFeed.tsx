@@ -81,7 +81,7 @@ interface ActivityFeedProps { events: ActivityEvent[]; }
 export function ActivityFeed({ events }: ActivityFeedProps) {
   const [selected, setSelected] = useState<ActivityEvent | null>(null);
 
-  if (events.length === 0) {
+  if (!events || events.length === 0) {
     return (
       <section className="rounded-lg border border-border overflow-hidden">
         <div className="orion-panel-header">
