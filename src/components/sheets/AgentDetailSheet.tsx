@@ -53,6 +53,7 @@ export function AgentDetailSheet({ agent, open, onOpenChange }: Props) {
   const [copiedId, setCopiedId] = useState(false);
   const [taskHistory, setTaskHistory] = useState<TaskHistoryEntry[]>([]);
   const [taskHistoryLoading, setTaskHistoryLoading] = useState(false);
+  const [taskVisible, setTaskVisible] = useState(5);
   const logsEndRef = useRef<HTMLDivElement>(null);
 
   // Fetch task history from activities
