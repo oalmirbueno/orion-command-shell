@@ -184,7 +184,33 @@ function emptyMetrics(): SystemMetrics {
   };
 }
 
+/** Merge new metrics over previous, keeping last valid (non-null) values */
+function mergeMetrics(prev: SystemMetrics, next: SystemMetrics): SystemMetrics {
+  return {
+    cpu: next.cpu ?? prev.cpu,
+    ram: next.ram ?? prev.ram,
+    ramUsedGB: next.ramUsedGB ?? prev.ramUsedGB,
+    ramTotalGB: next.ramTotalGB ?? prev.ramTotalGB,
+    disk: next.disk ?? prev.disk,
+    diskUsedGB: next.diskUsedGB ?? prev.diskUsedGB,
+    diskTotalGB: next.diskTotalGB ?? prev.diskTotalGB,
+    uptime: next.uptime ?? prev.uptime,
+    latencyMs: next.latencyMs ?? prev.latencyMs,
+    activeServices: next.activeServices ?? prev.activeServices,
+    totalServices: next.totalServices ?? prev.totalServices,
+    hostname: next.hostname ?? prev.hostname,
+    platform: next.platform ?? prev.platform,
+    // Health & status always use latest (never stale)
+    health: next.health,
+    panelStatus: next.panelStatus,
+  };
+}
+
+import { useRef } from "react";
+
 export function useSystemMetrics() {
+  const lastValid = useRef<SystemMetrics>(emptyMetrics());
+
   const { data, dataUpdatedAt } = useQuery({
     queryKey: ["orion", "status-bar-metrics"],
     queryFn: fetchMetrics,
@@ -196,8 +222,11 @@ export function useSystemMetrics() {
     retry: 0,
   });
 
-  const metrics = data?.metrics ?? emptyMetrics();
+  const raw = data?.metrics ?? emptyMetrics();
+  const merged = mergeMetrics(lastValid.current, raw);
+  lastValid.current = merged;
+
   const updatedAt = dataUpdatedAt ? new Date(dataUpdatedAt) : null;
 
-  return { metrics, updatedAt };
+  return { metrics: merged, updatedAt };
 }
