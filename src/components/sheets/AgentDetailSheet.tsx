@@ -533,12 +533,17 @@ export function AgentDetailSheet({ agent, open, onOpenChange }: Props) {
 // SUB-COMPONENTS
 // ════════════════════════════════════════════════════
 
-function Sec({ icon: Icon, title, children }: { icon: React.ElementType; title: string; children: React.ReactNode }) {
+function Sec({ icon: Icon, title, children, badge }: { icon: React.ElementType; title: string; children: React.ReactNode; badge?: "live" | "fallback" }) {
   return (
     <div>
       <div className="flex items-center gap-2 mb-3">
         <Icon className="h-3.5 w-3.5 text-muted-foreground/40" />
         <h4 className="text-xs font-mono uppercase tracking-wider text-muted-foreground/50">{title}</h4>
+        {badge && (
+          <span className={`text-[9px] font-mono px-1.5 py-0 rounded border ${badge === "live" ? "border-status-online/30 text-status-online" : "border-border/30 text-muted-foreground/30"}`}>
+            {badge === "live" ? "API" : "LOCAL"}
+          </span>
+        )}
       </div>
       <div className="space-y-2.5">{children}</div>
     </div>
