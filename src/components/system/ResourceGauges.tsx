@@ -43,7 +43,7 @@ interface Props {
   gauges: ResourceGauge[];
 }
 
-export function ResourceGauges({ gauges }: Props) {
+export function ResourceGauges({ gauges = [] }: Props) {
   if (gauges.length === 0) {
     return (
       <section className="rounded-lg border border-border overflow-hidden">

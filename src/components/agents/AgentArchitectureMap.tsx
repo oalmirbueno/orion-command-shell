@@ -59,7 +59,7 @@ function FlowArrow({ label }: { label?: string }) {
   );
 }
 
-export function AgentArchitectureMap({ agents }: AgentArchitectureMapProps) {
+export function AgentArchitectureMap({ agents = [] }: AgentArchitectureMapProps) {
   if (agents.length === 0) {
     return (
       <section className="rounded-lg border border-border overflow-hidden">

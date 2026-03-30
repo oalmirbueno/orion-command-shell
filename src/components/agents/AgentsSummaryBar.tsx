@@ -5,7 +5,7 @@ interface AgentsSummaryBarProps {
   agents: AgentView[];
 }
 
-export function AgentsSummaryBar({ agents }: AgentsSummaryBarProps) {
+export function AgentsSummaryBar({ agents = [] }: AgentsSummaryBarProps) {
   const isEmpty = agents.length === 0;
   const total = agents.length;
   const active = agents.filter(a => a.status === "active").length;

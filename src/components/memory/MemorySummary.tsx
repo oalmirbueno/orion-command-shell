@@ -6,6 +6,7 @@ interface MemorySummaryProps {
 }
 
 export function MemorySummary({ summary }: MemorySummaryProps) {
+  if (!summary) return null;
   const items = [
     { label: "Snapshots", value: summary.totalSnapshots || "—", icon: Layers, text: "text-primary", dot: "bg-primary/50" },
     { label: "Categorias", value: summary.totalCategories || "—", icon: Brain, text: "text-foreground", dot: "bg-foreground/30" },

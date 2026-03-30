@@ -13,7 +13,7 @@ interface Props {
   uptimePercent: string;
 }
 
-export function UptimeTimeline({ days, uptimePercent }: Props) {
+export function UptimeTimeline({ days = [], uptimePercent = "—" }: Props) {
   if (days.length === 0) {
     return (
       <section className="rounded-lg border border-border overflow-hidden">

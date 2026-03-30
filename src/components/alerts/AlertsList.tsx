@@ -79,7 +79,7 @@ interface Props {
   alerts: Alert[];
 }
 
-export function AlertsList({ alerts }: Props) {
+export function AlertsList({ alerts = [] }: Props) {
   if (alerts.length === 0) {
     return (
       <section className="rounded-lg border border-border overflow-hidden">

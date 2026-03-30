@@ -178,7 +178,7 @@ interface OperationsKanbanProps {
   tasks: OperationTask[];
 }
 
-export function OperationsKanban({ tasks }: OperationsKanbanProps) {
+export function OperationsKanban({ tasks = [] }: OperationsKanbanProps) {
   return (
     <section className="space-y-4">
       <OrionSectionHeader

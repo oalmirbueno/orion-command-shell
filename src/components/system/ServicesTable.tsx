@@ -12,7 +12,7 @@ interface Props {
   services: SystemService[];
 }
 
-export function ServicesTable({ services }: Props) {
+export function ServicesTable({ services = [] }: Props) {
   if (services.length === 0) {
     return (
       <section className="rounded-lg border border-border overflow-hidden h-full">

@@ -81,7 +81,7 @@ function SessionRow({ session, onClick }: { session: SessionView; onClick: () =>
 
 interface Props { sessions: SessionView[]; }
 
-export function SessionsList({ sessions }: Props) {
+export function SessionsList({ sessions = [] }: Props) {
   const [selected, setSelected] = useState<SessionView | null>(null);
 
   if (sessions.length === 0) {

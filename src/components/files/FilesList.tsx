@@ -46,7 +46,7 @@ function FileRow({ file, onClick }: { file: FileEntry; onClick: () => void }) {
 
 interface FilesListProps { files: FileEntry[]; }
 
-export function FilesList({ files }: FilesListProps) {
+export function FilesList({ files = [] }: FilesListProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [selected, setSelected] = useState<FileEntry | null>(null);
 

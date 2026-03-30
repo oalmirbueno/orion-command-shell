@@ -61,7 +61,7 @@ function SnapshotCard({ snapshot, onClick }: { snapshot: MemorySnapshot; onClick
 
 interface MemorySnapshotsProps { snapshots: MemorySnapshot[]; }
 
-export function MemorySnapshots({ snapshots }: MemorySnapshotsProps) {
+export function MemorySnapshots({ snapshots = [] }: MemorySnapshotsProps) {
   const [activeFilter, setActiveFilter] = useState<MemoryCategory | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [selected, setSelected] = useState<MemorySnapshot | null>(null);

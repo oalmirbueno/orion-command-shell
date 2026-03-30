@@ -12,7 +12,7 @@ interface Props {
   sessions: SessionView[];
 }
 
-export function SessionsSummary({ sessions }: Props) {
+export function SessionsSummary({ sessions = [] }: Props) {
   const counts: Record<SessionStatus, number> = { running: 0, paused: 0, completed: 0, failed: 0 };
   for (const s of sessions) counts[s.status]++;
 

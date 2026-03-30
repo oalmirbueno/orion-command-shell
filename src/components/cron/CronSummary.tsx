@@ -6,6 +6,7 @@ interface Props {
 }
 
 export function CronSummary({ summary }: Props) {
+  if (!summary) return null;
   const isEmpty = summary.active + summary.failed + summary.disabled === 0;
 
   const items = [
