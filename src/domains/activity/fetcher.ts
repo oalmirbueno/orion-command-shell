@@ -16,12 +16,65 @@ import type { DomainFetcher, DomainResult } from "../types";
 // Real API shape
 // ═══════════════════════════════════════════════════════
 
+interface BackendActivity {
+  id: string;
+  timestamp: string;
+  type: string;
+  description: string;
+  status: string;
+  duration_ms: number | null;
+  tokens_used: number | null;
+  agent: string;
+  metadata: Record<string, unknown> | null;
+}
+
 interface ActivitiesApiResponse {
-  activities: ActivityInfo[];
+  activities: BackendActivity[];
   total?: number;
   limit?: number;
   offset?: number;
   hasMore?: boolean;
+}
+
+// ═══════════════════════════════════════════════════════
+// Backend → Canonical normalization
+// ═══════════════════════════════════════════════════════
+
+const statusToLevel: Record<string, ActivityLevel> = {
+  success: "info",
+  error: "error",
+  pending: "info",
+  running: "info",
+};
+
+const typeToActivityType: Record<string, ActivityType> = {
+  command: "agent.task",
+  file: "agent.task",
+  search: "agent.task",
+  cron_run: "cron.run",
+  security: "security.alert",
+  build: "system.start",
+  message: "session.start",
+  tool_call: "agent.task",
+};
+
+function normalizeBackendActivity(raw: BackendActivity): ActivityInfo {
+  return {
+    id: raw.id,
+    type: typeToActivityType[raw.type] || "agent.task",
+    level: statusToLevel[raw.status] || "info",
+    message: raw.description,
+    detail: null,
+    source: raw.agent,
+    agentId: raw.agent,
+    sessionId: null,
+    createdAt: raw.timestamp,
+    metadata: {
+      duration_ms: raw.duration_ms,
+      tokens_used: raw.tokens_used,
+      ...(raw.metadata || {}),
+    },
+  };
 }
 
 // ═══════════════════════════════════════════════════════
