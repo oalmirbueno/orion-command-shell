@@ -130,12 +130,27 @@ async function fetchMetrics(): Promise<{ metrics: SystemMetrics; latencyMs: numb
       };
     }
 
+    // RAM: stats.ram is in GB, sys.system.memory is in bytes
     const mem = sys?.system?.memory;
-    const ramRaw = stats?.ram || (mem ? { used: mem.used, total: mem.total } : null);
-    const ramPct = ramRaw ? Math.round((ramRaw.used / ramRaw.total) * 100) : null;
+    const statsRam = stats?.ram;
+    let ramPct: number | null = null;
+    let ramUsedGB: string | null = null;
+    let ramTotalGB: string | null = null;
+    if (statsRam) {
+      ramPct = Math.round((statsRam.used / statsRam.total) * 100);
+      ramUsedGB = statsRam.used.toFixed(1) + " GB";
+      ramTotalGB = statsRam.total.toFixed(1) + " GB";
+    } else if (mem) {
+      ramPct = Math.round(((mem.total - mem.free) / mem.total) * 100);
+      ramUsedGB = fmtGB(mem.used);
+      ramTotalGB = fmtGB(mem.total);
+    }
 
+    // Disk: stats.disk is in GB
     const diskRaw = stats?.disk || null;
     const diskPct = diskRaw ? Math.round((diskRaw.used / diskRaw.total) * 100) : null;
+    const diskUsedGB = diskRaw ? diskRaw.used.toFixed(0) + " GB" : null;
+    const diskTotalGB = diskRaw ? diskRaw.total.toFixed(0) + " GB" : null;
 
     const uptimeStr = stats?.uptime
       || sys?.system?.uptimeFormatted
@@ -148,11 +163,11 @@ async function fetchMetrics(): Promise<{ metrics: SystemMetrics; latencyMs: numb
       metrics: {
         cpu: stats?.cpu ?? null,
         ram: ramPct,
-        ramUsedGB: ramRaw ? fmtGB(ramRaw.used) : null,
-        ramTotalGB: ramRaw ? fmtGB(ramRaw.total) : null,
+        ramUsedGB,
+        ramTotalGB,
         disk: diskPct,
-        diskUsedGB: diskRaw ? fmtGB(diskRaw.used * 1e9) : null,
-        diskTotalGB: diskRaw ? fmtGB(diskRaw.total * 1e9) : null,
+        diskUsedGB,
+        diskTotalGB,
         uptime: uptimeStr,
         latencyMs,
         activeServices: stats?.activeServices ?? connectedCount,
