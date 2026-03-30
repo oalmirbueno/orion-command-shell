@@ -456,7 +456,7 @@ else { setLogs(filtered.map((a: any) => ({ ts: a.timestamp || "", level: a.statu
 
             <Separator className="bg-border/30" />
 
-            <Sec icon={ListChecks} title={`Histórico${taskHistory.length > 0 ? ` (${taskHistory.length})` : ""}`}>
+            <Sec icon={ListChecks} title={`Histórico${taskHistory.length > 0 ? ` (${taskHistory.length})` : ""}`} badge={taskHistorySource}>
               {taskHistoryLoading ? (
                 <div className="space-y-2 ml-5">{[1,2,3].map(i => <div key={i} className="h-8 rounded bg-muted/30 animate-pulse" />)}</div>
               ) : taskHistory.length === 0 ? (
