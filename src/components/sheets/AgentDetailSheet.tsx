@@ -30,7 +30,25 @@ interface Props {
 }
 
 export function AgentDetailSheet({ agent, open, onOpenChange }: Props) {
+  const [restarting, setRestarting] = useState(false);
+
   if (!agent) return null;
+
+  const handleRestart = async () => {
+    setRestarting(true);
+    try {
+      const res = await fetch(apiUrl(`/agents/${agent.id}/restart`), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      toast({ title: `"${agent.name}" reiniciado com sucesso` });
+    } catch {
+      toast({ title: "Erro ao reiniciar agente", variant: "destructive" });
+    } finally {
+      setRestarting(false);
+    }
+  };
 
   const badge = statusBadge[agent.status] || statusBadge.idle;
   const tier = tierLabel[agent.tier] || agent.tier;
