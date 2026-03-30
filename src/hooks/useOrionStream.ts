@@ -19,17 +19,32 @@ export type StreamStatus = "connecting" | "connected" | "disconnected" | "unsupp
 
 /** Domain event names the backend can push */
 const DOMAIN_QUERY_MAP: Record<string, string> = {
-  "system":     "status-bar-metrics",
+  "system":       "status-bar-metrics",
   "system.stats": "status-bar-metrics",
-  "sessions":   "sessions-page",
-  "agents":     "agents-page",
-  "activities":  "activity-page",
-  "cron":       "cron-page",
-  "operations": "operations-page",
-  "alerts":     "alerts-page",
-  "memory":     "memory-page",
-  "files":      "files-page",
-  "home":       "home-page",
+  "sessions":     "sessions-page",
+  "agents":       "agents-page",
+  "activities":   "activity-page",
+  "cron":         "cron-page",
+  "operations":   "operations-page",
+  "alerts":       "alerts-page",
+  "memory":       "memory-page",
+  "files":        "files-page",
+  "home":         "home-page",
+};
+
+/** Map SSE event names to DomainKey for health tracking */
+const SSE_TO_DOMAIN: Record<string, DomainKey> = {
+  "system":       "system",
+  "system.stats": "system",
+  "sessions":     "sessions",
+  "agents":       "agents",
+  "activities":   "activity",
+  "cron":         "cron",
+  "operations":   "operations",
+  "alerts":       "alerts",
+  "memory":       "memory",
+  "files":        "files",
+  "home":         "home",
 };
 
 interface StreamOptions {
