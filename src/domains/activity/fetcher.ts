@@ -16,12 +16,65 @@ import type { DomainFetcher, DomainResult } from "../types";
 // Real API shape
 // ═══════════════════════════════════════════════════════
 
+interface BackendActivity {
+  id: string;
+  timestamp: string;
+  type: string;
+  description: string;
+  status: string;
+  duration_ms: number | null;
+  tokens_used: number | null;
+  agent: string;
+  metadata: Record<string, unknown> | null;
+}
+
 interface ActivitiesApiResponse {
-  activities: ActivityInfo[];
+  activities: BackendActivity[];
   total?: number;
   limit?: number;
   offset?: number;
   hasMore?: boolean;
+}
+
+// ═══════════════════════════════════════════════════════
+// Backend → Canonical normalization
+// ═══════════════════════════════════════════════════════
+
+const statusToLevel: Record<string, ActivityLevel> = {
+  success: "info",
+  error: "error",
+  pending: "info",
+  running: "info",
+};
+
+const typeToActivityType: Record<string, ActivityType> = {
+  command: "agent.task",
+  file: "agent.task",
+  search: "agent.task",
+  cron_run: "cron.run",
+  security: "security.alert",
+  build: "system.start",
+  message: "session.start",
+  tool_call: "agent.task",
+};
+
+function normalizeBackendActivity(raw: BackendActivity): ActivityInfo {
+  return {
+    id: raw.id,
+    type: typeToActivityType[raw.type] || "agent.task",
+    level: statusToLevel[raw.status] || "info",
+    message: raw.description,
+    detail: null,
+    source: raw.agent,
+    agentId: raw.agent,
+    sessionId: null,
+    createdAt: raw.timestamp,
+    metadata: {
+      duration_ms: raw.duration_ms,
+      tokens_used: raw.tokens_used,
+      ...(raw.metadata || {}),
+    },
+  };
 }
 
 // ═══════════════════════════════════════════════════════
@@ -94,16 +147,19 @@ const EMPTY_PAGE: ActivityPageData = {
 };
 
 export const fetchActivityPage: DomainFetcher<ActivityPageData> = async (): Promise<DomainResult<ActivityPageData>> => {
-  const baseFetcher = createRealFirstFetcher<ActivitiesApiResponse | ActivityInfo[], ActivityInfo[]>({
+  const baseFetcher = createRealFirstFetcher<ActivitiesApiResponse | BackendActivity[], ActivityInfo[]>({
     endpoint: "/activities",
     fallbackData: [],
     transform: (raw) => {
-      // Handle { activities: [...] } wrapper
+      let items: BackendActivity[];
       if (raw && typeof raw === "object" && !Array.isArray(raw) && "activities" in raw) {
-        return (raw as ActivitiesApiResponse).activities;
+        items = (raw as ActivitiesApiResponse).activities;
+      } else if (Array.isArray(raw)) {
+        items = raw as BackendActivity[];
+      } else {
+        return [];
       }
-      if (Array.isArray(raw)) return raw;
-      return [];
+      return items.map(normalizeBackendActivity);
     },
   });
 
