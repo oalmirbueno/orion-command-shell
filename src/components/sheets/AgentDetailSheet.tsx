@@ -51,7 +51,40 @@ export function AgentDetailSheet({ agent, open, onOpenChange }: Props) {
   const [profile, setProfile] = useState<AgentProfile | null>(null);
   const [profileLoading, setProfileLoading] = useState(false);
   const [copiedId, setCopiedId] = useState(false);
+  const [taskHistory, setTaskHistory] = useState<TaskHistoryEntry[]>([]);
+  const [taskHistoryLoading, setTaskHistoryLoading] = useState(false);
   const logsEndRef = useRef<HTMLDivElement>(null);
+
+  // Fetch task history from activities
+  useEffect(() => {
+    if (!open || !agent) { setTaskHistory([]); return; }
+    let cancelled = false;
+    const fetchHistory = async () => {
+      setTaskHistoryLoading(true);
+      try {
+        const res = await fetch(apiUrl("/activities"));
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        const all = data.activities || data || [];
+        if (!cancelled) {
+          const filtered = all
+            .filter((a: any) => a.agent === agent.name || a.agent === agent.id || a.agentId === agent.id)
+            .slice(0, 20)
+            .map((a: any) => ({
+              id: a.id || crypto.randomUUID(),
+              description: a.description || a.message || a.content || "",
+              status: a.status || "success",
+              timestamp: a.timestamp || "",
+              duration: a.duration_ms ? `${(a.duration_ms / 1000).toFixed(1)}s` : undefined,
+            }));
+          setTaskHistory(filtered);
+        }
+      } catch { /* silent */ }
+      finally { if (!cancelled) setTaskHistoryLoading(false); }
+    };
+    fetchHistory();
+    return () => { cancelled = true; };
+  }, [open, agent?.id]);
 
   // Fetch agent profile/soul
   useEffect(() => {
