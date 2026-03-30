@@ -98,22 +98,49 @@ export function FileDetailSheet({ file, open, onOpenChange }: Props) {
   /* ── auto-fetch content on open ── */
   useEffect(() => {
     if (!file || !open || !canPreview || isImage) return;
+    let cancelled = false;
     setContentState("loading");
 
-    const url = apiUrl(`/files/content?path=${encodeURIComponent(file.path)}`);
-    fetch(url, { headers: { Accept: "text/plain" } })
-      .then(r => {
-        if (!r.ok) throw new Error(`${r.status} ${r.statusText}`);
-        return r.text();
-      })
-      .then(text => {
-        setContent(text);
-        setContentState("loaded");
-      })
-      .catch(err => {
-        setContentError(err.message || "Falha ao carregar conteúdo");
+    const encodedPath = encodeURIComponent(file.path);
+    // Try candidate routes in order — backend may expose any of these
+    const candidates = [
+      apiUrl(`/files/read?path=${encodedPath}`),
+      apiUrl(`/files/content?path=${encodedPath}`),
+      apiUrl(`/files?path=${encodedPath}`),
+    ];
+
+    const tryFetch = async () => {
+      for (const url of candidates) {
+        try {
+          const r = await fetch(url, { headers: { Accept: "text/plain, application/json" } });
+          if (!r.ok) continue;
+
+          const ct = r.headers.get("content-type") || "";
+          // Guard: if backend returned HTML (SPA fallback / 404 page), skip
+          if (ct.includes("text/html")) continue;
+
+          const text = await r.text();
+          // Extra guard: if it looks like an HTML page, skip
+          if (text.trimStart().startsWith("<!DOCTYPE") || text.trimStart().startsWith("<html")) continue;
+
+          if (!cancelled) {
+            setContent(text);
+            setContentState("loaded");
+          }
+          return;
+        } catch {
+          // try next candidate
+        }
+      }
+      // All candidates failed
+      if (!cancelled) {
+        setContentError("Rota de conteúdo não disponível no backend");
         setContentState("error");
-      });
+      }
+    };
+
+    tryFetch();
+    return () => { cancelled = true; };
   }, [file?.path, open]);
 
   const handleCopy = async () => {
@@ -130,14 +157,15 @@ export function FileDetailSheet({ file, open, onOpenChange }: Props) {
 
   const handleDownload = () => {
     if (!file) return;
-    const url = apiUrl(`/files/content?path=${encodeURIComponent(file.path)}`);
+    const encodedPath = encodeURIComponent(file.path);
+    const url = apiUrl(`/files/read?path=${encodedPath}`);
     window.open(url, "_blank");
   };
 
   if (!file) return null;
 
   const tc = typeConfig[file.type] || defaultType;
-  const imageUrl = isImage ? apiUrl(`/files/content?path=${encodeURIComponent(file.path)}`) : null;
+  const imageUrl = isImage ? apiUrl(`/files/read?path=${encodeURIComponent(file.path)}`) : null;
 
   return (
     <Sheet open={open} onOpenChange={handleOpenChange}>
