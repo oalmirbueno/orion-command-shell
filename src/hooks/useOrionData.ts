@@ -73,7 +73,8 @@ export function useOrionData<T>({
     queryFn,
     enabled: autoLoad && !forceState,
     staleTime: 30_000,
-    gcTime: 5 * 60_000, // keep cache for 5 min after unmount
+    gcTime: 5 * 60_000,
+    placeholderData: keepPreviousData,
     refetchInterval: refreshInterval > 0 ? refreshInterval : false,
     refetchIntervalInBackground: false,
     refetchOnWindowFocus: "always",
