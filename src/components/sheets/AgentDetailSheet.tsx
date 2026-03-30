@@ -57,6 +57,34 @@ export function AgentDetailSheet({ agent, open, onOpenChange }: Props) {
   const [taskVisible, setTaskVisible] = useState(5);
   const logsEndRef = useRef<HTMLDivElement>(null);
 
+  // Operational controls
+  const [editing, setEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [controls, setControls] = useState({
+    displayName: "",
+    shortDesc: "",
+    role: "",
+    notes: "",
+    mode: "geral" as "geral" | "por_dm" | "por_topico",
+    target: "" as string,
+    targetType: "topic" as "topic" | "dm" | "grupo",
+    opStatus: "ativo" as "ativo" | "pausado" | "somente_leitura",
+  });
+
+  // Sync controls with agent data on open
+  useEffect(() => {
+    if (open && agent) {
+      setControls(c => ({
+        ...c,
+        displayName: agent.name,
+        role: agent.role,
+        shortDesc: "",
+        notes: "",
+      }));
+      setEditing(false);
+    }
+  }, [open, agent?.id]);
+
   // Fetch task history from activities
   useEffect(() => {
     if (!open || !agent) { setTaskHistory([]); setTaskVisible(5); return; }
