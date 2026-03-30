@@ -65,11 +65,13 @@ export function AgentDetailSheet({ agent, open, onOpenChange }: Props) {
     shortDesc: "",
     role: "",
     notes: "",
-    mode: "geral" as "geral" | "por_dm" | "por_topico",
-    target: "" as string,
-    targetType: "topic" as "topic" | "dm" | "grupo",
+    scopeType: "global" as "global" | "dm" | "topic" | "mixed",
+    topicIds: [] as string[],
+    dmEnabled: true,
+    groupEnabled: true,
     opStatus: "ativo" as "ativo" | "pausado" | "somente_leitura",
   });
+  const [newTopicId, setNewTopicId] = useState("");
 
   // Sync controls with agent data on open
   useEffect(() => {
@@ -237,9 +239,10 @@ export function AgentDetailSheet({ agent, open, onOpenChange }: Props) {
           shortDesc: controls.shortDesc,
           role: controls.role,
           notes: controls.notes,
-          mode: controls.mode,
-          target: controls.target,
-          targetType: controls.targetType,
+          scopeType: controls.scopeType,
+          topicIds: controls.topicIds,
+          dmEnabled: controls.dmEnabled,
+          groupEnabled: controls.groupEnabled,
           opStatus: controls.opStatus,
         }),
       });
@@ -309,8 +312,12 @@ export function AgentDetailSheet({ agent, open, onOpenChange }: Props) {
                   <ControlRow label="Descrição" value={controls.shortDesc || "—"} />
                   <ControlRow label="Função" value={controls.role} />
                   <ControlRow label="Observações" value={controls.notes || "—"} />
-                  <ControlRow label="Modo" value={{ geral: "Geral", por_dm: "Por DM", por_topico: "Por Tópico" }[controls.mode]} />
-                  <ControlRow label="Alvo" value={controls.target || "—"} sub={{ topic: "Topic ID", dm: "DM", grupo: "Grupo" }[controls.targetType]} />
+                  <ControlRow label="Escopo" value={{ global: "Global", dm: "Somente DMs", topic: "Tópicos específicos", mixed: "Misto" }[controls.scopeType]} />
+                  {controls.scopeType === "topic" || controls.scopeType === "mixed" ? (
+                    <ControlRow label="Tópicos" value={controls.topicIds.length > 0 ? controls.topicIds.join(", ") : "—"} />
+                  ) : null}
+                  <ControlRow label="DM" value={controls.dmEnabled ? "Habilitado" : "Desabilitado"} />
+                  <ControlRow label="Grupo" value={controls.groupEnabled ? "Habilitado" : "Desabilitado"} />
                   <ControlRow label="Status Op." value={{ ativo: "Ativo", pausado: "Pausado", somente_leitura: "Somente leitura" }[controls.opStatus]} />
                   <button
                     onClick={() => setEditing(true)}
@@ -327,27 +334,50 @@ export function AgentDetailSheet({ agent, open, onOpenChange }: Props) {
                   <EditField label="Observações" value={controls.notes} onChange={v => setControls(c => ({ ...c, notes: v }))} textarea />
 
                   <div>
-                    <p className="text-[10px] font-mono text-muted-foreground/40 mb-1.5">Modo de atuação</p>
-                    <div className="flex gap-1.5">
-                      {([["geral", "Geral"], ["por_dm", "Por DM"], ["por_topico", "Por Tópico"]] as const).map(([val, lbl]) => (
-                        <ChipSelect key={val} selected={controls.mode === val} onClick={() => setControls(c => ({ ...c, mode: val }))}>{lbl}</ChipSelect>
+                    <p className="text-[10px] font-mono text-muted-foreground/40 mb-1.5">Escopo de atuação</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {([["global", "Global"], ["dm", "Somente DMs"], ["topic", "Tópicos"], ["mixed", "Misto"]] as const).map(([val, lbl]) => (
+                        <ChipSelect key={val} selected={controls.scopeType === val} onClick={() => setControls(c => ({ ...c, scopeType: val }))}>{lbl}</ChipSelect>
                       ))}
                     </div>
                   </div>
 
-                  <div>
-                    <p className="text-[10px] font-mono text-muted-foreground/40 mb-1.5">Alvo principal</p>
-                    <div className="flex gap-1.5 mb-2">
-                      {([["topic", "Topic ID"], ["dm", "DM"], ["grupo", "Grupo"]] as const).map(([val, lbl]) => (
-                        <ChipSelect key={val} selected={controls.targetType === val} onClick={() => setControls(c => ({ ...c, targetType: val }))}>{lbl}</ChipSelect>
-                      ))}
+                  {(controls.scopeType === "topic" || controls.scopeType === "mixed") && (
+                    <div>
+                      <p className="text-[10px] font-mono text-muted-foreground/40 mb-1.5">IDs de tópicos</p>
+                      <div className="flex flex-wrap gap-1.5 mb-2">
+                        {controls.topicIds.map(tid => (
+                          <span key={tid} className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-primary/10 border border-primary/20 text-[10px] font-mono text-primary">
+                            {tid}
+                            <button onClick={() => setControls(c => ({ ...c, topicIds: c.topicIds.filter(t => t !== tid) }))} className="hover:text-status-critical cursor-pointer">×</button>
+                          </span>
+                        ))}
+                      </div>
+                      <div className="flex gap-1.5">
+                        <input
+                          value={newTopicId}
+                          onChange={e => setNewTopicId(e.target.value)}
+                          placeholder="Topic ID"
+                          onKeyDown={e => { if (e.key === "Enter" && newTopicId.trim()) { setControls(c => ({ ...c, topicIds: [...c.topicIds, newTopicId.trim()] })); setNewTopicId(""); } }}
+                          className="flex-1 px-3 py-1.5 rounded-md border border-border/40 bg-muted/10 text-xs font-mono text-foreground/80 placeholder:text-muted-foreground/25 focus:outline-none focus:border-primary/40"
+                        />
+                        <button
+                          onClick={() => { if (newTopicId.trim()) { setControls(c => ({ ...c, topicIds: [...c.topicIds, newTopicId.trim()] })); setNewTopicId(""); } }}
+                          className="px-2.5 py-1.5 rounded-md border border-border/40 text-[10px] font-mono text-muted-foreground/50 hover:text-foreground/70 hover:border-border/60 transition-colors cursor-pointer"
+                        >+</button>
+                      </div>
                     </div>
-                    <input
-                      value={controls.target}
-                      onChange={e => setControls(c => ({ ...c, target: e.target.value }))}
-                      placeholder="ID ou referência do alvo"
-                      className="w-full px-3 py-1.5 rounded-md border border-border/40 bg-muted/10 text-xs font-mono text-foreground/80 placeholder:text-muted-foreground/25 focus:outline-none focus:border-primary/40"
-                    />
+                  )}
+
+                  <div className="flex gap-4">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input type="checkbox" checked={controls.dmEnabled} onChange={e => setControls(c => ({ ...c, dmEnabled: e.target.checked }))} className="rounded border-border/40 accent-primary" />
+                      <span className="text-xs text-foreground/70">DMs</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input type="checkbox" checked={controls.groupEnabled} onChange={e => setControls(c => ({ ...c, groupEnabled: e.target.checked }))} className="rounded border-border/40 accent-primary" />
+                      <span className="text-xs text-foreground/70">Grupos</span>
+                    </label>
                   </div>
 
                   <div>
