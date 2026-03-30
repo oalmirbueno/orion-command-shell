@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   CheckCircle2, XCircle, AlertTriangle, ChevronRight, Timer,
-  ToggleLeft, ToggleRight, Inbox,
+  Inbox,
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { apiUrl } from "@/domains/api";
@@ -27,10 +27,6 @@ function JobRow({ job, onClick, onToggle, isToggling }: { job: CronJob; onClick:
   const isDisabled = !job.enabled;
   const hasFailed = job.status === "failed";
 
-  const handleSwitchClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-  };
-
   return (
     <div onClick={onClick} className={`rounded-lg border border-border/40 border-l-[3px] ${cfg.border} ${cfg.bg} ${isDisabled ? "opacity-40" : ""} hover:bg-accent/20 transition-colors cursor-pointer group`}>
       <div className="px-6 py-5">
@@ -47,7 +43,7 @@ function JobRow({ job, onClick, onToggle, isToggling }: { job: CronJob; onClick:
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-2.5 shrink-0 ml-4" onClick={handleSwitchClick}>
+          <div className="flex items-center gap-2.5 shrink-0 ml-4" onClick={(e) => e.stopPropagation()}>
             <Switch
               checked={job.enabled}
               disabled={isToggling}
@@ -82,23 +78,35 @@ function JobRow({ job, onClick, onToggle, isToggling }: { job: CronJob; onClick:
   );
 }
 
-interface Props { jobs: CronJob[]; }
+interface Props {
+  jobs: CronJob[];
+  refetchList?: () => void;
+}
 
-export function CronJobsList({ jobs }: Props) {
-  const [selected, setSelected] = useState<CronJob | null>(null);
+export function CronJobsList({ jobs, refetchList }: Props) {
   const [localJobs, setLocalJobs] = useState<CronJob[]>(jobs);
-
-  // Sync if props change
-  if (jobs !== localJobs && jobs.length > 0 && JSON.stringify(jobs) !== JSON.stringify(localJobs)) {
-    setLocalJobs(jobs);
-  }
-
+  const [selected, setSelected] = useState<CronJob | null>(null);
   const [togglingIds, setTogglingIds] = useState<Set<string>>(new Set());
+
+  // Sync from props
+  useEffect(() => {
+    setLocalJobs(jobs);
+    // Also update selected job if it's open
+    if (selected) {
+      const updated = jobs.find(j => j.id === selected.id);
+      if (updated) setSelected(updated);
+    }
+  }, [jobs]);
 
   const handleToggle = async (id: string, enabled: boolean) => {
     setTogglingIds(prev => new Set(prev).add(id));
+
     // Optimistic update
-    setLocalJobs(prev => prev.map(j => j.id === id ? { ...j, enabled } : j));
+    setLocalJobs(prev => prev.map(j => j.id === id ? { ...j, enabled, status: !enabled ? "disabled" as const : "healthy" as const } : j));
+    if (selected?.id === id) {
+      setSelected(prev => prev ? { ...prev, enabled, status: !enabled ? "disabled" as const : "healthy" as const } : prev);
+    }
+
     try {
       const res = await fetch(apiUrl("/cron"), {
         method: "PUT",
@@ -107,9 +115,14 @@ export function CronJobsList({ jobs }: Props) {
       });
       if (!res.ok) throw new Error();
       toast({ title: enabled ? "Cron job ativado" : "Cron job desativado" });
+      // Refetch to get fresh server state
+      refetchList?.();
     } catch {
-      // Revert on error
+      // Revert
       setLocalJobs(prev => prev.map(j => j.id === id ? { ...j, enabled: !enabled } : j));
+      if (selected?.id === id) {
+        setSelected(prev => prev ? { ...prev, enabled: !enabled } : prev);
+      }
       toast({ title: "Erro ao alterar status", variant: "destructive" });
     } finally {
       setTogglingIds(prev => { const s = new Set(prev); s.delete(id); return s; });
@@ -157,7 +170,12 @@ export function CronJobsList({ jobs }: Props) {
           <JobRow key={job.id} job={job} onClick={() => setSelected(job)} onToggle={(enabled) => handleToggle(job.id, enabled)} isToggling={togglingIds.has(job.id)} />
         ))}
       </div>
-      <CronDetailSheet job={selected} open={!!selected} onOpenChange={(o) => !o && setSelected(null)} onToggle={handleToggle} />
+      <CronDetailSheet
+        job={selected}
+        open={!!selected}
+        onOpenChange={(o) => !o && setSelected(null)}
+        onToggle={handleToggle}
+      />
     </section>
   );
 }

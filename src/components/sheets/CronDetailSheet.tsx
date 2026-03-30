@@ -2,8 +2,6 @@ import { useState } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Timer, CheckCircle2, XCircle } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
-import { apiUrl } from "@/domains/api";
-import { toast } from "@/hooks/use-toast";
 import type { CronJob } from "@/domains/cron/types";
 
 interface Props {
@@ -14,27 +12,7 @@ interface Props {
 }
 
 export function CronDetailSheet({ job, open, onOpenChange, onToggle }: Props) {
-  const [toggling, setToggling] = useState(false);
-
   if (!job) return null;
-
-  const handleToggle = async (enabled: boolean) => {
-    setToggling(true);
-    try {
-      const res = await fetch(apiUrl("/cron"), {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: job.id, enabled }),
-      });
-      if (!res.ok) throw new Error();
-      toast({ title: enabled ? "Cron job ativado" : "Cron job desativado", description: job.name });
-      onToggle?.(job.id, enabled);
-    } catch {
-      toast({ title: "Erro ao alterar status", description: "Tente novamente", variant: "destructive" });
-    } finally {
-      setToggling(false);
-    }
-  };
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -47,7 +25,10 @@ export function CronDetailSheet({ job, open, onOpenChange, onToggle }: Props) {
         <div className="space-y-5 mt-6">
           <div className="flex items-center justify-between">
             <span className="text-sm text-foreground/80">Habilitado</span>
-            <Switch checked={job.enabled} onCheckedChange={handleToggle} disabled={toggling} />
+            <Switch
+              checked={job.enabled}
+              onCheckedChange={(checked) => onToggle?.(job.id, checked)}
+            />
           </div>
 
           <Row label="Schedule" value={job.schedule} />
