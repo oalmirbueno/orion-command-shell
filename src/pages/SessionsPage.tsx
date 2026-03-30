@@ -5,6 +5,7 @@ import { SessionsList } from "@/components/sessions/SessionsList";
 import { useOrionData } from "@/hooks/useOrionData";
 import { fetchSessions } from "@/domains/sessions/fetcher";
 import { OrionDataWrapper } from "@/components/orion/DataWrapper";
+import { SessionsSkeleton } from "@/components/skeletons/DomainSkeletons";
 import type { SessionView } from "@/domains/sessions/types";
 
 const SessionsPage = () => {
