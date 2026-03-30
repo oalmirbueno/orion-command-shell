@@ -51,7 +51,6 @@ export function useOrionData<T>({
   const globalUpdated = useLastUpdated();
   const staleTimer = useRef<ReturnType<typeof setTimeout>>();
   const queryClient = useQueryClient();
-  const healthReporter = useDomainHealthReporter();
 
   const queryFn = useCallback(async (): Promise<FetcherResult<T>> => {
     const result = await fetcher();
