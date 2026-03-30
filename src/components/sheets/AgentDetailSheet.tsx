@@ -53,11 +53,12 @@ export function AgentDetailSheet({ agent, open, onOpenChange }: Props) {
   const [copiedId, setCopiedId] = useState(false);
   const [taskHistory, setTaskHistory] = useState<TaskHistoryEntry[]>([]);
   const [taskHistoryLoading, setTaskHistoryLoading] = useState(false);
+  const [taskVisible, setTaskVisible] = useState(5);
   const logsEndRef = useRef<HTMLDivElement>(null);
 
   // Fetch task history from activities
   useEffect(() => {
-    if (!open || !agent) { setTaskHistory([]); return; }
+    if (!open || !agent) { setTaskHistory([]); setTaskVisible(5); return; }
     let cancelled = false;
     const fetchHistory = async () => {
       setTaskHistoryLoading(true);
@@ -69,7 +70,6 @@ export function AgentDetailSheet({ agent, open, onOpenChange }: Props) {
         if (!cancelled) {
           const filtered = all
             .filter((a: any) => a.agent === agent.name || a.agent === agent.id || a.agentId === agent.id)
-            .slice(0, 20)
             .map((a: any) => ({
               id: a.id || crypto.randomUUID(),
               description: a.description || a.message || a.content || "",
@@ -301,7 +301,7 @@ export function AgentDetailSheet({ agent, open, onOpenChange }: Props) {
           <Separator className="bg-border/30" />
 
           {/* Task History */}
-          <Section icon={ListChecks} title="Histórico de Tarefas">
+          <Section icon={ListChecks} title={`Histórico de Tarefas${taskHistory.length > 0 ? ` (${taskHistory.length})` : ""}`}>
             {taskHistoryLoading ? (
               <div className="space-y-2 ml-5">
                 {[1,2,3].map(i => <div key={i} className="h-8 rounded bg-muted/30 animate-pulse" />)}
@@ -309,8 +309,8 @@ export function AgentDetailSheet({ agent, open, onOpenChange }: Props) {
             ) : taskHistory.length === 0 ? (
               <p className="text-xs text-muted-foreground/40 italic ml-5">Nenhuma tarefa registrada</p>
             ) : (
-              <div className="ml-5 space-y-1.5 max-h-56 overflow-y-auto scrollbar-thin pr-1">
-                {taskHistory.map(task => (
+              <div className="ml-5 space-y-1.5">
+                {taskHistory.slice(0, taskVisible).map(task => (
                   <div key={task.id} className="flex items-start gap-2.5 rounded-md border border-border/20 bg-muted/10 px-3 py-2">
                     {task.status === "success" ? (
                       <CheckCircle2 className="h-3.5 w-3.5 text-status-online shrink-0 mt-0.5" />
@@ -330,6 +330,14 @@ export function AgentDetailSheet({ agent, open, onOpenChange }: Props) {
                     </div>
                   </div>
                 ))}
+                {taskVisible < taskHistory.length && (
+                  <button
+                    onClick={() => setTaskVisible(v => v + 10)}
+                    className="w-full py-2 rounded-md border border-dashed border-border/30 text-[11px] font-mono text-muted-foreground/50 hover:text-foreground/70 hover:border-border/50 transition-colors cursor-pointer"
+                  >
+                    Carregar mais ({taskHistory.length - taskVisible} restantes)
+                  </button>
+                )}
               </div>
             )}
           </Section>
