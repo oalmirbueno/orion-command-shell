@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
   Bot, Cpu, Zap, Activity, Clock, Layers, ArrowDownRight,
-  ArrowUpRight, AlertTriangle, Briefcase, RotateCcw, Loader2,
+  ArrowUpRight, AlertTriangle, Briefcase, RotateCcw, Loader2, Terminal, RefreshCw,
 } from "lucide-react";
 import { apiUrl } from "@/domains/api";
 import { toast } from "@/hooks/use-toast";
