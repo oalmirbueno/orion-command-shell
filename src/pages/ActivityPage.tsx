@@ -5,6 +5,7 @@ import { ActivitySummary } from "@/components/activity/ActivitySummary";
 import { ActivityFeed } from "@/components/activity/ActivityFeed";
 import { useOrionData } from "@/hooks/useOrionData";
 import { fetchActivityPage } from "@/domains/activity/fetcher";
+import { ActivitySkeleton } from "@/components/skeletons/DomainSkeletons";
 import type { ActivityPageData } from "@/domains/activity/types";
 
 const ActivityPage = () => {
