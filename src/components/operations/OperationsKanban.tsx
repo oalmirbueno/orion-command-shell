@@ -176,9 +176,10 @@ function KanbanSummaryBar({ tasks }: { tasks: OperationTask[] }) {
 
 interface OperationsKanbanProps {
   tasks: OperationTask[];
+  onTaskClick?: (task: OperationTask) => void;
 }
 
-export function OperationsKanban({ tasks = [] }: OperationsKanbanProps) {
+export function OperationsKanban({ tasks = [], onTaskClick }: OperationsKanbanProps) {
   return (
     <section className="space-y-4">
       <OrionSectionHeader
@@ -194,6 +195,7 @@ export function OperationsKanban({ tasks = [] }: OperationsKanbanProps) {
             key={col.key}
             column={col}
             tasks={tasks.filter(t => t.status === col.key)}
+            onTaskClick={onTaskClick}
           />
         ))}
       </div>
