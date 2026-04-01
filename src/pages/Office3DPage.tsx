@@ -34,9 +34,23 @@ class WebGLErrorBoundary extends Component<{ children: ReactNode }, { hasError: 
   }
 }
 
+const TIER_LABEL: Record<string, string> = { orchestrator: "Orquestrador", core: "Núcleo", support: "Suporte" };
+const STATUS_LABEL: Record<string, { label: string; color: string }> = {
+  active: { label: "Ativo", color: "bg-status-online" },
+  idle: { label: "Ocioso", color: "bg-status-warning" },
+  offline: { label: "Offline", color: "bg-muted-foreground/40" },
+};
+
 const Office3DPage = () => {
   const [fullscreen, setFullscreen] = useState(false);
   const [selectedAgent, setSelectedAgent] = useState<AgentView | null>(null);
+  const [hoveredAgent, setHoveredAgent] = useState<AgentView | null>(null);
+  const [tooltipPos, setTooltipPos] = useState<{ x: number; y: number } | null>(null);
+
+  const handleHover = (agent: AgentView | null, pos?: { x: number; y: number }) => {
+    setHoveredAgent(agent);
+    setTooltipPos(pos ?? null);
+  };
 
   return (
     <OrionLayout title="Office 3D">
