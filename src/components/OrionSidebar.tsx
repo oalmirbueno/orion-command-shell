@@ -10,7 +10,7 @@ import {
   Bot,
   Timer,
   Brain,
-  Bell,
+  AlertTriangle as AlertTriangleIcon,
   Box,
   FolderOpen,
   Search,
@@ -44,7 +44,7 @@ const operationsItems = [
 const systemItems = [
   { title: "Sistema", url: "/system", icon: Monitor },
   { title: "Cron", url: "/cron", icon: Timer },
-  { title: "Alertas", url: "/alerts", icon: Bell },
+  { title: "Alertas", url: "/alerts", icon: AlertTriangleIcon },
   { title: "Pipelines", url: "/pipelines", icon: GitBranch },
   { title: "Office 3D", url: "/office3d", icon: Box },
   { title: "Configurações", url: "/settings", icon: Settings },
