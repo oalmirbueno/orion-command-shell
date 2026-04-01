@@ -46,7 +46,7 @@ function AppShell() {
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/agents" element={<AgentsPage />} />
-            <Route path="/missions" element={<PlaceholderPage title="Missões" description="Rastreamento e orquestração de missões" />} />
+            <Route path="/missions" element={<MissionsPage />} />
             <Route path="/sessions" element={<SessionsPage />} />
             <Route path="/activity" element={<ActivityPage />} />
             <Route path="/memory" element={<MemoryPage />} />
