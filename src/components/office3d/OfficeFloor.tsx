@@ -126,7 +126,7 @@ function GlassPanel({ position, rotation = [0, 0, 0], size = [0.05, 2, 2] }: {
       {[size[1] / 2, -size[1] / 2].map((yOff, i) => (
         <mesh key={i} position={[position[0], position[1] + yOff, position[2]]} rotation={rotation}>
           <boxGeometry args={[size[0] + 0.02, 0.04, size[2] + 0.02]} />
-          <meshStandardMaterial color="#6a6a88" roughness={0.2} metalness={0.6} />
+          <meshStandardMaterial color="#8888a8" roughness={0.2} metalness={0.6} />
         </mesh>
       ))}
     </group>
