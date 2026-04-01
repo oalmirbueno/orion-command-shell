@@ -253,7 +253,7 @@ const PipelinesPage = () => {
                   </h2>
                   <div className="space-y-3">
                     {data.pipelines.filter(p => p.status === "running").map(p => (
-                      <PipelineCard key={p.id} pipeline={p} />
+                      <PipelineCard key={p.id} pipeline={p} onSelect={setSelected} />
                     ))}
                   </div>
                 </div>
@@ -268,7 +268,7 @@ const PipelinesPage = () => {
                   </h2>
                   <div className="space-y-3">
                     {data.pipelines.filter(p => p.status === "failed").map(p => (
-                      <PipelineCard key={p.id} pipeline={p} />
+                      <PipelineCard key={p.id} pipeline={p} onSelect={setSelected} />
                     ))}
                   </div>
                 </div>
@@ -283,7 +283,7 @@ const PipelinesPage = () => {
                   </h2>
                   <div className="space-y-3">
                     {data.pipelines.filter(p => p.status === "healthy" || p.status === "idle").map(p => (
-                      <PipelineCard key={p.id} pipeline={p} />
+                      <PipelineCard key={p.id} pipeline={p} onSelect={setSelected} />
                     ))}
                   </div>
                 </div>
@@ -298,7 +298,7 @@ const PipelinesPage = () => {
                   </h2>
                   <div className="space-y-3">
                     {data.pipelines.filter(p => p.status === "disabled").map(p => (
-                      <PipelineCard key={p.id} pipeline={p} />
+                      <PipelineCard key={p.id} pipeline={p} onSelect={setSelected} />
                     ))}
                   </div>
                 </div>
