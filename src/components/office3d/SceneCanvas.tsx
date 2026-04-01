@@ -1,6 +1,6 @@
 /**
- * Orion Office 3D — Main Scene (rewritten for office layout)
- * Uses real agent data with desk-based layout, sectors, and meeting room.
+ * Office 3D — Main Scene (premium command center)
+ * Enhanced lighting, environment, and integration with operations data.
  */
 
 import { Canvas } from "@react-three/fiber";
@@ -16,20 +16,19 @@ import { ConnectionLine } from "./OfficeConnections";
 import { assignDesks, TIER_COLORS } from "./OfficeLayout";
 import { getMeetingPositions } from "./MeetingRoom";
 
-/* ── Overlay states (HTML, not WebGL) ── */
-
+/* ── Overlay states ── */
 export function SceneOverlay({ state, error, onRetry }: {
   state: "loading" | "error" | "empty";
   error?: string | null;
   onRetry?: () => void;
 }) {
   return (
-    <div className="w-full h-full flex items-center justify-center bg-background">
+    <div className="w-full h-full flex items-center justify-center bg-[#08081a]">
       <div className="text-center space-y-3">
         {state === "loading" && (
           <>
             <Loader2 className="h-6 w-6 text-primary/40 animate-spin mx-auto" />
-            <p className="text-xs font-mono text-muted-foreground/40">Carregando escritório…</p>
+            <p className="text-xs font-mono text-muted-foreground/40">Inicializando escritório…</p>
           </>
         )}
         {state === "error" && (
@@ -38,9 +37,7 @@ export function SceneOverlay({ state, error, onRetry }: {
             <p className="text-xs font-mono text-muted-foreground/60">Falha ao carregar dados</p>
             {error && <p className="text-[10px] text-muted-foreground/40 max-w-xs">{error}</p>}
             {onRetry && (
-              <button onClick={onRetry} className="text-xs text-primary hover:text-primary/80 transition-colors">
-                Tentar novamente
-              </button>
+              <button onClick={onRetry} className="text-xs text-primary hover:text-primary/80 transition-colors">Tentar novamente</button>
             )}
           </>
         )}
@@ -48,7 +45,6 @@ export function SceneOverlay({ state, error, onRetry }: {
           <>
             <WifiOff className="h-6 w-6 text-muted-foreground/30 mx-auto" />
             <p className="text-xs font-mono text-muted-foreground/40">Nenhum agente disponível</p>
-            <p className="text-[10px] text-muted-foreground/30">Aguardando conexão com API</p>
           </>
         )}
       </div>
@@ -57,7 +53,6 @@ export function SceneOverlay({ state, error, onRetry }: {
 }
 
 /* ── Main Canvas ── */
-
 export function SceneCanvas({
   onAgentClick,
   onAgentHover,
@@ -74,31 +69,23 @@ export function SceneCanvas({
   });
 
   const agentList = agents || [];
-
   const deskMap = useMemo(() => assignDesks(agentList), [agentList]);
 
   const meetingIds = new Set(meetingAgentIds || []);
-  const meetingPositions = useMemo(
-    () => getMeetingPositions(meetingIds.size),
-    [meetingIds.size]
-  );
+  const meetingPositions = useMemo(() => getMeetingPositions(meetingIds.size), [meetingIds.size]);
 
-  // Connection pairs: orchestrator → all others
+  // Connection pairs: orchestrator → others
   const connectionPairs = useMemo(() => {
     const pairs: { from: [number, number, number]; to: [number, number, number]; color: string }[] = [];
     const orchs = agentList.filter(a => a.tier === "orchestrator");
-    const others = agentList.filter(a => a.tier !== "orchestrator");
     orchs.forEach(orch => {
       const orchDesk = deskMap.get(orch.id);
       if (!orchDesk) return;
-      others.forEach(other => {
+      agentList.forEach(other => {
+        if (other.tier === "orchestrator") return;
         const otherDesk = deskMap.get(other.id);
         if (!otherDesk) return;
-        pairs.push({
-          from: orchDesk.position,
-          to: otherDesk.position,
-          color: TIER_COLORS[orch.tier],
-        });
+        pairs.push({ from: orchDesk.position, to: otherDesk.position, color: TIER_COLORS[orch.tier] });
       });
     });
     return pairs;
@@ -113,20 +100,55 @@ export function SceneCanvas({
   return (
     <Canvas
       shadows
-      camera={{ position: [0, 10, 10], fov: 45 }}
+      camera={{ position: [0, 9, 11], fov: 45 }}
       style={{ background: "transparent" }}
-      gl={{ antialias: true, alpha: true }}
+      gl={{ antialias: true, alpha: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.2 }}
+      onCreated={({ gl }) => {
+        gl.shadowMap.enabled = true;
+        gl.shadowMap.type = THREE.PCFSoftShadowMap;
+      }}
     >
-      <color attach="background" args={["#08081a"]} />
-      <fog attach="fog" args={["#08081a", 14, 30]} />
+      {/* Background gradient feel */}
+      <color attach="background" args={["#0a0a20"]} />
+      <fog attach="fog" args={["#0a0a20", 16, 35]} />
 
-      <ambientLight intensity={0.2} />
-      <directionalLight position={[5, 10, 5]} intensity={0.35} castShadow shadow-mapSize={1024} />
-      <pointLight position={[0, 6, 0]} intensity={0.15} color="#a78bfa" />
-      <pointLight position={[0, 3, -4.5]} intensity={0.15} color="#fbbf24" />
+      {/* ── Premium Lighting Setup ── */}
+      {/* Ambient fill - warmer, brighter */}
+      <ambientLight intensity={0.35} color="#b0b0d0" />
 
+      {/* Key light - main directional */}
+      <directionalLight
+        position={[8, 12, 6]}
+        intensity={0.5}
+        castShadow
+        shadow-mapSize={2048}
+        shadow-bias={-0.001}
+        color="#c4c4ff"
+      />
+
+      {/* Fill light from opposite side */}
+      <directionalLight position={[-6, 8, -4]} intensity={0.2} color="#a0a0ff" />
+
+      {/* Command center accent */}
+      <pointLight position={[0, 5, -1]} intensity={0.4} color="#a78bfa" distance={10} decay={2} />
+
+      {/* Operations area fill */}
+      <pointLight position={[0, 4, 2.5]} intensity={0.3} color="#60a5fa" distance={12} decay={2} />
+
+      {/* Meeting room warm light */}
+      <pointLight position={[0, 3, -4.5]} intensity={0.3} color="#fbbf24" distance={6} decay={2} />
+
+      {/* Support area accent lights */}
+      <pointLight position={[5.5, 3, 1]} intensity={0.2} color="#6ee7b7" distance={5} decay={2} />
+      <pointLight position={[-5.5, 3, 1]} intensity={0.2} color="#6ee7b7" distance={5} decay={2} />
+
+      {/* Rim/back light for depth */}
+      <pointLight position={[0, 6, -8]} intensity={0.15} color="#8080ff" distance={15} decay={2} />
+
+      {/* ── Office Environment ── */}
       <OfficeFloor />
 
+      {/* ── Agents ── */}
       {agentList.map(agent => {
         const desk = deskMap.get(agent.id);
         if (!desk) return null;
@@ -149,19 +171,21 @@ export function SceneCanvas({
         );
       })}
 
+      {/* ── Connection Lines ── */}
       {connectionPairs.map((cp, i) => (
-        <ConnectionLine key={i} from={cp.from} to={cp.to} color={cp.color} opacity={0.07} />
+        <ConnectionLine key={i} from={cp.from} to={cp.to} color={cp.color} opacity={0.06} />
       ))}
 
+      {/* ── Camera Controls ── */}
       <OrbitControls
         enableDamping
         dampingFactor={0.05}
         minDistance={5}
-        maxDistance={20}
-        maxPolarAngle={Math.PI / 2.2}
+        maxDistance={22}
+        maxPolarAngle={Math.PI / 2.15}
         autoRotate
-        autoRotateSpeed={0.15}
-        target={[0, 0, 1]}
+        autoRotateSpeed={0.12}
+        target={[0, 0.5, 1]}
       />
     </Canvas>
   );
