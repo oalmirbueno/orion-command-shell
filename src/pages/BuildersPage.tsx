@@ -148,6 +148,7 @@ interface BuilderView {
 
 /* ── Component ── */
 export default function BuildersPage() {
+  const navigate = useNavigate();
   const qc = useQueryClient();
   const [expandedBuilder, setExpandedBuilder] = useState<string | null>(null);
   const [expandedSquad, setExpandedSquad] = useState<string | null>(null);
