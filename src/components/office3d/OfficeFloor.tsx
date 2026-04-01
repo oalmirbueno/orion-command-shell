@@ -86,14 +86,8 @@ function SectorFloor({ position, size, color, elevated = false }: {
       </mesh>
     );
   }
-  // Non-elevated: use a thin box instead of a coplanar plane to avoid z-fighting
-  return (
-    <mesh position={[position[0], 0.005, position[2]]}>
-      <boxGeometry args={[size[0], 0.01, size[1]]} />
-      <meshStandardMaterial color={color} transparent opacity={0.12} roughness={0.7}
-        polygonOffset polygonOffsetFactor={-1} polygonOffsetUnits={-1} />
-    </mesh>
-  );
+  // Non-elevated sectors: no overlay, just use border lines for identity
+  return null;
 }
 
 /* ── Sector border ── */
