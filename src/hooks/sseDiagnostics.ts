@@ -80,17 +80,20 @@ class SSEDiagnosticStore {
   }
 
   getSnapshot() {
-    return {
-      status: this._status,
-      connectedAt: this._connectedAt,
-      uptimeSeconds: this.uptimeSeconds,
-      reconnects: this._reconnects,
-      reconnectHistory: this._reconnectHistory,
-      lastError: this._lastError,
-      lastErrorAt: this._lastErrorAt,
-      eventCount: this._events.length,
-      events: this._events,
-    };
+    if (!this._cachedSnapshot) {
+      this._cachedSnapshot = {
+        status: this._status,
+        connectedAt: this._connectedAt,
+        uptimeSeconds: this.uptimeSeconds,
+        reconnects: this._reconnects,
+        reconnectHistory: this._reconnectHistory,
+        lastError: this._lastError,
+        lastErrorAt: this._lastErrorAt,
+        eventCount: this._events.length,
+        events: this._events,
+      };
+    }
+    return this._cachedSnapshot;
   }
 }
 
