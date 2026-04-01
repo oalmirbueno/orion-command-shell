@@ -3,7 +3,7 @@
  * Shows meeting agenda auto-generated from convened agents.
  */
 import { useState } from "react";
-import { X, Users, ChevronDown, ChevronUp, AlertTriangle, Zap, Clock, Target, MessageSquare } from "lucide-react";
+import { X, Users, ChevronDown, ChevronUp, AlertTriangle, Zap, Clock, Target, MessageSquare, StickyNote, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import type { AgentView } from "@/domains/agents/types";
