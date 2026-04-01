@@ -205,7 +205,7 @@ export default function BuildersPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <OrionBreadcrumb items={[{ label: "Builders" }]} />
+            <OrionBreadcrumb items={["Builders"]} />
             <h1 className="text-2xl font-bold text-foreground mt-1 flex items-center gap-2">
               <Hammer className="h-6 w-6 text-primary" />
               Central de Builders

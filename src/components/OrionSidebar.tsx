@@ -41,6 +41,7 @@ const operationsItems = [
   { title: "Arquivos", url: "/files", icon: FolderOpen },
   { title: "Busca", url: "/search", icon: Search },
   { title: "Skills", url: "/skills", icon: Zap },
+  { title: "Builders", url: "/builders", icon: Hammer },
 ];
 
 const systemItems = [
