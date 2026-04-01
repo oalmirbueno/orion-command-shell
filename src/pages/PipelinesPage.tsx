@@ -108,7 +108,7 @@ function StepFlow({ steps }: { steps: PipelineStep[] }) {
 }
 
 /* ── Pipeline Card ── */
-function PipelineCard({ pipeline }: { pipeline: Pipeline }) {
+function PipelineCard({ pipeline, onSelect }: { pipeline: Pipeline; onSelect: (p: Pipeline) => void }) {
   const navigate = useNavigate();
   const cfg = statusConfig[pipeline.status];
   const Icon = cfg.icon;
