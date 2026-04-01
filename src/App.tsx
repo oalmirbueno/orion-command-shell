@@ -8,6 +8,7 @@ import { DomainHealthProvider } from "@/hooks/useDomainHealth";
 import { useOrionStream } from "@/hooks/useOrionStream";
 import Index from "./pages/Index.tsx";
 import PlaceholderPage from "./pages/PlaceholderPage.tsx";
+import PipelinesPage from "./pages/PipelinesPage.tsx";
 import MissionsPage from "./pages/MissionsPage.tsx";
 import SystemPage from "./pages/SystemPage.tsx";
 import AgentsPage from "./pages/AgentsPage.tsx";
@@ -64,7 +65,7 @@ function AppShell() {
             <Route path="/builders" element={<BuildersPage />} />
             <Route path="/timeline" element={<TimelinePage />} />
             <Route path="/reminders" element={<RemindersPage />} />
-            <Route path="/pipelines" element={<PlaceholderPage title="Pipelines" description="Módulo Pipeline — Em desenvolvimento" />} />
+            <Route path="/pipelines" element={<PipelinesPage />} />
             <Route path="/office3d" element={<Office3DPage />} />
             <Route path="/settings" element={<PlaceholderPage title="Configurações" description="Módulo Configurações — Em desenvolvimento" />} />
             <Route path="*" element={<NotFound />} />
