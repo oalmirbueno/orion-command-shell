@@ -570,6 +570,7 @@ const MissionsPage = () => {
         open={sheetOpen}
         onOpenChange={setSheetOpen}
         onDelete={handleDeleteWorkflow}
+        onUpdate={handleUpdateWorkflow}
       />
     </OrionLayout>
   );
