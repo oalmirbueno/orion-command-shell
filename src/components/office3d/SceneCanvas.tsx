@@ -77,7 +77,7 @@ export function SceneCanvas({
 
   // Connection pairs: orchestrator → others
   const connectionPairs = useMemo(() => {
-    const pairs: { from: [number, number, number]; to: [number, number, number]; color: string }[] = [];
+    const pairs: { from: [number, number, number]; to: [number, number, number]; color: string; active: boolean }[] = [];
     const orchs = agentList.filter(a => a.tier === "orchestrator");
     orchs.forEach(orch => {
       const orchDesk = deskMap.get(orch.id);
@@ -86,7 +86,12 @@ export function SceneCanvas({
         if (other.tier === "orchestrator") return;
         const otherDesk = deskMap.get(other.id);
         if (!otherDesk) return;
-        pairs.push({ from: orchDesk.position, to: otherDesk.position, color: TIER_COLORS[orch.tier] });
+        pairs.push({
+          from: orchDesk.position,
+          to: otherDesk.position,
+          color: TIER_COLORS[orch.tier],
+          active: other.status === "active" && other.sessions > 0,
+        });
       });
     });
     return pairs;
