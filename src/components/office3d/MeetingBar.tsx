@@ -3,7 +3,7 @@
  * Shows meeting agenda auto-generated from convened agents.
  */
 import { useState } from "react";
-import { X, Users, ChevronDown, ChevronUp, AlertTriangle, Zap, Clock, Target, MessageSquare } from "lucide-react";
+import { X, Users, ChevronDown, ChevronUp, AlertTriangle, Zap, Clock, Target, MessageSquare, StickyNote, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import type { AgentView } from "@/domains/agents/types";
@@ -54,6 +54,60 @@ const ICON_MAP = {
   idle: <Clock className="h-3 w-3 text-muted-foreground/60 shrink-0" />,
   collab: <Target className="h-3 w-3 text-amber-400 shrink-0" />,
 };
+
+/* ── Meeting Notes component ── */
+function MeetingNotes() {
+  const [notes, setNotes] = useState<{ id: number; text: string; done: boolean }[]>([]);
+  const [draft, setDraft] = useState("");
+
+  const addNote = () => {
+    const trimmed = draft.trim().slice(0, 500);
+    if (!trimmed) return;
+    setNotes(prev => [...prev, { id: Date.now(), text: trimmed, done: false }]);
+    setDraft("");
+  };
+
+  return (
+    <div className="border border-border/30 rounded-lg bg-background/30">
+      <div className="flex items-center gap-2 px-3 py-2 border-b border-border/20">
+        <StickyNote className="h-3.5 w-3.5 text-primary" />
+        <span className="text-[11px] font-semibold text-foreground/80 uppercase tracking-wider">Notas & Decisões</span>
+        <span className="text-[10px] font-mono text-muted-foreground/40 ml-auto">{notes.length}</span>
+      </div>
+      <div className="p-3 space-y-2">
+        {notes.length > 0 && (
+          <div className="space-y-1.5 max-h-32 overflow-y-auto scrollbar-thin">
+            {notes.map(n => (
+              <div key={n.id} className="flex items-start gap-2 group">
+                <button onClick={() => setNotes(prev => prev.map(x => x.id === n.id ? { ...x, done: !x.done } : x))}
+                  className={`mt-0.5 w-3.5 h-3.5 rounded border shrink-0 transition-colors ${n.done ? "bg-primary border-primary" : "border-border/40 hover:border-primary/50"}`}
+                />
+                <p className={`text-[11px] leading-tight flex-1 ${n.done ? "line-through text-muted-foreground/40" : "text-foreground/80"}`}>{n.text}</p>
+                <button onClick={() => setNotes(prev => prev.filter(x => x.id !== n.id))}
+                  className="opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                  <Trash2 className="h-3 w-3 text-muted-foreground/30 hover:text-status-error/60" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+        <div className="flex gap-1.5">
+          <input
+            value={draft}
+            onChange={e => setDraft(e.target.value)}
+            onKeyDown={e => e.key === "Enter" && addNote()}
+            placeholder="Registrar decisão ou ação..."
+            maxLength={500}
+            className="flex-1 text-[11px] bg-background/50 border border-border/30 rounded px-2 py-1.5 text-foreground placeholder:text-muted-foreground/30 focus:outline-none focus:border-primary/40"
+          />
+          <button onClick={addNote} className="px-2 py-1.5 rounded bg-primary/10 border border-primary/20 text-primary hover:bg-primary/20 transition-colors">
+            <Plus className="h-3 w-3" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export function MeetingBar({ agents, allAgents, onAddAgent, onRemoveAgent, onDismiss }: Props) {
   const [expanded, setExpanded] = useState(true);
@@ -120,6 +174,9 @@ export function MeetingBar({ agents, allAgents, onAddAgent, onRemoveAgent, onDis
                 </div>
               </div>
             )}
+
+            {/* ── NOTAS / DECISÕES ── */}
+            {agents.length > 0 && <MeetingNotes />}
 
             {/* Quick add */}
             {notInMeeting.length > 0 && (
