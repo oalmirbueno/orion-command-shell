@@ -23,6 +23,8 @@ interface RealAgent {
   status?: string;
   lastActivity?: string;
   activeSessions?: number;
+  currentTask?: string;
+  context?: string;
 }
 
 interface RealSession {
