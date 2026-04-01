@@ -16,7 +16,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger,
 } from "@/components/ui/dialog";
 import { WorkflowDetailSheet } from "@/components/sheets/WorkflowDetailSheet";
-import type { MissionForSheet } from "@/components/sheets/WorkflowDetailSheet";
+import type { MissionForSheet, WorkflowUpdate } from "@/components/sheets/WorkflowDetailSheet";
 import { API_BASE_URL } from "@/domains/api";
 import type { CronJob, JobStatus } from "@/domains/cron/types";
 
