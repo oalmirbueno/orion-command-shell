@@ -16,7 +16,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger,
 } from "@/components/ui/dialog";
 import { WorkflowDetailSheet } from "@/components/sheets/WorkflowDetailSheet";
-import type { MissionForSheet } from "@/components/sheets/WorkflowDetailSheet";
+import type { MissionForSheet, WorkflowUpdate } from "@/components/sheets/WorkflowDetailSheet";
 import { API_BASE_URL } from "@/domains/api";
 import type { CronJob, JobStatus } from "@/domains/cron/types";
 
@@ -472,6 +472,29 @@ const MissionsPage = () => {
     });
   }, []);
 
+  const handleUpdateWorkflow = useCallback((id: string, updates: WorkflowUpdate) => {
+    setCustomWorkflows((prev) => {
+      const next = prev.map((w) =>
+        w.id === id
+          ? {
+              ...w,
+              ...(updates.name !== undefined ? { name: updates.name.slice(0, 100) } : {}),
+              ...(updates.description !== undefined ? { description: updates.description.slice(0, 200) } : {}),
+              ...(updates.cronMatch !== undefined ? { cronMatch: updates.cronMatch.slice(0, 100) || undefined } : {}),
+            }
+          : w
+      );
+      saveCustomWorkflows(next);
+      return next;
+    });
+    // Update the sheet's displayed mission optimistically
+    setSelectedMission((prev) =>
+      prev && prev.id === id
+        ? { ...prev, ...updates }
+        : prev
+    );
+  }, []);
+
   const handleMissionClick = useCallback((mission: MissionCard) => {
     const wfDef = allWorkflows.find((w) => w.id === mission.id);
     const forSheet: MissionForSheet = {
@@ -547,6 +570,7 @@ const MissionsPage = () => {
         open={sheetOpen}
         onOpenChange={setSheetOpen}
         onDelete={handleDeleteWorkflow}
+        onUpdate={handleUpdateWorkflow}
       />
     </OrionLayout>
   );
