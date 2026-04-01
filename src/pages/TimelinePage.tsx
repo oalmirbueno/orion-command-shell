@@ -131,7 +131,6 @@ const TimelinePage = () => {
               onChange={setFilters}
               resultCount={filtered.length}
             />
-            </span>
           </div>
 
           {/* Center Timeline */}
