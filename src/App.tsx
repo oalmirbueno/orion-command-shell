@@ -63,6 +63,7 @@ function AppShell() {
             <Route path="/skills" element={<SkillsPage />} />
             <Route path="/builders" element={<BuildersPage />} />
             <Route path="/timeline" element={<TimelinePage />} />
+            <Route path="/reminders" element={<RemindersPage />} />
             <Route path="/pipelines" element={<PlaceholderPage title="Pipelines" description="Módulo Pipeline — Em desenvolvimento" />} />
             <Route path="/office3d" element={<Office3DPage />} />
             <Route path="/settings" element={<PlaceholderPage title="Configurações" description="Módulo Configurações — Em desenvolvimento" />} />
