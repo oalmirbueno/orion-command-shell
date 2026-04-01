@@ -50,6 +50,7 @@ const Index = () => {
               <div className="xl:col-span-2 space-y-5">
                 <OperationalHealth services={data.health} />
                 <SkillsWidget />
+                <BuildersWidget />
               </div>
               <div className="xl:col-span-3">
                 <ExecutiveBriefing items={data.briefing} />
