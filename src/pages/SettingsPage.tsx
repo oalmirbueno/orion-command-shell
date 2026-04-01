@@ -356,6 +356,11 @@ const SettingsPage = () => {
         {/* SSE Diagnostics */}
         <SSEDiagnosticsSection />
 
+        {/* Histórico de Notificações */}
+        <SectionCard title="Histórico de Notificações" icon={Bell}>
+          <NotificationHistory />
+        </SectionCard>
+
         {/* Notas operacionais */}
         <SectionCard title="Notas Operacionais" icon={Clock}>
           <div className="space-y-2 text-xs text-muted-foreground">
