@@ -159,7 +159,8 @@ function SSEDiagnosticsSection() {
   const [, setTick] = useState(0);
 
   useEffect(() => {
-    return sseDiagnostics.subscribe(() => setTick(t => t + 1));
+    const unsub = sseDiagnostics.subscribe(() => setTick(t => t + 1));
+    return () => { unsub(); };
   }, []);
 
   const { status, events, connectedAt, reconnects } = sseDiagnostics;
