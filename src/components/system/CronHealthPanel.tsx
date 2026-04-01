@@ -97,6 +97,7 @@ export function CronHealthPanel({ jobs, summary }: CronHealthPanelProps) {
           {disabledJobs.length} job{disabledJobs.length !== 1 ? "s" : ""} desativado{disabledJobs.length !== 1 ? "s" : ""}
         </p>
       )}
+      </div>
     </section>
   );
 }
