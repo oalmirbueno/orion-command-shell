@@ -33,21 +33,20 @@ function useTileTexture() {
     const ctx = canvas.getContext("2d")!;
 
     // Light warm-grey base
-    ctx.fillStyle = "#4a4a68";
+    ctx.fillStyle = "#6a6a88";
     ctx.fillRect(0, 0, size, size);
 
-    // 4x4 tiles with subtle variation
     const ts = size / 4;
     for (let x = 0; x < 4; x++) {
       for (let y = 0; y < 4; y++) {
-        const b = 68 + Math.floor(Math.random() * 12);
-        ctx.fillStyle = `rgb(${b - 4}, ${b - 4}, ${b + 8})`;
+        const b = 100 + Math.floor(Math.random() * 14);
+        ctx.fillStyle = `rgb(${b - 2}, ${b - 2}, ${b + 10})`;
         ctx.fillRect(x * ts + 1.5, y * ts + 1.5, ts - 3, ts - 3);
       }
     }
 
-    // Grout — slightly darker
-    ctx.strokeStyle = "#3a3a58";
+    ctx.strokeStyle = "#585878";
+    ctx.lineWidth = 2;
     ctx.lineWidth = 2;
     for (let i = 0; i <= 4; i++) {
       ctx.beginPath(); ctx.moveTo(i * ts, 0); ctx.lineTo(i * ts, size); ctx.stroke();
@@ -82,7 +81,7 @@ function SectorFloor({ position, size, color, elevated = false }: {
     return (
       <mesh position={[position[0], 0.02, position[2]]} castShadow receiveShadow>
         <boxGeometry args={[size[0], 0.04, size[1]]} />
-        <meshStandardMaterial color="#454568" roughness={0.35} metalness={0.3}
+        <meshStandardMaterial color="#606088" roughness={0.35} metalness={0.3}
           polygonOffset polygonOffsetFactor={1} polygonOffsetUnits={1} />
       </mesh>
     );
@@ -121,13 +120,13 @@ function GlassPanel({ position, rotation = [0, 0, 0], size = [0.05, 2, 2] }: {
     <group>
       <mesh position={position} rotation={rotation} castShadow>
         <boxGeometry args={size} />
-        <meshPhysicalMaterial color="#a0b0c8" transparent opacity={0.1} roughness={0.03} metalness={0.05}
+        <meshPhysicalMaterial color="#b8c8e0" transparent opacity={0.12} roughness={0.03} metalness={0.05}
           clearcoat={1} clearcoatRoughness={0.03} />
       </mesh>
       {[size[1] / 2, -size[1] / 2].map((yOff, i) => (
         <mesh key={i} position={[position[0], position[1] + yOff, position[2]]} rotation={rotation}>
           <boxGeometry args={[size[0] + 0.02, 0.04, size[2] + 0.02]} />
-          <meshStandardMaterial color="#6a6a88" roughness={0.2} metalness={0.6} />
+          <meshStandardMaterial color="#8888a8" roughness={0.2} metalness={0.6} />
         </mesh>
       ))}
     </group>
@@ -142,11 +141,11 @@ function Pillar({ position, height = 3, radius = 0.07 }: {
     <group position={position}>
       <mesh position={[0, height / 2, 0]} castShadow>
         <cylinderGeometry args={[radius, radius, height, 16]} />
-        <meshStandardMaterial color="#5a5a78" roughness={0.2} metalness={0.6} />
+        <meshStandardMaterial color="#7878a0" roughness={0.2} metalness={0.6} />
       </mesh>
       <mesh position={[0, 0.012, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <circleGeometry args={[radius * 2.2, 16]} />
-        <meshStandardMaterial color="#606080" roughness={0.3} metalness={0.5} />
+        <meshStandardMaterial color="#7878a0" roughness={0.3} metalness={0.5} />
       </mesh>
     </group>
   );
@@ -161,7 +160,7 @@ function WallDisplay({ position, rotation = [0, 0, 0], width = 1.5, height = 0.8
       {/* Frame */}
       <mesh position={[0, 0, -0.025]} castShadow>
         <boxGeometry args={[width + 0.1, height + 0.1, 0.04]} />
-        <meshStandardMaterial color="#3a3a58" roughness={0.15} metalness={0.75} />
+        <meshStandardMaterial color="#505078" roughness={0.15} metalness={0.75} />
       </mesh>
       {/* Screen */}
       <mesh>
@@ -186,7 +185,7 @@ function CommandConsole() {
       {/* Console desk */}
       <mesh position={[0, 0.4, 0]} castShadow receiveShadow>
         <boxGeometry args={[3.5, 0.07, 0.85]} />
-        <meshPhysicalMaterial color="#484870" roughness={0.15} metalness={0.5}
+        <meshPhysicalMaterial color="#606090" roughness={0.15} metalness={0.5}
           clearcoat={0.3} clearcoatRoughness={0.25} />
       </mesh>
       {/* Front accent */}
@@ -198,7 +197,7 @@ function CommandConsole() {
       {[-1.75, 1.75].map((x, i) => (
         <mesh key={i} position={[x, 0.2, 0]} castShadow>
           <boxGeometry args={[0.07, 0.42, 0.85]} />
-          <meshStandardMaterial color="#404065" roughness={0.2} metalness={0.55} />
+          <meshStandardMaterial color="#555585" roughness={0.2} metalness={0.55} />
         </mesh>
       ))}
       {/* Large display */}
@@ -210,13 +209,13 @@ function CommandConsole() {
       {/* Display frame */}
       <mesh position={[0, 1.2, -0.33]} castShadow>
         <boxGeometry args={[3.35, 1.32, 0.04]} />
-        <meshStandardMaterial color="#3a3a58" roughness={0.12} metalness={0.8} />
+        <meshStandardMaterial color="#505078" roughness={0.12} metalness={0.8} />
       </mesh>
       {/* Stand pillars */}
       {[-1.2, 1.2].map((x, i) => (
         <mesh key={i} position={[x, 0.6, -0.3]}>
           <cylinderGeometry args={[0.03, 0.03, 1.2, 8]} />
-          <meshStandardMaterial color="#5a5a78" roughness={0.2} metalness={0.65} />
+          <meshStandardMaterial color="#7878a0" roughness={0.2} metalness={0.65} />
         </mesh>
       ))}
       {/* Status LED */}
@@ -234,12 +233,12 @@ function ServerRack({ position, color = "#6ee7b7" }: { position: [number, number
     <group position={position}>
       <mesh position={[0, 0.7, 0]} castShadow>
         <boxGeometry args={[0.5, 1.4, 0.38]} />
-        <meshStandardMaterial color="#3a3a58" roughness={0.2} metalness={0.65} />
+        <meshStandardMaterial color="#505078" roughness={0.2} metalness={0.65} />
       </mesh>
       {[0.2, 0.5, 0.8, 1.1].map((y, i) => (
         <mesh key={i} position={[0, y, 0.195]}>
           <boxGeometry args={[0.42, 0.015, 0.004]} />
-          <meshStandardMaterial color="#555578" roughness={0.35} metalness={0.45} />
+          <meshStandardMaterial color="#707098" roughness={0.35} metalness={0.45} />
         </mesh>
       ))}
       <mesh position={[0.18, 0.9, 0.2]}>
@@ -260,7 +259,7 @@ function MeetingTable() {
       {/* Table surface */}
       <mesh position={[0, 0.38, 0]} castShadow receiveShadow>
         <cylinderGeometry args={[1.4, 1.4, 0.06, 48]} />
-        <meshPhysicalMaterial color="#505075" roughness={0.06} metalness={0.5}
+        <meshPhysicalMaterial color="#686898" roughness={0.06} metalness={0.5}
           clearcoat={0.7} clearcoatRoughness={0.08} />
       </mesh>
       {/* Inlay ring */}
@@ -271,7 +270,7 @@ function MeetingTable() {
       {/* Pedestal */}
       <mesh position={[0, 0.19, 0]}>
         <cylinderGeometry args={[0.15, 0.22, 0.38, 16]} />
-        <meshStandardMaterial color="#555580" roughness={0.2} metalness={0.65} />
+        <meshStandardMaterial color="#7070a0" roughness={0.2} metalness={0.65} />
       </mesh>
       {/* Chairs */}
       {Array.from({ length: 6 }, (_, i) => {
@@ -280,15 +279,15 @@ function MeetingTable() {
           <group key={i} position={[Math.cos(angle) * 2, 0, Math.sin(angle) * 2]} rotation={[0, -angle + Math.PI, 0]}>
             <mesh position={[0, 0.28, 0]}>
               <cylinderGeometry args={[0.16, 0.16, 0.04, 12]} />
-              <meshStandardMaterial color="#484868" roughness={0.3} metalness={0.45} />
+              <meshStandardMaterial color="#606090" roughness={0.3} metalness={0.45} />
             </mesh>
             <mesh position={[0, 0.46, -0.12]}>
               <boxGeometry args={[0.26, 0.32, 0.03]} />
-              <meshStandardMaterial color="#484868" roughness={0.3} metalness={0.45} />
+              <meshStandardMaterial color="#606090" roughness={0.3} metalness={0.45} />
             </mesh>
             <mesh position={[0, 0.14, 0]}>
               <cylinderGeometry args={[0.02, 0.02, 0.28, 6]} />
-              <meshStandardMaterial color="#606088" roughness={0.2} metalness={0.55} />
+              <meshStandardMaterial color="#7878a8" roughness={0.2} metalness={0.55} />
             </mesh>
           </group>
         );

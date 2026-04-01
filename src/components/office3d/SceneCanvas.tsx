@@ -109,37 +109,37 @@ export function SceneCanvas({
       shadows
       camera={{ position: [0, 8.5, 12], fov: 42 }}
       style={{ background: "transparent" }}
-      gl={{ antialias: true, alpha: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.6 }}
+      gl={{ antialias: true, alpha: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 2.0 }}
       onCreated={({ gl }) => { gl.shadowMap.enabled = true; gl.shadowMap.type = THREE.PCFSoftShadowMap; }}
     >
-      {/* Light architectural background */}
-      <color attach="background" args={["#252545"]} />
-      <fog attach="fog" args={["#252545", 22, 50]} />
+      {/* Bright architectural background */}
+      <color attach="background" args={["#3a3a5c"]} />
+      <fog attach="fog" args={["#3a3a5c", 25, 55]} />
 
-      {/* ════ LIGHTING — bright, architectural, legible ════ */}
-      <hemisphereLight args={["#9999cc", "#505070", 1.0]} />
-      <ambientLight intensity={0.9} color="#e0e0f0" />
+      {/* ════ LIGHTING — bright, premium office ════ */}
+      <hemisphereLight args={["#bbbbdd", "#707090", 1.2]} />
+      <ambientLight intensity={1.2} color="#e8e8ff" />
 
-      {/* Key light — strong, warm */}
-      <directionalLight position={[8, 14, 8]} intensity={0.9} castShadow
-        shadow-mapSize={2048} shadow-bias={-0.0003} color="#f0f0ff"
+      {/* Key light */}
+      <directionalLight position={[8, 14, 8]} intensity={1.1} castShadow
+        shadow-mapSize={2048} shadow-bias={-0.0003} color="#f5f5ff"
         shadow-camera-left={-12} shadow-camera-right={12}
         shadow-camera-top={12} shadow-camera-bottom={-10}
         shadow-camera-near={1} shadow-camera-far={35} />
 
       {/* Fill — left */}
-      <directionalLight position={[-8, 10, -4]} intensity={0.4} color="#d0d0e8" />
+      <directionalLight position={[-8, 10, -4]} intensity={0.6} color="#d8d8f0" />
 
       {/* Top fill */}
-      <directionalLight position={[0, 15, 0]} intensity={0.35} color="#d8d8f0" />
+      <directionalLight position={[0, 15, 0]} intensity={0.5} color="#e0e0f8" />
 
-      {/* Sector accents — gentle */}
-      <pointLight position={[0, 3.5, -1.5]} intensity={0.2} color="#a78bfa" distance={8} decay={2} />
-      <pointLight position={[-2, 3, 2.5]} intensity={0.15} color="#60a5fa" distance={10} decay={2} />
-      <pointLight position={[2, 3, 2.5]} intensity={0.15} color="#60a5fa" distance={10} decay={2} />
-      <pointLight position={[0, 2.5, -4.5]} intensity={0.2} color="#fbbf24" distance={5} decay={2} />
-      <pointLight position={[5.5, 2.5, 1.5]} intensity={0.1} color="#6ee7b7" distance={4} decay={2} />
-      <pointLight position={[-5.5, 2.5, 1.5]} intensity={0.1} color="#6ee7b7" distance={4} decay={2} />
+      {/* Sector accents */}
+      <pointLight position={[0, 3.5, -1.5]} intensity={0.25} color="#a78bfa" distance={8} decay={2} />
+      <pointLight position={[-2, 3, 2.5]} intensity={0.2} color="#60a5fa" distance={10} decay={2} />
+      <pointLight position={[2, 3, 2.5]} intensity={0.2} color="#60a5fa" distance={10} decay={2} />
+      <pointLight position={[0, 2.5, -4.5]} intensity={0.25} color="#fbbf24" distance={5} decay={2} />
+      <pointLight position={[5.5, 2.5, 1.5]} intensity={0.15} color="#6ee7b7" distance={4} decay={2} />
+      <pointLight position={[-5.5, 2.5, 1.5]} intensity={0.15} color="#6ee7b7" distance={4} decay={2} />
 
       {/* ════ ENVIRONMENT ════ */}
       <OfficeFloor />

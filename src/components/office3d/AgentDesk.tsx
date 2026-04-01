@@ -106,7 +106,7 @@ export function AgentDesk({ agent, desk, inMeeting, meetingPos, onClick, onHover
           {/* Desk surface — light mid-tone */}
           <mesh position={[0, 0.24, 0]} castShadow receiveShadow>
             <boxGeometry args={[1.15, 0.055, 0.7]} />
-            <meshPhysicalMaterial color="#505078" roughness={0.18} metalness={0.45}
+            <meshPhysicalMaterial color="#6868a0" roughness={0.18} metalness={0.45}
               clearcoat={0.2} clearcoatRoughness={0.3} />
           </mesh>
           {/* Front edge accent */}
@@ -118,7 +118,7 @@ export function AgentDesk({ agent, desk, inMeeting, meetingPos, onClick, onHover
           {[[-0.5, 0.12, -0.28], [0.5, 0.12, -0.28], [-0.5, 0.12, 0.28], [0.5, 0.12, 0.28]].map((p, i) => (
             <mesh key={i} position={p as [number, number, number]} castShadow>
               <cylinderGeometry args={[0.02, 0.02, 0.24, 8]} />
-              <meshStandardMaterial color="#606085" roughness={0.2} metalness={0.55} />
+              <meshStandardMaterial color="#7878a8" roughness={0.2} metalness={0.55} />
             </mesh>
           ))}
           {/* Primary monitor */}
@@ -129,11 +129,11 @@ export function AgentDesk({ agent, desk, inMeeting, meetingPos, onClick, onHover
           </mesh>
           <mesh position={[0, 0.5, -0.195]} castShadow>
             <boxGeometry args={[0.54, 0.39, 0.012]} />
-            <meshStandardMaterial color="#3a3a58" roughness={0.12} metalness={0.75} />
+            <meshStandardMaterial color="#505078" roughness={0.12} metalness={0.75} />
           </mesh>
           <mesh position={[0, 0.34, -0.18]}>
             <cylinderGeometry args={[0.015, 0.015, 0.15, 8]} />
-            <meshStandardMaterial color="#606085" roughness={0.25} metalness={0.55} />
+            <meshStandardMaterial color="#7878a8" roughness={0.25} metalness={0.55} />
           </mesh>
           {/* Secondary monitor */}
           <mesh position={[0.35, 0.45, -0.15]} rotation={[0, -0.3, 0]}>
@@ -144,26 +144,26 @@ export function AgentDesk({ agent, desk, inMeeting, meetingPos, onClick, onHover
           {/* Keyboard */}
           <mesh position={[0, 0.275, 0.1]}>
             <boxGeometry args={[0.3, 0.008, 0.1]} />
-            <meshStandardMaterial color="#404065" roughness={0.4} metalness={0.3} />
+            <meshStandardMaterial color="#585890" roughness={0.4} metalness={0.3} />
           </mesh>
           {/* Mouse */}
           <mesh position={[0.25, 0.275, 0.12]}>
             <boxGeometry args={[0.05, 0.01, 0.07]} />
-            <meshStandardMaterial color="#404065" roughness={0.4} metalness={0.3} />
+            <meshStandardMaterial color="#585890" roughness={0.4} metalness={0.3} />
           </mesh>
           {/* Chair */}
           <group position={[0, 0, 0.55]}>
             <mesh position={[0, 0.3, 0]} castShadow>
               <cylinderGeometry args={[0.17, 0.17, 0.04, 12]} />
-              <meshStandardMaterial color="#454568" roughness={0.3} metalness={0.4} />
+              <meshStandardMaterial color="#606090" roughness={0.3} metalness={0.4} />
             </mesh>
             <mesh position={[0, 0.5, -0.14]} castShadow>
               <boxGeometry args={[0.3, 0.35, 0.03]} />
-              <meshStandardMaterial color="#454568" roughness={0.3} metalness={0.4} />
+              <meshStandardMaterial color="#606090" roughness={0.3} metalness={0.4} />
             </mesh>
             <mesh position={[0, 0.15, 0]}>
               <cylinderGeometry args={[0.02, 0.02, 0.3, 6]} />
-              <meshStandardMaterial color="#606088" roughness={0.2} metalness={0.5} />
+              <meshStandardMaterial color="#7878a8" roughness={0.2} metalness={0.5} />
             </mesh>
           </group>
         </group>
