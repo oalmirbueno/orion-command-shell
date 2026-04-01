@@ -227,6 +227,7 @@ function EmptyState() {
 
 /* ── Page ── */
 const PipelinesPage = () => {
+  const [selected, setSelected] = useState<Pipeline | null>(null);
   const { state, data, source, lastUpdated, refetch } = useOrionData<PipelinesPageData>({
     key: "pipelines-page",
     fetcher: fetchPipelinesPage,
@@ -236,6 +237,7 @@ const PipelinesPage = () => {
   return (
     <OrionLayout title="Pipelines">
       <OrionBreadcrumb items={["Pipelines"]} />
+      <PipelineDetailSheet pipeline={selected} open={!!selected} onOpenChange={(o) => !o && setSelected(null)} />
       <OrionDataWrapper state={state} source={source} lastUpdated={lastUpdated} onRetry={refetch} compact hideSource skeleton={<PipelinesSkeleton />}>
         {data && (
           data.pipelines.length === 0 ? <EmptyState /> : (
