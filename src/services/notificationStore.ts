@@ -37,9 +37,6 @@ class NotificationStore {
   private _userId: string | null = null;
   private _loaded = false;
   private _snapshot: StoreSnapshot = { mode: "memory", loaded: false, readCount: 0, dismissedCount: 0 };
-  private _mode: PersistenceMode = "memory";
-  private _userId: string | null = null;
-  private _loaded = false;
 
   get mode() { return this._mode; }
   get loaded() { return this._loaded; }
