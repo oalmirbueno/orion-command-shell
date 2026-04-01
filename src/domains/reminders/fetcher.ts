@@ -1,11 +1,12 @@
 // Reminders & News — Fetcher derivado dos domínios existentes
 // Compõe lembretes de alertas/cron/operações e notícias de atividade/memória.
 
-import { fetchAlerts } from "../alerts/fetcher";
+import { fetchAlertsPage } from "../alerts/fetcher";
 import { fetchCronPage } from "../cron/fetcher";
 import { fetchActivityPage } from "../activity/fetcher";
 import { fetchOperationsPage } from "../operations/fetcher";
 import { fetchSessions } from "../sessions/fetcher";
+import type { AlertsPageData } from "../alerts/types";
 import type { DomainFetcher, DomainResult, DataSource } from "../types";
 import type { RemindersPageData, Reminder, NewsItem, RemindersSummary } from "./types";
 
