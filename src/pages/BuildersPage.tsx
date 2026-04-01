@@ -41,7 +41,7 @@ interface RealSession {
   aborted: boolean;
 }
 
-interface SkillItem {
+interface AioxSquad {
   id: string;
   name: string;
   description?: string;
@@ -50,6 +50,7 @@ interface SkillItem {
   agents?: string[];
   files?: number | string[];
   tags?: string[];
+  category?: string;
 }
 
 /* ── Builder classification ── */
