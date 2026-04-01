@@ -232,7 +232,7 @@ const PipelinesPage = () => {
 
   return (
     <OrionLayout title="Pipelines">
-      <OrionBreadcrumb items={[{ label: "Pipelines" }]} />
+      <OrionBreadcrumb items={["Pipelines"]} />
       <OrionDataWrapper state={state} source={source} lastUpdated={lastUpdated} onRetry={refetch} compact hideSource skeleton={<PipelinesSkeleton />}>
         {data && (
           data.pipelines.length === 0 ? <EmptyState /> : (
