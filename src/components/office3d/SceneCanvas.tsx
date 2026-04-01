@@ -76,6 +76,28 @@ export function SceneCanvas({
     return pairs;
   }, [agentList, deskMap]);
 
+  // Squad connections: agents linked via dependsOn/feeds form squads
+  const squadPairs = useMemo(() => {
+    const pairs: { from: [number, number, number]; to: [number, number, number]; active: boolean }[] = [];
+    const seen = new Set<string>();
+    agentList.forEach(agent => {
+      const aDesk = deskMap.get(agent.id);
+      if (!aDesk) return;
+      const linkedIds = [...(agent.dependsOn || []), ...(agent.feeds || [])];
+      linkedIds.forEach(otherId => {
+        const key = [agent.id, otherId].sort().join("-");
+        if (seen.has(key)) return;
+        seen.add(key);
+        const bDesk = deskMap.get(otherId);
+        if (!bDesk) return;
+        const otherAgent = agentList.find(a => a.id === otherId);
+        const isActive = agent.status === "active" || (otherAgent?.status === "active");
+        pairs.push({ from: aDesk.position, to: bDesk.position, active: isActive });
+      });
+    });
+    return pairs;
+  }, [agentList, deskMap]);
+
   if (state === "loading" || state === "error" || state === "empty") {
     return <SceneOverlay state={state} error={error} onRetry={refetch} />;
   }
