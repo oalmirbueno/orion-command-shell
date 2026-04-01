@@ -13,7 +13,7 @@ import * as THREE from "three";
 import { AlertTriangle, Loader2, WifiOff } from "lucide-react";
 import { OfficeFloor } from "./OfficeFloor";
 import { AgentDesk } from "./AgentDesk";
-import { ConnectionLine } from "./OfficeConnections";
+import { FlowConnection } from "./OfficeConnections";
 import { assignDesks, TIER_COLORS } from "./OfficeLayout";
 import { getMeetingPositions } from "./MeetingRoom";
 
@@ -77,7 +77,7 @@ export function SceneCanvas({
 
   // Connection pairs: orchestrator → others
   const connectionPairs = useMemo(() => {
-    const pairs: { from: [number, number, number]; to: [number, number, number]; color: string }[] = [];
+    const pairs: { from: [number, number, number]; to: [number, number, number]; color: string; active: boolean }[] = [];
     const orchs = agentList.filter(a => a.tier === "orchestrator");
     orchs.forEach(orch => {
       const orchDesk = deskMap.get(orch.id);
@@ -86,7 +86,12 @@ export function SceneCanvas({
         if (other.tier === "orchestrator") return;
         const otherDesk = deskMap.get(other.id);
         if (!otherDesk) return;
-        pairs.push({ from: orchDesk.position, to: otherDesk.position, color: TIER_COLORS[orch.tier] });
+        pairs.push({
+          from: orchDesk.position,
+          to: otherDesk.position,
+          color: TIER_COLORS[orch.tier],
+          active: other.status === "active" && other.sessions > 0,
+        });
       });
     });
     return pairs;
@@ -174,7 +179,7 @@ export function SceneCanvas({
 
       {/* ── Connection Lines ── */}
       {connectionPairs.map((cp, i) => (
-        <ConnectionLine key={i} from={cp.from} to={cp.to} color={cp.color} opacity={0.06} />
+        <FlowConnection key={i} from={cp.from} to={cp.to} color={cp.color} active={cp.active} particleCount={cp.active ? 2 : 0} />
       ))}
 
       {/* ── Camera Controls ── */}
