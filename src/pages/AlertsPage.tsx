@@ -213,9 +213,9 @@ const AlertsPage = () => {
               Sinais de risco e atenção operacional
             </p>
           </div>
-          <Button variant="outline" size="sm" onClick={handleRefresh} className="gap-2">
-            <RefreshCw className="h-4 w-4" />
-            Atualizar
+          <Button variant="outline" size="sm" onClick={handleRefresh} disabled={isRefreshing || isFetching} className="gap-2">
+            <RefreshCw className={`h-4 w-4 ${isRefreshing || isFetching ? "animate-spin" : ""}`} />
+            {isRefreshing ? "Atualizando…" : "Atualizar"}
           </Button>
         </div>
 
