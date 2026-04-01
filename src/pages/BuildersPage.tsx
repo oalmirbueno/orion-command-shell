@@ -23,6 +23,8 @@ interface RealAgent {
   status?: string;
   lastActivity?: string;
   activeSessions?: number;
+  currentTask?: string;
+  context?: string;
 }
 
 interface RealSession {
@@ -163,6 +165,8 @@ interface BuilderView {
   sessions: RealSession[];
   totalTokens: number;
   emoji?: string;
+  currentTask: string;
+  context: string;
 }
 
 /* ── Component ── */
@@ -191,6 +195,11 @@ export default function BuildersPage() {
           s.model?.toLowerCase().includes(a.model?.split("/")[0]?.toLowerCase() || "___") ||
           s.key?.toLowerCase().includes(a.name?.toLowerCase() || "___"),
       );
+      // Derive current task: from API field or latest active session
+      const latestActive = agentSessions.find((s) => !s.aborted && s.ageMs < 300_000);
+      const currentTask = a.currentTask || latestActive?.preview || latestActive?.key || "";
+      const context = a.context || (latestActive ? `${latestActive.type || "session"} · ${latestActive.model || "—"}` : "");
+
       return {
         id: a.id,
         name: a.name,
@@ -203,6 +212,8 @@ export default function BuildersPage() {
         sessions: agentSessions,
         totalTokens: agentSessions.reduce((sum, s) => sum + (s.totalTokens || 0), 0),
         emoji: a.emoji,
+        currentTask,
+        context,
       };
     });
   }, [agentsQ.data, sessionsQ.data]);
@@ -368,6 +379,20 @@ export default function BuildersPage() {
             <div className="flex items-center gap-2 text-[10px] text-muted-foreground/50 font-mono">
               <Cpu className="h-3 w-3" />
               <span>{formatTokens(b.totalTokens)} tokens</span>
+            </div>
+          )}
+          {/* Current task & context */}
+          {(b.currentTask || b.context) && (
+            <div className="rounded-md border border-primary/10 bg-primary/5 px-3 py-2 space-y-1">
+              {b.currentTask && (
+                <div className="flex items-center gap-2">
+                  <Activity className="h-3 w-3 text-primary shrink-0" />
+                  <span className="text-xs text-foreground/80 truncate">{b.currentTask}</span>
+                </div>
+              )}
+              {b.context && (
+                <div className="text-[10px] font-mono text-muted-foreground/50 pl-5">{b.context}</div>
+              )}
             </div>
           )}
         </div>
