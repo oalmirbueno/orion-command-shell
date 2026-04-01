@@ -36,6 +36,7 @@ class WebGLErrorBoundary extends Component<{ children: ReactNode }, { hasError: 
 
 const Office3DPage = () => {
   const [fullscreen, setFullscreen] = useState(false);
+  const [selectedAgent, setSelectedAgent] = useState<AgentView | null>(null);
 
   return (
     <OrionLayout title="Office 3D">
