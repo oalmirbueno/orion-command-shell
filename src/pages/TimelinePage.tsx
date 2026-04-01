@@ -76,7 +76,7 @@ function groupByBlock(items: TimelineItem[]): { label: string; items: TimelineIt
 // ── Page ──
 const TimelinePage = () => {
   const navigate = useNavigate();
-  const [filter, setFilter] = useState<FilterKey>("all");
+  const [filters, setFilters] = useState<FilterState>({ type: "all", status: "all", dateFrom: undefined, dateTo: undefined });
 
   const { state, data, source, lastUpdated, refetch } = useOrionData<TimelinePageData>({
     key: "timeline-page",
@@ -87,9 +87,19 @@ const TimelinePage = () => {
   const pageData = data || { items: [], summary: { total: 0, running: 0, completed: 0, failed: 0, scheduled: 0, critical: 0 } };
 
   const filtered = useMemo(() => {
-    if (filter === "all") return pageData.items;
-    return pageData.items.filter(i => i.type === filter);
-  }, [pageData.items, filter]);
+    let items = pageData.items;
+    if (filters.type !== "all") items = items.filter(i => i.type === filters.type);
+    if (filters.status !== "all") items = items.filter(i => i.status === filters.status);
+    if (filters.dateFrom) {
+      const from = filters.dateFrom.getTime();
+      items = items.filter(i => new Date(i.timestamp).getTime() >= from);
+    }
+    if (filters.dateTo) {
+      const to = filters.dateTo.getTime() + 86_400_000; // end of day
+      items = items.filter(i => new Date(i.timestamp).getTime() <= to);
+    }
+    return items;
+  }, [pageData.items, filters]);
 
   const blocks = useMemo(() => groupByBlock(filtered), [filtered]);
 
@@ -112,26 +122,15 @@ const TimelinePage = () => {
         >
           <TimelineSummary data={pageData} />
 
-          {/* Filters */}
-          <div className="flex items-center gap-2 mt-5">
-            <Filter className="h-3.5 w-3.5 text-muted-foreground/40" />
-            {filters.map((f) => (
-              <button
-                key={f.key}
-                onClick={() => setFilter(f.key)}
-                className={cn(
-                  "text-[11px] font-mono uppercase tracking-wider px-3 py-1.5 rounded-md border transition-colors",
-                  filter === f.key
-                    ? "bg-primary/10 text-primary border-primary/30"
-                    : "bg-transparent text-muted-foreground/50 border-border/30 hover:border-border/60 hover:text-muted-foreground/70"
-                )}
-              >
-                {f.label}
-              </button>
-            ))}
-            <div className="flex-1" />
-            <span className="text-[10px] font-mono text-muted-foreground/30">
-              {filtered.length} evento{filtered.length !== 1 ? "s" : ""}
+          {/* Advanced Filters */}
+          <div className="mt-5">
+            <AdvancedFilters
+              types={typeOptions}
+              statuses={statusOptions}
+              value={filters}
+              onChange={setFilters}
+              resultCount={filtered.length}
+            />
             </span>
           </div>
 
