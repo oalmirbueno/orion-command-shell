@@ -65,18 +65,11 @@ function useTileTexture() {
 function FloorPlane() {
   const tileMap = useTileTexture();
   return (
-    <group>
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.02, 1]} receiveShadow>
-        <planeGeometry args={[22, 20]} />
-        <meshStandardMaterial map={tileMap} roughness={0.5} metalness={0.15} />
-      </mesh>
-      {/* Subtle polished overlay */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.015, 1]} receiveShadow>
-        <planeGeometry args={[22, 20]} />
-        <meshPhysicalMaterial color="#505070" roughness={0.3} metalness={0.2}
-          clearcoat={0.12} clearcoatRoughness={0.5} transparent opacity={0.15} />
-      </mesh>
-    </group>
+    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.02, 1]} receiveShadow>
+      <planeGeometry args={[22, 20]} />
+      <meshPhysicalMaterial map={tileMap} roughness={0.4} metalness={0.18}
+        clearcoat={0.1} clearcoatRoughness={0.5} />
+    </mesh>
   );
 }
 
