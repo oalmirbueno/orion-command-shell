@@ -17,6 +17,7 @@ import {
   Zap,
   Hammer,
   GitMerge,
+  Bell,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import {
@@ -45,6 +46,7 @@ const operationsItems = [
   { title: "Skills", url: "/skills", icon: Zap },
   { title: "Builders", url: "/builders", icon: Hammer },
   { title: "Timeline", url: "/timeline", icon: GitMerge },
+  { title: "Lembretes", url: "/reminders", icon: Bell },
 ];
 
 const systemItems = [
