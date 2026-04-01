@@ -5,6 +5,7 @@ import { Suspense, useState, useCallback, Component, type ReactNode } from "reac
 import { SceneCanvas, SceneOverlay } from "@/components/office3d/SceneCanvas";
 import { AgentCommandPanel } from "@/components/office3d/AgentCommandPanel";
 import { MeetingBar } from "@/components/office3d/MeetingBar";
+import { OfficeMinimap } from "@/components/office3d/OfficeMinimap";
 import { AgentDetailSheet } from "@/components/sheets/AgentDetailSheet";
 import { useOrionData } from "@/hooks/useOrionData";
 import { fetchAgents } from "@/domains/agents/fetcher";
