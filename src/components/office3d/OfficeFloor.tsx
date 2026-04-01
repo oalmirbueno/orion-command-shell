@@ -68,7 +68,8 @@ function FloorPlane() {
     <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.02, 1]} receiveShadow>
       <planeGeometry args={[22, 20]} />
       <meshPhysicalMaterial map={tileMap} roughness={0.4} metalness={0.18}
-        clearcoat={0.1} clearcoatRoughness={0.5} />
+        clearcoat={0.1} clearcoatRoughness={0.5}
+        polygonOffset polygonOffsetFactor={2} polygonOffsetUnits={2} />
     </mesh>
   );
 }
