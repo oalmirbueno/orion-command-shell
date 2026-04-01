@@ -45,9 +45,12 @@ export function AttentionRequired({ items = [] }: AttentionRequiredProps) {
           </div>
           <span className="text-xs font-mono text-status-online/60">Tudo em ordem</span>
         </div>
-        <div className="px-5 py-6 text-center flex flex-col items-center">
-          <CheckCircle2 className="h-5 w-5 text-status-online/40 mb-2" />
-          <p className="text-sm text-muted-foreground/50 font-mono">Nenhum item requer atenção</p>
+        <div className="orion-empty">
+          <div className="orion-empty-icon">
+            <CheckCircle2 className="h-5 w-5 text-status-online/40" />
+          </div>
+          <p className="orion-empty-title">Nenhum item requer atenção</p>
+          <p className="orion-empty-subtitle">Sistema operando normalmente</p>
         </div>
       </section>
     );

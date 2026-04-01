@@ -81,10 +81,12 @@ export function BottlenecksWidget() {
       </div>
 
       {!hasData ? (
-        <div className="px-5 py-8 text-center flex flex-col items-center gap-2">
-          <Zap className="h-5 w-5 text-muted-foreground/20" />
-          <p className="text-sm font-mono text-muted-foreground/40">Acumulando métricas...</p>
-          <p className="text-[10px] text-muted-foreground/25">Dados de latência e erro aparecerão após os primeiros fetches</p>
+        <div className="orion-empty">
+          <div className="orion-empty-icon">
+            <Zap className="h-5 w-5 text-muted-foreground/30" />
+          </div>
+          <p className="orion-empty-title">Acumulando métricas...</p>
+          <p className="orion-empty-subtitle">Dados de latência e erro aparecerão após os primeiros fetches</p>
         </div>
       ) : (
         <>

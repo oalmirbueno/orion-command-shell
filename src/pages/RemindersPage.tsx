@@ -155,9 +155,12 @@ function NewsList({ items }: { items: NewsItem[] }) {
             <h2 className="orion-panel-title">Notícias Operacionais</h2>
           </div>
         </div>
-        <div className="px-5 py-8 text-center flex flex-col items-center gap-2">
-          <Newspaper className="h-5 w-5 text-muted-foreground/20" />
-          <p className="text-sm font-mono text-muted-foreground/40">Nenhuma notícia recente</p>
+        <div className="orion-empty">
+          <div className="orion-empty-icon">
+            <Newspaper className="h-5 w-5 text-muted-foreground/30" />
+          </div>
+          <p className="orion-empty-title">Nenhuma notícia recente</p>
+          <p className="orion-empty-subtitle">Eventos aparecerão conforme o sistema operar</p>
         </div>
       </section>
     );
