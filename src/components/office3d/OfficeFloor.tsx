@@ -270,7 +270,7 @@ function MeetingTable() {
       {/* Pedestal */}
       <mesh position={[0, 0.19, 0]}>
         <cylinderGeometry args={[0.15, 0.22, 0.38, 16]} />
-        <meshStandardMaterial color="#555580" roughness={0.2} metalness={0.65} />
+        <meshStandardMaterial color="#7070a0" roughness={0.2} metalness={0.65} />
       </mesh>
       {/* Chairs */}
       {Array.from({ length: 6 }, (_, i) => {
