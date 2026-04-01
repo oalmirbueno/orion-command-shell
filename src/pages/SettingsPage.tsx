@@ -363,6 +363,16 @@ const SettingsPage = () => {
           <NotificationHistory />
         </SectionCard>
 
+        {/* Alertas de Degradação */}
+        <SectionCard title="Alertas de Degradação" icon={ShieldAlert}>
+          <DegradationAlerts />
+        </SectionCard>
+
+        {/* Tendências por Domínio */}
+        <SectionCard title="Tendências Históricas" icon={BarChart3}>
+          <TrendsDashboard />
+        </SectionCard>
+
         {/* Notas operacionais */}
         <SectionCard title="Notas Operacionais" icon={Clock}>
           <div className="space-y-2 text-xs text-muted-foreground">
