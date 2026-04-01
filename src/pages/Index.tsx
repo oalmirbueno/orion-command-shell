@@ -14,6 +14,7 @@ import { WeatherContext } from "@/components/home/WeatherContext";
 import { SkillsWidget } from "@/components/home/SkillsWidget";
 import { BuildersWidget } from "@/components/home/BuildersWidget";
 import { BottlenecksWidget } from "@/components/home/BottlenecksWidget";
+import { MetricsRecorder } from "@/components/analytics/MetricsRecorder";
 
 const Index = () => {
   const { state, data, source, lastUpdated, refetch } = useOrionData<HomePageData>({
