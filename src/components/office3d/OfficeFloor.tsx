@@ -259,7 +259,7 @@ function MeetingTable() {
       {/* Table surface */}
       <mesh position={[0, 0.38, 0]} castShadow receiveShadow>
         <cylinderGeometry args={[1.4, 1.4, 0.06, 48]} />
-        <meshPhysicalMaterial color="#505075" roughness={0.06} metalness={0.5}
+        <meshPhysicalMaterial color="#686898" roughness={0.06} metalness={0.5}
           clearcoat={0.7} clearcoatRoughness={0.08} />
       </mesh>
       {/* Inlay ring */}
