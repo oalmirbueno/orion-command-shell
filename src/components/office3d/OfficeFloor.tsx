@@ -3,7 +3,7 @@
  * Sophisticated command-center with physical materials, warm lighting,
  * reduced FX, and premium architectural mass.
  */
-import { useRef } from "react";
+import { useRef, useMemo } from "react";
 import { Text, Billboard } from "@react-three/drei";
 import * as THREE from "three";
 import { SECTOR_META, MEETING_POSITION } from "./OfficeLayout";
@@ -22,31 +22,75 @@ function SectorLabel({ position, label, color }: { position: [number, number, nu
   );
 }
 
+/* ── Procedural tile texture ── */
+function useTileTexture() {
+  return useMemo(() => {
+    const size = 512;
+    const canvas = document.createElement("canvas");
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext("2d")!;
+    
+    // Base color
+    ctx.fillStyle = "#1e1e3a";
+    ctx.fillRect(0, 0, size, size);
+    
+    // Tile grid (4x4 tiles per texture repeat)
+    const tileSize = size / 4;
+    for (let x = 0; x < 4; x++) {
+      for (let y = 0; y < 4; y++) {
+        // Subtle variation per tile
+        const brightness = 28 + Math.floor(Math.random() * 8);
+        ctx.fillStyle = `rgb(${brightness}, ${brightness}, ${brightness + 20})`;
+        ctx.fillRect(x * tileSize + 2, y * tileSize + 2, tileSize - 4, tileSize - 4);
+      }
+    }
+    
+    // Grout lines
+    ctx.strokeStyle = "#141430";
+    ctx.lineWidth = 3;
+    for (let i = 0; i <= 4; i++) {
+      ctx.beginPath();
+      ctx.moveTo(i * tileSize, 0);
+      ctx.lineTo(i * tileSize, size);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(0, i * tileSize);
+      ctx.lineTo(size, i * tileSize);
+      ctx.stroke();
+    }
+    
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+    tex.repeat.set(5, 5);
+    return tex;
+  }, []);
+}
+
 /* ── Floor ── */
 function FloorPlane() {
+  const tileMap = useTileTexture();
+  
   return (
     <group>
-      {/* Primary floor — warmer, lighter base */}
+      {/* Tiled floor surface */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.02, 1]} receiveShadow>
         <planeGeometry args={[22, 20]} />
-        <meshStandardMaterial color="#1e1e3a" roughness={0.6} metalness={0.2} />
+        <meshStandardMaterial map={tileMap} roughness={0.55} metalness={0.2} />
       </mesh>
-      {/* Polished overlay — subtle reflection */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.015, 1]}>
+      {/* Polished clearcoat overlay */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.015, 1]} receiveShadow>
         <planeGeometry args={[22, 20]} />
         <meshPhysicalMaterial
           color="#262648"
-          roughness={0.35}
+          roughness={0.3}
           metalness={0.3}
-          clearcoat={0.15}
-          clearcoatRoughness={0.5}
+          clearcoat={0.25}
+          clearcoatRoughness={0.4}
           transparent
-          opacity={0.35}
+          opacity={0.3}
         />
       </mesh>
-      {/* Floor tile lines — subtle grid pattern for materiality */}
-      <gridHelper args={[20, 20, "#2a2a52", "#222244"]} position={[0, 0.003, 1]} />
-      <gridHelper args={[20, 80, "#1e1e42", "#1a1a3c"]} position={[0, 0.004, 1]} />
     </group>
   );
 }
