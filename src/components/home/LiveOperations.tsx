@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import { Flame, Clock, Pause, ArrowRight, Bot, CheckCircle2 } from "lucide-react";
 import type { Operation } from "@/domains/operations/types";
 
@@ -6,10 +7,12 @@ interface LiveOperationsProps {
 }
 
 export function LiveOperations({ operations = [] }: LiveOperationsProps) {
+  const navigate = useNavigate();
+
   if (operations.length === 0) {
     return (
       <section className="rounded-lg border border-border overflow-hidden h-full">
-        <div className="orion-panel-header">
+        <div className="orion-panel-header cursor-pointer hover:bg-muted/20 transition-colors" onClick={() => navigate("/operations")}>
           <div className="flex items-center gap-3">
             <div className="w-6 h-0.5 bg-status-online rounded-full" />
             <h2 className="orion-panel-title">Operações em Andamento</h2>
@@ -28,7 +31,7 @@ export function LiveOperations({ operations = [] }: LiveOperationsProps) {
 
   return (
     <section className="rounded-lg border border-border overflow-hidden h-full">
-      <div className="orion-panel-header">
+      <div className="orion-panel-header cursor-pointer hover:bg-muted/20 transition-colors" onClick={() => navigate("/operations")}>
         <div className="flex items-center gap-3">
           <div className="w-6 h-0.5 bg-status-online rounded-full" />
           <h2 className="orion-panel-title">Operações em Andamento</h2>
@@ -43,7 +46,11 @@ export function LiveOperations({ operations = [] }: LiveOperationsProps) {
           const isPaused = op.status === "paused";
           const isHigh = op.priority === "high";
           return (
-            <div key={op.id} className={`flex items-center gap-4 px-5 py-4 cursor-pointer group transition-colors ${isPaused ? "opacity-40 hover:opacity-60" : isHigh ? "bg-primary/[0.02] hover:bg-primary/[0.05]" : "hover:bg-accent/20"}`}>
+            <div
+              key={op.id}
+              className={`flex items-center gap-4 px-5 py-4 cursor-pointer group transition-colors ${isPaused ? "opacity-40 hover:opacity-60" : isHigh ? "bg-primary/[0.02] hover:bg-primary/[0.05]" : "hover:bg-accent/20"}`}
+              onClick={() => navigate("/operations")}
+            >
               <div className="shrink-0">{isPaused ? <Pause className="h-4 w-4 text-status-warning" /> : <Flame className="h-4 w-4 text-status-online" />}</div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">

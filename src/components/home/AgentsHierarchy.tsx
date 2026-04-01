@@ -1,4 +1,5 @@
-import { Bot, Crown, Users, Cpu } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Bot, Crown, Users, Cpu, ChevronRight } from "lucide-react";
 import type { AgentNode, AgentTier, AgentStatus } from "@/domains/agents/types";
 
 const tierConfig: Record<AgentTier, { label: string; icon: React.ElementType; color: string }> = {
@@ -18,14 +19,17 @@ interface AgentsHierarchyProps {
 }
 
 export function AgentsHierarchy({ agents = [] }: AgentsHierarchyProps) {
+  const navigate = useNavigate();
+
   if (agents.length === 0) {
     return (
       <section className="rounded-lg border border-border overflow-hidden h-full">
-        <div className="orion-panel-header">
+        <div className="orion-panel-header cursor-pointer hover:bg-muted/20 transition-colors" onClick={() => navigate("/agents")}>
           <div className="flex items-center gap-3">
             <div className="w-6 h-0.5 bg-primary rounded-full" />
             <h2 className="orion-panel-title">Hierarquia de Agentes</h2>
           </div>
+          <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/30" />
         </div>
         <div className="px-5 py-8 text-center">
           <p className="text-sm text-muted-foreground/50 font-mono">Aguardando conexão com API</p>
@@ -40,12 +44,15 @@ export function AgentsHierarchy({ agents = [] }: AgentsHierarchyProps) {
 
   return (
     <section className="rounded-lg border border-border overflow-hidden h-full">
-      <div className="orion-panel-header">
+      <div className="orion-panel-header cursor-pointer hover:bg-muted/20 transition-colors" onClick={() => navigate("/agents")}>
         <div className="flex items-center gap-3">
           <div className="w-6 h-0.5 bg-primary rounded-full" />
           <h2 className="orion-panel-title">Hierarquia de Agentes</h2>
         </div>
-        <span className="text-xs font-mono text-primary font-semibold">{activeCount}/{total} ativos</span>
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-mono text-primary font-semibold">{activeCount}/{total} ativos</span>
+          <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/30" />
+        </div>
       </div>
 
       <div className="p-4 space-y-4">
@@ -65,7 +72,11 @@ export function AgentsHierarchy({ agents = [] }: AgentsHierarchyProps) {
 
               <div className="space-y-1">
                 {tierAgents.map((agent) => (
-                  <div key={agent.name} className={`flex items-center gap-3 px-4 py-2.5 rounded-md hover:bg-accent/20 transition-colors cursor-pointer ${agent.status === "offline" ? "opacity-35" : ""} ${tier === "orchestrator" ? "border-l-2 border-l-primary/40 bg-primary/[0.03]" : ""}`}>
+                  <div
+                    key={agent.name}
+                    className={`flex items-center gap-3 px-4 py-2.5 rounded-md hover:bg-accent/20 transition-colors cursor-pointer ${agent.status === "offline" ? "opacity-35" : ""} ${tier === "orchestrator" ? "border-l-2 border-l-primary/40 bg-primary/[0.03]" : ""}`}
+                    onClick={() => navigate("/agents")}
+                  >
                     <div className={`status-dot ${statusDot[agent.status]}`} />
                     <div className="flex-1 min-w-0">
                       <span className="text-sm font-medium text-foreground">{agent.name}</span>
