@@ -74,9 +74,12 @@ function RemindersList({ reminders }: { reminders: Reminder[] }) {
           </div>
           <span className="text-xs font-mono text-status-online/60">Tudo em ordem</span>
         </div>
-        <div className="px-5 py-8 text-center flex flex-col items-center gap-2">
-          <CheckCircle2 className="h-5 w-5 text-status-online/30" />
-          <p className="text-sm font-mono text-muted-foreground/40">Nenhum lembrete pendente</p>
+        <div className="orion-empty">
+          <div className="orion-empty-icon">
+            <CheckCircle2 className="h-5 w-5 text-status-online/40" />
+          </div>
+          <p className="orion-empty-title">Nenhum lembrete pendente</p>
+          <p className="orion-empty-subtitle">Todos os itens foram resolvidos</p>
         </div>
       </section>
     );
