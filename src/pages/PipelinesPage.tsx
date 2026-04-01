@@ -122,7 +122,8 @@ function PipelineCard({ pipeline, onSelect }: { pipeline: Pipeline; onSelect: (p
 
   return (
     <div
-      className={`rounded-lg border bg-card/60 hover:bg-card/80 transition-colors ${
+      onClick={() => onSelect(pipeline)}
+      className={`rounded-lg border bg-card/60 hover:bg-card/80 transition-colors cursor-pointer ${
         pipeline.status === "failed" ? "border-red-500/30" :
         pipeline.status === "running" ? "border-blue-500/30" :
         "border-border/40"
