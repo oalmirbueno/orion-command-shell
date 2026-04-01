@@ -86,7 +86,7 @@ const Office3DPage = () => {
           <div style={{ height: fullscreen ? "calc(100vh - 41px)" : "520px" }}>
             <WebGLErrorBoundary>
               <Suspense fallback={<SceneOverlay state="loading" />}>
-                <SceneCanvas />
+                <SceneCanvas onAgentClick={setSelectedAgent} />
               </Suspense>
             </WebGLErrorBoundary>
           </div>
