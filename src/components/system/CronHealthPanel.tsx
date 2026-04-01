@@ -14,20 +14,18 @@ export function CronHealthPanel({ jobs, summary }: CronHealthPanelProps) {
   const disabledJobs = jobs.filter(j => !j.enabled);
 
   return (
-    <section>
-      <div className="flex items-center gap-3 mb-4">
-        <h2 className="text-xs font-mono uppercase tracking-[0.15em] text-muted-foreground">Saúde dos Cron Jobs</h2>
-        <div className={cn(
-          "flex items-center gap-2 ml-2 px-3 py-1 rounded-full border",
-          hasIssues ? "bg-status-critical/10 border-status-critical/20" : "bg-status-online/10 border-status-online/20"
-        )}>
-          <span className={cn("text-xs font-mono font-medium", hasIssues ? "text-status-critical" : "text-status-online")}>
-            {hasIssues ? `${summary.failed} falhando` : "Todos saudáveis"}
-          </span>
+    <section className="rounded-lg border border-border overflow-hidden">
+      <div className="orion-panel-header">
+        <div className="flex items-center gap-3">
+          <div className={`w-6 h-0.5 rounded-full ${hasIssues ? "bg-status-critical" : "bg-status-online"}`} />
+          <h2 className="orion-panel-title">Saúde dos Cron Jobs</h2>
         </div>
-        <div className="flex-1 h-px bg-border/40" />
+        <span className={cn("text-xs font-mono font-semibold", hasIssues ? "text-status-critical" : "text-status-online")}>
+          {hasIssues ? `${summary.failed} falhando` : "Todos saudáveis"}
+        </span>
       </div>
 
+      <div className="p-4">
       {/* Summary strip */}
       <div className="grid grid-cols-4 gap-3 mb-4">
         {[
@@ -99,6 +97,7 @@ export function CronHealthPanel({ jobs, summary }: CronHealthPanelProps) {
           {disabledJobs.length} job{disabledJobs.length !== 1 ? "s" : ""} desativado{disabledJobs.length !== 1 ? "s" : ""}
         </p>
       )}
+      </div>
     </section>
   );
 }
