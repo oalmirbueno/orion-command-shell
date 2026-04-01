@@ -58,13 +58,14 @@ export function FilesList({ files = [] }: FilesListProps) {
           <h2 className="text-xs font-mono uppercase tracking-[0.15em] text-muted-foreground">Explorador</h2>
           <div className="flex-1 h-px bg-border/40" />
         </div>
-        <div className="flex flex-col items-center justify-center py-16 text-center rounded-xl border border-border/30 bg-card">
-        <div className="orion-empty">
-          <div className="orion-empty-icon">
-            <Inbox className="h-5 w-5 text-muted-foreground/30" />
+        <div className="rounded-xl border border-border/30 bg-card">
+          <div className="orion-empty">
+            <div className="orion-empty-icon">
+              <Inbox className="h-5 w-5 text-muted-foreground/30" />
+            </div>
+            <p className="orion-empty-title">Nenhum arquivo registrado</p>
+            <p className="orion-empty-subtitle">Aguardando conexão com API</p>
           </div>
-          <p className="orion-empty-title">Nenhum arquivo registrado</p>
-          <p className="orion-empty-subtitle">Aguardando conexão com API</p>
         </div>
       </section>
     );
