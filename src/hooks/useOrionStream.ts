@@ -149,6 +149,7 @@ export function useOrionStream(options: StreamOptions = {}) {
         try {
           const parsed = JSON.parse(ev.data);
           if (parsed?.domain && parsed?.data) {
+            sseDiagnostics.recordEvent(parsed.domain, ev.data?.length ?? 0);
             injectData(parsed.domain, parsed.data);
           }
         } catch {
