@@ -135,6 +135,7 @@ export function useOrionStream(options: StreamOptions = {}) {
           if (!mountedRef.current) return;
           try {
             const parsed = JSON.parse(ev.data);
+            sseDiagnostics.recordEvent(domain, ev.data?.length ?? 0);
             injectData(domain, parsed);
           } catch {
             // Ignore malformed payloads
