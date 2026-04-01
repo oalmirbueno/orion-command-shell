@@ -41,7 +41,7 @@ interface RealSession {
   aborted: boolean;
 }
 
-interface SkillItem {
+interface AioxSquad {
   id: string;
   name: string;
   description?: string;
@@ -50,6 +50,7 @@ interface SkillItem {
   agents?: string[];
   files?: number | string[];
   tags?: string[];
+  category?: string;
 }
 
 /* ── Builder classification ── */
@@ -70,10 +71,8 @@ function classifyBuilder(agent: RealAgent): BuilderCategory {
   return "other";
 }
 
-function isAioxSquad(skill: SkillItem): boolean {
-  const h = `${skill.name} ${skill.description || ""} ${skill.source || ""}`.toLowerCase();
-  return ["aiox", "aio", "squad", "openai", "gpt"].some((k) => h.includes(k));
-}
+
+
 
 const CATEGORY_META: Record<BuilderCategory, { label: string; icon: React.ElementType; accent: string }> = {
   "claude-code": { label: "Claude Code", icon: Terminal, accent: "text-primary" },
@@ -102,15 +101,14 @@ async function fetchSessions(): Promise<RealSession[]> {
   return Array.isArray(data) ? data : data?.sessions ?? [];
 }
 
-async function fetchSquads(): Promise<SkillItem[]> {
-  const res = await fetch(`${API_BASE_URL}/skills`, {
+async function fetchSquads(): Promise<AioxSquad[]> {
+  const res = await fetch(`${API_BASE_URL}/builders/aiox-squads`, {
     headers: { Accept: "application/json" },
     signal: AbortSignal.timeout(12_000),
   });
   if (!res.ok) return [];
   const data = await res.json();
-  const skills: SkillItem[] = Array.isArray(data) ? data : data?.skills ?? [];
-  return skills.filter(isAioxSquad);
+  return Array.isArray(data) ? data : data?.squads ?? [];
 }
 
 /* ── Helpers ── */
@@ -156,7 +154,7 @@ export default function BuildersPage() {
 
   const agentsQ = useQuery({ queryKey: ["builders-agents"], queryFn: fetchAgents, staleTime: 30_000, refetchInterval: 60_000, placeholderData: (prev) => prev });
   const sessionsQ = useQuery({ queryKey: ["builders-sessions"], queryFn: fetchSessions, staleTime: 30_000, refetchInterval: 60_000, placeholderData: (prev) => prev });
-  const squadsQ = useQuery({ queryKey: ["builders-squads"], queryFn: fetchSquads, staleTime: 60_000, refetchInterval: 120_000, placeholderData: (prev) => prev });
+  const squadsQ = useQuery({ queryKey: ["builders-aiox-squads"], queryFn: fetchSquads, staleTime: 30_000, refetchInterval: 60_000, placeholderData: (prev) => prev });
 
   const isLoading = agentsQ.isLoading || sessionsQ.isLoading;
   const isError = agentsQ.isError && sessionsQ.isError;
@@ -200,7 +198,7 @@ export default function BuildersPage() {
   const handleRefresh = () => {
     qc.invalidateQueries({ queryKey: ["builders-agents"] });
     qc.invalidateQueries({ queryKey: ["builders-sessions"] });
-    qc.invalidateQueries({ queryKey: ["builders-squads"] });
+    qc.invalidateQueries({ queryKey: ["builders-aiox-squads"] });
   };
 
   return (

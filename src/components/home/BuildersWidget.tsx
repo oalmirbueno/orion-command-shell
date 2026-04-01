@@ -14,7 +14,7 @@ interface RealAgent {
   lastActivity?: string;
 }
 
-interface SkillItem {
+interface AioxSquad {
   id: string;
   name: string;
   description?: string;
@@ -22,6 +22,7 @@ interface SkillItem {
   status?: string;
   agents?: string[];
   files?: number | string[];
+  category?: string;
 }
 
 type BuilderCategory = "claude-code" | "aiox" | "other";
@@ -37,11 +38,6 @@ function classify(agent: RealAgent): BuilderCategory {
     if (kws.some((k) => h.includes(k))) return cat;
   }
   return "other";
-}
-
-function isAioxSquad(skill: SkillItem): boolean {
-  const h = `${skill.name} ${skill.description || ""} ${skill.source || ""}`.toLowerCase();
-  return ["aiox", "aio", "squad", "openai", "gpt"].some((k) => h.includes(k));
 }
 
 function timeAgo(iso?: string): string {
@@ -77,20 +73,19 @@ export function BuildersWidget() {
     placeholderData: (prev) => prev,
   });
 
-  const { data: squads = [] } = useQuery<SkillItem[]>({
-    queryKey: ["builders-squads"],
+  const { data: squads = [] } = useQuery<AioxSquad[]>({
+    queryKey: ["builders-aiox-squads"],
     queryFn: async () => {
-      const res = await fetch(`${API_BASE_URL}/skills`, {
+      const res = await fetch(`${API_BASE_URL}/builders/aiox-squads`, {
         headers: { Accept: "application/json" },
         signal: AbortSignal.timeout(10_000),
       });
       if (!res.ok) return [];
       const d = await res.json();
-      const skills: SkillItem[] = Array.isArray(d) ? d : d?.skills ?? [];
-      return skills.filter(isAioxSquad);
+      return Array.isArray(d) ? d : d?.squads ?? [];
     },
-    staleTime: 60_000,
-    refetchInterval: 120_000,
+    staleTime: 30_000,
+    refetchInterval: 60_000,
     placeholderData: (prev) => prev,
   });
 
