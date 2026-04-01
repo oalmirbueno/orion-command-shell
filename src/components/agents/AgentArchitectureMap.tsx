@@ -88,13 +88,16 @@ export function AgentArchitectureMap({ agents = [] }: AgentArchitectureMapProps)
   const activeSupport = supportAgents.filter(a => a.status === "active").length;
 
   return (
-    <section>
-      <div className="flex items-center gap-3 mb-5">
-        <h2 className="text-xs font-mono uppercase tracking-[0.15em] text-muted-foreground">Mapa de Arquitetura</h2>
-        <div className="flex-1 h-px bg-border/40" />
+    <section className="rounded-lg border border-border overflow-hidden">
+      <div className="orion-panel-header">
+        <div className="flex items-center gap-3">
+          <div className="w-6 h-0.5 bg-primary/40 rounded-full" />
+          <h2 className="orion-panel-title">Mapa de Arquitetura</h2>
+        </div>
+        <span className="text-xs font-mono text-muted-foreground/40">{agents.length} agentes</span>
       </div>
 
-      <div className="rounded-lg border border-border/40 bg-card/50 p-6">
+      <div className="p-6">
         {/* Tier 1: Orchestrator */}
         {orchestrators.length > 0 && (
           <>

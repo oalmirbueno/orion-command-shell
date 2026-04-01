@@ -152,20 +152,20 @@ export function CronJobsList({ jobs = [], refetchList }: Props) {
   const failedCount = localJobs.filter(j => j.status === "failed").length;
 
   return (
-    <section>
-      <div className="flex items-center gap-3 mb-4">
-        <h2 className="text-xs font-mono uppercase tracking-[0.15em] text-muted-foreground">Registro de Jobs</h2>
-        {failedCount > 0 ? (
-          <div className="flex items-center gap-2 ml-2 px-3 py-1 rounded-full bg-status-critical/10 border border-status-critical/20">
-            <span className="text-xs font-mono text-status-critical font-medium">{failedCount} com falha</span>
-          </div>
-        ) : (
-          <div className="flex items-center gap-2 ml-2 px-3 py-1 rounded-full bg-status-online/10 border border-status-online/20">
-            <span className="text-xs font-mono text-status-online font-medium">{enabledCount} habilitados</span>
-          </div>
-        )}
-        <div className="flex-1 h-px bg-border/40" />
-        <span className="text-xs font-mono text-muted-foreground/40">{localJobs.length} total</span>
+    <section className="rounded-lg border border-border overflow-hidden">
+      <div className="orion-panel-header">
+        <div className="flex items-center gap-3">
+          <div className={`w-6 h-0.5 rounded-full ${failedCount > 0 ? "bg-status-critical" : "bg-status-online"}`} />
+          <h2 className="orion-panel-title">Registro de Jobs</h2>
+        </div>
+        <div className="flex items-center gap-3">
+          {failedCount > 0 ? (
+            <span className="text-xs font-mono text-status-critical font-semibold">{failedCount} com falha</span>
+          ) : (
+            <span className="text-xs font-mono text-status-online font-semibold">{enabledCount} habilitados</span>
+          )}
+          <span className="text-xs font-mono text-muted-foreground/30">{localJobs.length} total</span>
+        </div>
       </div>
       <div className="space-y-2.5 max-h-[calc(100vh-280px)] overflow-y-auto orion-thin-scroll pr-1">
         {sorted.map((job) => (

@@ -280,15 +280,15 @@ const AlertsPage = () => {
             />
 
             {/* List */}
-            <div>
-              <div className="flex items-center gap-3 mb-5">
-                <h2 className="text-xs font-mono uppercase tracking-[0.15em] text-muted-foreground">
-                  Feed de Alertas
-                </h2>
-                <div className="flex-1 h-px bg-border/40" />
+            <div className="rounded-lg border border-border overflow-hidden">
+              <div className="orion-panel-header">
+                <div className="flex items-center gap-3">
+                  <div className="w-6 h-0.5 bg-muted-foreground/40 rounded-full" />
+                  <h2 className="orion-panel-title">Feed de Alertas</h2>
+                </div>
                 <span className="text-xs font-mono text-muted-foreground/40">{filteredAlerts.length} de {data.total}</span>
               </div>
-              <div className="space-y-2.5 max-h-[calc(100vh-440px)] overflow-y-auto orion-thin-scroll pr-1">
+              <div className="space-y-2.5 p-4 max-h-[calc(100vh-440px)] overflow-y-auto">
                 {filteredAlerts.map((alert) => (
                   <AlertRow key={alert.id} alert={alert} />
                 ))}

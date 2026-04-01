@@ -79,14 +79,13 @@ export function FilesList({ files = [] }: FilesListProps) {
     : files;
 
   return (
-    <section>
-      <div className="flex items-center gap-3 mb-4">
-        <FolderOpen className="h-4 w-4 text-muted-foreground/40" />
-        <h2 className="text-xs font-mono uppercase tracking-[0.15em] text-muted-foreground">Explorador</h2>
-        <div className="flex items-center gap-2 ml-1 px-2.5 py-0.5 rounded-full bg-primary/8 border border-primary/15">
-          <span className="text-[10px] font-mono text-primary font-medium">{filtered.length} arquivos</span>
+    <section className="rounded-lg border border-border overflow-hidden">
+      <div className="orion-panel-header">
+        <div className="flex items-center gap-3">
+          <div className="w-6 h-0.5 bg-primary/40 rounded-full" />
+          <h2 className="orion-panel-title">Explorador</h2>
         </div>
-        <div className="flex-1 h-px bg-border/40" />
+        <span className="text-xs font-mono text-muted-foreground/50">{filtered.length} arquivos</span>
       </div>
       <div className="flex items-center gap-3 mb-4">
         <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border/30 bg-card flex-1 max-w-xs">
