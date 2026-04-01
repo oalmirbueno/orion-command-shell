@@ -194,6 +194,14 @@ const Office3DPage = () => {
                 onDismiss={handleDismissMeeting}
               />
             )}
+
+            {/* Minimap */}
+            {!commandAgent && (
+              <OfficeMinimap
+                agents={allAgents || []}
+                meetingAgentIds={meetingAgentIds}
+              />
+            )}
           </div>
         </div>
 
