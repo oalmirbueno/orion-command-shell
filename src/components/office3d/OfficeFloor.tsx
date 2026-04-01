@@ -91,7 +91,8 @@ function SectorFloor({ position, size, color, elevated = false }: {
   return (
     <mesh position={[position[0], 0.005, position[2]]}>
       <boxGeometry args={[size[0], 0.01, size[1]]} />
-      <meshStandardMaterial color={color} transparent opacity={0.12} roughness={0.7} />
+      <meshStandardMaterial color={color} transparent opacity={0.12} roughness={0.7}
+        polygonOffset polygonOffsetFactor={-1} polygonOffsetUnits={-1} />
     </mesh>
   );
 }
