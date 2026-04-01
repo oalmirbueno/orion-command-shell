@@ -10,7 +10,7 @@ import {
   Bot,
   Timer,
   Brain,
-  Bell,
+  AlertTriangle as AlertTriangleIcon,
   Box,
   FolderOpen,
   Search,
