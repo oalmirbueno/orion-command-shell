@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { OrionLayout } from "@/components/OrionLayout";
 import { OrionDataWrapper, OrionBreadcrumb } from "@/components/orion";
 import { useOrionData } from "@/hooks/useOrionData";
@@ -10,6 +11,7 @@ import {
   ChevronRight, Zap, Bot, CalendarClock, ArrowRight, Circle,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { PipelineDetailSheet } from "@/components/sheets/PipelineDetailSheet";
 
 /* ── Skeleton ── */
 function PipelinesSkeleton() {
