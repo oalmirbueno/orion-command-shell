@@ -183,10 +183,19 @@ function AlertsSkeleton() {
   );
 }
 
-/* ── Page ── */
+const alertTypeOptions = [
+  { key: "all", label: "Todos" },
+  { key: "critical", label: "Crítico" },
+  { key: "warning", label: "Atenção" },
+];
+const alertStatusOptions = [
+  { key: "all", label: "Todos" },
+];
+
 const AlertsPage = () => {
   const queryClient = useQueryClient();
-  const [isRefreshing, setIsRefreshing] = React.useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [filters, setFilters] = useState<FilterState>({ type: "all", status: "all", dateFrom: undefined, dateTo: undefined });
 
   const { data, isLoading, isError, error, isFetching } = useQuery<AlertsResponse>({
     queryKey: ["alerts-page"],
@@ -194,6 +203,21 @@ const AlertsPage = () => {
     refetchInterval: 30_000,
     placeholderData: (prev) => prev,
   });
+
+  const filteredAlerts = useMemo(() => {
+    if (!data?.alerts) return [];
+    let items = data.alerts;
+    if (filters.type !== "all") items = items.filter(a => a.severity === filters.type);
+    if (filters.dateFrom) {
+      const from = filters.dateFrom.getTime();
+      items = items.filter(a => new Date(a.timestamp).getTime() >= from);
+    }
+    if (filters.dateTo) {
+      const to = filters.dateTo.getTime() + 86_400_000;
+      items = items.filter(a => new Date(a.timestamp).getTime() <= to);
+    }
+    return items;
+  }, [data?.alerts, filters]);
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
