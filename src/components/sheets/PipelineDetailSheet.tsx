@@ -239,6 +239,20 @@ export function PipelineDetailSheet({ pipeline, open, onOpenChange }: Props) {
             </Badge>
           </div>
 
+          {/* Run Now button */}
+          {isCronBased && (
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={triggering || pipeline.status === "disabled"}
+              onClick={handleRunNow}
+              className="w-full gap-2"
+            >
+              {triggering ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Play className="h-3.5 w-3.5" />}
+              {triggering ? "Executando..." : "Executar Agora"}
+            </Button>
+          )}
+
           {/* Quick metrics */}
           <div className="grid grid-cols-3 gap-2">
             {[
