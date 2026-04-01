@@ -133,7 +133,7 @@ export function AgentDesk({ agent, desk, inMeeting, meetingPos, onClick, onHover
           </mesh>
           <mesh position={[0, 0.34, -0.18]}>
             <cylinderGeometry args={[0.015, 0.015, 0.15, 8]} />
-            <meshStandardMaterial color="#606085" roughness={0.25} metalness={0.55} />
+            <meshStandardMaterial color="#7878a8" roughness={0.25} metalness={0.55} />
           </mesh>
           {/* Secondary monitor */}
           <mesh position={[0.35, 0.45, -0.15]} rotation={[0, -0.3, 0]}>
