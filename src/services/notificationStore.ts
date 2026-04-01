@@ -20,6 +20,13 @@ interface NotificationState {
   dismissedIds: Set<string>;
 }
 
+interface StoreSnapshot {
+  mode: PersistenceMode;
+  loaded: boolean;
+  readCount: number;
+  dismissedCount: number;
+}
+
 class NotificationStore {
   private state: NotificationState = {
     readIds: new Set(),
@@ -29,11 +36,24 @@ class NotificationStore {
   private _mode: PersistenceMode = "memory";
   private _userId: string | null = null;
   private _loaded = false;
+  private _snapshot: StoreSnapshot = { mode: "memory", loaded: false, readCount: 0, dismissedCount: 0 };
 
   get mode() { return this._mode; }
   get loaded() { return this._loaded; }
 
-  private emit() { for (const fn of this.listeners) fn(); }
+  private buildSnapshot(): StoreSnapshot {
+    return {
+      mode: this._mode,
+      loaded: this._loaded,
+      readCount: this.state.readIds.size,
+      dismissedCount: this.state.dismissedIds.size,
+    };
+  }
+
+  private emit() {
+    this._snapshot = this.buildSnapshot();
+    for (const fn of this.listeners) fn();
+  }
 
   subscribe = (fn: () => void) => {
     this.listeners.add(fn);
@@ -147,14 +167,7 @@ class NotificationStore {
     return notifications.filter(n => !this.state.readIds.has(n.id) && !this.state.dismissedIds.has(n.id)).length;
   }
 
-  getSnapshot() {
-    return {
-      mode: this._mode,
-      loaded: this._loaded,
-      readCount: this.state.readIds.size,
-      dismissedCount: this.state.dismissedIds.size,
-    };
-  }
+  getSnapshot = () => this._snapshot;
 }
 
 export const notificationStore = new NotificationStore();
