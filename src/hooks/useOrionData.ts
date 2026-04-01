@@ -8,6 +8,7 @@ import { useQuery, useQueryClient, keepPreviousData } from "@tanstack/react-quer
 import type { DataState, DataSource, DomainFetcher } from "@/domains/types";
 import { useLastUpdated } from "./useLastUpdated";
 import { useDomainHealthReporter } from "./useDomainHealth";
+import { domainAnalyticsStore } from "@/services/domainAnalytics";
 
 export type { DataState, DataSource };
 
