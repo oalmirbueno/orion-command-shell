@@ -191,7 +191,7 @@ export function SceneOverlay({ state, error, onRetry }: {
 
 /* ── Main Canvas ── */
 
-export function SceneCanvas() {
+export function SceneCanvas({ onAgentClick }: { onAgentClick?: (agent: AgentView) => void }) {
   const { data: agents, state, error, refetch, source } = useOrionData<AgentView[]>({
     key: "agents-page",
     fetcher: fetchAgents,
