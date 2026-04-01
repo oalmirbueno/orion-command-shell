@@ -20,12 +20,23 @@ interface NotificationState {
   dismissedIds: Set<string>;
 }
 
+interface StoreSnapshot {
+  mode: PersistenceMode;
+  loaded: boolean;
+  readCount: number;
+  dismissedCount: number;
+}
+
 class NotificationStore {
   private state: NotificationState = {
     readIds: new Set(),
     dismissedIds: new Set(),
   };
   private listeners = new Set<() => void>();
+  private _mode: PersistenceMode = "memory";
+  private _userId: string | null = null;
+  private _loaded = false;
+  private _snapshot: StoreSnapshot = { mode: "memory", loaded: false, readCount: 0, dismissedCount: 0 };
   private _mode: PersistenceMode = "memory";
   private _userId: string | null = null;
   private _loaded = false;
