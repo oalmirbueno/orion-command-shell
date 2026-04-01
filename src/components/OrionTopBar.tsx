@@ -1,11 +1,18 @@
-import { Search, LogOut, User } from "lucide-react";
+import { Search, LogOut, User, Shield } from "lucide-react";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { NotificationCenter } from "@/components/notifications/NotificationCenter";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
+import { useUserRole, type AppRole } from "@/hooks/useUserRole";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+
+const ROLE_BADGES: Record<AppRole, { label: string; cls: string }> = {
+  admin:    { label: "Admin",    cls: "bg-primary/10 text-primary border-primary/20" },
+  operator: { label: "Operator", cls: "bg-status-warning/10 text-status-warning border-status-warning/20" },
+  viewer:   { label: "Viewer",   cls: "bg-muted text-muted-foreground border-border" },
+};
 
 export function OrionTopBar({ title = "Comando" }: { title?: string }) {
   const navigate = useNavigate();
