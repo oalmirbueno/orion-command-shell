@@ -106,7 +106,7 @@ export function AgentDesk({ agent, desk, inMeeting, meetingPos, onClick, onHover
           {/* Desk surface — light mid-tone */}
           <mesh position={[0, 0.24, 0]} castShadow receiveShadow>
             <boxGeometry args={[1.15, 0.055, 0.7]} />
-            <meshPhysicalMaterial color="#505078" roughness={0.18} metalness={0.45}
+            <meshPhysicalMaterial color="#6868a0" roughness={0.18} metalness={0.45}
               clearcoat={0.2} clearcoatRoughness={0.3} />
           </mesh>
           {/* Front edge accent */}
