@@ -1,12 +1,15 @@
 import { useState, useEffect } from "react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
   GitBranch, Timer, Bot, Clock, CheckCircle2, XCircle, CalendarClock,
   Zap, ArrowRight, Activity, AlertTriangle, FileText, Hash, BarChart3,
+  Play, Loader2,
 } from "lucide-react";
 import { apiUrl } from "@/domains/api";
+import { toast } from "@/hooks/use-toast";
 import type { Pipeline, PipelineStep, PipelineStatus, StepStatus } from "@/domains/pipelines/types";
 
 /* ── Types ── */
