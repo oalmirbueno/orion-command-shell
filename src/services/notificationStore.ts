@@ -41,7 +41,19 @@ class NotificationStore {
   get mode() { return this._mode; }
   get loaded() { return this._loaded; }
 
-  private emit() { for (const fn of this.listeners) fn(); }
+  private buildSnapshot(): StoreSnapshot {
+    return {
+      mode: this._mode,
+      loaded: this._loaded,
+      readCount: this.state.readIds.size,
+      dismissedCount: this.state.dismissedIds.size,
+    };
+  }
+
+  private emit() {
+    this._snapshot = this.buildSnapshot();
+    for (const fn of this.listeners) fn();
+  }
 
   subscribe = (fn: () => void) => {
     this.listeners.add(fn);
