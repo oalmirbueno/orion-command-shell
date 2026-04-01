@@ -16,6 +16,7 @@ import { useEffect, useState, useSyncExternalStore } from "react";
 import { apiUrl } from "@/domains/api";
 import { sseDiagnostics } from "@/hooks/sseDiagnostics";
 import { cn } from "@/lib/utils";
+import { NotificationHistory } from "@/components/notifications/NotificationHistory";
 
 /* ── Domain labels ── */
 const DOMAIN_LABELS: Record<DomainKey, string> = {
