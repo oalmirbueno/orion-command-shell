@@ -3,8 +3,9 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { OrionLayout } from "@/components/OrionLayout";
 import { OrionBreadcrumb } from "@/components/orion";
 import {
-  Hammer, RefreshCw, Cpu, Activity, Clock, Inbox, AlertCircle, Bot,
-  Zap, Terminal, Layers, MonitorSmartphone, Package, FileText, ChevronDown, ChevronRight, ExternalLink,
+  Hammer, RefreshCw, Cpu, Activity, Inbox, AlertCircle, Bot,
+  Zap, Terminal, Layers, MonitorSmartphone, Package, FileText,
+  ChevronDown, ChevronRight, ExternalLink, Server,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -53,32 +54,52 @@ interface AioxSquad {
   category?: string;
 }
 
-/* ── Builder classification ── */
-type BuilderCategory = "claude-code" | "aiox" | "other";
+/* ── 3 domains ── */
+type BuilderDomain = "openclaw" | "claude-code" | "aiox";
 
-const BUILDER_KEYWORDS: Record<BuilderCategory, string[]> = {
-  "claude-code": ["claude", "anthropic", "claude-code", "sonnet", "opus", "haiku"],
-  aiox: ["aiox", "aio", "openai", "gpt"],
-  other: [],
+const DOMAIN_META: Record<BuilderDomain, { label: string; desc: string; icon: React.ElementType; accent: string; border: string; bg: string }> = {
+  "openclaw": {
+    label: "OpenClaw",
+    desc: "Plataforma de orquestração — agentes de controle, roteamento e gestão do ecossistema",
+    icon: Server,
+    accent: "text-primary",
+    border: "border-primary/20",
+    bg: "bg-primary/5",
+  },
+  "claude-code": {
+    label: "Claude Code",
+    desc: "Builders de construção — geração de código, edição e sessões de desenvolvimento via Anthropic",
+    icon: Terminal,
+    accent: "text-purple-400",
+    border: "border-purple-400/20",
+    bg: "bg-purple-400/5",
+  },
+  aiox: {
+    label: "AIOX",
+    desc: "Squads operacionais — automação, pipelines e capacidades instaladas no filesystem",
+    icon: Zap,
+    accent: "text-amber-400",
+    border: "border-amber-400/20",
+    bg: "bg-amber-400/5",
+  },
 };
 
-function classifyBuilder(agent: RealAgent): BuilderCategory {
+/* ── Classification — strict rules ── */
+const CLAUDE_KEYWORDS = ["claude", "anthropic", "sonnet", "opus", "haiku", "claude-code"];
+const AIOX_KEYWORDS = ["aiox", "aio-x", "squad"];
+
+function classifyAgent(agent: RealAgent): BuilderDomain {
   const haystack = `${agent.name} ${agent.model || ""} ${agent.id}`.toLowerCase();
-  for (const [cat, keywords] of Object.entries(BUILDER_KEYWORDS) as [BuilderCategory, string[]][]) {
-    if (cat === "other") continue;
-    if (keywords.some((k) => haystack.includes(k))) return cat;
-  }
-  return "other";
+
+  // Claude Code: only if agent model or name explicitly references Anthropic/Claude
+  if (CLAUDE_KEYWORDS.some((k) => haystack.includes(k))) return "claude-code";
+
+  // AIOX: only if agent name/id explicitly references AIOX
+  if (AIOX_KEYWORDS.some((k) => haystack.includes(k))) return "aiox";
+
+  // Everything else is OpenClaw platform agent
+  return "openclaw";
 }
-
-
-
-
-const CATEGORY_META: Record<BuilderCategory, { label: string; icon: React.ElementType; accent: string }> = {
-  "claude-code": { label: "Claude Code", icon: Terminal, accent: "text-primary" },
-  aiox: { label: "AIOX", icon: Zap, accent: "text-amber-400" },
-  other: { label: "Outros Builders", icon: Bot, accent: "text-muted-foreground" },
-};
 
 /* ── Fetchers ── */
 async function fetchAgents(): Promise<RealAgent[]> {
@@ -129,13 +150,13 @@ function formatTokens(n: number): string {
   return String(n);
 }
 
-/* ── Derived builder view ── */
+/* ── Derived view ── */
 interface BuilderView {
   id: string;
   name: string;
   model: string;
   status: string;
-  category: BuilderCategory;
+  domain: BuilderDomain;
   activeSessions: number;
   lastActivity: string;
   lastActivityRaw: string;
@@ -150,7 +171,7 @@ export default function BuildersPage() {
   const qc = useQueryClient();
   const [expandedBuilder, setExpandedBuilder] = useState<string | null>(null);
   const [expandedSquad, setExpandedSquad] = useState<string | null>(null);
-  const [showAllSquads, setShowAllSquads] = useState(false);
+  const [showAllImported, setShowAllImported] = useState(false);
 
   const agentsQ = useQuery({ queryKey: ["builders-agents"], queryFn: fetchAgents, staleTime: 30_000, refetchInterval: 60_000, placeholderData: (prev) => prev });
   const sessionsQ = useQuery({ queryKey: ["builders-sessions"], queryFn: fetchSessions, staleTime: 30_000, refetchInterval: 60_000, placeholderData: (prev) => prev });
@@ -164,16 +185,21 @@ export default function BuildersPage() {
     const agents = agentsQ.data ?? [];
     const sessions = sessionsQ.data ?? [];
     return agents.map((a) => {
-      const cat = classifyBuilder(a);
+      const domain = classifyAgent(a);
       const agentSessions = sessions.filter(
-        (s) => s.model?.toLowerCase().includes(a.model?.split("/")[0]?.toLowerCase() || "___") ||
-               s.key?.toLowerCase().includes(a.name?.toLowerCase() || "___")
+        (s) =>
+          s.model?.toLowerCase().includes(a.model?.split("/")[0]?.toLowerCase() || "___") ||
+          s.key?.toLowerCase().includes(a.name?.toLowerCase() || "___"),
       );
       return {
-        id: a.id, name: a.name, model: a.model || "—", status: a.status || "unknown",
-        category: cat,
+        id: a.id,
+        name: a.name,
+        model: a.model || "—",
+        status: a.status || "unknown",
+        domain,
         activeSessions: a.activeSessions ?? agentSessions.filter((s) => !s.aborted && s.ageMs < 300_000).length,
-        lastActivity: timeAgo(a.lastActivity), lastActivityRaw: a.lastActivity || "",
+        lastActivity: timeAgo(a.lastActivity),
+        lastActivityRaw: a.lastActivity || "",
         sessions: agentSessions,
         totalTokens: agentSessions.reduce((sum, s) => sum + (s.totalTokens || 0), 0),
         emoji: a.emoji,
@@ -182,24 +208,198 @@ export default function BuildersPage() {
   }, [agentsQ.data, sessionsQ.data]);
 
   const grouped = useMemo(() => {
-    const map: Record<BuilderCategory, BuilderView[]> = { "claude-code": [], aiox: [], other: [] };
-    builders.forEach((b) => map[b.category].push(b));
+    const map: Record<BuilderDomain, BuilderView[]> = { openclaw: [], "claude-code": [], aiox: [] };
+    builders.forEach((b) => map[b.domain].push(b));
     return map;
   }, [builders]);
 
-  const stats = useMemo(() => ({
-    total: builders.length,
-    online: builders.filter((b) => b.status === "online").length,
-    activeSessions: builders.reduce((s, b) => s + b.activeSessions, 0),
-    totalTokens: builders.reduce((s, b) => s + b.totalTokens, 0),
-    squads: squads.length,
-  }), [builders, squads]);
+  const stats = useMemo(
+    () => ({
+      total: builders.length,
+      online: builders.filter((b) => b.status === "online").length,
+      activeSessions: builders.reduce((s, b) => s + b.activeSessions, 0),
+      totalTokens: builders.reduce((s, b) => s + b.totalTokens, 0),
+      squads: squads.length,
+    }),
+    [builders, squads],
+  );
 
   const handleRefresh = () => {
     qc.invalidateQueries({ queryKey: ["builders-agents"] });
     qc.invalidateQueries({ queryKey: ["builders-sessions"] });
     qc.invalidateQueries({ queryKey: ["builders-aiox-squads"] });
   };
+
+  /* ── Squad card renderer ── */
+  const renderSquadCard = (sq: AioxSquad, borderCls: string, bgCls: string) => {
+    const fileCount = Array.isArray(sq.files) ? sq.files.length : (sq.files ?? 0);
+    const fileNames = Array.isArray(sq.files) ? sq.files : [];
+    const agentNames = sq.agents ?? [];
+    const isOpen = expandedSquad === sq.id;
+    return (
+      <div
+        key={sq.id}
+        onClick={() => setExpandedSquad(isOpen ? null : sq.id)}
+        className={`rounded-lg border ${borderCls} ${bgCls} hover:border-amber-400/30 transition-colors cursor-pointer`}
+      >
+        <div className="p-4 space-y-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Package className="h-4 w-4 text-amber-400" />
+              <span className="font-semibold text-sm text-foreground truncate max-w-[200px]">{sq.name}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              {sq.status && (
+                <span
+                  className={`text-[10px] font-mono px-1.5 py-0.5 rounded ${
+                    sq.status === "active" ? "bg-emerald-400/10 text-emerald-400" : "bg-muted text-muted-foreground"
+                  }`}
+                >
+                  {sq.status === "active" ? "ativo" : sq.status}
+                </span>
+              )}
+              {isOpen ? <ChevronDown className="h-3 w-3 text-muted-foreground/40" /> : <ChevronRight className="h-3 w-3 text-muted-foreground/40" />}
+            </div>
+          </div>
+          {sq.description && <p className="text-xs text-muted-foreground/70 line-clamp-2">{sq.description}</p>}
+          <div className="flex items-center gap-4 text-[10px] font-mono text-muted-foreground/50">
+            <span className="flex items-center gap-1">
+              <FileText className="h-3 w-3" />
+              {fileCount} arquivos
+            </span>
+            {agentNames.length > 0 && (
+              <span className="flex items-center gap-1">
+                <Bot className="h-3 w-3" />
+                {agentNames.length} agentes
+              </span>
+            )}
+            {sq.source && <span className="text-amber-400/60">{sq.source}</span>}
+          </div>
+        </div>
+        {isOpen && (
+          <div className="border-t border-amber-400/10 p-4 space-y-4 bg-muted/5" onClick={(e) => e.stopPropagation()}>
+            <div className="text-[10px] font-mono text-muted-foreground/40">ID: {sq.id}</div>
+            {agentNames.length > 0 && (
+              <div className="space-y-2">
+                <div className="text-[10px] uppercase tracking-wider text-muted-foreground/50 font-mono font-bold">Agentes vinculados</div>
+                <div className="flex flex-wrap gap-2">
+                  {agentNames.map((name) => (
+                    <button
+                      key={name}
+                      onClick={() => navigate("/agents")}
+                      className="flex items-center gap-1.5 text-xs font-medium px-2.5 py-1.5 rounded-md border border-border bg-card hover:border-primary/40 hover:text-primary transition-colors"
+                    >
+                      <Bot className="h-3 w-3" />
+                      <span>{name}</span>
+                      <ExternalLink className="h-2.5 w-2.5 text-muted-foreground/40" />
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+            {fileNames.length > 0 ? (
+              <div className="space-y-2">
+                <div className="text-[10px] uppercase tracking-wider text-muted-foreground/50 font-mono font-bold">Arquivos ({fileNames.length})</div>
+                <div className="space-y-1 max-h-40 overflow-y-auto">
+                  {fileNames.map((f, i) => (
+                    <div key={i} className="flex items-center gap-2 text-xs font-mono text-foreground/70 rounded-md bg-card border border-border px-3 py-1.5">
+                      <FileText className="h-3 w-3 text-muted-foreground/40 shrink-0" />
+                      <span className="truncate">{f}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : fileCount > 0 ? (
+              <div className="text-xs text-muted-foreground/50 italic">{fileCount} arquivos vinculados (nomes indisponíveis)</div>
+            ) : null}
+            {sq.tags && sq.tags.length > 0 && (
+              <div className="flex flex-wrap gap-1.5">
+                {sq.tags.map((t) => (
+                  <span key={t} className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+                    {t}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  /* ── Builder card renderer ── */
+  const renderBuilderCard = (b: BuilderView, meta: (typeof DOMAIN_META)[BuilderDomain]) => {
+    const isExpanded = expandedBuilder === b.id;
+    const isOnline = b.status === "online";
+    return (
+      <div
+        key={b.id}
+        onClick={() => setExpandedBuilder(isExpanded ? null : b.id)}
+        className={`rounded-lg border ${meta.border} ${meta.bg} hover:border-primary/30 transition-colors cursor-pointer`}
+      >
+        <div className="p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              {b.emoji ? <span className="text-lg">{b.emoji}</span> : <meta.icon className={`h-5 w-5 ${meta.accent}`} />}
+              <span className="font-semibold text-sm text-foreground truncate max-w-[180px]">{b.name}</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <div className={`w-2 h-2 rounded-full ${isOnline ? "bg-emerald-400 animate-pulse" : "bg-muted-foreground/30"}`} />
+              <span className={`text-xs font-mono ${isOnline ? "text-emerald-400" : "text-muted-foreground/50"}`}>
+                {isOnline ? "online" : b.status || "—"}
+              </span>
+            </div>
+          </div>
+          <div className="grid grid-cols-3 gap-2 text-xs">
+            <div className="space-y-0.5">
+              <div className="text-muted-foreground/50 font-mono uppercase text-[10px]">Modelo</div>
+              <div className="text-foreground/80 font-medium truncate">{b.model}</div>
+            </div>
+            <div className="space-y-0.5">
+              <div className="text-muted-foreground/50 font-mono uppercase text-[10px]">Sessões</div>
+              <div className="text-foreground/80 font-medium">{b.activeSessions}</div>
+            </div>
+            <div className="space-y-0.5">
+              <div className="text-muted-foreground/50 font-mono uppercase text-[10px]">Última Ativ.</div>
+              <div className="text-foreground/80 font-medium">{b.lastActivity}</div>
+            </div>
+          </div>
+          {b.totalTokens > 0 && (
+            <div className="flex items-center gap-2 text-[10px] text-muted-foreground/50 font-mono">
+              <Cpu className="h-3 w-3" />
+              <span>{formatTokens(b.totalTokens)} tokens</span>
+            </div>
+          )}
+        </div>
+        {isExpanded && (
+          <div className="border-t border-border p-3 space-y-2 bg-muted/10">
+            <div className="text-[10px] uppercase tracking-wider text-muted-foreground/50 font-mono">Sessões recentes</div>
+            {b.sessions.length === 0 ? (
+              <p className="text-xs text-muted-foreground/40 italic">Nenhuma sessão vinculada</p>
+            ) : (
+              b.sessions.slice(0, 5).map((s) => (
+                <div key={s.id} className="flex items-center justify-between text-xs rounded-md bg-card border border-border px-3 py-2">
+                  <div className="flex items-center gap-2 truncate">
+                    <span>{s.typeEmoji || "💬"}</span>
+                    <span className="text-foreground/80 truncate max-w-[160px]">{s.key}</span>
+                  </div>
+                  <div className="flex items-center gap-3 text-muted-foreground/60 font-mono">
+                    <span>{formatTokens(s.totalTokens)} tk</span>
+                    <span>{timeAgo(s.updatedAt)}</span>
+                    {s.aborted && <span className="text-destructive text-[10px]">abortada</span>}
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  /* ── Squads split ── */
+  const activeSquads = squads.filter((s) => s.status === "active");
+  const importedSquads = squads.filter((s) => s.status !== "active");
 
   return (
     <OrionLayout>
@@ -213,24 +413,21 @@ export default function BuildersPage() {
               Central de Builders
             </h1>
             <p className="text-sm text-muted-foreground mt-1">
-              Agentes de construção e execução do ecossistema. Mostra quem está ativo, modelos em uso e sessões de build.
+              Visão operacional dos 3 domínios de execução: OpenClaw · Claude Code · AIOX
             </p>
           </div>
-          <Button
-            variant="outline" size="sm" onClick={handleRefresh} disabled={isLoading}
-            className="border-border text-muted-foreground hover:text-foreground"
-          >
+          <Button variant="outline" size="sm" onClick={handleRefresh} disabled={isLoading} className="border-border text-muted-foreground hover:text-foreground">
             <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? "animate-spin" : ""}`} />
             Atualizar
           </Button>
         </div>
 
-        {/* Summary cards */}
+        {/* Summary strip */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
           {[
             { label: "Total Builders", value: stats.total, icon: Layers, color: "text-primary" },
             { label: "Online", value: stats.online, icon: Activity, color: "text-emerald-400" },
-            { label: "Sessões Ativas", value: stats.activeSessions, icon: MonitorSmartphone, color: "text-amber-400" },
+            { label: "Sessões Ativas", value: stats.activeSessions, icon: MonitorSmartphone, color: "text-purple-400" },
             { label: "Tokens Hoje", value: formatTokens(stats.totalTokens), icon: Cpu, color: "text-primary" },
             { label: "Squads AIOX", value: stats.squads, icon: Package, color: "text-amber-400" },
           ].map((m) => (
@@ -246,23 +443,23 @@ export default function BuildersPage() {
           ))}
         </div>
 
-        {/* Loading */}
+        {/* Loading / Error / Empty */}
         {isLoading && !builders.length && (
           <div className="space-y-4">
-            {[1, 2, 3].map((i) => <Skeleton key={i} className="h-32 w-full rounded-lg" />)}
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} className="h-32 w-full rounded-lg" />
+            ))}
           </div>
         )}
-
-        {/* Error */}
         {isError && !builders.length && (
           <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-8 text-center space-y-3">
             <AlertCircle className="h-8 w-8 text-destructive mx-auto" />
             <p className="text-sm text-destructive">Falha ao carregar dados de builders</p>
-            <Button variant="outline" size="sm" onClick={handleRefresh}>Tentar novamente</Button>
+            <Button variant="outline" size="sm" onClick={handleRefresh}>
+              Tentar novamente
+            </Button>
           </div>
         )}
-
-        {/* Empty */}
         {!isLoading && !isError && builders.length === 0 && squads.length === 0 && (
           <div className="rounded-lg border border-border bg-card p-12 text-center space-y-3">
             <Inbox className="h-10 w-10 text-muted-foreground/40 mx-auto" />
@@ -271,225 +468,105 @@ export default function BuildersPage() {
           </div>
         )}
 
-        {/* AIOX Squads — split: Principais (active) vs Importados */}
-        {squads.length > 0 && (() => {
-          const mainSquads = squads.filter((s) => s.status === "active");
-          const importedSquads = squads.filter((s) => s.status !== "active");
+        {/* ═══ DOMAIN SECTIONS ═══ */}
+        {!isLoading &&
+          (["openclaw", "claude-code", "aiox"] as BuilderDomain[]).map((domain) => {
+            const meta = DOMAIN_META[domain];
+            const items = grouped[domain];
+            const isAiox = domain === "aiox";
 
-          const renderSquadCard = (sq: AioxSquad, borderCls: string, bgCls: string) => {
-            const fileCount = Array.isArray(sq.files) ? sq.files.length : (sq.files ?? 0);
-            const fileNames = Array.isArray(sq.files) ? sq.files : [];
-            const agentNames = sq.agents ?? [];
-            const isOpen = expandedSquad === sq.id;
+            // AIOX section shows even if no agents (squads matter)
+            if (!isAiox && items.length === 0) return null;
+            if (isAiox && items.length === 0 && squads.length === 0) return null;
+
             return (
-              <div
-                key={sq.id}
-                onClick={() => setExpandedSquad(isOpen ? null : sq.id)}
-                className={`rounded-lg border ${borderCls} ${bgCls} hover:border-amber-400/30 transition-colors cursor-pointer`}
-              >
-                <div className="p-4 space-y-2">
-                  <div className="flex items-center justify-between">
+              <section key={domain} className="space-y-4">
+                {/* Domain header */}
+                <div className={`flex items-center gap-3 border-b ${meta.border} pb-3`}>
+                  <div className={`w-8 h-8 rounded-md ${meta.bg} flex items-center justify-center`}>
+                    <meta.icon className={`h-4 w-4 ${meta.accent}`} />
+                  </div>
+                  <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <Package className="h-4 w-4 text-amber-400" />
-                      <span className="font-semibold text-sm text-foreground truncate max-w-[200px]">{sq.name}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {sq.status && (
-                        <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded ${sq.status === "active" ? "bg-emerald-400/10 text-emerald-400" : "bg-muted text-muted-foreground"}`}>
-                          {sq.status === "active" ? "ativo" : sq.status}
+                      <h2 className="text-sm font-bold uppercase tracking-wider text-foreground">{meta.label}</h2>
+                      {items.length > 0 && (
+                        <span className="text-[10px] font-mono text-muted-foreground/50">
+                          {items.filter((i) => i.status === "online").length}/{items.length} online
                         </span>
                       )}
-                      {isOpen ? <ChevronDown className="h-3 w-3 text-muted-foreground/40" /> : <ChevronRight className="h-3 w-3 text-muted-foreground/40" />}
                     </div>
-                  </div>
-                  {sq.description && <p className="text-xs text-muted-foreground/70 line-clamp-2">{sq.description}</p>}
-                  <div className="flex items-center gap-4 text-[10px] font-mono text-muted-foreground/50">
-                    <span className="flex items-center gap-1"><FileText className="h-3 w-3" />{fileCount} arquivos</span>
-                    {agentNames.length > 0 && <span className="flex items-center gap-1"><Bot className="h-3 w-3" />{agentNames.length} agentes</span>}
-                    {sq.source && <span className="text-amber-400/60">{sq.source}</span>}
+                    <p className="text-[11px] text-muted-foreground/60 mt-0.5">{meta.desc}</p>
                   </div>
                 </div>
-                {isOpen && (
-                  <div className="border-t border-amber-400/10 p-4 space-y-4 bg-muted/5" onClick={(e) => e.stopPropagation()}>
-                    <div className="text-[10px] font-mono text-muted-foreground/40">ID: {sq.id}</div>
-                    {agentNames.length > 0 && (
-                      <div className="space-y-2">
-                        <div className="text-[10px] uppercase tracking-wider text-muted-foreground/50 font-mono font-bold">Agentes vinculados</div>
-                        <div className="flex flex-wrap gap-2">
-                          {agentNames.map((name) => (
-                            <button key={name} onClick={() => navigate("/agents")} className="flex items-center gap-1.5 text-xs font-medium px-2.5 py-1.5 rounded-md border border-border bg-card hover:border-primary/40 hover:text-primary transition-colors">
-                              <Bot className="h-3 w-3" /><span>{name}</span><ExternalLink className="h-2.5 w-2.5 text-muted-foreground/40" />
-                            </button>
-                          ))}
+
+                {/* Agent cards for this domain */}
+                {items.length > 0 && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+                    {items.map((b) => renderBuilderCard(b, meta))}
+                  </div>
+                )}
+
+                {/* AIOX-specific: squads */}
+                {isAiox && squads.length > 0 && (
+                  <div className="space-y-4 pl-0">
+                    {/* Active squads */}
+                    {activeSquads.length > 0 && (
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2">
+                          <Package className="h-3.5 w-3.5 text-amber-400" />
+                          <span className="text-[11px] font-bold uppercase tracking-wider text-foreground">Squads em Operação</span>
+                          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-400/10 text-emerald-400">
+                            {activeSquads.length} ativos
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+                          {activeSquads.map((sq) => renderSquadCard(sq, "border-amber-400/20", "bg-amber-400/5"))}
                         </div>
                       </div>
                     )}
-                    {fileNames.length > 0 ? (
-                      <div className="space-y-2">
-                        <div className="text-[10px] uppercase tracking-wider text-muted-foreground/50 font-mono font-bold">Arquivos ({fileNames.length})</div>
-                        <div className="space-y-1 max-h-40 overflow-y-auto">
-                          {fileNames.map((f, i) => (
-                            <div key={i} className="flex items-center gap-2 text-xs font-mono text-foreground/70 rounded-md bg-card border border-border px-3 py-1.5">
-                              <FileText className="h-3 w-3 text-muted-foreground/40 shrink-0" /><span className="truncate">{f}</span>
-                            </div>
-                          ))}
+
+                    {/* Imported / historical */}
+                    {importedSquads.length > 0 && (
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Package className="h-3.5 w-3.5 text-muted-foreground/50" />
+                            <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Importados / Histórico</span>
+                            <span className="text-[10px] font-mono text-muted-foreground/40">({importedSquads.length})</span>
+                          </div>
+                          {importedSquads.length > 6 && (
+                            <Button variant="ghost" size="sm" onClick={() => setShowAllImported(!showAllImported)} className="text-xs text-muted-foreground">
+                              {showAllImported ? "Mostrar menos" : "Ver todos"}
+                              {showAllImported ? <ChevronDown className="h-3 w-3 ml-1" /> : <ChevronRight className="h-3 w-3 ml-1" />}
+                            </Button>
+                          )}
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+                          {(showAllImported ? importedSquads : importedSquads.slice(0, 6)).map((sq) => renderSquadCard(sq, "border-border", "bg-card"))}
                         </div>
                       </div>
-                    ) : fileCount > 0 ? (
-                      <div className="text-xs text-muted-foreground/50 italic">{fileCount} arquivos vinculados (nomes indisponíveis)</div>
-                    ) : null}
-                    {sq.tags && sq.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-1.5">
-                        {sq.tags.map((t) => (
-                          <span key={t} className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-muted text-muted-foreground">{t}</span>
-                        ))}
+                    )}
+
+                    {/* Fallback: squads with no status at all */}
+                    {activeSquads.length === 0 && importedSquads.length === 0 && (
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2">
+                          <Package className="h-3.5 w-3.5 text-amber-400" />
+                          <span className="text-[11px] font-bold uppercase tracking-wider text-foreground">Squads Instalados</span>
+                          <span className="text-[10px] font-mono text-muted-foreground/40">({squads.length})</span>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+                          {squads.map((sq) => renderSquadCard(sq, "border-amber-400/15", "bg-amber-400/5"))}
+                        </div>
                       </div>
                     )}
                   </div>
                 )}
-              </div>
-            );
-          };
 
-          return (
-            <div className="space-y-6">
-              {/* Squads Principais — ativos */}
-              {mainSquads.length > 0 && (
-                <section className="space-y-3">
-                  <div className="flex items-center gap-2 border-b border-amber-400/20 pb-2">
-                    <Package className="h-4 w-4 text-amber-400" />
-                    <h2 className="text-sm font-bold uppercase tracking-wider text-foreground">Squads Principais</h2>
-                    <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-400/10 text-emerald-400">ativos</span>
-                    <span className="text-xs font-mono text-muted-foreground/50 ml-auto">({mainSquads.length})</span>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
-                    {mainSquads.map((sq) => renderSquadCard(sq, "border-amber-400/20", "bg-amber-400/5"))}
-                  </div>
-                </section>
-              )}
-
-              {/* Importados / Histórico */}
-              {importedSquads.length > 0 && (
-                <section className="space-y-3">
-                  <div className="flex items-center justify-between border-b border-border pb-2">
-                    <div className="flex items-center gap-2">
-                      <Package className="h-4 w-4 text-muted-foreground/60" />
-                      <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Importados / Histórico</h2>
-                      <span className="text-xs font-mono text-muted-foreground/50 ml-1">({importedSquads.length})</span>
-                    </div>
-                    {importedSquads.length > 6 && (
-                      <Button variant="ghost" size="sm" onClick={() => setShowAllSquads(!showAllSquads)} className="text-xs text-muted-foreground">
-                        {showAllSquads ? "Mostrar menos" : "Ver todos"}
-                        {showAllSquads ? <ChevronDown className="h-3 w-3 ml-1" /> : <ChevronRight className="h-3 w-3 ml-1" />}
-                      </Button>
-                    )}
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
-                    {(showAllSquads ? importedSquads : importedSquads.slice(0, 6)).map((sq) => renderSquadCard(sq, "border-border", "bg-card"))}
-                  </div>
-                </section>
-              )}
-
-              {/* Fallback quando nenhum tem status */}
-              {mainSquads.length === 0 && importedSquads.length === 0 && (
-                <section className="space-y-3">
-                  <div className="flex items-center gap-2 border-b border-border pb-2">
-                    <Package className="h-4 w-4 text-amber-400" />
-                    <h2 className="text-sm font-bold uppercase tracking-wider text-foreground">Squads AIOX</h2>
-                    <span className="text-xs font-mono text-muted-foreground/50 ml-1">({squads.length})</span>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
-                    {squads.map((sq) => renderSquadCard(sq, "border-amber-400/15", "bg-amber-400/5"))}
-                  </div>
-                </section>
-              )}
-            </div>
-          );
-        })()}
-
-        {/* Grouped builder sections */}
-        {!isLoading &&
-          (["claude-code", "aiox", "other"] as BuilderCategory[]).map((cat) => {
-            const items = grouped[cat];
-            if (!items.length) return null;
-            const meta = CATEGORY_META[cat];
-            return (
-              <section key={cat} className="space-y-3">
-                <div className="flex items-center gap-2 border-b border-border pb-2">
-                  <meta.icon className={`h-4 w-4 ${meta.accent}`} />
-                  <h2 className="text-sm font-bold uppercase tracking-wider text-foreground">{meta.label}</h2>
-                  <span className="text-xs font-mono text-muted-foreground/50 ml-1">({items.length})</span>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
-                  {items.map((b) => {
-                    const isExpanded = expandedBuilder === b.id;
-                    const isOnline = b.status === "online";
-                    return (
-                      <div
-                        key={b.id}
-                        onClick={() => setExpandedBuilder(isExpanded ? null : b.id)}
-                        className="rounded-lg border border-border bg-card hover:border-primary/30 transition-colors cursor-pointer"
-                      >
-                        <div className="p-4 space-y-3">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              {b.emoji ? <span className="text-lg">{b.emoji}</span> : <Bot className={`h-5 w-5 ${meta.accent}`} />}
-                              <span className="font-semibold text-sm text-foreground truncate max-w-[180px]">{b.name}</span>
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                              <div className={`w-2 h-2 rounded-full ${isOnline ? "bg-emerald-400 animate-pulse" : "bg-muted-foreground/30"}`} />
-                              <span className={`text-xs font-mono ${isOnline ? "text-emerald-400" : "text-muted-foreground/50"}`}>
-                                {isOnline ? "online" : b.status || "—"}
-                              </span>
-                            </div>
-                          </div>
-                          <div className="grid grid-cols-3 gap-2 text-xs">
-                            <div className="space-y-0.5">
-                              <div className="text-muted-foreground/50 font-mono uppercase text-[10px]">Modelo</div>
-                              <div className="text-foreground/80 font-medium truncate">{b.model}</div>
-                            </div>
-                            <div className="space-y-0.5">
-                              <div className="text-muted-foreground/50 font-mono uppercase text-[10px]">Sessões</div>
-                              <div className="text-foreground/80 font-medium">{b.activeSessions}</div>
-                            </div>
-                            <div className="space-y-0.5">
-                              <div className="text-muted-foreground/50 font-mono uppercase text-[10px]">Última Ativ.</div>
-                              <div className="text-foreground/80 font-medium">{b.lastActivity}</div>
-                            </div>
-                          </div>
-                          {b.totalTokens > 0 && (
-                            <div className="flex items-center gap-2 text-[10px] text-muted-foreground/50 font-mono">
-                              <Cpu className="h-3 w-3" />
-                              <span>{formatTokens(b.totalTokens)} tokens</span>
-                            </div>
-                          )}
-                        </div>
-                        {isExpanded && (
-                          <div className="border-t border-border p-3 space-y-2 bg-muted/10">
-                            <div className="text-[10px] uppercase tracking-wider text-muted-foreground/50 font-mono">Sessões recentes</div>
-                            {b.sessions.length === 0 ? (
-                              <p className="text-xs text-muted-foreground/40 italic">Nenhuma sessão vinculada</p>
-                            ) : (
-                              b.sessions.slice(0, 5).map((s) => (
-                                <div key={s.id} className="flex items-center justify-between text-xs rounded-md bg-card border border-border px-3 py-2">
-                                  <div className="flex items-center gap-2 truncate">
-                                    <span>{s.typeEmoji || "💬"}</span>
-                                    <span className="text-foreground/80 truncate max-w-[160px]">{s.key}</span>
-                                  </div>
-                                  <div className="flex items-center gap-3 text-muted-foreground/60 font-mono">
-                                    <span>{formatTokens(s.totalTokens)} tk</span>
-                                    <span>{timeAgo(s.updatedAt)}</span>
-                                    {s.aborted && <span className="text-destructive text-[10px]">abortada</span>}
-                                  </div>
-                                </div>
-                              ))
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
+                {/* Empty state for AIOX agents */}
+                {isAiox && items.length === 0 && squads.length > 0 && (
+                  <p className="text-xs text-muted-foreground/40 italic px-1">Nenhum agente AIOX registrado — operando via squads</p>
+                )}
               </section>
             );
           })}
