@@ -209,7 +209,7 @@ function CommandConsole() {
       {/* Display frame */}
       <mesh position={[0, 1.2, -0.33]} castShadow>
         <boxGeometry args={[3.35, 1.32, 0.04]} />
-        <meshStandardMaterial color="#3a3a58" roughness={0.12} metalness={0.8} />
+        <meshStandardMaterial color="#505078" roughness={0.12} metalness={0.8} />
       </mesh>
       {/* Stand pillars */}
       {[-1.2, 1.2].map((x, i) => (
