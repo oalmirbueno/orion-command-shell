@@ -17,6 +17,7 @@ import {
   Zap,
   Hammer,
   GitMerge,
+  Bell,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import {
