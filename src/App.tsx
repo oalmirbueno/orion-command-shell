@@ -8,6 +8,7 @@ import { DomainHealthProvider } from "@/hooks/useDomainHealth";
 import { useOrionStream } from "@/hooks/useOrionStream";
 import Index from "./pages/Index.tsx";
 import PlaceholderPage from "./pages/PlaceholderPage.tsx";
+import PipelinesPage from "./pages/PipelinesPage.tsx";
 import MissionsPage from "./pages/MissionsPage.tsx";
 import SystemPage from "./pages/SystemPage.tsx";
 import AgentsPage from "./pages/AgentsPage.tsx";
