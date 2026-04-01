@@ -120,7 +120,7 @@ function GlassPanel({ position, rotation = [0, 0, 0], size = [0.05, 2, 2] }: {
     <group>
       <mesh position={position} rotation={rotation} castShadow>
         <boxGeometry args={size} />
-        <meshPhysicalMaterial color="#a0b0c8" transparent opacity={0.1} roughness={0.03} metalness={0.05}
+        <meshPhysicalMaterial color="#b8c8e0" transparent opacity={0.12} roughness={0.03} metalness={0.05}
           clearcoat={1} clearcoatRoughness={0.03} />
       </mesh>
       {[size[1] / 2, -size[1] / 2].map((yOff, i) => (
