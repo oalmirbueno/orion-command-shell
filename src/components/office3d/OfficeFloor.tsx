@@ -160,7 +160,7 @@ function WallDisplay({ position, rotation = [0, 0, 0], width = 1.5, height = 0.8
       {/* Frame */}
       <mesh position={[0, 0, -0.025]} castShadow>
         <boxGeometry args={[width + 0.1, height + 0.1, 0.04]} />
-        <meshStandardMaterial color="#3a3a58" roughness={0.15} metalness={0.75} />
+        <meshStandardMaterial color="#505078" roughness={0.15} metalness={0.75} />
       </mesh>
       {/* Screen */}
       <mesh>
