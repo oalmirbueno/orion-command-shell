@@ -96,7 +96,7 @@ function SectorFloor({ position, size, color, elevated = false }: {
 
 /* ── Sector border ── */
 function SectorBorder({ position, size, color }: { position: [number, number, number]; size: [number, number]; color: string }) {
-  const hw = size[0] / 2, hh = size[1] / 2, y = 0.006;
+  const hw = size[0] / 2, hh = size[1] / 2, y = 0.03;
   const corners = [[-hw, y, -hh], [hw, y, -hh], [hw, y, hh], [-hw, y, hh], [-hw, y, -hh]]
     .map(([x, cy, z]) => new THREE.Vector3(x + position[0], cy, z + position[2]));
   return (
