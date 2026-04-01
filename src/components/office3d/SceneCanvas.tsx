@@ -9,6 +9,7 @@ import { useMemo } from "react";
 import { useOrionData } from "@/hooks/useOrionData";
 import { fetchAgents } from "@/domains/agents/fetcher";
 import type { AgentView } from "@/domains/agents/types";
+import * as THREE from "three";
 import { AlertTriangle, Loader2, WifiOff } from "lucide-react";
 import { OfficeFloor } from "./OfficeFloor";
 import { AgentDesk } from "./AgentDesk";
