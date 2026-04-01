@@ -121,6 +121,9 @@ export function MeetingBar({ agents, allAgents, onAddAgent, onRemoveAgent, onDis
               </div>
             )}
 
+            {/* ── NOTAS / DECISÕES ── */}
+            {agents.length > 0 && <MeetingNotes />}
+
             {/* Quick add */}
             {notInMeeting.length > 0 && (
               <div className="flex flex-wrap gap-1 pt-2 border-t border-border/20">
