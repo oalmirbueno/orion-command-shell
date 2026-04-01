@@ -120,9 +120,12 @@ export function SceneCanvas({
       <hemisphereLight args={["#6060b0", "#2a2a50", 0.6]} />
       <ambientLight intensity={0.55} color="#d0d0e8" />
 
-      {/* Key light — warm white */}
+      {/* Key light — warm white, wide shadow coverage */}
       <directionalLight position={[8, 14, 8]} intensity={0.7} castShadow
-        shadow-mapSize={2048} shadow-bias={-0.0005} color="#e0e0ff" />
+        shadow-mapSize={2048} shadow-bias={-0.0004} color="#e0e0ff"
+        shadow-camera-left={-12} shadow-camera-right={12}
+        shadow-camera-top={12} shadow-camera-bottom={-10}
+        shadow-camera-near={1} shadow-camera-far={35} />
 
       {/* Fill from left */}
       <directionalLight position={[-8, 10, -4]} intensity={0.3} color="#c0c0e0" />
