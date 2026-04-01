@@ -154,7 +154,7 @@ export default function BuildersPage() {
 
   const agentsQ = useQuery({ queryKey: ["builders-agents"], queryFn: fetchAgents, staleTime: 30_000, refetchInterval: 60_000, placeholderData: (prev) => prev });
   const sessionsQ = useQuery({ queryKey: ["builders-sessions"], queryFn: fetchSessions, staleTime: 30_000, refetchInterval: 60_000, placeholderData: (prev) => prev });
-  const squadsQ = useQuery({ queryKey: ["builders-squads"], queryFn: fetchSquads, staleTime: 60_000, refetchInterval: 120_000, placeholderData: (prev) => prev });
+  const squadsQ = useQuery({ queryKey: ["builders-aiox-squads"], queryFn: fetchSquads, staleTime: 30_000, refetchInterval: 60_000, placeholderData: (prev) => prev });
 
   const isLoading = agentsQ.isLoading || sessionsQ.isLoading;
   const isError = agentsQ.isError && sessionsQ.isError;
