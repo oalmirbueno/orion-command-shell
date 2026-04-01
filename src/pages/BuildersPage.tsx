@@ -195,6 +195,11 @@ export default function BuildersPage() {
           s.model?.toLowerCase().includes(a.model?.split("/")[0]?.toLowerCase() || "___") ||
           s.key?.toLowerCase().includes(a.name?.toLowerCase() || "___"),
       );
+      // Derive current task: from API field or latest active session
+      const latestActive = agentSessions.find((s) => !s.aborted && s.ageMs < 300_000);
+      const currentTask = a.currentTask || latestActive?.preview || latestActive?.key || "";
+      const context = a.context || (latestActive ? `${latestActive.type || "session"} · ${latestActive.model || "—"}` : "");
+
       return {
         id: a.id,
         name: a.name,
@@ -207,6 +212,8 @@ export default function BuildersPage() {
         sessions: agentSessions,
         totalTokens: agentSessions.reduce((sum, s) => sum + (s.totalTokens || 0), 0),
         emoji: a.emoji,
+        currentTask,
+        context,
       };
     });
   }, [agentsQ.data, sessionsQ.data]);
