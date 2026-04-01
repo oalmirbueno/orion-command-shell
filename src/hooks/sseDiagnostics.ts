@@ -28,7 +28,7 @@ class SSEDiagnosticStore {
   private _lastError: string | null = null;
   private _lastErrorAt: Date | null = null;
   private listeners = new Set<() => void>();
-  private _cachedSnapshot: ReturnType<SSEDiagnosticStore["_buildSnapshot"]> | null = null;
+  private _cachedSnapshot: ReturnType<typeof SSEDiagnosticStore.prototype.getSnapshot> | null = null;
 
   get status() { return this._status; }
   get events() { return this._events; }
