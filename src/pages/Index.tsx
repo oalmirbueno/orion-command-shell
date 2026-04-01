@@ -12,6 +12,7 @@ import { OperationalHealth } from "@/components/home/OperationalHealth";
 import { ExecutiveBriefing } from "@/components/home/ExecutiveBriefing";
 import { WeatherContext } from "@/components/home/WeatherContext";
 import { SkillsWidget } from "@/components/home/SkillsWidget";
+import { BuildersWidget } from "@/components/home/BuildersWidget";
 
 const Index = () => {
   const { state, data, source, lastUpdated, refetch } = useOrionData<HomePageData>({
