@@ -6,7 +6,6 @@ import { NotificationCenter } from "@/components/notifications/NotificationCente
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 export function OrionTopBar({ title = "Comando" }: { title?: string }) {
   const navigate = useNavigate();
