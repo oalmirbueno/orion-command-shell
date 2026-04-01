@@ -166,6 +166,12 @@ const Office3DPage = () => {
             </div>
           </div>
         )}
+
+        <AgentDetailSheet
+          agent={selectedAgent}
+          open={!!selectedAgent}
+          onOpenChange={(open) => { if (!open) setSelectedAgent(null); }}
+        />
       </div>
     </OrionLayout>
   );
