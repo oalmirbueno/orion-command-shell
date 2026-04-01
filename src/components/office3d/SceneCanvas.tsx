@@ -44,17 +44,46 @@ function AgentNode3D({ position, agent, onClick, onHover }: {
   onHover?: (agent: AgentView | null, screenPos?: { x: number; y: number }) => void;
 }) {
   const color = TIER_COLORS[agent.tier] || TIER_COLORS.support;
-  const scale = agent.tier === "orchestrator" ? 1.2 : agent.tier === "core" ? 0.9 : 0.7;
+  const baseScale = agent.tier === "orchestrator" ? 1.2 : agent.tier === "core" ? 0.9 : 0.7;
   const active = agent.status !== "offline";
+  const [hovered, setHovered] = useState(false);
+  const meshRef = useRef<THREE.Mesh>(null);
+  const ringRef = useRef<THREE.Mesh>(null);
+  const outerRingRef = useRef<THREE.Mesh>(null);
+
+  // Animate hover glow
+  useFrame((_, delta) => {
+    if (!meshRef.current) return;
+    const mat = meshRef.current.material as THREE.MeshStandardMaterial;
+    const targetEmissive = hovered ? 1.2 : (agent.status === "active" ? 0.6 : active ? 0.3 : 0.05);
+    mat.emissiveIntensity += (targetEmissive - mat.emissiveIntensity) * Math.min(delta * 8, 1);
+
+    const targetScale = hovered ? baseScale * 1.15 : baseScale;
+    const s = meshRef.current.scale.x;
+    const newS = s + (targetScale - s) * Math.min(delta * 10, 1);
+    meshRef.current.scale.setScalar(newS / baseScale); // normalize since geometry already uses baseScale
+
+    if (ringRef.current) {
+      const rMat = ringRef.current.material as THREE.MeshBasicMaterial;
+      const targetOp = hovered ? 0.5 : (active ? 0.25 : 0.05);
+      rMat.opacity += (targetOp - rMat.opacity) * Math.min(delta * 8, 1);
+    }
+    if (outerRingRef.current) {
+      const oMat = outerRingRef.current.material as THREE.MeshBasicMaterial;
+      oMat.opacity += ((hovered ? 0.35 : 0) - oMat.opacity) * Math.min(delta * 8, 1);
+    }
+  });
 
   return (
     <Float speed={1.5} rotationIntensity={0.2} floatIntensity={0.3}>
       <group position={position}>
         <mesh
+          ref={meshRef}
           castShadow
           onClick={(e) => { e.stopPropagation(); onClick?.(agent); }}
           onPointerOver={(e) => {
             e.stopPropagation();
+            setHovered(true);
             document.body.style.cursor = "pointer";
             const { clientX, clientY } = e as unknown as { clientX: number; clientY: number };
             onHover?.(agent, { x: clientX, y: clientY });
@@ -63,9 +92,9 @@ function AgentNode3D({ position, agent, onClick, onHover }: {
             const { clientX, clientY } = e as unknown as { clientX: number; clientY: number };
             onHover?.(agent, { x: clientX, y: clientY });
           }}
-          onPointerOut={() => { document.body.style.cursor = "auto"; onHover?.(null); }}
+          onPointerOut={() => { setHovered(false); document.body.style.cursor = "auto"; onHover?.(null); }}
         >
-          <octahedronGeometry args={[scale * 0.35, 0]} />
+          <octahedronGeometry args={[baseScale * 0.35, 0]} />
           <meshStandardMaterial
             color={color}
             emissive={active ? color : "#333"}
@@ -78,18 +107,16 @@ function AgentNode3D({ position, agent, onClick, onHover }: {
         </mesh>
 
         {/* Glow ring */}
-        <mesh rotation={[Math.PI / 2, 0, 0]}>
-          <ringGeometry args={[scale * 0.5, scale * 0.55, 32]} />
+        <mesh ref={ringRef} rotation={[Math.PI / 2, 0, 0]}>
+          <ringGeometry args={[baseScale * 0.5, baseScale * 0.55, 32]} />
           <meshBasicMaterial color={color} transparent opacity={active ? 0.25 : 0.05} side={THREE.DoubleSide} />
         </mesh>
 
-        {/* Active pulse ring */}
-        {agent.status === "active" && (
-          <mesh rotation={[Math.PI / 2, 0, 0]}>
-            <ringGeometry args={[scale * 0.58, scale * 0.61, 32]} />
-            <meshBasicMaterial color={color} transparent opacity={0.12} side={THREE.DoubleSide} />
-          </mesh>
-        )}
+        {/* Hover outer glow ring (always rendered, animated via useFrame) */}
+        <mesh ref={outerRingRef} rotation={[Math.PI / 2, 0, 0]}>
+          <ringGeometry args={[baseScale * 0.6, baseScale * 0.68, 32]} />
+          <meshBasicMaterial color={color} transparent opacity={0} side={THREE.DoubleSide} />
+        </mesh>
 
         {/* Name label */}
         <Billboard follow lockX={false} lockY={false} lockZ={false}>
