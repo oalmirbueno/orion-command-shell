@@ -279,9 +279,9 @@ function MeetingTable() {
           clearcoat={0.7} clearcoatRoughness={0.08} />
       </mesh>
       {/* Inlay ring */}
-      <mesh position={[0, 0.415, 0]} rotation={[Math.PI / 2, 0, 0]}>
+      <mesh position={[0, 0.42, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <ringGeometry args={[0.7, 0.73, 48]} />
-        <meshBasicMaterial color="#fbbf24" transparent opacity={0.1} side={THREE.DoubleSide} />
+        <meshBasicMaterial color="#fbbf24" transparent opacity={0.1} />
       </mesh>
       {/* Pedestal */}
       <mesh position={[0, 0.19, 0]}>
