@@ -80,6 +80,7 @@ export function useOrionStream(options: StreamOptions = {}) {
 
   const setStatus = useCallback((s: StreamStatus) => {
     statusRef.current = s;
+    sseDiagnostics.setStatus(s);
     onStatusChange?.(s);
   }, [onStatusChange]);
 
