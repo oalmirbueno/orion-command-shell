@@ -179,7 +179,7 @@ export function SceneCanvas({
 
       {/* ── Connection Lines ── */}
       {connectionPairs.map((cp, i) => (
-        <ConnectionLine key={i} from={cp.from} to={cp.to} color={cp.color} opacity={0.06} />
+        <FlowConnection key={i} from={cp.from} to={cp.to} color={cp.color} active={cp.active} particleCount={cp.active ? 2 : 0} />
       ))}
 
       {/* ── Camera Controls ── */}
