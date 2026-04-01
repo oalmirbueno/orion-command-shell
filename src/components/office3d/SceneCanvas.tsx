@@ -4,9 +4,9 @@
  * Consome agentes via useOrionData e renderiza nós 3D com status operacional.
  */
 
-import { Canvas } from "@react-three/fiber";
+import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, Grid, Float, Text, Billboard } from "@react-three/drei";
-import { useMemo } from "react";
+import { useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import { useOrionData } from "@/hooks/useOrionData";
 import { fetchAgents } from "@/domains/agents/fetcher";
