@@ -11,6 +11,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { API_BASE_URL } from "@/domains/api";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from "recharts";
 
 /* ── Types ── */
 interface RealAgent {
@@ -235,8 +236,33 @@ export default function BuildersPage() {
     [builders, squads],
   );
 
-  const handleRefresh = () => {
-    qc.invalidateQueries({ queryKey: ["builders-agents"] });
+  /* ── Token chart: 6 × 4h buckets over last 24h ── */
+  const tokenChartData = useMemo(() => {
+    const now = Date.now();
+    const bucketSize = 4 * 60 * 60_000;
+    const buckets: { label: string; OpenClaw: number; "Claude Code": number; AIOX: number }[] = [];
+    for (let i = 5; i >= 0; i--) {
+      const hS = new Date(now - (i + 1) * bucketSize).getHours();
+      const hE = new Date(now - i * bucketSize).getHours();
+      buckets.push({ label: `${String(hS).padStart(2, "0")}–${String(hE).padStart(2, "0")}h`, OpenClaw: 0, "Claude Code": 0, AIOX: 0 });
+    }
+    const h24 = 24 * 60 * 60_000;
+    builders.forEach((b) => {
+      const key = b.domain === "openclaw" ? "OpenClaw" : b.domain === "claude-code" ? "Claude Code" : "AIOX";
+      b.sessions.forEach((s) => {
+        const ts = typeof s.updatedAt === "number" ? s.updatedAt : new Date(s.updatedAt).getTime();
+        if (ts < now - h24 || ts > now) return;
+        const idx = 5 - Math.min(5, Math.floor((now - ts) / bucketSize));
+        if (idx >= 0 && idx < 6) buckets[idx][key] += s.totalTokens || 0;
+      });
+    });
+    return buckets;
+  }, [builders]);
+
+  const hasTokenData = tokenChartData.some((d) => d.OpenClaw > 0 || d["Claude Code"] > 0 || d.AIOX > 0);
+
+
+    const handleRefresh = () => {
     qc.invalidateQueries({ queryKey: ["builders-sessions"] });
     qc.invalidateQueries({ queryKey: ["builders-aiox-squads"] });
   };
@@ -468,7 +494,40 @@ export default function BuildersPage() {
           ))}
         </div>
 
-        {/* Loading / Error / Empty */}
+        {/* Token chart — last 24h by domain */}
+        {hasTokenData && (
+          <div className="rounded-lg border border-border bg-card p-4 space-y-3">
+            <div className="flex items-center gap-2">
+              <Cpu className="h-4 w-4 text-primary" />
+              <span className="text-xs font-bold uppercase tracking-wider text-foreground">Tokens por Domínio — Últimas 24h</span>
+            </div>
+            <div className="h-44">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={tokenChartData} barCategoryGap="20%">
+                  <XAxis dataKey="label" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
+                  <YAxis
+                    tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
+                    axisLine={false}
+                    tickLine={false}
+                    tickFormatter={(v: number) => (v >= 1000 ? `${(v / 1000).toFixed(0)}k` : String(v))}
+                    width={40}
+                  />
+                  <Tooltip
+                    contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 11 }}
+                    labelStyle={{ color: "hsl(var(--foreground))", fontWeight: 600 }}
+                    formatter={(value: number, name: string) => [formatTokens(value), name]}
+                  />
+                  <Legend iconSize={8} wrapperStyle={{ fontSize: 10 }} />
+                  <Bar dataKey="OpenClaw" stackId="a" fill="hsl(var(--primary))" radius={[0, 0, 0, 0]} />
+                  <Bar dataKey="Claude Code" stackId="a" fill="hsl(270 60% 60%)" radius={[0, 0, 0, 0]} />
+                  <Bar dataKey="AIOX" stackId="a" fill="hsl(45 96% 64%)" radius={[2, 2, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        )}
+
+
         {isLoading && !builders.length && (
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (
