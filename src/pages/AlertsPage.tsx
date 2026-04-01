@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useState, useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { AdvancedFilters, type FilterState } from "@/components/filters/AdvancedFilters";
 import { OrionLayout } from "@/components/OrionLayout";
 import { OrionBreadcrumb } from "@/components/orion";
 import {
