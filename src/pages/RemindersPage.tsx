@@ -1,3 +1,4 @@
+import { useState, useMemo } from "react";
 import { OrionLayout } from "@/components/OrionLayout";
 import { OrionBreadcrumb } from "@/components/orion";
 import { OrionDataWrapper } from "@/components/orion/DataWrapper";
@@ -9,6 +10,7 @@ import {
   ChevronRight, Timer, Zap, Terminal, Cpu, Bot,
   Newspaper, BookOpen, Info
 } from "lucide-react";
+import { AdvancedFilters, type FilterState } from "@/components/filters/AdvancedFilters";
 import type { RemindersPageData, Reminder, NewsItem } from "@/domains/reminders/types";
 
 // ── Summary Cards ──
@@ -75,13 +77,11 @@ function RemindersList({ reminders }: { reminders: Reminder[] }) {
         <div className="px-5 py-8 text-center flex flex-col items-center gap-2">
           <CheckCircle2 className="h-5 w-5 text-status-online/30" />
           <p className="text-sm font-mono text-muted-foreground/40">Nenhum lembrete pendente</p>
-          <p className="text-[10px] text-muted-foreground/25">Quando houver alertas, falhas ou agendamentos, aparecerão aqui</p>
         </div>
       </section>
     );
   }
 
-  // Group by status
   const grouped = {
     overdue: reminders.filter(r => r.status === "overdue"),
     pending: reminders.filter(r => r.status === "pending"),
@@ -155,7 +155,6 @@ function NewsList({ items }: { items: NewsItem[] }) {
         <div className="px-5 py-8 text-center flex flex-col items-center gap-2">
           <Newspaper className="h-5 w-5 text-muted-foreground/20" />
           <p className="text-sm font-mono text-muted-foreground/40">Nenhuma notícia recente</p>
-          <p className="text-[10px] text-muted-foreground/25">Eventos operacionais aparecerão conforme o sistema operar</p>
         </div>
       </section>
     );
@@ -206,6 +205,23 @@ function NewsList({ items }: { items: NewsItem[] }) {
   );
 }
 
+// ── Filter config ──
+const typeOptions = [
+  { key: "all", label: "Todos" },
+  { key: "overdue", label: "Exige Ação" },
+  { key: "pending", label: "Pendente" },
+  { key: "upcoming", label: "Agendado" },
+];
+
+const sourceOptions = [
+  { key: "all", label: "Todas" },
+  { key: "alert", label: "Alerta" },
+  { key: "cron", label: "Cron" },
+  { key: "operation", label: "Operação" },
+  { key: "session", label: "Sessão" },
+  { key: "system", label: "Sistema" },
+];
+
 // ── Page ──
 const RemindersPage = () => {
   const { state, data, source, lastUpdated, refetch } = useOrionData<RemindersPageData>({
@@ -214,9 +230,30 @@ const RemindersPage = () => {
     refreshInterval: 30_000,
   });
 
+  const [filters, setFilters] = useState<FilterState>({
+    type: "all", status: "all", dateFrom: undefined, dateTo: undefined,
+  });
+
   const reminders = data?.reminders ?? [];
   const news = data?.news ?? [];
   const summary = data?.summary ?? { totalReminders: 0, pending: 0, overdue: 0, upcoming: 0, totalNews: 0 };
+
+  const filteredReminders = useMemo(() => {
+    return reminders.filter((r) => {
+      if (filters.type !== "all" && r.status !== filters.type) return false;
+      if (filters.status !== "all" && r.source !== filters.status) return false;
+      return true;
+    });
+  }, [reminders, filters]);
+
+  const filteredNews = useMemo(() => {
+    return news.filter((n) => {
+      if (filters.status !== "all" && n.source !== filters.status) return false;
+      return true;
+    });
+  }, [news, filters]);
+
+  const totalFiltered = filteredReminders.length + filteredNews.length;
 
   return (
     <OrionLayout title="Lembretes & Notícias">
@@ -231,9 +268,18 @@ const RemindersPage = () => {
           emptyDescription="Quando houver alertas, agendamentos ou eventos operacionais, aparecerão aqui"
         >
           <RemindersSummaryBar summary={summary} />
+          <div className="mt-5">
+            <AdvancedFilters
+              types={typeOptions}
+              statuses={sourceOptions}
+              value={filters}
+              onChange={setFilters}
+              resultCount={totalFiltered}
+            />
+          </div>
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-5 mt-5">
-            <RemindersList reminders={reminders} />
-            <NewsList items={news} />
+            <RemindersList reminders={filteredReminders} />
+            <NewsList items={filteredNews} />
           </div>
         </OrionDataWrapper>
       </div>
