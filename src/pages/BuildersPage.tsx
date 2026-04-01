@@ -198,7 +198,7 @@ export default function BuildersPage() {
   const handleRefresh = () => {
     qc.invalidateQueries({ queryKey: ["builders-agents"] });
     qc.invalidateQueries({ queryKey: ["builders-sessions"] });
-    qc.invalidateQueries({ queryKey: ["builders-squads"] });
+    qc.invalidateQueries({ queryKey: ["builders-aiox-squads"] });
   };
 
   return (
