@@ -149,7 +149,7 @@ export function AgentDesk({ agent, desk, inMeeting, meetingPos, onClick, onHover
           {/* Mouse */}
           <mesh position={[0.25, 0.275, 0.12]}>
             <boxGeometry args={[0.05, 0.01, 0.07]} />
-            <meshStandardMaterial color="#404065" roughness={0.4} metalness={0.3} />
+            <meshStandardMaterial color="#585890" roughness={0.4} metalness={0.3} />
           </mesh>
           {/* Chair */}
           <group position={[0, 0, 0.55]}>
