@@ -37,9 +37,10 @@ function computePositions(agents: AgentView[]): [number, number, number][] {
 
 /* ── Agent Node 3D ── */
 
-function AgentNode3D({ position, agent }: {
+function AgentNode3D({ position, agent, onClick }: {
   position: [number, number, number];
   agent: AgentView;
+  onClick?: (agent: AgentView) => void;
 }) {
   const color = TIER_COLORS[agent.tier] || TIER_COLORS.support;
   const scale = agent.tier === "orchestrator" ? 1.2 : agent.tier === "core" ? 0.9 : 0.7;
@@ -48,7 +49,7 @@ function AgentNode3D({ position, agent }: {
   return (
     <Float speed={1.5} rotationIntensity={0.2} floatIntensity={0.3}>
       <group position={position}>
-        <mesh castShadow>
+        <mesh castShadow onClick={(e) => { e.stopPropagation(); onClick?.(agent); }} onPointerOver={(e) => { e.stopPropagation(); document.body.style.cursor = "pointer"; }} onPointerOut={() => { document.body.style.cursor = "auto"; }}>
           <octahedronGeometry args={[scale * 0.35, 0]} />
           <meshStandardMaterial
             color={color}
@@ -190,7 +191,7 @@ export function SceneOverlay({ state, error, onRetry }: {
 
 /* ── Main Canvas ── */
 
-export function SceneCanvas() {
+export function SceneCanvas({ onAgentClick }: { onAgentClick?: (agent: AgentView) => void }) {
   const { data: agents, state, error, refetch, source } = useOrionData<AgentView[]>({
     key: "agents-page",
     fetcher: fetchAgents,
@@ -239,7 +240,7 @@ export function SceneCanvas() {
       />
 
       {agentList.map((agent, i) => (
-        <AgentNode3D key={agent.id} agent={agent} position={positions[i]} />
+        <AgentNode3D key={agent.id} agent={agent} position={positions[i]} onClick={onAgentClick} />
       ))}
 
       {connectionPairs.map(([fromIdx, toIdx], i) => (

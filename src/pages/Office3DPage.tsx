@@ -3,6 +3,8 @@ import { OrionBreadcrumb } from "@/components/orion";
 import { Box, Eye, Maximize2, Layers, AlertTriangle } from "lucide-react";
 import { Suspense, useState, Component, type ReactNode } from "react";
 import { SceneCanvas, SceneOverlay } from "@/components/office3d/SceneCanvas";
+import { AgentDetailSheet } from "@/components/sheets/AgentDetailSheet";
+import type { AgentView } from "@/domains/agents/types";
 
 /* ── WebGL Error Boundary ── */
 class WebGLErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean; error: string }> {
@@ -34,6 +36,7 @@ class WebGLErrorBoundary extends Component<{ children: ReactNode }, { hasError: 
 
 const Office3DPage = () => {
   const [fullscreen, setFullscreen] = useState(false);
+  const [selectedAgent, setSelectedAgent] = useState<AgentView | null>(null);
 
   return (
     <OrionLayout title="Office 3D">
@@ -83,7 +86,7 @@ const Office3DPage = () => {
           <div style={{ height: fullscreen ? "calc(100vh - 41px)" : "520px" }}>
             <WebGLErrorBoundary>
               <Suspense fallback={<SceneOverlay state="loading" />}>
-                <SceneCanvas />
+                <SceneCanvas onAgentClick={setSelectedAgent} />
               </Suspense>
             </WebGLErrorBoundary>
           </div>
@@ -163,6 +166,12 @@ const Office3DPage = () => {
             </div>
           </div>
         )}
+
+        <AgentDetailSheet
+          agent={selectedAgent}
+          open={!!selectedAgent}
+          onOpenChange={(open) => { if (!open) setSelectedAgent(null); }}
+        />
       </div>
     </OrionLayout>
   );
