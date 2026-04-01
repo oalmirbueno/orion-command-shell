@@ -21,7 +21,7 @@ export function SceneOverlay({ state, error, onRetry }: {
   state: "loading" | "error" | "empty"; error?: string | null; onRetry?: () => void;
 }) {
   return (
-    <div className="w-full h-full flex items-center justify-center bg-[#0c0c24]">
+    <div className="w-full h-full flex items-center justify-center bg-[#252545]">
       <div className="text-center space-y-3">
         {state === "loading" && (
           <><Loader2 className="h-6 w-6 text-primary/40 animate-spin mx-auto" />
@@ -109,37 +109,37 @@ export function SceneCanvas({
       shadows
       camera={{ position: [0, 8.5, 12], fov: 42 }}
       style={{ background: "transparent" }}
-      gl={{ antialias: true, alpha: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.4 }}
+      gl={{ antialias: true, alpha: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.6 }}
       onCreated={({ gl }) => { gl.shadowMap.enabled = true; gl.shadowMap.type = THREE.PCFSoftShadowMap; }}
     >
-      {/* Lighter background — sophisticated navy */}
-      <color attach="background" args={["#141430"]} />
-      <fog attach="fog" args={["#141430", 20, 45]} />
+      {/* Light architectural background */}
+      <color attach="background" args={["#252545"]} />
+      <fog attach="fog" args={["#252545", 22, 50]} />
 
-      {/* ════ LIGHTING — brighter, warmer, more balanced ════ */}
-      <hemisphereLight args={["#6060b0", "#2a2a50", 0.6]} />
-      <ambientLight intensity={0.55} color="#d0d0e8" />
+      {/* ════ LIGHTING — bright, architectural, legible ════ */}
+      <hemisphereLight args={["#8888c0", "#404060", 0.8]} />
+      <ambientLight intensity={0.7} color="#e0e0f0" />
 
-      {/* Key light — warm white, wide shadow coverage */}
-      <directionalLight position={[8, 14, 8]} intensity={0.7} castShadow
-        shadow-mapSize={2048} shadow-bias={-0.0004} color="#e0e0ff"
+      {/* Key light — strong, warm */}
+      <directionalLight position={[8, 14, 8]} intensity={0.9} castShadow
+        shadow-mapSize={2048} shadow-bias={-0.0003} color="#f0f0ff"
         shadow-camera-left={-12} shadow-camera-right={12}
         shadow-camera-top={12} shadow-camera-bottom={-10}
         shadow-camera-near={1} shadow-camera-far={35} />
 
-      {/* Fill from left */}
-      <directionalLight position={[-8, 10, -4]} intensity={0.3} color="#c0c0e0" />
+      {/* Fill — left */}
+      <directionalLight position={[-8, 10, -4]} intensity={0.4} color="#d0d0e8" />
 
-      {/* Top-down fill */}
-      <directionalLight position={[0, 15, 0]} intensity={0.25} color="#b8b8d8" />
+      {/* Top fill */}
+      <directionalLight position={[0, 15, 0]} intensity={0.35} color="#d8d8f0" />
 
-      {/* Sector accents — reduced intensity */}
-      <pointLight position={[0, 4, -1.5]} intensity={0.3} color="#a78bfa" distance={10} decay={2} />
-      <pointLight position={[-2, 3.5, 2.5]} intensity={0.2} color="#60a5fa" distance={12} decay={2} />
-      <pointLight position={[2, 3.5, 2.5]} intensity={0.2} color="#60a5fa" distance={12} decay={2} />
-      <pointLight position={[0, 3, -4.5]} intensity={0.25} color="#fbbf24" distance={6} decay={2} />
-      <pointLight position={[5.5, 3, 1.5]} intensity={0.15} color="#6ee7b7" distance={5} decay={2} />
-      <pointLight position={[-5.5, 3, 1.5]} intensity={0.15} color="#6ee7b7" distance={5} decay={2} />
+      {/* Sector accents — gentle */}
+      <pointLight position={[0, 3.5, -1.5]} intensity={0.2} color="#a78bfa" distance={8} decay={2} />
+      <pointLight position={[-2, 3, 2.5]} intensity={0.15} color="#60a5fa" distance={10} decay={2} />
+      <pointLight position={[2, 3, 2.5]} intensity={0.15} color="#60a5fa" distance={10} decay={2} />
+      <pointLight position={[0, 2.5, -4.5]} intensity={0.2} color="#fbbf24" distance={5} decay={2} />
+      <pointLight position={[5.5, 2.5, 1.5]} intensity={0.1} color="#6ee7b7" distance={4} decay={2} />
+      <pointLight position={[-5.5, 2.5, 1.5]} intensity={0.1} color="#6ee7b7" distance={4} decay={2} />
 
       {/* ════ ENVIRONMENT ════ */}
       <OfficeFloor />
