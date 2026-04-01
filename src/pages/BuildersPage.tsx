@@ -4,8 +4,9 @@ import { OrionLayout } from "@/components/OrionLayout";
 import { OrionBreadcrumb } from "@/components/orion";
 import {
   Hammer, RefreshCw, Cpu, Activity, Clock, Inbox, AlertCircle, Bot,
-  Zap, Terminal, Layers, MonitorSmartphone, Package, FileText, ChevronDown, ChevronRight,
+  Zap, Terminal, Layers, MonitorSmartphone, Package, FileText, ChevronDown, ChevronRight, ExternalLink,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { API_BASE_URL } from "@/domains/api";
