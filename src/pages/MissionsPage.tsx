@@ -472,6 +472,29 @@ const MissionsPage = () => {
     });
   }, []);
 
+  const handleUpdateWorkflow = useCallback((id: string, updates: WorkflowUpdate) => {
+    setCustomWorkflows((prev) => {
+      const next = prev.map((w) =>
+        w.id === id
+          ? {
+              ...w,
+              ...(updates.name !== undefined ? { name: updates.name.slice(0, 100) } : {}),
+              ...(updates.description !== undefined ? { description: updates.description.slice(0, 200) } : {}),
+              ...(updates.cronMatch !== undefined ? { cronMatch: updates.cronMatch.slice(0, 100) || undefined } : {}),
+            }
+          : w
+      );
+      saveCustomWorkflows(next);
+      return next;
+    });
+    // Update the sheet's displayed mission optimistically
+    setSelectedMission((prev) =>
+      prev && prev.id === id
+        ? { ...prev, ...updates }
+        : prev
+    );
+  }, []);
+
   const handleMissionClick = useCallback((mission: MissionCard) => {
     const wfDef = allWorkflows.find((w) => w.id === mission.id);
     const forSheet: MissionForSheet = {
