@@ -15,6 +15,7 @@ import {
   FolderOpen,
   Search,
   Zap,
+  Hammer,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import {
