@@ -48,13 +48,14 @@ src/
 | **Busca** | `/search` | — | Busca global |
 | **Notificações** | TopBar | — | Centro de notificações derivado do cache React Query. Deep-links para módulos de origem |
 
-### 🔧 Funcionais (placeholder ou parciais)
+| **Pipelines** | `/pipelines` | `pipelines` | Visão unificada de fluxos — derivado de cron + operations. Etapas, status, execução, painel de detalhe com histórico + "Executar Agora" |
+| **Configurações** | `/settings` | — | Leitura operacional — status global, domínios live/fallback, ping API, arquitetura de dados, diagnóstico SSE em tempo real |
+
+### 🔧 Funcionais (experimentais)
 
 | Módulo | Rota | Status |
 |--------|------|--------|
-| **Pipelines** | `/pipelines` | Placeholder — "Em desenvolvimento" |
 | **Office 3D** | `/office3d` | Visualização 3D (Three.js) — funcional mas experimental |
-| **Configurações** | `/settings` | Placeholder — "Em desenvolvimento" |
 
 ---
 
@@ -66,12 +67,28 @@ src/
 | `OrionDataWrapper` | ✅ | Loading/error/empty states padronizados |
 | `DomainHealthStore` | ✅ | Saúde por domínio (live/stale/loading/offline) |
 | `useOrionStream` (SSE) | ✅ | Stream real-time para cache React Query |
+| `sseDiagnostics` | ✅ | Store de diagnóstico SSE — status, reconexões, log de eventos |
 | `createRealFirstFetcher` | ✅ | Padrão real-first + fallback |
 | `PageTransition` | ✅ | Transições animadas entre rotas |
 | Skeletons por domínio | ✅ | Loading states específicos |
-| Sheets de detalhe | ✅ | Painéis laterais para agents, operations, sessions, cron, files, memory, activity, workflows |
+| Sheets de detalhe | ✅ | Painéis laterais para agents, operations, sessions, cron, files, memory, activity, workflows, pipelines |
 | Dashboard clicável | ✅ | Métricas e cards com deep-links internos |
 | Notificações funcionais | ✅ | Derivadas do cache, com badge e navegação |
+
+---
+
+## Domínios de Builders
+
+O módulo Builders distingue explicitamente três domínios operacionais:
+
+| Domínio | Descrição | Fonte |
+|---------|-----------|-------|
+| **OpenClaw** | Orquestração — agentes do ecossistema | `/api/agents` |
+| **Claude Code** | Ambientes Anthropic — sessões de desenvolvimento | `/api/sessions` |
+| **AIOX** | Squads do filesystem — automações operacionais | `/api/builders/aiox-squads` |
+
+Cada domínio exibe tarefa atual, contexto operacional, modelo/sessão, e consumo de tokens (gráfico stacked bar 24h).  
+Squads AIOX são segregados em **Operação** vs **Importados/Histórico**.
 
 ---
 
@@ -79,24 +96,25 @@ src/
 
 | Endpoint | Consumido por |
 |----------|---------------|
-| `/api/agents` | Agents, Builders, Home |
-| `/api/sessions` | Sessions, Builders, Timeline |
-| `/api/cron` | Cron, Missions, Timeline, Reminders |
+| `/api/agents` | Agents, Builders (OpenClaw), Home |
+| `/api/sessions` | Sessions, Builders (Claude Code), Timeline |
+| `/api/cron` | Cron, Missions, Pipelines, Timeline, Reminders |
+| `/api/cron/run` | Pipelines (execução manual), Missions |
+| `/api/cron/runs/:id` | Pipelines (histórico de execuções) |
 | `/api/alerts` | Alerts, Timeline, Reminders, Notificações |
-| `/api/operations` | Operations, Timeline, Reminders |
+| `/api/operations` | Operations, Pipelines, Timeline, Reminders |
 | `/api/activity` | Activity, Reminders |
-| `/api/system` | System, Home |
+| `/api/system/stats` | System, Home, Settings (ping) |
 | `/api/memory` | Memory |
 | `/api/files` | Files |
 | `/api/builders/aiox-squads` | Builders (AIOX) |
 | `/api/home` | Home (agregado) |
+| `/api/stream` | SSE real-time (todos os domínios) |
 
 ---
 
 ## Lacunas Reais / Próximo Ciclo
 
-- [ ] **Pipelines** — módulo completo (ainda placeholder)
-- [ ] **Configurações** — módulo completo (ainda placeholder)
 - [ ] **Office 3D** — refinar para uso operacional real
 - [ ] **Persistência de notificações** — marcar como lida (hoje é derivado em memória)
 - [ ] **Filtros avançados** — em lembretes, timeline e atividade
