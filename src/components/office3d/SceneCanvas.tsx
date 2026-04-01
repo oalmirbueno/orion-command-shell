@@ -1,8 +1,7 @@
 /**
- * Office 3D — Main Scene (premium command center)
- * Enhanced lighting, environment, and integration with operations data.
+ * Office 3D — Main Scene
+ * Premium command center with rich lighting and environment.
  */
-
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import { useMemo } from "react";
@@ -19,34 +18,24 @@ import { getMeetingPositions } from "./MeetingRoom";
 
 /* ── Overlay states ── */
 export function SceneOverlay({ state, error, onRetry }: {
-  state: "loading" | "error" | "empty";
-  error?: string | null;
-  onRetry?: () => void;
+  state: "loading" | "error" | "empty"; error?: string | null; onRetry?: () => void;
 }) {
   return (
-    <div className="w-full h-full flex items-center justify-center bg-[#08081a]">
+    <div className="w-full h-full flex items-center justify-center bg-[#0c0c24]">
       <div className="text-center space-y-3">
         {state === "loading" && (
-          <>
-            <Loader2 className="h-6 w-6 text-primary/40 animate-spin mx-auto" />
-            <p className="text-xs font-mono text-muted-foreground/40">Inicializando escritório…</p>
-          </>
+          <><Loader2 className="h-6 w-6 text-primary/40 animate-spin mx-auto" />
+          <p className="text-xs font-mono text-muted-foreground/40">Inicializando escritório…</p></>
         )}
         {state === "error" && (
-          <>
-            <AlertTriangle className="h-6 w-6 text-status-error/60 mx-auto" />
-            <p className="text-xs font-mono text-muted-foreground/60">Falha ao carregar dados</p>
-            {error && <p className="text-[10px] text-muted-foreground/40 max-w-xs">{error}</p>}
-            {onRetry && (
-              <button onClick={onRetry} className="text-xs text-primary hover:text-primary/80 transition-colors">Tentar novamente</button>
-            )}
-          </>
+          <><AlertTriangle className="h-6 w-6 text-status-error/60 mx-auto" />
+          <p className="text-xs font-mono text-muted-foreground/60">Falha ao carregar dados</p>
+          {error && <p className="text-[10px] text-muted-foreground/40 max-w-xs">{error}</p>}
+          {onRetry && <button onClick={onRetry} className="text-xs text-primary hover:text-primary/80 transition-colors">Tentar novamente</button>}</>
         )}
         {state === "empty" && (
-          <>
-            <WifiOff className="h-6 w-6 text-muted-foreground/30 mx-auto" />
-            <p className="text-xs font-mono text-muted-foreground/40">Nenhum agente disponível</p>
-          </>
+          <><WifiOff className="h-6 w-6 text-muted-foreground/30 mx-auto" />
+          <p className="text-xs font-mono text-muted-foreground/40">Nenhum agente disponível</p></>
         )}
       </div>
     </div>
@@ -55,27 +44,21 @@ export function SceneOverlay({ state, error, onRetry }: {
 
 /* ── Main Canvas ── */
 export function SceneCanvas({
-  onAgentClick,
-  onAgentHover,
-  meetingAgentIds,
+  onAgentClick, onAgentHover, meetingAgentIds,
 }: {
   onAgentClick?: (agent: AgentView) => void;
   onAgentHover?: (agent: AgentView | null, screenPos?: { x: number; y: number }) => void;
   meetingAgentIds?: string[];
 }) {
   const { data: agents, state, error, refetch } = useOrionData<AgentView[]>({
-    key: "agents-page",
-    fetcher: fetchAgents,
-    refreshInterval: 30_000,
+    key: "agents-page", fetcher: fetchAgents, refreshInterval: 30_000,
   });
 
   const agentList = agents || [];
   const deskMap = useMemo(() => assignDesks(agentList), [agentList]);
-
   const meetingIds = new Set(meetingAgentIds || []);
   const meetingPositions = useMemo(() => getMeetingPositions(meetingIds.size), [meetingIds.size]);
 
-  // Connection pairs: orchestrator → others
   const connectionPairs = useMemo(() => {
     const pairs: { from: [number, number, number]; to: [number, number, number]; color: string; active: boolean }[] = [];
     const orchs = agentList.filter(a => a.tier === "orchestrator");
@@ -86,12 +69,8 @@ export function SceneCanvas({
         if (other.tier === "orchestrator") return;
         const otherDesk = deskMap.get(other.id);
         if (!otherDesk) return;
-        pairs.push({
-          from: orchDesk.position,
-          to: otherDesk.position,
-          color: TIER_COLORS[orch.tier],
-          active: other.status === "active" && other.sessions > 0,
-        });
+        pairs.push({ from: orchDesk.position, to: otherDesk.position, color: TIER_COLORS[orch.tier],
+          active: other.status === "active" && other.sessions > 0 });
       });
     });
     return pairs;
@@ -106,93 +85,73 @@ export function SceneCanvas({
   return (
     <Canvas
       shadows
-      camera={{ position: [0, 9, 11], fov: 45 }}
+      camera={{ position: [0, 8.5, 12], fov: 42 }}
       style={{ background: "transparent" }}
-      gl={{ antialias: true, alpha: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.2 }}
-      onCreated={({ gl }) => {
-        gl.shadowMap.enabled = true;
-        gl.shadowMap.type = THREE.PCFSoftShadowMap;
-      }}
+      gl={{ antialias: true, alpha: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.4 }}
+      onCreated={({ gl }) => { gl.shadowMap.enabled = true; gl.shadowMap.type = THREE.PCFSoftShadowMap; }}
     >
-      {/* Background gradient feel */}
-      <color attach="background" args={["#0a0a20"]} />
-      <fog attach="fog" args={["#0a0a20", 16, 35]} />
+      {/* Brighter background — deep navy, not black */}
+      <color attach="background" args={["#0e0e28"]} />
+      <fog attach="fog" args={["#0e0e28", 18, 40]} />
 
-      {/* ── Premium Lighting Setup ── */}
-      {/* Ambient fill - warmer, brighter */}
-      <ambientLight intensity={0.35} color="#b0b0d0" />
+      {/* ════ LIGHTING ════ */}
+      {/* Hemisphere: sky blue above, warm below — lifts everything */}
+      <hemisphereLight args={["#4040a0", "#1a1a40", 0.5]} />
 
-      {/* Key light - main directional */}
-      <directionalLight
-        position={[8, 12, 6]}
-        intensity={0.5}
-        castShadow
-        shadow-mapSize={2048}
-        shadow-bias={-0.001}
-        color="#c4c4ff"
-      />
+      {/* Strong ambient — prevents black shadows */}
+      <ambientLight intensity={0.45} color="#c0c0e0" />
 
-      {/* Fill light from opposite side */}
-      <directionalLight position={[-6, 8, -4]} intensity={0.2} color="#a0a0ff" />
+      {/* Key light (warm-white, strong) */}
+      <directionalLight position={[8, 14, 8]} intensity={0.6} castShadow
+        shadow-mapSize={2048} shadow-bias={-0.0005} color="#d4d4ff" />
 
-      {/* Command center accent */}
-      <pointLight position={[0, 5, -1]} intensity={0.4} color="#a78bfa" distance={10} decay={2} />
+      {/* Fill from left */}
+      <directionalLight position={[-8, 10, -4]} intensity={0.25} color="#b0b0e0" />
 
-      {/* Operations area fill */}
-      <pointLight position={[0, 4, 2.5]} intensity={0.3} color="#60a5fa" distance={12} decay={2} />
+      {/* Top-down soft fill */}
+      <directionalLight position={[0, 15, 0]} intensity={0.2} color="#a0a0d0" />
 
-      {/* Meeting room warm light */}
-      <pointLight position={[0, 3, -4.5]} intensity={0.3} color="#fbbf24" distance={6} decay={2} />
+      {/* Command center purple accent */}
+      <pointLight position={[0, 5, -1.5]} intensity={0.5} color="#a78bfa" distance={12} decay={2} />
 
-      {/* Support area accent lights */}
-      <pointLight position={[5.5, 3, 1]} intensity={0.2} color="#6ee7b7" distance={5} decay={2} />
-      <pointLight position={[-5.5, 3, 1]} intensity={0.2} color="#6ee7b7" distance={5} decay={2} />
+      {/* Operations blue wash */}
+      <pointLight position={[-2, 4, 2.5]} intensity={0.35} color="#60a5fa" distance={14} decay={2} />
+      <pointLight position={[2, 4, 2.5]} intensity={0.35} color="#60a5fa" distance={14} decay={2} />
 
-      {/* Rim/back light for depth */}
-      <pointLight position={[0, 6, -8]} intensity={0.15} color="#8080ff" distance={15} decay={2} />
+      {/* Meeting warm glow */}
+      <pointLight position={[0, 3.5, -4.5]} intensity={0.4} color="#fbbf24" distance={7} decay={2} />
 
-      {/* ── Office Environment ── */}
+      {/* Support green accents */}
+      <pointLight position={[5.5, 3.5, 1.5]} intensity={0.25} color="#6ee7b7" distance={6} decay={2} />
+      <pointLight position={[-5.5, 3.5, 1.5]} intensity={0.25} color="#6ee7b7" distance={6} decay={2} />
+
+      {/* Rim lights for depth */}
+      <pointLight position={[7, 5, -3]} intensity={0.15} color="#6060c0" distance={15} decay={2} />
+      <pointLight position={[-7, 5, 5]} intensity={0.15} color="#6060c0" distance={15} decay={2} />
+
+      {/* ════ ENVIRONMENT ════ */}
       <OfficeFloor />
 
-      {/* ── Agents ── */}
+      {/* ════ AGENTS ════ */}
       {agentList.map(agent => {
         const desk = deskMap.get(agent.id);
         if (!desk) return null;
         const inMeeting = meetingIds.has(agent.id);
         let mPos: [number, number, number] | undefined;
-        if (inMeeting) {
-          mPos = meetingPositions[meetingIdx];
-          meetingIdx++;
-        }
-        return (
-          <AgentDesk
-            key={agent.id}
-            agent={agent}
-            desk={desk}
-            inMeeting={inMeeting}
-            meetingPos={mPos}
-            onClick={onAgentClick}
-            onHover={onAgentHover}
-          />
-        );
+        if (inMeeting) { mPos = meetingPositions[meetingIdx]; meetingIdx++; }
+        return <AgentDesk key={agent.id} agent={agent} desk={desk} inMeeting={inMeeting}
+          meetingPos={mPos} onClick={onAgentClick} onHover={onAgentHover} />;
       })}
 
-      {/* ── Connection Lines ── */}
+      {/* ════ FLOW CONNECTIONS ════ */}
       {connectionPairs.map((cp, i) => (
-        <FlowConnection key={i} from={cp.from} to={cp.to} color={cp.color} active={cp.active} particleCount={cp.active ? 2 : 0} />
+        <FlowConnection key={i} from={cp.from} to={cp.to} color={cp.color}
+          active={cp.active} particleCount={cp.active ? 2 : 0} />
       ))}
 
-      {/* ── Camera Controls ── */}
-      <OrbitControls
-        enableDamping
-        dampingFactor={0.05}
-        minDistance={5}
-        maxDistance={22}
-        maxPolarAngle={Math.PI / 2.15}
-        autoRotate
-        autoRotateSpeed={0.12}
-        target={[0, 0.5, 1]}
-      />
+      {/* ════ CAMERA ════ */}
+      <OrbitControls enableDamping dampingFactor={0.05} minDistance={5} maxDistance={24}
+        maxPolarAngle={Math.PI / 2.15} autoRotate autoRotateSpeed={0.1} target={[0, 0.5, 0.5]} />
     </Canvas>
   );
 }
