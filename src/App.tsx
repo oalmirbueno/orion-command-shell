@@ -66,6 +66,7 @@ function AppShell() {
           <Routes>
             {/* Public */}
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
 
             {/* Protected with Error Boundaries */}
             <Route path="/" element={<EB title="Dashboard"><Index /></EB>} />
