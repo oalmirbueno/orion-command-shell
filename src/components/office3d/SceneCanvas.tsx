@@ -112,44 +112,31 @@ export function SceneCanvas({
       gl={{ antialias: true, alpha: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.4 }}
       onCreated={({ gl }) => { gl.shadowMap.enabled = true; gl.shadowMap.type = THREE.PCFSoftShadowMap; }}
     >
-      {/* Brighter background — deep navy, not black */}
-      <color attach="background" args={["#0e0e28"]} />
-      <fog attach="fog" args={["#0e0e28", 18, 40]} />
+      {/* Lighter background — sophisticated navy */}
+      <color attach="background" args={["#141430"]} />
+      <fog attach="fog" args={["#141430", 20, 45]} />
 
-      {/* ════ LIGHTING ════ */}
-      {/* Hemisphere: sky blue above, warm below — lifts everything */}
-      <hemisphereLight args={["#4040a0", "#1a1a40", 0.5]} />
+      {/* ════ LIGHTING — brighter, warmer, more balanced ════ */}
+      <hemisphereLight args={["#6060b0", "#2a2a50", 0.6]} />
+      <ambientLight intensity={0.55} color="#d0d0e8" />
 
-      {/* Strong ambient — prevents black shadows */}
-      <ambientLight intensity={0.45} color="#c0c0e0" />
-
-      {/* Key light (warm-white, strong) */}
-      <directionalLight position={[8, 14, 8]} intensity={0.6} castShadow
-        shadow-mapSize={2048} shadow-bias={-0.0005} color="#d4d4ff" />
+      {/* Key light — warm white */}
+      <directionalLight position={[8, 14, 8]} intensity={0.7} castShadow
+        shadow-mapSize={2048} shadow-bias={-0.0005} color="#e0e0ff" />
 
       {/* Fill from left */}
-      <directionalLight position={[-8, 10, -4]} intensity={0.25} color="#b0b0e0" />
+      <directionalLight position={[-8, 10, -4]} intensity={0.3} color="#c0c0e0" />
 
-      {/* Top-down soft fill */}
-      <directionalLight position={[0, 15, 0]} intensity={0.2} color="#a0a0d0" />
+      {/* Top-down fill */}
+      <directionalLight position={[0, 15, 0]} intensity={0.25} color="#b8b8d8" />
 
-      {/* Command center purple accent */}
-      <pointLight position={[0, 5, -1.5]} intensity={0.5} color="#a78bfa" distance={12} decay={2} />
-
-      {/* Operations blue wash */}
-      <pointLight position={[-2, 4, 2.5]} intensity={0.35} color="#60a5fa" distance={14} decay={2} />
-      <pointLight position={[2, 4, 2.5]} intensity={0.35} color="#60a5fa" distance={14} decay={2} />
-
-      {/* Meeting warm glow */}
-      <pointLight position={[0, 3.5, -4.5]} intensity={0.4} color="#fbbf24" distance={7} decay={2} />
-
-      {/* Support green accents */}
-      <pointLight position={[5.5, 3.5, 1.5]} intensity={0.25} color="#6ee7b7" distance={6} decay={2} />
-      <pointLight position={[-5.5, 3.5, 1.5]} intensity={0.25} color="#6ee7b7" distance={6} decay={2} />
-
-      {/* Rim lights for depth */}
-      <pointLight position={[7, 5, -3]} intensity={0.15} color="#6060c0" distance={15} decay={2} />
-      <pointLight position={[-7, 5, 5]} intensity={0.15} color="#6060c0" distance={15} decay={2} />
+      {/* Sector accents — reduced intensity */}
+      <pointLight position={[0, 4, -1.5]} intensity={0.3} color="#a78bfa" distance={10} decay={2} />
+      <pointLight position={[-2, 3.5, 2.5]} intensity={0.2} color="#60a5fa" distance={12} decay={2} />
+      <pointLight position={[2, 3.5, 2.5]} intensity={0.2} color="#60a5fa" distance={12} decay={2} />
+      <pointLight position={[0, 3, -4.5]} intensity={0.25} color="#fbbf24" distance={6} decay={2} />
+      <pointLight position={[5.5, 3, 1.5]} intensity={0.15} color="#6ee7b7" distance={5} decay={2} />
+      <pointLight position={[-5.5, 3, 1.5]} intensity={0.15} color="#6ee7b7" distance={5} decay={2} />
 
       {/* ════ ENVIRONMENT ════ */}
       <OfficeFloor />
