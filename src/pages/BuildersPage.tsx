@@ -1,0 +1,397 @@
+import React, { useMemo, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { OrionLayout } from "@/components/OrionLayout";
+import { OrionBreadcrumb } from "@/components/orion";
+import {
+  Hammer,
+  RefreshCw,
+  Cpu,
+  Activity,
+  Clock,
+  Inbox,
+  AlertCircle,
+  Bot,
+  Zap,
+  Terminal,
+  Layers,
+  MonitorSmartphone,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { API_BASE_URL } from "@/domains/api";
+
+/* ── Types ── */
+interface RealAgent {
+  id: string;
+  name: string;
+  emoji?: string;
+  color?: string;
+  model?: string;
+  workspace?: string;
+  status?: string;
+  lastActivity?: string;
+  activeSessions?: number;
+}
+
+interface RealSession {
+  id: string;
+  key: string;
+  type: string;
+  typeLabel?: string;
+  typeEmoji?: string;
+  updatedAt: string | number;
+  ageMs: number;
+  model: string;
+  inputTokens: number;
+  outputTokens: number;
+  totalTokens: number;
+  preview?: string;
+  previewType?: string;
+  aborted: boolean;
+}
+
+/* ── Builder classification ── */
+type BuilderCategory = "claude-code" | "aiox" | "other";
+
+const BUILDER_KEYWORDS: Record<BuilderCategory, string[]> = {
+  "claude-code": ["claude", "anthropic", "claude-code", "sonnet", "opus", "haiku"],
+  aiox: ["aiox", "aio", "openai", "gpt"],
+  other: [],
+};
+
+function classifyBuilder(agent: RealAgent): BuilderCategory {
+  const haystack = `${agent.name} ${agent.model || ""} ${agent.id}`.toLowerCase();
+  for (const [cat, keywords] of Object.entries(BUILDER_KEYWORDS) as [BuilderCategory, string[]][]) {
+    if (cat === "other") continue;
+    if (keywords.some((k) => haystack.includes(k))) return cat;
+  }
+  return "other";
+}
+
+const CATEGORY_META: Record<BuilderCategory, { label: string; icon: React.ElementType; accent: string }> = {
+  "claude-code": { label: "Claude Code", icon: Terminal, accent: "text-primary" },
+  aiox: { label: "AIOX", icon: Zap, accent: "text-amber-400" },
+  other: { label: "Outros Builders", icon: Bot, accent: "text-muted-foreground" },
+};
+
+/* ── Fetchers ── */
+async function fetchAgents(): Promise<RealAgent[]> {
+  const res = await fetch(`${API_BASE_URL}/agents`, {
+    headers: { Accept: "application/json" },
+    signal: AbortSignal.timeout(12_000),
+  });
+  if (!res.ok) throw new Error(`agents ${res.status}`);
+  const data = await res.json();
+  if (Array.isArray(data)) return data;
+  if (data?.agents) return data.agents;
+  return [];
+}
+
+async function fetchSessions(): Promise<RealSession[]> {
+  const res = await fetch(`${API_BASE_URL}/sessions`, {
+    headers: { Accept: "application/json" },
+    signal: AbortSignal.timeout(12_000),
+  });
+  if (!res.ok) throw new Error(`sessions ${res.status}`);
+  const data = await res.json();
+  if (Array.isArray(data)) return data;
+  if (data?.sessions) return data.sessions;
+  return [];
+}
+
+/* ── Helpers ── */
+function timeAgo(iso?: string | number): string {
+  if (!iso) return "—";
+  const d = typeof iso === "number" ? new Date(iso) : new Date(iso);
+  const mins = Math.round((Date.now() - d.getTime()) / 60_000);
+  if (mins < 1) return "agora";
+  if (mins < 60) return `${mins}min atrás`;
+  const hrs = Math.round(mins / 60);
+  if (hrs < 24) return `${hrs}h atrás`;
+  return `${Math.round(hrs / 24)}d atrás`;
+}
+
+function formatTokens(n: number): string {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}k`;
+  return String(n);
+}
+
+/* ── Derived builder view ── */
+interface BuilderView {
+  id: string;
+  name: string;
+  model: string;
+  status: string;
+  category: BuilderCategory;
+  activeSessions: number;
+  lastActivity: string;
+  lastActivityRaw: string;
+  sessions: RealSession[];
+  totalTokens: number;
+  emoji?: string;
+}
+
+/* ── Component ── */
+export default function BuildersPage() {
+  const qc = useQueryClient();
+  const [expandedBuilder, setExpandedBuilder] = useState<string | null>(null);
+
+  const agentsQ = useQuery({
+    queryKey: ["builders-agents"],
+    queryFn: fetchAgents,
+    staleTime: 30_000,
+    refetchInterval: 60_000,
+    placeholderData: (prev) => prev,
+  });
+
+  const sessionsQ = useQuery({
+    queryKey: ["builders-sessions"],
+    queryFn: fetchSessions,
+    staleTime: 30_000,
+    refetchInterval: 60_000,
+    placeholderData: (prev) => prev,
+  });
+
+  const isLoading = agentsQ.isLoading || sessionsQ.isLoading;
+  const isError = agentsQ.isError && sessionsQ.isError;
+
+  const builders = useMemo<BuilderView[]>(() => {
+    const agents = agentsQ.data ?? [];
+    const sessions = sessionsQ.data ?? [];
+    return agents.map((a) => {
+      const cat = classifyBuilder(a);
+      const agentSessions = sessions.filter(
+        (s) => s.model?.toLowerCase().includes(a.model?.split("/")[0]?.toLowerCase() || "___") ||
+               s.key?.toLowerCase().includes(a.name?.toLowerCase() || "___")
+      );
+      return {
+        id: a.id,
+        name: a.name,
+        model: a.model || "—",
+        status: a.status || "unknown",
+        category: cat,
+        activeSessions: a.activeSessions ?? agentSessions.filter((s) => !s.aborted && s.ageMs < 300_000).length,
+        lastActivity: timeAgo(a.lastActivity),
+        lastActivityRaw: a.lastActivity || "",
+        sessions: agentSessions,
+        totalTokens: agentSessions.reduce((sum, s) => sum + (s.totalTokens || 0), 0),
+        emoji: a.emoji,
+      };
+    });
+  }, [agentsQ.data, sessionsQ.data]);
+
+  const grouped = useMemo(() => {
+    const map: Record<BuilderCategory, BuilderView[]> = { "claude-code": [], aiox: [], other: [] };
+    builders.forEach((b) => map[b.category].push(b));
+    return map;
+  }, [builders]);
+
+  const stats = useMemo(() => ({
+    total: builders.length,
+    online: builders.filter((b) => b.status === "online").length,
+    activeSessions: builders.reduce((s, b) => s + b.activeSessions, 0),
+    totalTokens: builders.reduce((s, b) => s + b.totalTokens, 0),
+  }), [builders]);
+
+  const handleRefresh = () => {
+    qc.invalidateQueries({ queryKey: ["builders-agents"] });
+    qc.invalidateQueries({ queryKey: ["builders-sessions"] });
+  };
+
+  return (
+    <OrionLayout>
+      <div className="p-6 space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <OrionBreadcrumb items={[{ label: "Builders" }]} />
+            <h1 className="text-2xl font-bold text-foreground mt-1 flex items-center gap-2">
+              <Hammer className="h-6 w-6 text-primary" />
+              Central de Builders
+            </h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              Agentes de construção e execução do ecossistema. Mostra quem está ativo, modelos em uso e sessões de build.
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleRefresh}
+            disabled={isLoading}
+            className="border-border text-muted-foreground hover:text-foreground"
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? "animate-spin" : ""}`} />
+            Atualizar
+          </Button>
+        </div>
+
+        {/* Summary cards */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {[
+            { label: "Total Builders", value: stats.total, icon: Layers, color: "text-primary" },
+            { label: "Online", value: stats.online, icon: Activity, color: "text-emerald-400" },
+            { label: "Sessões Ativas", value: stats.activeSessions, icon: MonitorSmartphone, color: "text-amber-400" },
+            { label: "Tokens Hoje", value: formatTokens(stats.totalTokens), icon: Cpu, color: "text-primary" },
+          ].map((m) => (
+            <div
+              key={m.label}
+              className="rounded-lg border border-border bg-card p-4 flex items-center gap-3"
+            >
+              <div className="w-9 h-9 rounded-md bg-muted/50 flex items-center justify-center">
+                <m.icon className={`h-4 w-4 ${m.color}`} />
+              </div>
+              <div>
+                <div className="text-xs text-muted-foreground font-mono uppercase tracking-wider">{m.label}</div>
+                <div className="text-lg font-bold text-foreground">{isLoading ? "—" : m.value}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Loading */}
+        {isLoading && !builders.length && (
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} className="h-32 w-full rounded-lg" />
+            ))}
+          </div>
+        )}
+
+        {/* Error */}
+        {isError && !builders.length && (
+          <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-8 text-center space-y-3">
+            <AlertCircle className="h-8 w-8 text-destructive mx-auto" />
+            <p className="text-sm text-destructive">Falha ao carregar dados de builders</p>
+            <Button variant="outline" size="sm" onClick={handleRefresh}>Tentar novamente</Button>
+          </div>
+        )}
+
+        {/* Empty */}
+        {!isLoading && !isError && builders.length === 0 && (
+          <div className="rounded-lg border border-border bg-card p-12 text-center space-y-3">
+            <Inbox className="h-10 w-10 text-muted-foreground/40 mx-auto" />
+            <p className="text-sm text-muted-foreground">Nenhum builder encontrado</p>
+            <p className="text-xs text-muted-foreground/60">Aguardando dados de /api/agents</p>
+          </div>
+        )}
+
+        {/* Grouped builder sections */}
+        {!isLoading &&
+          (["claude-code", "aiox", "other"] as BuilderCategory[]).map((cat) => {
+            const items = grouped[cat];
+            if (!items.length) return null;
+            const meta = CATEGORY_META[cat];
+            return (
+              <section key={cat} className="space-y-3">
+                <div className="flex items-center gap-2 border-b border-border pb-2">
+                  <meta.icon className={`h-4 w-4 ${meta.accent}`} />
+                  <h2 className="text-sm font-bold uppercase tracking-wider text-foreground">
+                    {meta.label}
+                  </h2>
+                  <span className="text-xs font-mono text-muted-foreground/50 ml-1">
+                    ({items.length})
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+                  {items.map((b) => {
+                    const isExpanded = expandedBuilder === b.id;
+                    const isOnline = b.status === "online";
+                    return (
+                      <div
+                        key={b.id}
+                        onClick={() => setExpandedBuilder(isExpanded ? null : b.id)}
+                        className="rounded-lg border border-border bg-card hover:border-primary/30 transition-colors cursor-pointer"
+                      >
+                        {/* Card header */}
+                        <div className="p-4 space-y-3">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              {b.emoji ? (
+                                <span className="text-lg">{b.emoji}</span>
+                              ) : (
+                                <Bot className={`h-5 w-5 ${meta.accent}`} />
+                              )}
+                              <span className="font-semibold text-sm text-foreground truncate max-w-[180px]">
+                                {b.name}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                              <div
+                                className={`w-2 h-2 rounded-full ${
+                                  isOnline ? "bg-emerald-400 animate-pulse" : "bg-muted-foreground/30"
+                                }`}
+                              />
+                              <span className={`text-xs font-mono ${isOnline ? "text-emerald-400" : "text-muted-foreground/50"}`}>
+                                {isOnline ? "online" : b.status || "—"}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Metrics row */}
+                          <div className="grid grid-cols-3 gap-2 text-xs">
+                            <div className="space-y-0.5">
+                              <div className="text-muted-foreground/50 font-mono uppercase text-[10px]">Modelo</div>
+                              <div className="text-foreground/80 font-medium truncate">{b.model}</div>
+                            </div>
+                            <div className="space-y-0.5">
+                              <div className="text-muted-foreground/50 font-mono uppercase text-[10px]">Sessões</div>
+                              <div className="text-foreground/80 font-medium">{b.activeSessions}</div>
+                            </div>
+                            <div className="space-y-0.5">
+                              <div className="text-muted-foreground/50 font-mono uppercase text-[10px]">Última Ativ.</div>
+                              <div className="text-foreground/80 font-medium">{b.lastActivity}</div>
+                            </div>
+                          </div>
+
+                          {/* Tokens bar */}
+                          {b.totalTokens > 0 && (
+                            <div className="flex items-center gap-2 text-[10px] text-muted-foreground/50 font-mono">
+                              <Cpu className="h-3 w-3" />
+                              <span>{formatTokens(b.totalTokens)} tokens</span>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Expanded: recent sessions */}
+                        {isExpanded && (
+                          <div className="border-t border-border p-3 space-y-2 bg-muted/10">
+                            <div className="text-[10px] uppercase tracking-wider text-muted-foreground/50 font-mono">
+                              Sessões recentes
+                            </div>
+                            {b.sessions.length === 0 ? (
+                              <p className="text-xs text-muted-foreground/40 italic">Nenhuma sessão vinculada</p>
+                            ) : (
+                              b.sessions.slice(0, 5).map((s) => (
+                                <div
+                                  key={s.id}
+                                  className="flex items-center justify-between text-xs rounded-md bg-card border border-border px-3 py-2"
+                                >
+                                  <div className="flex items-center gap-2 truncate">
+                                    <span>{s.typeEmoji || "💬"}</span>
+                                    <span className="text-foreground/80 truncate max-w-[160px]">{s.key}</span>
+                                  </div>
+                                  <div className="flex items-center gap-3 text-muted-foreground/60 font-mono">
+                                    <span>{formatTokens(s.totalTokens)} tk</span>
+                                    <span>{timeAgo(s.updatedAt)}</span>
+                                    {s.aborted && (
+                                      <span className="text-destructive text-[10px]">abortada</span>
+                                    )}
+                                  </div>
+                                </div>
+                              ))
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </section>
+            );
+          })}
+      </div>
+    </OrionLayout>
+  );
+}
