@@ -80,18 +80,19 @@ class NotificationStore {
     this.emit();
 
     if (this._mode === "supabase" && supabase && this._userId) {
-      await supabase
-        .from("notifications")
-        .upsert({
-          id,
-          user_id: this._userId,
-          type: "info",
-          severity: "info",
-          title: "",
-          read: true,
-          updated_at: new Date().toISOString(),
-        }, { onConflict: "id" })
-        .catch(() => {});
+      try {
+        await supabase
+          .from("notifications")
+          .upsert({
+            id,
+            user_id: this._userId,
+            type: "info",
+            severity: "info",
+            title: "",
+            read: true,
+            updated_at: new Date().toISOString(),
+          }, { onConflict: "id" });
+      } catch { /* ignore */ }
     }
   }
 
