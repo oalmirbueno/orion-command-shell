@@ -123,6 +123,12 @@ const Office3DPage = () => {
               </div>
             </div>
             <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => setSquadsOpen(s => !s)}
+                className={`text-xs font-mono px-2.5 py-1 rounded bg-card border transition-colors flex items-center gap-1 ${squadsOpen ? "border-amber-400/40 text-amber-400" : "border-border/30 text-muted-foreground hover:text-amber-400 hover:border-amber-400/30"}`}
+              >
+                <Network className="h-3 w-3" /> Squads
+              </button>
               {!meetingActive && (
                 <button
                   onClick={() => setMeetingActive(true)}
