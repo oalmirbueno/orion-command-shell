@@ -40,6 +40,7 @@ const operationsItems = [
   { title: "Memória", url: "/memory", icon: Brain },
   { title: "Arquivos", url: "/files", icon: FolderOpen },
   { title: "Busca", url: "/search", icon: Search },
+  { title: "Skills", url: "/skills", icon: Zap },
 ];
 
 const systemItems = [
