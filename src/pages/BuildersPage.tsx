@@ -165,6 +165,8 @@ interface BuilderView {
   sessions: RealSession[];
   totalTokens: number;
   emoji?: string;
+  currentTask: string;
+  context: string;
 }
 
 /* ── Component ── */
