@@ -156,15 +156,21 @@ const SSE_STATUS_MAP: Record<string, { label: string; icon: React.ReactNode; cls
 };
 
 function SSEDiagnosticsSection() {
-  const [, setTick] = useState(0);
+  const snap = useSyncExternalStore(
+    sseDiagnostics.subscribe,
+    () => sseDiagnostics.getSnapshot()
+  );
 
-  useEffect(() => {
-    const unsub = sseDiagnostics.subscribe(() => setTick(t => t + 1));
-    return () => { unsub(); };
-  }, []);
+  const info = SSE_STATUS_MAP[snap.status] || SSE_STATUS_MAP.disconnected;
 
-  const { status, events, connectedAt, reconnects } = sseDiagnostics;
-  const info = SSE_STATUS_MAP[status] || SSE_STATUS_MAP.disconnected;
+  const formatUptime = (secs: number | null) => {
+    if (secs === null) return "—";
+    if (secs < 60) return `${secs}s`;
+    if (secs < 3600) return `${Math.floor(secs / 60)}min ${secs % 60}s`;
+    const h = Math.floor(secs / 3600);
+    const m = Math.floor((secs % 3600) / 60);
+    return `${h}h ${m}min`;
+  };
 
   return (
     <SectionCard title="Diagnóstico SSE (Real-time)" icon={Zap}>
@@ -175,26 +181,62 @@ function SSEDiagnosticsSection() {
           <span className={cn("text-sm font-semibold", info.cls)}>{info.label}</span>
         </div>
         <div className="flex items-center gap-4 text-[10px] text-muted-foreground font-mono">
-          {connectedAt && (
-            <span>Desde {connectedAt.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}</span>
+          {snap.connectedAt && (
+            <span>Desde {snap.connectedAt.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}</span>
           )}
-          <span>Reconexões: {reconnects}</span>
+          <span>Uptime: {formatUptime(snap.uptimeSeconds)}</span>
+          <span>Reconexões: {snap.reconnects}</span>
         </div>
       </div>
 
+      {/* Last error */}
+      {snap.lastError && (
+        <div className="flex items-center gap-2 py-2 px-3 rounded-lg bg-status-critical/5 border border-status-critical/10">
+          <AlertTriangle className="h-3.5 w-3.5 text-status-critical shrink-0" />
+          <div className="flex-1 min-w-0">
+            <p className="text-[11px] font-mono text-status-critical truncate">{snap.lastError}</p>
+            {snap.lastErrorAt && (
+              <p className="text-[9px] text-muted-foreground/40 font-mono">
+                {snap.lastErrorAt.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Reconnect history */}
+      {snap.reconnectHistory.length > 0 && (
+        <div className="pt-2">
+          <div className="flex items-center gap-1.5 mb-1.5">
+            <RefreshCw className="h-3 w-3 text-muted-foreground/50" />
+            <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
+              Histórico de reconexões ({snap.reconnectHistory.length})
+            </span>
+          </div>
+          <div className="max-h-24 overflow-y-auto space-y-0.5 scrollbar-thin">
+            {snap.reconnectHistory.slice(0, 5).map((r, i) => (
+              <div key={i} className="flex items-center justify-between py-1 px-2 text-[10px] font-mono text-muted-foreground/60">
+                <span>#{r.attempt} — {r.reason}</span>
+                <span>{r.timestamp.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Event log */}
-      <div>
+      <div className="pt-2">
         <div className="flex items-center gap-1.5 mb-2">
           <ArrowDown className="h-3 w-3 text-muted-foreground/50" />
           <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
-            Últimos eventos ({events.length})
+            Últimos eventos ({snap.eventCount})
           </span>
         </div>
-        {events.length === 0 ? (
+        {snap.events.length === 0 ? (
           <p className="text-xs text-muted-foreground/40 text-center py-6">Nenhum evento SSE recebido</p>
         ) : (
           <div className="max-h-64 overflow-y-auto space-y-0.5 scrollbar-thin">
-            {events.map((ev, i) => (
+            {snap.events.map((ev, i) => (
               <div key={i} className="flex items-center justify-between py-1.5 px-2 rounded hover:bg-muted/20 transition-colors">
                 <div className="flex items-center gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-status-online animate-pulse" />
