@@ -185,7 +185,7 @@ function CommandConsole() {
       {/* Console desk */}
       <mesh position={[0, 0.4, 0]} castShadow receiveShadow>
         <boxGeometry args={[3.5, 0.07, 0.85]} />
-        <meshPhysicalMaterial color="#484870" roughness={0.15} metalness={0.5}
+        <meshPhysicalMaterial color="#606090" roughness={0.15} metalness={0.5}
           clearcoat={0.3} clearcoatRoughness={0.25} />
       </mesh>
       {/* Front accent */}
