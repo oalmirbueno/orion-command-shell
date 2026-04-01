@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useState, useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { AdvancedFilters, type FilterState } from "@/components/filters/AdvancedFilters";
 import { OrionLayout } from "@/components/OrionLayout";
 import { OrionBreadcrumb } from "@/components/orion";
 import {
@@ -182,10 +183,19 @@ function AlertsSkeleton() {
   );
 }
 
-/* ── Page ── */
+const alertTypeOptions = [
+  { key: "all", label: "Todos" },
+  { key: "critical", label: "Crítico" },
+  { key: "warning", label: "Atenção" },
+];
+const alertStatusOptions = [
+  { key: "all", label: "Todos" },
+];
+
 const AlertsPage = () => {
   const queryClient = useQueryClient();
-  const [isRefreshing, setIsRefreshing] = React.useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [filters, setFilters] = useState<FilterState>({ type: "all", status: "all", dateFrom: undefined, dateTo: undefined });
 
   const { data, isLoading, isError, error, isFetching } = useQuery<AlertsResponse>({
     queryKey: ["alerts-page"],
@@ -193,6 +203,21 @@ const AlertsPage = () => {
     refetchInterval: 30_000,
     placeholderData: (prev) => prev,
   });
+
+  const filteredAlerts = useMemo(() => {
+    if (!data?.alerts) return [];
+    let items = data.alerts;
+    if (filters.type !== "all") items = items.filter(a => a.severity === filters.type);
+    if (filters.dateFrom) {
+      const from = filters.dateFrom.getTime();
+      items = items.filter(a => new Date(a.timestamp).getTime() >= from);
+    }
+    if (filters.dateTo) {
+      const to = filters.dateTo.getTime() + 86_400_000;
+      items = items.filter(a => new Date(a.timestamp).getTime() <= to);
+    }
+    return items;
+  }, [data?.alerts, filters]);
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -245,6 +270,15 @@ const AlertsPage = () => {
           <>
             <SummaryCards alerts={data.alerts} />
 
+            {/* Advanced Filters */}
+            <AdvancedFilters
+              types={alertTypeOptions}
+              statuses={alertStatusOptions}
+              value={filters}
+              onChange={setFilters}
+              resultCount={filteredAlerts.length}
+            />
+
             {/* List */}
             <div>
               <div className="flex items-center gap-3 mb-5">
@@ -252,10 +286,10 @@ const AlertsPage = () => {
                   Feed de Alertas
                 </h2>
                 <div className="flex-1 h-px bg-border/40" />
-                <span className="text-xs font-mono text-muted-foreground/40">{data.total} total</span>
+                <span className="text-xs font-mono text-muted-foreground/40">{filteredAlerts.length} de {data.total}</span>
               </div>
-              <div className="space-y-2.5 max-h-[calc(100vh-380px)] overflow-y-auto orion-thin-scroll pr-1">
-                {data.alerts.map((alert) => (
+              <div className="space-y-2.5 max-h-[calc(100vh-440px)] overflow-y-auto orion-thin-scroll pr-1">
+                {filteredAlerts.map((alert) => (
                   <AlertRow key={alert.id} alert={alert} />
                 ))}
               </div>
