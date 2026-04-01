@@ -186,7 +186,7 @@ export function PipelineDetailSheet({ pipeline, open, onOpenChange }: Props) {
       try {
         const ctrl = new AbortController();
         const timer = setTimeout(() => ctrl.abort(), 10000);
-        const res = await fetch(apiUrl(`/cron/runs?jobId=${pipeline.id}`), {
+        const res = await fetch(apiUrl(`/cron/runs/${pipeline.id}`), {
           signal: ctrl.signal,
           headers: { Accept: "application/json" },
         });
