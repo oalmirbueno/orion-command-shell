@@ -18,7 +18,9 @@ export function OrionTopBar({ title = "Comando" }: { title?: string }) {
   const navigate = useNavigate();
   const { user, configured, signOut } = useAuth();
   const { profile } = useProfile();
+  const { role } = useUserRole();
   const displayLabel = profile?.display_name || user?.email?.split("@")[0] || user?.email || "";
+  const roleBadge = ROLE_BADGES[role];
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
