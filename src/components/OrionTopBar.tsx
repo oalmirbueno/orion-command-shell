@@ -70,6 +70,7 @@ export function OrionTopBar({ title = "Comando" }: { title?: string }) {
               <button onClick={handleSignOut} className="flex items-center gap-1.5 px-2 py-1.5 rounded-md text-muted-foreground/50 hover:text-foreground hover:bg-accent/40 transition-colors">
                 <User className="h-3.5 w-3.5" />
                 <span className="text-[10px] font-mono hidden lg:inline max-w-[100px] truncate">{displayLabel}</span>
+                <span className={`text-[8px] font-mono px-1.5 py-0.5 rounded border hidden lg:inline ${roleBadge.cls}`}>{roleBadge.label}</span>
                 <LogOut className="h-3 w-3 ml-1" />
               </button>
             </TooltipTrigger>
