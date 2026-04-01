@@ -65,18 +65,11 @@ function useTileTexture() {
 function FloorPlane() {
   const tileMap = useTileTexture();
   return (
-    <group>
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.02, 1]} receiveShadow>
-        <planeGeometry args={[22, 20]} />
-        <meshStandardMaterial map={tileMap} roughness={0.5} metalness={0.15} />
-      </mesh>
-      {/* Subtle polished overlay */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.015, 1]} receiveShadow>
-        <planeGeometry args={[22, 20]} />
-        <meshPhysicalMaterial color="#505070" roughness={0.3} metalness={0.2}
-          clearcoat={0.12} clearcoatRoughness={0.5} transparent opacity={0.15} />
-      </mesh>
-    </group>
+    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.02, 1]} receiveShadow>
+      <planeGeometry args={[22, 20]} />
+      <meshPhysicalMaterial map={tileMap} roughness={0.4} metalness={0.18}
+        clearcoat={0.1} clearcoatRoughness={0.5} />
+    </mesh>
   );
 }
 
@@ -84,26 +77,26 @@ function FloorPlane() {
 function SectorFloor({ position, size, color, elevated = false }: {
   position: [number, number, number]; size: [number, number]; color: string; elevated?: boolean;
 }) {
-  const y = elevated ? 0.04 : 0.003;
-  return (
-    <group>
-      {elevated && (
-        <mesh position={[position[0], 0.02, position[2]]} castShadow receiveShadow>
-          <boxGeometry args={[size[0], 0.04, size[1]]} />
-          <meshStandardMaterial color="#454568" roughness={0.35} metalness={0.3} />
-        </mesh>
-      )}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[position[0], y, position[2]]}>
-        <planeGeometry args={size} />
-        <meshStandardMaterial color={color} transparent opacity={0.08} roughness={0.7} />
+  if (elevated) {
+    return (
+      <mesh position={[position[0], 0.02, position[2]]} castShadow receiveShadow>
+        <boxGeometry args={[size[0], 0.04, size[1]]} />
+        <meshStandardMaterial color="#454568" roughness={0.35} metalness={0.3} />
       </mesh>
-    </group>
+    );
+  }
+  // Non-elevated: use a thin box instead of a coplanar plane to avoid z-fighting
+  return (
+    <mesh position={[position[0], 0.005, position[2]]}>
+      <boxGeometry args={[size[0], 0.01, size[1]]} />
+      <meshStandardMaterial color={color} transparent opacity={0.12} roughness={0.7} />
+    </mesh>
   );
 }
 
 /* ── Sector border ── */
 function SectorBorder({ position, size, color }: { position: [number, number, number]; size: [number, number]; color: string }) {
-  const hw = size[0] / 2, hh = size[1] / 2, y = 0.006;
+  const hw = size[0] / 2, hh = size[1] / 2, y = 0.03;
   const corners = [[-hw, y, -hh], [hw, y, -hh], [hw, y, hh], [-hw, y, hh], [-hw, y, -hh]]
     .map(([x, cy, z]) => new THREE.Vector3(x + position[0], cy, z + position[2]));
   return (
@@ -286,9 +279,9 @@ function MeetingTable() {
           clearcoat={0.7} clearcoatRoughness={0.08} />
       </mesh>
       {/* Inlay ring */}
-      <mesh position={[0, 0.415, 0]} rotation={[Math.PI / 2, 0, 0]}>
+      <mesh position={[0, 0.42, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <ringGeometry args={[0.7, 0.73, 48]} />
-        <meshBasicMaterial color="#fbbf24" transparent opacity={0.1} side={THREE.DoubleSide} />
+        <meshBasicMaterial color="#fbbf24" transparent opacity={0.1} />
       </mesh>
       {/* Pedestal */}
       <mesh position={[0, 0.19, 0]}>
