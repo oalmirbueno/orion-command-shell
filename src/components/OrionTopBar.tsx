@@ -1,9 +1,8 @@
-import { useState } from "react";
-import { Bell, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { NotificationCenter } from "@/components/notifications/NotificationCenter";
 
 export function OrionTopBar({ title = "Comando" }: { title?: string }) {
   const navigate = useNavigate();
@@ -42,18 +41,7 @@ export function OrionTopBar({ title = "Comando" }: { title?: string }) {
           <Search className="h-4 w-4" /><span className="hidden md:inline">⌘K</span>
         </button>
 
-        <Popover>
-          <PopoverTrigger asChild>
-            <button className="p-2 rounded-md text-muted-foreground/50 hover:text-foreground hover:bg-accent/40 transition-colors relative">
-              <Bell className="h-4 w-4" />
-              <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 rounded-full bg-surface-2 border border-border text-[9px] font-mono text-muted-foreground/50 flex items-center justify-center px-1">0</span>
-            </button>
-          </PopoverTrigger>
-          <PopoverContent className="w-64 bg-card border-border p-4" align="end">
-            <p className="text-sm font-semibold text-foreground mb-2">Notificações</p>
-            <p className="text-xs text-muted-foreground/50">Em breve — notificações em tempo real aparecerão aqui</p>
-          </PopoverContent>
-        </Popover>
+        <NotificationCenter />
       </div>
     </header>
   );
