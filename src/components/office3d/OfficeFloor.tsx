@@ -141,7 +141,7 @@ function Pillar({ position, height = 3, radius = 0.07 }: {
     <group position={position}>
       <mesh position={[0, height / 2, 0]} castShadow>
         <cylinderGeometry args={[radius, radius, height, 16]} />
-        <meshStandardMaterial color="#5a5a78" roughness={0.2} metalness={0.6} />
+        <meshStandardMaterial color="#7878a0" roughness={0.2} metalness={0.6} />
       </mesh>
       <mesh position={[0, 0.012, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <circleGeometry args={[radius * 2.2, 16]} />
