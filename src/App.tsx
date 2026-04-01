@@ -29,6 +29,7 @@ import TimelinePage from "./pages/TimelinePage.tsx";
 import RemindersPage from "./pages/RemindersPage.tsx";
 import SettingsPage from "./pages/SettingsPage.tsx";
 import LoginPage from "./pages/LoginPage.tsx";
+import ResetPasswordPage from "./pages/ResetPasswordPage.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import { PageTransition } from "./components/PageTransition.tsx";
 
