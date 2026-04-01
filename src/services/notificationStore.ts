@@ -167,14 +167,7 @@ class NotificationStore {
     return notifications.filter(n => !this.state.readIds.has(n.id) && !this.state.dismissedIds.has(n.id)).length;
   }
 
-  getSnapshot() {
-    return {
-      mode: this._mode,
-      loaded: this._loaded,
-      readCount: this.state.readIds.size,
-      dismissedCount: this.state.dismissedIds.size,
-    };
-  }
+  getSnapshot = () => this._snapshot;
 }
 
 export const notificationStore = new NotificationStore();
