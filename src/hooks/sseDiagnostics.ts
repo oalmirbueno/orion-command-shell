@@ -44,7 +44,7 @@ class SSEDiagnosticStore {
     return Math.round((Date.now() - this._connectedAt.getTime()) / 1000);
   }
 
-  private emit() { for (const fn of this.listeners) fn(); }
+  private emit() { this._cachedSnapshot = null; for (const fn of this.listeners) fn(); }
 
   subscribe = (fn: () => void) => {
     this.listeners.add(fn);
