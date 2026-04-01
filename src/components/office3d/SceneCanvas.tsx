@@ -37,9 +37,10 @@ function computePositions(agents: AgentView[]): [number, number, number][] {
 
 /* ── Agent Node 3D ── */
 
-function AgentNode3D({ position, agent }: {
+function AgentNode3D({ position, agent, onClick }: {
   position: [number, number, number];
   agent: AgentView;
+  onClick?: (agent: AgentView) => void;
 }) {
   const color = TIER_COLORS[agent.tier] || TIER_COLORS.support;
   const scale = agent.tier === "orchestrator" ? 1.2 : agent.tier === "core" ? 0.9 : 0.7;
