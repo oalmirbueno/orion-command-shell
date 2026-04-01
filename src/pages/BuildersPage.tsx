@@ -71,10 +71,8 @@ function classifyBuilder(agent: RealAgent): BuilderCategory {
   return "other";
 }
 
-function isAioxSquad(skill: SkillItem): boolean {
-  const h = `${skill.name} ${skill.description || ""} ${skill.source || ""}`.toLowerCase();
-  return ["aiox", "aio", "squad", "openai", "gpt"].some((k) => h.includes(k));
-}
+
+
 
 const CATEGORY_META: Record<BuilderCategory, { label: string; icon: React.ElementType; accent: string }> = {
   "claude-code": { label: "Claude Code", icon: Terminal, accent: "text-primary" },
