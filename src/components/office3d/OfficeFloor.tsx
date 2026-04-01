@@ -279,7 +279,7 @@ function MeetingTable() {
           <group key={i} position={[Math.cos(angle) * 2, 0, Math.sin(angle) * 2]} rotation={[0, -angle + Math.PI, 0]}>
             <mesh position={[0, 0.28, 0]}>
               <cylinderGeometry args={[0.16, 0.16, 0.04, 12]} />
-              <meshStandardMaterial color="#484868" roughness={0.3} metalness={0.45} />
+              <meshStandardMaterial color="#606090" roughness={0.3} metalness={0.45} />
             </mesh>
             <mesh position={[0, 0.46, -0.12]}>
               <boxGeometry args={[0.26, 0.32, 0.03]} />
