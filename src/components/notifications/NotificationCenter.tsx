@@ -217,7 +217,7 @@ export function NotificationCenter() {
   const handleDismiss = (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
     notificationStore.dismiss(id);
-  };
+    logAction("notification.dismiss", "notifications", id);
 
   const handleClick = (notif: OperationalNotification) => {
     notificationStore.markRead(notif.id);
