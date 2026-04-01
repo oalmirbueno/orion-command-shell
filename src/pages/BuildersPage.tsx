@@ -4,8 +4,9 @@ import { OrionLayout } from "@/components/OrionLayout";
 import { OrionBreadcrumb } from "@/components/orion";
 import {
   Hammer, RefreshCw, Cpu, Activity, Clock, Inbox, AlertCircle, Bot,
-  Zap, Terminal, Layers, MonitorSmartphone, Package, FileText, ChevronDown, ChevronRight,
+  Zap, Terminal, Layers, MonitorSmartphone, Package, FileText, ChevronDown, ChevronRight, ExternalLink,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { API_BASE_URL } from "@/domains/api";
@@ -147,8 +148,10 @@ interface BuilderView {
 
 /* ── Component ── */
 export default function BuildersPage() {
+  const navigate = useNavigate();
   const qc = useQueryClient();
   const [expandedBuilder, setExpandedBuilder] = useState<string | null>(null);
+  const [expandedSquad, setExpandedSquad] = useState<string | null>(null);
   const [showAllSquads, setShowAllSquads] = useState(false);
 
   const agentsQ = useQuery({ queryKey: ["builders-agents"], queryFn: fetchAgents, staleTime: 30_000, refetchInterval: 60_000, placeholderData: (prev) => prev });
@@ -295,43 +298,113 @@ export default function BuildersPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
               {(showAllSquads ? squads : squads.slice(0, 6)).map((sq) => {
                 const fileCount = Array.isArray(sq.files) ? sq.files.length : (sq.files ?? 0);
-                const agentCount = sq.agents?.length ?? 0;
+                const fileNames = Array.isArray(sq.files) ? sq.files : [];
+                const agentNames = sq.agents ?? [];
+                const isOpen = expandedSquad === sq.id;
                 return (
                   <div
                     key={sq.id}
-                    className="rounded-lg border border-amber-400/15 bg-amber-400/5 hover:border-amber-400/30 transition-colors p-4 space-y-2"
+                    onClick={() => setExpandedSquad(isOpen ? null : sq.id)}
+                    className="rounded-lg border border-amber-400/15 bg-amber-400/5 hover:border-amber-400/30 transition-colors cursor-pointer"
                   >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Package className="h-4 w-4 text-amber-400" />
-                        <span className="font-semibold text-sm text-foreground truncate max-w-[200px]">{sq.name}</span>
+                    <div className="p-4 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Package className="h-4 w-4 text-amber-400" />
+                          <span className="font-semibold text-sm text-foreground truncate max-w-[200px]">{sq.name}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {sq.status && (
+                            <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded ${
+                              sq.status === "active" ? "bg-emerald-400/10 text-emerald-400" : "bg-muted text-muted-foreground"
+                            }`}>
+                              {sq.status === "active" ? "ativo" : sq.status}
+                            </span>
+                          )}
+                          {isOpen ? <ChevronDown className="h-3 w-3 text-muted-foreground/40" /> : <ChevronRight className="h-3 w-3 text-muted-foreground/40" />}
+                        </div>
                       </div>
-                      {sq.status && (
-                        <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded ${
-                          sq.status === "active" ? "bg-emerald-400/10 text-emerald-400" : "bg-muted text-muted-foreground"
-                        }`}>
-                          {sq.status === "active" ? "ativo" : sq.status}
-                        </span>
+                      {sq.description && (
+                        <p className="text-xs text-muted-foreground/70 line-clamp-2">{sq.description}</p>
                       )}
-                    </div>
-                    {sq.description && (
-                      <p className="text-xs text-muted-foreground/70 line-clamp-2">{sq.description}</p>
-                    )}
-                    <div className="flex items-center gap-4 text-[10px] font-mono text-muted-foreground/50">
-                      <span className="flex items-center gap-1">
-                        <FileText className="h-3 w-3" />
-                        {fileCount} arquivos
-                      </span>
-                      {agentCount > 0 && (
+                      <div className="flex items-center gap-4 text-[10px] font-mono text-muted-foreground/50">
                         <span className="flex items-center gap-1">
-                          <Bot className="h-3 w-3" />
-                          {agentCount} agentes
+                          <FileText className="h-3 w-3" />
+                          {fileCount} arquivos
                         </span>
-                      )}
-                      {sq.source && (
-                        <span className="text-amber-400/60">{sq.source}</span>
-                      )}
+                        {agentNames.length > 0 && (
+                          <span className="flex items-center gap-1">
+                            <Bot className="h-3 w-3" />
+                            {agentNames.length} agentes
+                          </span>
+                        )}
+                        {sq.source && (
+                          <span className="text-amber-400/60">{sq.source}</span>
+                        )}
+                      </div>
                     </div>
+
+                    {/* Expanded detail */}
+                    {isOpen && (
+                      <div className="border-t border-amber-400/10 p-4 space-y-4 bg-muted/5" onClick={(e) => e.stopPropagation()}>
+                        {/* ID técnico */}
+                        <div className="text-[10px] font-mono text-muted-foreground/40">ID: {sq.id}</div>
+
+                        {/* Agentes vinculados */}
+                        {agentNames.length > 0 && (
+                          <div className="space-y-2">
+                            <div className="text-[10px] uppercase tracking-wider text-muted-foreground/50 font-mono font-bold">
+                              Agentes vinculados
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                              {agentNames.map((name) => (
+                                <button
+                                  key={name}
+                                  onClick={() => navigate("/agents")}
+                                  className="flex items-center gap-1.5 text-xs font-medium px-2.5 py-1.5 rounded-md border border-border bg-card hover:border-primary/40 hover:text-primary transition-colors"
+                                >
+                                  <Bot className="h-3 w-3" />
+                                  <span>{name}</span>
+                                  <ExternalLink className="h-2.5 w-2.5 text-muted-foreground/40" />
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Arquivos */}
+                        {fileNames.length > 0 ? (
+                          <div className="space-y-2">
+                            <div className="text-[10px] uppercase tracking-wider text-muted-foreground/50 font-mono font-bold">
+                              Arquivos ({fileNames.length})
+                            </div>
+                            <div className="space-y-1 max-h-40 overflow-y-auto">
+                              {fileNames.map((f, i) => (
+                                <div key={i} className="flex items-center gap-2 text-xs font-mono text-foreground/70 rounded-md bg-card border border-border px-3 py-1.5">
+                                  <FileText className="h-3 w-3 text-muted-foreground/40 shrink-0" />
+                                  <span className="truncate">{f}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        ) : fileCount > 0 ? (
+                          <div className="text-xs text-muted-foreground/50 italic">
+                            {fileCount} arquivos vinculados (nomes indisponíveis)
+                          </div>
+                        ) : null}
+
+                        {/* Tags */}
+                        {sq.tags && sq.tags.length > 0 && (
+                          <div className="flex flex-wrap gap-1.5">
+                            {sq.tags.map((t) => (
+                              <span key={t} className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+                                {t}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 );
               })}
