@@ -1,39 +1,59 @@
 /**
- * Orion Office 3D — Core Scene
- * 
- * Viewport WebGL integrado ao Mission Control.
- * Renderiza a representação espacial dos agentes e suas conexões.
+ * Orion Office 3D — Core Scene (dados reais)
+ *
+ * Consome agentes via useOrionData e renderiza nós 3D com status operacional.
  */
 
 import { Canvas } from "@react-three/fiber";
-import { OrbitControls, Grid, Environment, Float, Text, Billboard } from "@react-three/drei";
+import { OrbitControls, Grid, Float, Text, Billboard } from "@react-three/drei";
 import { useMemo } from "react";
 import * as THREE from "three";
+import { useOrionData } from "@/hooks/useOrionData";
+import { fetchAgents } from "@/domains/agents/fetcher";
+import type { AgentView, AgentTier } from "@/domains/agents/types";
+import { AlertTriangle, Loader2, WifiOff } from "lucide-react";
+
+/* ── Layout helpers ── */
+
+const TIER_COLORS: Record<AgentTier, string> = {
+  orchestrator: "#a78bfa",
+  core: "#60a5fa",
+  support: "#6ee7b7",
+};
+
+function computePositions(agents: AgentView[]): [number, number, number][] {
+  // Place orchestrator at top, others in a ring below
+  return agents.map((a, i) => {
+    if (a.tier === "orchestrator") return [0, 2.5, 0] as [number, number, number];
+    const nonOrch = agents.filter(x => x.tier !== "orchestrator");
+    const idx = nonOrch.indexOf(a);
+    const total = nonOrch.length || 1;
+    const angle = (idx / total) * Math.PI * 2 - Math.PI / 2;
+    const radius = a.tier === "core" ? 2.8 : 3.8;
+    const y = a.tier === "core" ? 0.8 : -0.6;
+    return [Math.cos(angle) * radius, y, Math.sin(angle) * radius] as [number, number, number];
+  });
+}
 
 /* ── Agent Node 3D ── */
 
-interface AgentNode3DProps {
+function AgentNode3D({ position, agent }: {
   position: [number, number, number];
-  label: string;
-  tier: "orchestrator" | "core" | "support";
-  active?: boolean;
-}
-
-function AgentNode({ position, label, tier, active = true }: AgentNode3DProps) {
-  const color = tier === "orchestrator" ? "#a78bfa" : tier === "core" ? "#60a5fa" : "#6ee7b7";
-  const scale = tier === "orchestrator" ? 1.2 : tier === "core" ? 0.9 : 0.7;
-  const emissive = active ? color : "#333";
+  agent: AgentView;
+}) {
+  const color = TIER_COLORS[agent.tier] || TIER_COLORS.support;
+  const scale = agent.tier === "orchestrator" ? 1.2 : agent.tier === "core" ? 0.9 : 0.7;
+  const active = agent.status !== "offline";
 
   return (
     <Float speed={1.5} rotationIntensity={0.2} floatIntensity={0.3}>
       <group position={position}>
-        {/* Core shape */}
         <mesh castShadow>
           <octahedronGeometry args={[scale * 0.35, 0]} />
           <meshStandardMaterial
             color={color}
-            emissive={emissive}
-            emissiveIntensity={active ? 0.4 : 0.05}
+            emissive={active ? color : "#333"}
+            emissiveIntensity={agent.status === "active" ? 0.6 : active ? 0.3 : 0.05}
             roughness={0.3}
             metalness={0.6}
             transparent
@@ -47,25 +67,46 @@ function AgentNode({ position, label, tier, active = true }: AgentNode3DProps) {
           <meshBasicMaterial color={color} transparent opacity={active ? 0.25 : 0.05} side={THREE.DoubleSide} />
         </mesh>
 
-        {/* Label */}
+        {/* Active pulse ring */}
+        {agent.status === "active" && (
+          <mesh rotation={[Math.PI / 2, 0, 0]}>
+            <ringGeometry args={[scale * 0.58, scale * 0.61, 32]} />
+            <meshBasicMaterial color={color} transparent opacity={0.12} side={THREE.DoubleSide} />
+          </mesh>
+        )}
+
+        {/* Name label */}
         <Billboard follow lockX={false} lockY={false} lockZ={false}>
           <Text
-            position={[0, scale * 0.6, 0]}
+            position={[0, scale * 0.65, 0]}
             fontSize={0.18}
             color="white"
             anchorX="center"
             anchorY="bottom"
-            font="/fonts/inter-medium.woff"
             outlineWidth={0.02}
             outlineColor="#000000"
           >
-            {label}
+            {agent.name}
           </Text>
         </Billboard>
 
-        {/* Base glow */}
+        {/* Status/task subtitle */}
+        <Billboard follow lockX={false} lockY={false} lockZ={false}>
+          <Text
+            position={[0, scale * 0.65 - 0.22, 0]}
+            fontSize={0.1}
+            color={agent.status === "active" ? "#a3e635" : agent.status === "idle" ? "#fbbf24" : "#6b7280"}
+            anchorX="center"
+            anchorY="bottom"
+            outlineWidth={0.015}
+            outlineColor="#000000"
+          >
+            {agent.status === "active" ? (agent.currentTask !== "Sem tarefa ativa" ? agent.currentTask.slice(0, 28) : "Ativo") : agent.status === "idle" ? "Idle" : "Offline"}
+          </Text>
+        </Billboard>
+
         {active && (
-          <pointLight color={color} intensity={0.6} distance={3} decay={2} />
+          <pointLight color={color} intensity={agent.status === "active" ? 0.8 : 0.4} distance={3} decay={2} />
         )}
       </group>
     </Float>
@@ -74,7 +115,11 @@ function AgentNode({ position, label, tier, active = true }: AgentNode3DProps) {
 
 /* ── Connection lines ── */
 
-function ConnectionLine({ from, to, color = "#ffffff" }: { from: [number, number, number]; to: [number, number, number]; color?: string }) {
+function ConnectionLine({ from, to, color = "#ffffff" }: {
+  from: [number, number, number];
+  to: [number, number, number];
+  color?: string;
+}) {
   const points = useMemo(() => {
     const mid: [number, number, number] = [
       (from[0] + to[0]) / 2,
@@ -103,30 +148,69 @@ function ConnectionLine({ from, to, color = "#ffffff" }: { from: [number, number
   );
 }
 
-/* ── Scene layout data ── */
+/* ── Overlay states (HTML, not WebGL) ── */
 
-const agents: AgentNode3DProps[] = [
-  { position: [0, 2.5, 0], label: "Orion", tier: "orchestrator", active: true },
-  { position: [-2.5, 0.8, -1], label: "Coder", tier: "core", active: true },
-  { position: [0, 0.8, -2], label: "Planner", tier: "core", active: true },
-  { position: [2.5, 0.8, -1], label: "Reviewer", tier: "core", active: true },
-  { position: [-3, -0.8, 1], label: "Memory", tier: "support", active: true },
-  { position: [-1, -0.8, 2], label: "Browser", tier: "support", active: false },
-  { position: [1.5, -0.8, 2], label: "Files", tier: "support", active: true },
-  { position: [3.2, -0.8, 1], label: "Shell", tier: "support", active: false },
-];
-
-const connections: [number, number][] = [
-  [0, 1], [0, 2], [0, 3], // Orion → core
-  [1, 4], [1, 5], // Coder → Memory, Browser
-  [2, 4], // Planner → Memory
-  [3, 6], [3, 7], // Reviewer → Files, Shell
-  [1, 6], // Coder → Files
-];
+export function SceneOverlay({ state, error, onRetry }: {
+  state: "loading" | "error" | "empty";
+  error?: string | null;
+  onRetry?: () => void;
+}) {
+  return (
+    <div className="w-full h-full flex items-center justify-center bg-background">
+      <div className="text-center space-y-3">
+        {state === "loading" && (
+          <>
+            <Loader2 className="h-6 w-6 text-primary/40 animate-spin mx-auto" />
+            <p className="text-xs font-mono text-muted-foreground/40">Carregando agentes…</p>
+          </>
+        )}
+        {state === "error" && (
+          <>
+            <AlertTriangle className="h-6 w-6 text-status-error/60 mx-auto" />
+            <p className="text-xs font-mono text-muted-foreground/60">Falha ao carregar dados</p>
+            {error && <p className="text-[10px] text-muted-foreground/40 max-w-xs">{error}</p>}
+            {onRetry && (
+              <button onClick={onRetry} className="text-xs text-primary hover:text-primary/80 transition-colors">
+                Tentar novamente
+              </button>
+            )}
+          </>
+        )}
+        {state === "empty" && (
+          <>
+            <WifiOff className="h-6 w-6 text-muted-foreground/30 mx-auto" />
+            <p className="text-xs font-mono text-muted-foreground/40">Nenhum agente disponível</p>
+            <p className="text-[10px] text-muted-foreground/30">Aguardando conexão com API</p>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
 
 /* ── Main Canvas ── */
 
 export function SceneCanvas() {
+  const { data: agents, state, error, refetch, source } = useOrionData<AgentView[]>({
+    key: "agents-page",
+    fetcher: fetchAgents,
+    refreshInterval: 30_000,
+  });
+
+  if (state === "loading" || state === "error" || state === "empty") {
+    return <SceneOverlay state={state} error={error} onRetry={refetch} />;
+  }
+
+  const agentList = agents || [];
+  const positions = computePositions(agentList);
+
+  // Connect orchestrator to all others, plus core↔support adjacencies
+  const orchIdx = agentList.findIndex(a => a.tier === "orchestrator");
+  const connectionPairs: [number, number][] = [];
+  agentList.forEach((_, i) => {
+    if (i !== orchIdx && orchIdx >= 0) connectionPairs.push([orchIdx, i]);
+  });
+
   return (
     <Canvas
       shadows
@@ -137,12 +221,10 @@ export function SceneCanvas() {
       <color attach="background" args={["#0a0a0f"]} />
       <fog attach="fog" args={["#0a0a0f", 10, 25]} />
 
-      {/* Lighting */}
       <ambientLight intensity={0.15} />
       <directionalLight position={[5, 8, 5]} intensity={0.4} castShadow />
       <pointLight position={[0, 4, 0]} intensity={0.3} color="#a78bfa" />
 
-      {/* Grid */}
       <Grid
         position={[0, -1.5, 0]}
         args={[20, 20]}
@@ -156,22 +238,19 @@ export function SceneCanvas() {
         infiniteGrid
       />
 
-      {/* Agents */}
-      {agents.map((a, i) => (
-        <AgentNode key={i} {...a} />
+      {agentList.map((agent, i) => (
+        <AgentNode3D key={agent.id} agent={agent} position={positions[i]} />
       ))}
 
-      {/* Connections */}
-      {connections.map(([fromIdx, toIdx], i) => (
+      {connectionPairs.map(([fromIdx, toIdx], i) => (
         <ConnectionLine
           key={i}
-          from={agents[fromIdx].position}
-          to={agents[toIdx].position}
-          color={agents[fromIdx].tier === "orchestrator" ? "#a78bfa" : "#60a5fa"}
+          from={positions[fromIdx]}
+          to={positions[toIdx]}
+          color={TIER_COLORS[agentList[fromIdx]?.tier] || "#60a5fa"}
         />
       ))}
 
-      {/* Controls */}
       <OrbitControls
         enableDamping
         dampingFactor={0.05}
