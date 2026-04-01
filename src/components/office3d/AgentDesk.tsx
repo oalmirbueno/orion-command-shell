@@ -1,7 +1,6 @@
 /**
- * Office 3D — Agent Desk (Refined)
- * Clean workstation with reduced FX, solid materials,
- * calm status indicators, and minimal particles.
+ * Office 3D — Agent Desk (Architectural)
+ * Light mid-tone workstation, clear materials, no dark silhouettes.
  */
 import { useFrame } from "@react-three/fiber";
 import { Text, Billboard } from "@react-three/drei";
@@ -20,15 +19,15 @@ interface AgentDeskProps {
   onHover?: (agent: AgentView | null, pos?: { x: number; y: number }) => void;
 }
 
-/* ── Subtle particles — fewer, slower, smaller ── */
-function ActiveParticles({ color, count = 5 }: { color: string; count?: number }) {
+/* ── Subtle particles ── */
+function ActiveParticles({ color, count = 4 }: { color: string; count?: number }) {
   const ref = useRef<THREE.Points>(null);
   const positions = useMemo(() => {
     const arr = new Float32Array(count * 3);
     for (let i = 0; i < count; i++) {
-      arr[i * 3] = (Math.random() - 0.5) * 0.5;
-      arr[i * 3 + 1] = Math.random() * 1.2 + 0.4;
-      arr[i * 3 + 2] = (Math.random() - 0.5) * 0.5;
+      arr[i * 3] = (Math.random() - 0.5) * 0.4;
+      arr[i * 3 + 1] = Math.random() * 1.0 + 0.5;
+      arr[i * 3 + 2] = (Math.random() - 0.5) * 0.4;
     }
     return arr;
   }, [count]);
@@ -38,9 +37,9 @@ function ActiveParticles({ color, count = 5 }: { color: string; count?: number }
     const posAttr = ref.current.geometry.attributes.position as THREE.BufferAttribute;
     const t = state.clock.elapsedTime;
     for (let i = 0; i < count; i++) {
-      posAttr.setY(i, ((t * 0.2 + i * 0.5) % 1.4) + 0.4);
-      posAttr.setX(i, Math.sin(t * 0.4 + i * 1.5) * 0.18);
-      posAttr.setZ(i, Math.cos(t * 0.3 + i * 0.9) * 0.18);
+      posAttr.setY(i, ((t * 0.18 + i * 0.55) % 1.2) + 0.5);
+      posAttr.setX(i, Math.sin(t * 0.35 + i * 1.4) * 0.15);
+      posAttr.setZ(i, Math.cos(t * 0.25 + i * 0.8) * 0.15);
     }
     posAttr.needsUpdate = true;
   });
@@ -50,21 +49,21 @@ function ActiveParticles({ color, count = 5 }: { color: string; count?: number }
       <bufferGeometry>
         <bufferAttribute attach="attributes-position" count={count} array={positions} itemSize={3} />
       </bufferGeometry>
-      <pointsMaterial color={color} size={0.025} transparent opacity={0.4} sizeAttenuation depthWrite={false} />
+      <pointsMaterial color={color} size={0.022} transparent opacity={0.35} sizeAttenuation depthWrite={false} />
     </points>
   );
 }
 
-/* ── Alert indicator — no pulsing ring, just a badge ── */
+/* ── Alert badge ── */
 function AlertBadge({ count }: { count: number }) {
   if (count <= 0) return null;
   return (
-    <Billboard position={[0.42, 1.4, 0]} follow lockX={false} lockY={false} lockZ={false}>
+    <Billboard position={[0.4, 1.4, 0]} follow lockX={false} lockY={false} lockZ={false}>
       <mesh>
-        <circleGeometry args={[0.09, 16]} />
+        <circleGeometry args={[0.085, 16]} />
         <meshBasicMaterial color="#ef4444" />
       </mesh>
-      <Text position={[0, -0.01, 0.01]} fontSize={0.075} color="#ffffff" anchorX="center" anchorY="middle" font={undefined}>
+      <Text position={[0, -0.01, 0.01]} fontSize={0.07} color="#ffffff" anchorX="center" anchorY="middle" font={undefined}>
         {String(count)}
       </Text>
     </Billboard>
@@ -88,15 +87,13 @@ export function AgentDesk({ agent, desk, inMeeting, meetingPos, onClick, onHover
   useFrame((_, delta) => {
     if (!groupRef.current) return;
     const g = groupRef.current;
-    // Smooth position interpolation
     g.position.x += (targetPos[0] - g.position.x) * Math.min(delta * 3, 1);
     g.position.y += (targetPos[1] - g.position.y) * Math.min(delta * 3, 1);
     g.position.z += (targetPos[2] - g.position.z) * Math.min(delta * 3, 1);
 
-    // Status ring — calm opacity transition, no pulsing
     if (ringRef.current) {
       const m = ringRef.current.material as THREE.MeshBasicMaterial;
-      const target = hovered ? 0.45 : isActive ? 0.25 : agent.status === "idle" ? 0.12 : 0.04;
+      const target = hovered ? 0.5 : isActive ? 0.3 : agent.status === "idle" ? 0.15 : 0.05;
       m.opacity += (target - m.opacity) * Math.min(delta * 6, 1);
     }
   });
@@ -106,79 +103,79 @@ export function AgentDesk({ agent, desk, inMeeting, meetingPos, onClick, onHover
       {/* ── WORKSTATION ── */}
       {!inMeeting && (
         <group>
-          {/* Desk surface — solid, polished */}
-          <mesh position={[0, 0.24, 0]} castShadow>
+          {/* Desk surface — light mid-tone */}
+          <mesh position={[0, 0.24, 0]} castShadow receiveShadow>
             <boxGeometry args={[1.15, 0.055, 0.7]} />
-            <meshPhysicalMaterial color="#262658" roughness={0.2} metalness={0.55}
-              clearcoat={0.2} clearcoatRoughness={0.35} />
+            <meshPhysicalMaterial color="#505078" roughness={0.18} metalness={0.45}
+              clearcoat={0.2} clearcoatRoughness={0.3} />
           </mesh>
-          {/* Front edge — subtle accent */}
+          {/* Front edge accent */}
           <mesh position={[0, 0.24, 0.355]}>
-            <boxGeometry args={[1.15, 0.055, 0.01]} />
-            <meshStandardMaterial color={tierColor} emissive={tierColor} emissiveIntensity={0.2} transparent opacity={0.45} />
+            <boxGeometry args={[1.15, 0.055, 0.008]} />
+            <meshStandardMaterial color={tierColor} emissive={tierColor} emissiveIntensity={0.12} transparent opacity={0.35} />
           </mesh>
-          {/* Desk legs */}
+          {/* Legs */}
           {[[-0.5, 0.12, -0.28], [0.5, 0.12, -0.28], [-0.5, 0.12, 0.28], [0.5, 0.12, 0.28]].map((p, i) => (
-            <mesh key={i} position={p as [number, number, number]}>
+            <mesh key={i} position={p as [number, number, number]} castShadow>
               <cylinderGeometry args={[0.02, 0.02, 0.24, 8]} />
-              <meshStandardMaterial color="#353565" roughness={0.25} metalness={0.65} />
+              <meshStandardMaterial color="#606085" roughness={0.2} metalness={0.55} />
             </mesh>
           ))}
           {/* Primary monitor */}
-          <mesh position={[0, 0.5, -0.18]}>
+          <mesh position={[0, 0.5, -0.18]} castShadow>
             <boxGeometry args={[0.5, 0.35, 0.012]} />
             <meshStandardMaterial color={tierColor} emissive={tierColor}
-              emissiveIntensity={isActive ? 0.3 : 0.1} transparent opacity={0.45} roughness={0.15} />
+              emissiveIntensity={isActive ? 0.2 : 0.06} transparent opacity={0.5} roughness={0.1} />
           </mesh>
-          <mesh position={[0, 0.5, -0.195]}>
+          <mesh position={[0, 0.5, -0.195]} castShadow>
             <boxGeometry args={[0.54, 0.39, 0.012]} />
-            <meshStandardMaterial color="#1a1a3a" roughness={0.15} metalness={0.8} />
+            <meshStandardMaterial color="#3a3a58" roughness={0.12} metalness={0.75} />
           </mesh>
           <mesh position={[0, 0.34, -0.18]}>
             <cylinderGeometry args={[0.015, 0.015, 0.15, 8]} />
-            <meshStandardMaterial color="#353565" roughness={0.3} metalness={0.6} />
+            <meshStandardMaterial color="#606085" roughness={0.25} metalness={0.55} />
           </mesh>
           {/* Secondary monitor */}
           <mesh position={[0.35, 0.45, -0.15]} rotation={[0, -0.3, 0]}>
             <boxGeometry args={[0.3, 0.22, 0.01]} />
             <meshStandardMaterial color={tierColor} emissive={tierColor}
-              emissiveIntensity={isActive ? 0.2 : 0.06} transparent opacity={0.35} roughness={0.2} />
+              emissiveIntensity={isActive ? 0.15 : 0.04} transparent opacity={0.4} roughness={0.15} />
           </mesh>
           {/* Keyboard */}
           <mesh position={[0, 0.275, 0.1]}>
             <boxGeometry args={[0.3, 0.008, 0.1]} />
-            <meshStandardMaterial color="#1e1e48" roughness={0.45} metalness={0.35} />
+            <meshStandardMaterial color="#404065" roughness={0.4} metalness={0.3} />
           </mesh>
           {/* Mouse */}
           <mesh position={[0.25, 0.275, 0.12]}>
             <boxGeometry args={[0.05, 0.01, 0.07]} />
-            <meshStandardMaterial color="#1e1e48" roughness={0.45} metalness={0.35} />
+            <meshStandardMaterial color="#404065" roughness={0.4} metalness={0.3} />
           </mesh>
           {/* Chair */}
           <group position={[0, 0, 0.55]}>
-            <mesh position={[0, 0.3, 0]}>
+            <mesh position={[0, 0.3, 0]} castShadow>
               <cylinderGeometry args={[0.17, 0.17, 0.04, 12]} />
-              <meshStandardMaterial color="#222250" roughness={0.35} metalness={0.5} />
+              <meshStandardMaterial color="#454568" roughness={0.3} metalness={0.4} />
             </mesh>
-            <mesh position={[0, 0.5, -0.14]}>
+            <mesh position={[0, 0.5, -0.14]} castShadow>
               <boxGeometry args={[0.3, 0.35, 0.03]} />
-              <meshStandardMaterial color="#222250" roughness={0.35} metalness={0.5} />
+              <meshStandardMaterial color="#454568" roughness={0.3} metalness={0.4} />
             </mesh>
             <mesh position={[0, 0.15, 0]}>
               <cylinderGeometry args={[0.02, 0.02, 0.3, 6]} />
-              <meshStandardMaterial color="#383870" roughness={0.25} metalness={0.6} />
+              <meshStandardMaterial color="#606088" roughness={0.2} metalness={0.5} />
             </mesh>
           </group>
         </group>
       )}
 
-      {/* ── STATUS RING (calm, no pulse) ── */}
+      {/* ── STATUS RING ── */}
       <mesh ref={ringRef} position={[0, 0.006, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <ringGeometry args={[0.44, 0.49, 32]} />
         <meshBasicMaterial color={sv.color} transparent opacity={0.15} side={THREE.DoubleSide} />
       </mesh>
 
-      {/* ── INTERACTIVE HITBOX ── */}
+      {/* ── HITBOX ── */}
       <mesh position={[0, 0.85, 0]}
         onClick={(e) => { e.stopPropagation(); onClick?.(agent); }}
         onPointerOver={(e) => {
@@ -199,21 +196,17 @@ export function AgentDesk({ agent, desk, inMeeting, meetingPos, onClick, onHover
 
       {/* ── AVATAR ── */}
       <Billboard position={[0, 1.2, 0]} follow lockX={false} lockY={false} lockZ={false}>
-        {/* Background circle */}
         <mesh>
           <circleGeometry args={[0.26, 32]} />
-          <meshBasicMaterial color={tierColor} transparent opacity={hovered ? 0.95 : 0.85} />
+          <meshBasicMaterial color={tierColor} transparent opacity={hovered ? 0.95 : 0.88} />
         </mesh>
-        {/* Initial */}
         <Text position={[0, -0.02, 0.001]} fontSize={0.19} color="#ffffff" anchorX="center" anchorY="middle" font={undefined}>
           {agent.name.charAt(0).toUpperCase()}
         </Text>
-        {/* Status dot bg */}
         <mesh position={[0.2, 0.18, 0.001]}>
           <circleGeometry args={[0.055, 16]} />
-          <meshBasicMaterial color="#12122a" />
+          <meshBasicMaterial color="#2a2a48" />
         </mesh>
-        {/* Status dot */}
         <mesh position={[0.2, 0.18, 0.002]}>
           <circleGeometry args={[0.038, 16]} />
           <meshBasicMaterial color={sv.color} />
@@ -222,8 +215,8 @@ export function AgentDesk({ agent, desk, inMeeting, meetingPos, onClick, onHover
 
       {/* ── NAME ── */}
       <Billboard position={[0, 0.78, 0]} follow lockX={false} lockY={false} lockZ={false}>
-        <Text fontSize={0.11} color="#e0e0f0" anchorX="center" anchorY="bottom"
-          outlineWidth={0.02} outlineColor="#12122a" font={undefined} maxWidth={1.4}>
+        <Text fontSize={0.11} color="#e8e8f8" anchorX="center" anchorY="bottom"
+          outlineWidth={0.018} outlineColor="#2a2a48" font={undefined} maxWidth={1.4}>
           {agent.name}
         </Text>
       </Billboard>
@@ -231,21 +224,21 @@ export function AgentDesk({ agent, desk, inMeeting, meetingPos, onClick, onHover
       {/* ── STATUS / TASK ── */}
       <Billboard position={[0, 0.64, 0]} follow lockX={false} lockY={false} lockZ={false}>
         <Text fontSize={0.07} color={sv.color} anchorX="center" anchorY="bottom"
-          outlineWidth={0.012} outlineColor="#12122a" font={undefined} maxWidth={1.6} fillOpacity={0.8}>
+          outlineWidth={0.01} outlineColor="#2a2a48" font={undefined} maxWidth={1.6} fillOpacity={0.85}>
           {isActive && hasTask ? `⚡ ${agent.currentTask.slice(0, 30)}` : sv.label}
         </Text>
       </Billboard>
 
-      {/* ── SUBTLE PARTICLES (active only, fewer) ── */}
-      {isActive && <ActiveParticles color={tierColor} count={4} />}
+      {/* ── PARTICLES ── */}
+      {isActive && <ActiveParticles color={tierColor} count={3} />}
 
-      {/* ── ALERT BADGE ── */}
+      {/* ── ALERT ── */}
       <AlertBadge count={agent.alertCount} />
 
-      {/* ── DESK LIGHT (subtle, warm) ── */}
+      {/* ── DESK LIGHT ── */}
       {agent.status !== "offline" && (
-        <pointLight position={[0, 1.2, 0]} color={tierColor}
-          intensity={isActive ? 0.25 : 0.1} distance={1.8} decay={2} />
+        <pointLight position={[0, 1.0, 0]} color={tierColor}
+          intensity={isActive ? 0.18 : 0.06} distance={1.5} decay={2} />
       )}
     </group>
   );
