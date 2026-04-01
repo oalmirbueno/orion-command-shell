@@ -77,20 +77,20 @@ function FloorPlane() {
 function SectorFloor({ position, size, color, elevated = false }: {
   position: [number, number, number]; size: [number, number]; color: string; elevated?: boolean;
 }) {
-  const y = elevated ? 0.04 : 0.003;
-  return (
-    <group>
-      {elevated && (
-        <mesh position={[position[0], 0.02, position[2]]} castShadow receiveShadow>
-          <boxGeometry args={[size[0], 0.04, size[1]]} />
-          <meshStandardMaterial color="#454568" roughness={0.35} metalness={0.3} />
-        </mesh>
-      )}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[position[0], y, position[2]]}>
-        <planeGeometry args={size} />
-        <meshStandardMaterial color={color} transparent opacity={0.08} roughness={0.7} />
+  if (elevated) {
+    return (
+      <mesh position={[position[0], 0.02, position[2]]} castShadow receiveShadow>
+        <boxGeometry args={[size[0], 0.04, size[1]]} />
+        <meshStandardMaterial color="#454568" roughness={0.35} metalness={0.3} />
       </mesh>
-    </group>
+    );
+  }
+  // Non-elevated: use a thin box instead of a coplanar plane to avoid z-fighting
+  return (
+    <mesh position={[position[0], 0.005, position[2]]}>
+      <boxGeometry args={[size[0], 0.01, size[1]]} />
+      <meshStandardMaterial color={color} transparent opacity={0.12} roughness={0.7} />
+    </mesh>
   );
 }
 
