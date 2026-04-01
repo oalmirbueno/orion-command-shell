@@ -215,7 +215,7 @@ function CommandConsole() {
       {[-1.2, 1.2].map((x, i) => (
         <mesh key={i} position={[x, 0.6, -0.3]}>
           <cylinderGeometry args={[0.03, 0.03, 1.2, 8]} />
-          <meshStandardMaterial color="#5a5a78" roughness={0.2} metalness={0.65} />
+          <meshStandardMaterial color="#7878a0" roughness={0.2} metalness={0.65} />
         </mesh>
       ))}
       {/* Status LED */}
