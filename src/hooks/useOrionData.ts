@@ -8,6 +8,7 @@ import { useQuery, useQueryClient, keepPreviousData } from "@tanstack/react-quer
 import type { DataState, DataSource, DomainFetcher } from "@/domains/types";
 import { useLastUpdated } from "./useLastUpdated";
 import { useDomainHealthReporter } from "./useDomainHealth";
+import { domainAnalyticsStore } from "@/services/domainAnalytics";
 
 export type { DataState, DataSource };
 
@@ -55,13 +56,22 @@ export function useOrionData<T>({
   const healthReporter = useDomainHealthReporter();
 
   const queryFn = useCallback(async (): Promise<FetcherResult<T>> => {
-    const result = await fetcher();
-    return {
-      data: result.data as T,
-      source: result.source,
-      timestamp: result.timestamp,
-    };
-  }, [fetcher]);
+    const t0 = performance.now();
+    try {
+      const result = await fetcher();
+      const latency = Math.round(performance.now() - t0);
+      domainAnalyticsStore.record(key, latency, result.source === "api");
+      return {
+        data: result.data as T,
+        source: result.source,
+        timestamp: result.timestamp,
+      };
+    } catch (err) {
+      const latency = Math.round(performance.now() - t0);
+      domainAnalyticsStore.record(key, latency, false);
+      throw err;
+    }
+  }, [fetcher, key]);
 
   const {
     data: result,
