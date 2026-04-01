@@ -185,6 +185,7 @@ export function NotificationCenter() {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const { user } = useAuth();
+  const { logAction } = useAuditLog();
 
   // Sync store with auth state
   useEffect(() => {
