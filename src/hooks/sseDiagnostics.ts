@@ -28,6 +28,17 @@ class SSEDiagnosticStore {
   private _lastError: string | null = null;
   private _lastErrorAt: Date | null = null;
   private listeners = new Set<() => void>();
+  private _cachedSnapshot: {
+    status: StreamStatus;
+    connectedAt: Date | null;
+    uptimeSeconds: number | null;
+    reconnects: number;
+    reconnectHistory: ReconnectEntry[];
+    lastError: string | null;
+    lastErrorAt: Date | null;
+    eventCount: number;
+    events: SSEEvent[];
+  } | null = null;
 
   get status() { return this._status; }
   get events() { return this._events; }
@@ -43,7 +54,7 @@ class SSEDiagnosticStore {
     return Math.round((Date.now() - this._connectedAt.getTime()) / 1000);
   }
 
-  private emit() { for (const fn of this.listeners) fn(); }
+  private emit() { this._cachedSnapshot = null; for (const fn of this.listeners) fn(); }
 
   subscribe = (fn: () => void) => {
     this.listeners.add(fn);
@@ -79,17 +90,20 @@ class SSEDiagnosticStore {
   }
 
   getSnapshot() {
-    return {
-      status: this._status,
-      connectedAt: this._connectedAt,
-      uptimeSeconds: this.uptimeSeconds,
-      reconnects: this._reconnects,
-      reconnectHistory: this._reconnectHistory,
-      lastError: this._lastError,
-      lastErrorAt: this._lastErrorAt,
-      eventCount: this._events.length,
-      events: this._events,
-    };
+    if (!this._cachedSnapshot) {
+      this._cachedSnapshot = {
+        status: this._status,
+        connectedAt: this._connectedAt,
+        uptimeSeconds: this.uptimeSeconds,
+        reconnects: this._reconnects,
+        reconnectHistory: this._reconnectHistory,
+        lastError: this._lastError,
+        lastErrorAt: this._lastErrorAt,
+        eventCount: this._events.length,
+        events: this._events,
+      };
+    }
+    return this._cachedSnapshot;
   }
 }
 
