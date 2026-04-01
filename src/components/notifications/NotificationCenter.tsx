@@ -209,7 +209,9 @@ export function NotificationCenter() {
   const criticalCount = notifications.filter(n => n.severity === "critical" && !notificationStore.isRead(n.id)).length;
 
   const handleMarkAllRead = () => {
-    notificationStore.markAllRead(notifications.map(n => n.id));
+    const ids = notifications.map(n => n.id);
+    notificationStore.markAllRead(ids);
+    logAction("notification.mark_all_read", "notifications", "", { count: ids.length });
   };
 
   const handleDismiss = (e: React.MouseEvent, id: string) => {
