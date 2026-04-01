@@ -144,6 +144,30 @@ function RunRow({ run }: { run: CronRunEntry }) {
 export function PipelineDetailSheet({ pipeline, open, onOpenChange }: Props) {
   const [runs, setRuns] = useState<CronRunEntry[]>([]);
   const [loadingRuns, setLoadingRuns] = useState(false);
+  const [triggering, setTriggering] = useState(false);
+
+  const isCronBased = pipeline?.origin === "cron" || pipeline?.origin === "mixed";
+
+  async function handleRunNow() {
+    if (!pipeline || !isCronBased) return;
+    setTriggering(true);
+    try {
+      const res = await fetch(apiUrl("/cron/run"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({ jobId: pipeline.id }),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body?.error || `${res.status}`);
+      }
+      toast({ title: "Pipeline disparado", description: `${pipeline.name} iniciado com sucesso.` });
+    } catch (err: any) {
+      toast({ title: "Erro ao executar", description: err?.message || "Falha ao disparar pipeline", variant: "destructive" });
+    } finally {
+      setTriggering(false);
+    }
+  }
 
   // Fetch cron run history when a cron-origin pipeline is selected
   useEffect(() => {
