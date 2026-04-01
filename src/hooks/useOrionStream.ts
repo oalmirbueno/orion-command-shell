@@ -157,8 +157,9 @@ export function useOrionStream(options: StreamOptions = {}) {
         }
       };
 
-      es.onerror = () => {
+      es.onerror = (ev) => {
         if (!mountedRef.current) return;
+        sseDiagnostics.recordError("EventSource error — connection lost");
         es.close();
         esRef.current = null;
         setStatus("disconnected");
