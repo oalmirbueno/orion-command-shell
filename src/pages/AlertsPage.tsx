@@ -1,3 +1,4 @@
+import React from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { OrionLayout } from "@/components/OrionLayout";
 import { OrionBreadcrumb } from "@/components/orion";
@@ -184,16 +185,19 @@ function AlertsSkeleton() {
 /* ── Page ── */
 const AlertsPage = () => {
   const queryClient = useQueryClient();
+  const [isRefreshing, setIsRefreshing] = React.useState(false);
 
-  const { data, isLoading, isError, error } = useQuery<AlertsResponse>({
+  const { data, isLoading, isError, error, isFetching } = useQuery<AlertsResponse>({
     queryKey: ["alerts-page"],
     queryFn: fetchAlerts,
     refetchInterval: 30_000,
     placeholderData: (prev) => prev,
   });
 
-  const handleRefresh = () => {
-    queryClient.invalidateQueries({ queryKey: ["alerts-page"] });
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await queryClient.refetchQueries({ queryKey: ["alerts-page"] });
+    setIsRefreshing(false);
   };
 
   return (
@@ -209,9 +213,9 @@ const AlertsPage = () => {
               Sinais de risco e atenção operacional
             </p>
           </div>
-          <Button variant="outline" size="sm" onClick={handleRefresh} className="gap-2">
-            <RefreshCw className="h-4 w-4" />
-            Atualizar
+          <Button variant="outline" size="sm" onClick={handleRefresh} disabled={isRefreshing || isFetching} className="gap-2">
+            <RefreshCw className={`h-4 w-4 ${isRefreshing || isFetching ? "animate-spin" : ""}`} />
+            {isRefreshing ? "Atualizando…" : "Atualizar"}
           </Button>
         </div>
 
