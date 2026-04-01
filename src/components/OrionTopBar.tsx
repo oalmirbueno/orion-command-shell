@@ -11,6 +11,8 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 export function OrionTopBar({ title = "Comando" }: { title?: string }) {
   const navigate = useNavigate();
   const { user, configured, signOut } = useAuth();
+  const { profile } = useProfile();
+  const displayLabel = profile?.display_name || user?.email?.split("@")[0] || user?.email || "";
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
