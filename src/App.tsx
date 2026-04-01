@@ -25,6 +25,7 @@ import SkillsPage from "./pages/SkillsPage.tsx";
 import BuildersPage from "./pages/BuildersPage.tsx";
 import TimelinePage from "./pages/TimelinePage.tsx";
 import RemindersPage from "./pages/RemindersPage.tsx";
+import SettingsPage from "./pages/SettingsPage.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import { PageTransition } from "./components/PageTransition.tsx";
 
