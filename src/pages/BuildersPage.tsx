@@ -494,7 +494,40 @@ export default function BuildersPage() {
           ))}
         </div>
 
-        {/* Loading / Error / Empty */}
+        {/* Token chart — last 24h by domain */}
+        {hasTokenData && (
+          <div className="rounded-lg border border-border bg-card p-4 space-y-3">
+            <div className="flex items-center gap-2">
+              <Cpu className="h-4 w-4 text-primary" />
+              <span className="text-xs font-bold uppercase tracking-wider text-foreground">Tokens por Domínio — Últimas 24h</span>
+            </div>
+            <div className="h-44">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={tokenChartData} barCategoryGap="20%">
+                  <XAxis dataKey="label" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
+                  <YAxis
+                    tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
+                    axisLine={false}
+                    tickLine={false}
+                    tickFormatter={(v: number) => (v >= 1000 ? `${(v / 1000).toFixed(0)}k` : String(v))}
+                    width={40}
+                  />
+                  <Tooltip
+                    contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 11 }}
+                    labelStyle={{ color: "hsl(var(--foreground))", fontWeight: 600 }}
+                    formatter={(value: number, name: string) => [formatTokens(value), name]}
+                  />
+                  <Legend iconSize={8} wrapperStyle={{ fontSize: 10 }} />
+                  <Bar dataKey="OpenClaw" stackId="a" fill="hsl(var(--primary))" radius={[0, 0, 0, 0]} />
+                  <Bar dataKey="Claude Code" stackId="a" fill="hsl(270 60% 60%)" radius={[0, 0, 0, 0]} />
+                  <Bar dataKey="AIOX" stackId="a" fill="hsl(45 96% 64%)" radius={[2, 2, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        )}
+
+
         {isLoading && !builders.length && (
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (
