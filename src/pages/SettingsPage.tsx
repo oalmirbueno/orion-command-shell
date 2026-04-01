@@ -10,12 +10,13 @@ import { API_BASE_URL, isUsingLocalBackend } from "@/domains/api";
 import {
   Settings, Server, Wifi, WifiOff, Activity, Clock, Database,
   Radio, Shield, Eye, Lock, RefreshCw, CheckCircle2, AlertTriangle, XCircle, Loader2,
-  Zap, ArrowDown
+  Zap, ArrowDown, Bell
 } from "lucide-react";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { apiUrl } from "@/domains/api";
 import { sseDiagnostics } from "@/hooks/sseDiagnostics";
 import { cn } from "@/lib/utils";
+import { NotificationHistory } from "@/components/notifications/NotificationHistory";
 
 /* ── Domain labels ── */
 const DOMAIN_LABELS: Record<DomainKey, string> = {
@@ -354,6 +355,11 @@ const SettingsPage = () => {
 
         {/* SSE Diagnostics */}
         <SSEDiagnosticsSection />
+
+        {/* Histórico de Notificações */}
+        <SectionCard title="Histórico de Notificações" icon={Bell}>
+          <NotificationHistory />
+        </SectionCard>
 
         {/* Notas operacionais */}
         <SectionCard title="Notas Operacionais" icon={Clock}>

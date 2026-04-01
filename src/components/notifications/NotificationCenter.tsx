@@ -10,6 +10,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { useState, useMemo, useEffect, useSyncExternalStore } from "react";
 import { notificationStore } from "@/services/notificationStore";
 import { useAuth } from "@/hooks/useAuth";
+import { useAuditLog } from "@/hooks/useAuditLog";
 
 export type NotifType = "alert" | "cron" | "session" | "operation" | "builder" | "system" | "agent";
 export type NotifSeverity = "critical" | "warning" | "success" | "info";
@@ -184,6 +185,7 @@ export function NotificationCenter() {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const { user } = useAuth();
+  const { logAction } = useAuditLog();
 
   // Sync store with auth state
   useEffect(() => {
@@ -207,12 +209,15 @@ export function NotificationCenter() {
   const criticalCount = notifications.filter(n => n.severity === "critical" && !notificationStore.isRead(n.id)).length;
 
   const handleMarkAllRead = () => {
-    notificationStore.markAllRead(notifications.map(n => n.id));
+    const ids = notifications.map(n => n.id);
+    notificationStore.markAllRead(ids);
+    logAction("notification.mark_all_read", "notifications", "", { count: ids.length });
   };
 
   const handleDismiss = (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
     notificationStore.dismiss(id);
+    logAction("notification.dismiss", "notifications", id);
   };
 
   const handleClick = (notif: OperationalNotification) => {
