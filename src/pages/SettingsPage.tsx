@@ -9,10 +9,12 @@ import { useDomainHealth, type DomainKey, type DomainHealthEntry } from "@/hooks
 import { API_BASE_URL, isUsingLocalBackend } from "@/domains/api";
 import {
   Settings, Server, Wifi, WifiOff, Activity, Clock, Database,
-  Radio, Shield, Eye, Lock, RefreshCw, CheckCircle2, AlertTriangle, XCircle, Loader2
+  Radio, Shield, Eye, Lock, RefreshCw, CheckCircle2, AlertTriangle, XCircle, Loader2,
+  Zap, ArrowDown
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { apiUrl } from "@/domains/api";
+import { sseDiagnostics } from "@/hooks/sseDiagnostics";
 import { cn } from "@/lib/utils";
 
 /* ── Domain labels ── */
@@ -145,6 +147,72 @@ function DomainRow({ domain, entry }: { domain: DomainKey; entry: DomainHealthEn
   );
 }
 
+/* ── SSE Diagnostics Section ── */
+const SSE_STATUS_MAP: Record<string, { label: string; icon: React.ReactNode; cls: string }> = {
+  connected: { label: "Conectado", icon: <Zap className="h-3.5 w-3.5 text-status-online" />, cls: "text-status-online" },
+  connecting: { label: "Conectando…", icon: <Loader2 className="h-3.5 w-3.5 text-status-warning animate-spin" />, cls: "text-status-warning" },
+  disconnected: { label: "Desconectado", icon: <WifiOff className="h-3.5 w-3.5 text-status-error" />, cls: "text-status-error" },
+  unsupported: { label: "Não suportado", icon: <XCircle className="h-3.5 w-3.5 text-muted-foreground" />, cls: "text-muted-foreground" },
+};
+
+function SSEDiagnosticsSection() {
+  const [, setTick] = useState(0);
+
+  useEffect(() => {
+    const unsub = sseDiagnostics.subscribe(() => setTick(t => t + 1));
+    return () => { unsub(); };
+  }, []);
+
+  const { status, events, connectedAt, reconnects } = sseDiagnostics;
+  const info = SSE_STATUS_MAP[status] || SSE_STATUS_MAP.disconnected;
+
+  return (
+    <SectionCard title="Diagnóstico SSE (Real-time)" icon={Zap}>
+      {/* Status row */}
+      <div className="flex items-center justify-between pb-3 border-b border-border/40">
+        <div className="flex items-center gap-2">
+          {info.icon}
+          <span className={cn("text-sm font-semibold", info.cls)}>{info.label}</span>
+        </div>
+        <div className="flex items-center gap-4 text-[10px] text-muted-foreground font-mono">
+          {connectedAt && (
+            <span>Desde {connectedAt.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}</span>
+          )}
+          <span>Reconexões: {reconnects}</span>
+        </div>
+      </div>
+
+      {/* Event log */}
+      <div>
+        <div className="flex items-center gap-1.5 mb-2">
+          <ArrowDown className="h-3 w-3 text-muted-foreground/50" />
+          <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
+            Últimos eventos ({events.length})
+          </span>
+        </div>
+        {events.length === 0 ? (
+          <p className="text-xs text-muted-foreground/40 text-center py-6">Nenhum evento SSE recebido</p>
+        ) : (
+          <div className="max-h-64 overflow-y-auto space-y-0.5 scrollbar-thin">
+            {events.map((ev, i) => (
+              <div key={i} className="flex items-center justify-between py-1.5 px-2 rounded hover:bg-muted/20 transition-colors">
+                <div className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-status-online animate-pulse" />
+                  <span className="text-xs font-mono font-medium text-foreground">{ev.domain}</span>
+                </div>
+                <div className="flex items-center gap-3 text-[10px] text-muted-foreground font-mono">
+                  <span>{(ev.size / 1024).toFixed(1)} KB</span>
+                  <span>{ev.timestamp.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </SectionCard>
+  );
+}
+
 /* ── Page ── */
 const SettingsPage = () => {
   const health = useDomainHealth();
@@ -241,6 +309,9 @@ const SettingsPage = () => {
             )}
           </SectionCard>
         </div>
+
+        {/* SSE Diagnostics */}
+        <SSEDiagnosticsSection />
 
         {/* Notas operacionais */}
         <SectionCard title="Notas Operacionais" icon={Clock}>

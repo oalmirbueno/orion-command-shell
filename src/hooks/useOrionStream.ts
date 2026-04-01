@@ -14,6 +14,7 @@ import { useEffect, useRef, useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { apiUrl } from "@/domains/api";
 import { getDomainHealthStore, type DomainKey } from "./useDomainHealth";
+import { sseDiagnostics } from "./sseDiagnostics";
 
 export type StreamStatus = "connecting" | "connected" | "disconnected" | "unsupported";
 
@@ -79,6 +80,7 @@ export function useOrionStream(options: StreamOptions = {}) {
 
   const setStatus = useCallback((s: StreamStatus) => {
     statusRef.current = s;
+    sseDiagnostics.setStatus(s);
     onStatusChange?.(s);
   }, [onStatusChange]);
 
@@ -133,6 +135,7 @@ export function useOrionStream(options: StreamOptions = {}) {
           if (!mountedRef.current) return;
           try {
             const parsed = JSON.parse(ev.data);
+            sseDiagnostics.recordEvent(domain, ev.data?.length ?? 0);
             injectData(domain, parsed);
           } catch {
             // Ignore malformed payloads
@@ -146,6 +149,7 @@ export function useOrionStream(options: StreamOptions = {}) {
         try {
           const parsed = JSON.parse(ev.data);
           if (parsed?.domain && parsed?.data) {
+            sseDiagnostics.recordEvent(parsed.domain, ev.data?.length ?? 0);
             injectData(parsed.domain, parsed.data);
           }
         } catch {
