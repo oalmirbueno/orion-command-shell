@@ -136,7 +136,7 @@ function AgentNode3D({ position, agent, onClick, onHover }: {
         {/* Status/task subtitle */}
         <Billboard follow lockX={false} lockY={false} lockZ={false}>
           <Text
-            position={[0, scale * 0.65 - 0.22, 0]}
+            position={[0, baseScale * 0.65 - 0.22, 0]}
             fontSize={0.1}
             color={agent.status === "active" ? "#a3e635" : agent.status === "idle" ? "#fbbf24" : "#6b7280"}
             anchorX="center"
