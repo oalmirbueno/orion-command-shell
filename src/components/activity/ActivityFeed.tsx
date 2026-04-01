@@ -104,13 +104,13 @@ export function ActivityFeed({ events }: ActivityFeedProps) {
   const blocks = groupByTimeBlock(events);
 
   return (
-    <section>
-      <div className="flex items-center gap-3 mb-5">
-        <h2 className="text-xs font-mono uppercase tracking-[0.15em] text-muted-foreground">Feed de Eventos</h2>
-        <div className="flex items-center gap-2 ml-2 px-3 py-1 rounded-full bg-muted-foreground/5 border border-border/40">
-          <span className="text-xs font-mono text-muted-foreground/60">{events.length} eventos</span>
+    <section className="rounded-lg border border-border overflow-hidden">
+      <div className="orion-panel-header">
+        <div className="flex items-center gap-3">
+          <div className="w-6 h-0.5 bg-primary/40 rounded-full" />
+          <h2 className="orion-panel-title">Feed de Eventos</h2>
         </div>
-        <div className="flex-1 h-px bg-border/40" />
+        <span className="text-xs font-mono text-muted-foreground/50">{events.length} eventos</span>
       </div>
       <div className="space-y-6 max-h-[calc(100vh-280px)] overflow-y-auto orion-thin-scroll pr-1">
         {blocks.map((block) => (

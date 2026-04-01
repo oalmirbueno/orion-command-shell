@@ -65,12 +65,15 @@ export function ResourceGauges({ gauges = [] }: Props) {
   }
 
   return (
-    <section>
-      <div className="flex items-center gap-3 mb-4">
-        <h2 className="text-xs font-mono uppercase tracking-[0.15em] text-muted-foreground">Uso de Recursos</h2>
-        <div className="flex-1 h-px bg-border/40" />
+    <section className="rounded-lg border border-border overflow-hidden">
+      <div className="orion-panel-header">
+        <div className="flex items-center gap-3">
+          <div className="w-6 h-0.5 bg-muted-foreground/40 rounded-full" />
+          <h2 className="orion-panel-title">Uso de Recursos</h2>
+        </div>
       </div>
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="p-5">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {gauges.map((g) => (
           <CircularGauge key={g.label} data={g} />
         ))}

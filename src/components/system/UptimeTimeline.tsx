@@ -35,14 +35,16 @@ export function UptimeTimeline({ days = [], uptimePercent = "—" }: Props) {
   }
 
   return (
-    <section>
-      <div className="flex items-center gap-3 mb-4">
-        <h2 className="text-xs font-mono uppercase tracking-[0.15em] text-muted-foreground">Disponibilidade · 90 Dias</h2>
-        <div className="flex-1 h-px bg-border/40" />
+    <section className="rounded-lg border border-border overflow-hidden">
+      <div className="orion-panel-header">
+        <div className="flex items-center gap-3">
+          <div className="w-6 h-0.5 bg-primary/40 rounded-full" />
+          <h2 className="orion-panel-title">Disponibilidade · 90 Dias</h2>
+        </div>
         <span className="text-sm font-mono font-semibold text-foreground">{uptimePercent}</span>
       </div>
 
-      <div className="rounded-lg border border-border/40 bg-card p-5">
+      <div className="p-5">
         <div className="flex gap-0.5 flex-wrap">
           {days.map((day, i) => (
             <div

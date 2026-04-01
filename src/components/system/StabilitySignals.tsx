@@ -37,22 +37,18 @@ export function StabilitySignals({ signals = [] }: Props) {
   const hasIssues = signals.some(s => s.level !== "normal");
 
   return (
-    <section>
-      <div className="flex items-center gap-3 mb-4">
-        <h2 className="text-xs font-mono uppercase tracking-[0.15em] text-muted-foreground">Sinais de Estabilidade</h2>
-        {!hasIssues ? (
-          <div className="flex items-center gap-2 ml-2 px-3 py-1 rounded-full bg-status-online/10 border border-status-online/20">
-            <span className="text-xs font-mono text-status-online font-medium">Estável</span>
-          </div>
-        ) : (
-          <div className="flex items-center gap-2 ml-2 px-3 py-1 rounded-full bg-status-warning/10 border border-status-warning/20">
-            <span className="text-xs font-mono text-status-warning font-medium">Atenção</span>
-          </div>
-        )}
-        <div className="flex-1 h-px bg-border/40" />
+    <section className="rounded-lg border border-border overflow-hidden">
+      <div className="orion-panel-header">
+        <div className="flex items-center gap-3">
+          <div className={`w-6 h-0.5 rounded-full ${hasIssues ? "bg-status-warning" : "bg-status-online"}`} />
+          <h2 className="orion-panel-title">Sinais de Estabilidade</h2>
+        </div>
+        <span className={`text-xs font-mono font-semibold ${hasIssues ? "text-status-warning" : "text-status-online"}`}>
+          {hasIssues ? "Atenção" : "Estável"}
+        </span>
       </div>
 
-      <div className="space-y-2">
+      <div className="p-4 space-y-2">
         {signals.map((signal) => {
           const cfg = levelConfig[signal.level];
           const Icon = iconMap[signal.iconName] || Clock;

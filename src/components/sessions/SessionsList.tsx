@@ -109,16 +109,18 @@ export function SessionsList({ sessions = [] }: Props) {
   const runningCount = sessions.filter(s => s.status === "running").length;
 
   return (
-    <section>
-      <div className="flex items-center gap-3 mb-4">
-        <h2 className="text-xs font-mono uppercase tracking-[0.15em] text-muted-foreground">Registro de Sessões</h2>
-        {runningCount > 0 && (
-          <div className="flex items-center gap-2 ml-2 px-3 py-1 rounded-full bg-status-online/10 border border-status-online/20">
+    <section className="rounded-lg border border-border overflow-hidden">
+      <div className="orion-panel-header">
+        <div className="flex items-center gap-3">
+          <div className={`w-6 h-0.5 rounded-full ${runningCount > 0 ? "bg-status-online" : "bg-muted-foreground/40"}`} />
+          <h2 className="orion-panel-title">Registro de Sessões</h2>
+        </div>
+        <div className="flex items-center gap-3">
+          {runningCount > 0 && (
             <span className="text-xs font-mono text-status-online font-semibold">{runningCount} em execução</span>
-          </div>
-        )}
-        <div className="flex-1 h-px bg-border/40" />
-        <span className="text-xs font-mono text-muted-foreground/40">{sessions.length} total</span>
+          )}
+          <span className="text-xs font-mono text-muted-foreground/30">{sessions.length} total</span>
+        </div>
       </div>
       <div className="space-y-2.5 max-h-[calc(100vh-280px)] overflow-y-auto orion-thin-scroll pr-1">
         {sorted.map((session) => (

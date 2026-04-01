@@ -149,10 +149,12 @@ export function AgentDetailCards({ agents = [] }: AgentDetailCardsProps) {
   const tiers: AgentTier[] = ["orchestrator", "core", "support"];
 
   return (
-    <section>
-      <div className="flex items-center gap-3 mb-5">
-        <h2 className="text-xs font-mono uppercase tracking-[0.15em] text-muted-foreground">Detalhe Operacional</h2>
-        <div className="flex-1 h-px bg-border/40" />
+    <section className="rounded-lg border border-border overflow-hidden">
+      <div className="orion-panel-header">
+        <div className="flex items-center gap-3">
+          <div className="w-6 h-0.5 bg-muted-foreground/40 rounded-full" />
+          <h2 className="orion-panel-title">Detalhe Operacional</h2>
+        </div>
         <span className="text-xs font-mono text-muted-foreground/40">{agents.length} agentes</span>
       </div>
       <div className="space-y-6">
