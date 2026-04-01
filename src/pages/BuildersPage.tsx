@@ -381,6 +381,20 @@ export default function BuildersPage() {
               <span>{formatTokens(b.totalTokens)} tokens</span>
             </div>
           )}
+          {/* Current task & context */}
+          {(b.currentTask || b.context) && (
+            <div className="rounded-md border border-primary/10 bg-primary/5 px-3 py-2 space-y-1">
+              {b.currentTask && (
+                <div className="flex items-center gap-2">
+                  <Activity className="h-3 w-3 text-primary shrink-0" />
+                  <span className="text-xs text-foreground/80 truncate">{b.currentTask}</span>
+                </div>
+              )}
+              {b.context && (
+                <div className="text-[10px] font-mono text-muted-foreground/50 pl-5">{b.context}</div>
+              )}
+            </div>
+          )}
         </div>
         {isExpanded && (
           <div className="border-t border-border p-3 space-y-2 bg-muted/10">
