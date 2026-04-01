@@ -255,7 +255,7 @@ export function SceneCanvas({ onAgentClick, onAgentHover }: { onAgentClick?: (ag
       />
 
       {agentList.map((agent, i) => (
-        <AgentNode3D key={agent.id} agent={agent} position={positions[i]} onClick={onAgentClick} />
+        <AgentNode3D key={agent.id} agent={agent} position={positions[i]} onClick={onAgentClick} onHover={onAgentHover} />
       ))}
 
       {connectionPairs.map(([fromIdx, toIdx], i) => (
