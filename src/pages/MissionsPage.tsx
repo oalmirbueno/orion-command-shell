@@ -441,7 +441,7 @@ const MissionsPage = () => {
   const queryClient = useQueryClient();
   const [customWorkflows, setCustomWorkflows] = useState<WorkflowDef[]>(loadCustomWorkflows);
   const [sheetOpen, setSheetOpen] = useState(false);
-  const [selectedCronJob, setSelectedCronJob] = useState<CronJob | null>(null);
+  const [selectedMission, setSelectedMission] = useState<MissionForSheet | null>(null);
 
   const { data: cronJobs, isLoading, isError, error } = useQuery<CronJobRaw[]>({
     queryKey: ["missions-cron"],
@@ -450,6 +450,7 @@ const MissionsPage = () => {
     placeholderData: (prev) => prev,
   });
 
+  const customIds = useMemo(() => new Set(customWorkflows.map((w) => w.id)), [customWorkflows]);
   const allWorkflows = useMemo(() => [...BUILTIN_WORKFLOWS, ...customWorkflows], [customWorkflows]);
   const missions = useMemo(() => buildMissions(allWorkflows, cronJobs ?? []), [allWorkflows, cronJobs]);
 
@@ -463,12 +464,35 @@ const MissionsPage = () => {
     });
   }, []);
 
-  const handleMissionClick = useCallback((mission: MissionCard) => {
-    if (mission.matched && mission.cronRaw) {
-      setSelectedCronJob(rawToCronJob(mission.cronRaw));
-      setSheetOpen(true);
-    }
+  const handleDeleteWorkflow = useCallback((id: string) => {
+    setCustomWorkflows((prev) => {
+      const next = prev.filter((w) => w.id !== id);
+      saveCustomWorkflows(next);
+      return next;
+    });
   }, []);
+
+  const handleMissionClick = useCallback((mission: MissionCard) => {
+    const wfDef = allWorkflows.find((w) => w.id === mission.id);
+    const forSheet: MissionForSheet = {
+      id: mission.id,
+      name: mission.name,
+      description: mission.description,
+      trigger: mission.trigger,
+      category: mission.category,
+      cronMatch: wfDef?.cronMatch,
+      matched: mission.matched,
+      enabled: mission.enabled,
+      lastRunAt: mission.lastRunAt,
+      nextRunAt: mission.nextRunAt,
+      lastRunOk: mission.lastRunOk,
+      schedule: mission.schedule,
+      cronJob: mission.cronRaw ? rawToCronJob(mission.cronRaw) : null,
+      isCustom: customIds.has(mission.id),
+    };
+    setSelectedMission(forSheet);
+    setSheetOpen(true);
+  }, [allWorkflows, customIds]);
 
   return (
     <OrionLayout title="Missões">
