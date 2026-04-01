@@ -40,11 +40,6 @@ function classify(agent: RealAgent): BuilderCategory {
   return "other";
 }
 
-function isAioxSquad(skill: SkillItem): boolean {
-  const h = `${skill.name} ${skill.description || ""} ${skill.source || ""}`.toLowerCase();
-  return ["aiox", "aio", "squad", "openai", "gpt"].some((k) => h.includes(k));
-}
-
 function timeAgo(iso?: string): string {
   if (!iso) return "—";
   const mins = Math.round((Date.now() - new Date(iso).getTime()) / 60_000);
