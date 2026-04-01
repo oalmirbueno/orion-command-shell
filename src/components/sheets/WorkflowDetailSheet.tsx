@@ -1,15 +1,16 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   Target, Timer, Bot, Play, Zap, Clock, Calendar, CheckCircle2, XCircle,
   Pause, Trash2, AlertTriangle, BarChart3, ArrowRight, Link2, Unlink,
-  Activity, Loader2, Settings2, Workflow,
+  Activity, Loader2, Settings2, Workflow, Pencil, Check, X, History,
 } from "lucide-react";
-import { apiUrl } from "@/domains/api";
+import { apiUrl, API_BASE_URL } from "@/domains/api";
 import { toast } from "@/hooks/use-toast";
 import type { CronJob, JobStatus } from "@/domains/cron/types";
 
@@ -37,11 +38,18 @@ interface MissionForSheet {
   isCustom: boolean;
 }
 
+interface WorkflowUpdate {
+  name?: string;
+  description?: string;
+  cronMatch?: string;
+}
+
 interface Props {
   mission: MissionForSheet | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onDelete?: (id: string) => void;
+  onUpdate?: (id: string, updates: WorkflowUpdate) => void;
 }
 
 /* ══════════════════════════════════════════════
@@ -96,11 +104,168 @@ function timeUntil(iso: string | null): string {
   return `em ${Math.round(hrs / 24)}d`;
 }
 
+function formatDuration(ms: number): string {
+  if (ms < 1000) return `${ms}ms`;
+  if (ms < 60_000) return `${(ms / 1000).toFixed(1)}s`;
+  return `${Math.round(ms / 60_000)}min`;
+}
+
+function formatTime(iso: string): string {
+  return new Date(iso).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+}
+
+function formatDate(iso: string): string {
+  return new Date(iso).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
+}
+
 /* ══════════════════════════════════════════════
-   Component
+   Execution History (from /api/cron/runs)
    ══════════════════════════════════════════════ */
 
-export function WorkflowDetailSheet({ mission, open, onOpenChange, onDelete }: Props) {
+interface CronRunRaw {
+  id: string;
+  jobId: string;
+  startedAt: string;
+  finishedAt: string;
+  durationMs: number;
+  success: boolean;
+  error: string | null;
+}
+
+async function fetchCronRuns(jobId: string): Promise<CronRunRaw[]> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/cron/runs?jobId=${encodeURIComponent(jobId)}`, {
+      headers: { Accept: "application/json" },
+      signal: AbortSignal.timeout(10_000),
+    });
+    if (!res.ok) return [];
+    const json = await res.json();
+    return Array.isArray(json) ? json.slice(0, 10) : [];
+  } catch {
+    return [];
+  }
+}
+
+function RunHistorySection({ cronJobId }: { cronJobId: string }) {
+  const { data: runs, isLoading } = useQuery<CronRunRaw[]>({
+    queryKey: ["cron-runs", cronJobId],
+    queryFn: () => fetchCronRuns(cronJobId),
+    staleTime: 30_000,
+  });
+
+  return (
+    <div>
+      <div className="flex items-center gap-2 mb-3">
+        <History className="h-3.5 w-3.5 text-muted-foreground/40" />
+        <h4 className="text-xs font-mono uppercase tracking-wider text-muted-foreground/50">Execuções Recentes</h4>
+      </div>
+      <div className="ml-5 space-y-1.5">
+        {isLoading ? (
+          <div className="flex items-center gap-2 py-3">
+            <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground/30" />
+            <span className="text-xs text-muted-foreground/40">Carregando histórico…</span>
+          </div>
+        ) : !runs || runs.length === 0 ? (
+          <p className="text-xs text-muted-foreground/30 font-mono py-2">Nenhuma execução registrada</p>
+        ) : (
+          runs.map((run) => (
+            <div key={run.id} className="flex items-center gap-3 py-1.5 group">
+              {run.success ? (
+                <CheckCircle2 className="h-3.5 w-3.5 text-status-online/60 shrink-0" />
+              ) : (
+                <XCircle className="h-3.5 w-3.5 text-status-critical/60 shrink-0" />
+              )}
+              <div className="flex items-center gap-2 flex-1 min-w-0">
+                <span className="text-[10px] font-mono text-muted-foreground/50">
+                  {formatDate(run.startedAt)} {formatTime(run.startedAt)}
+                </span>
+                <div className="w-px h-3 bg-border/20" />
+                <span className="text-[10px] font-mono text-muted-foreground/40">
+                  {formatDuration(run.durationMs)}
+                </span>
+              </div>
+              {run.error && (
+                <span className="text-[9px] font-mono text-status-critical/40 truncate max-w-[120px]" title={run.error}>
+                  {run.error}
+                </span>
+              )}
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════
+   Inline editable field
+   ══════════════════════════════════════════════ */
+
+function EditableField({
+  label,
+  value,
+  onSave,
+  placeholder,
+  mono,
+}: {
+  label: string;
+  value: string;
+  onSave: (val: string) => void;
+  placeholder?: string;
+  mono?: boolean;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(value);
+
+  useEffect(() => { setDraft(value); }, [value]);
+
+  if (!editing) {
+    return (
+      <div className="flex items-center gap-3 group/edit">
+        <span className="text-xs text-muted-foreground/50 w-28 shrink-0">{label}</span>
+        <span className={`text-sm text-foreground/80 truncate flex-1 ${mono ? "font-mono text-xs" : ""}`}>
+          {value || <span className="text-muted-foreground/30 italic">vazio</span>}
+        </span>
+        <button
+          onClick={() => setEditing(true)}
+          className="opacity-0 group-hover/edit:opacity-100 transition-opacity p-1 rounded hover:bg-accent/20"
+        >
+          <Pencil className="h-3 w-3 text-muted-foreground/40" />
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-center gap-2">
+      <span className="text-xs text-muted-foreground/50 w-28 shrink-0">{label}</span>
+      <Input
+        value={draft}
+        onChange={(e) => setDraft(e.target.value)}
+        placeholder={placeholder}
+        maxLength={200}
+        className="h-7 text-xs flex-1"
+        autoFocus
+        onKeyDown={(e) => {
+          if (e.key === "Enter") { onSave(draft.trim()); setEditing(false); }
+          if (e.key === "Escape") { setDraft(value); setEditing(false); }
+        }}
+      />
+      <button onClick={() => { onSave(draft.trim()); setEditing(false); }} className="p-1 rounded hover:bg-status-online/10">
+        <Check className="h-3.5 w-3.5 text-status-online" />
+      </button>
+      <button onClick={() => { setDraft(value); setEditing(false); }} className="p-1 rounded hover:bg-status-critical/10">
+        <X className="h-3.5 w-3.5 text-status-critical/60" />
+      </button>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════
+   Main Component
+   ══════════════════════════════════════════════ */
+
+export function WorkflowDetailSheet({ mission, open, onOpenChange, onDelete, onUpdate }: Props) {
   const [running, setRunning] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
@@ -130,27 +295,24 @@ export function WorkflowDetailSheet({ mission, open, onOpenChange, onDelete }: P
   };
 
   const handleDelete = () => {
-    if (!confirmDelete) {
-      setConfirmDelete(true);
-      return;
-    }
+    if (!confirmDelete) { setConfirmDelete(true); return; }
     onDelete?.(mission.id);
     onOpenChange(false);
     setConfirmDelete(false);
     toast({ title: `Workflow "${mission.name}" removido` });
   };
 
+  const handleFieldSave = (field: keyof WorkflowUpdate, value: string) => {
+    onUpdate?.(mission.id, { [field]: value });
+    toast({ title: "Workflow atualizado" });
+  };
+
   return (
     <Sheet open={open} onOpenChange={(v) => { onOpenChange(v); setConfirmDelete(false); }}>
-      <SheetContent
-        className="bg-card border-border overflow-y-auto p-0 sm:max-w-lg w-full"
-        // n8n-style: no default header, custom layout
-      >
+      <SheetContent className="bg-card border-border overflow-y-auto p-0 sm:max-w-lg w-full">
         {/* ── Hero header ── */}
         <div className="relative px-6 pt-6 pb-5 border-b border-border/40">
-          {/* Decorative gradient bar */}
           <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary/60 via-primary/30 to-transparent" />
-
           <div className="flex items-start gap-4">
             <div className="w-12 h-12 rounded-xl bg-surface-2 border border-border/50 flex items-center justify-center shrink-0 shadow-sm">
               <Target className="h-5 w-5 text-foreground/60" />
@@ -189,35 +351,26 @@ export function WorkflowDetailSheet({ mission, open, onOpenChange, onDelete }: P
               Fluxo de Execução
             </h4>
             <div className="flex items-center gap-0">
-              {/* Trigger node */}
               <div className="flex flex-col items-center gap-1.5 shrink-0">
                 <div className={`w-11 h-11 rounded-xl border-2 border-dashed border-border/50 flex items-center justify-center ${trig.color} bg-background`}>
                   <TriggerIcon className="h-5 w-5" />
                 </div>
                 <span className="text-[9px] font-mono text-muted-foreground/40">{trig.label}</span>
               </div>
-
-              {/* Connector */}
               <div className="flex-1 flex items-center mx-1.5 -mt-4">
                 <div className="flex-1 h-px bg-border/40" />
                 <ArrowRight className="h-3 w-3 text-border/60 shrink-0 -mx-0.5" />
               </div>
-
-              {/* Process node */}
               <div className="flex flex-col items-center gap-1.5 shrink-0">
                 <div className="w-11 h-11 rounded-xl border border-border/50 flex items-center justify-center bg-background">
                   <Workflow className="h-5 w-5 text-foreground/50" />
                 </div>
                 <span className="text-[9px] font-mono text-muted-foreground/40">Processar</span>
               </div>
-
-              {/* Connector */}
               <div className="flex-1 flex items-center mx-1.5 -mt-4">
                 <div className="flex-1 h-px bg-border/40" />
                 <ArrowRight className="h-3 w-3 text-border/60 shrink-0 -mx-0.5" />
               </div>
-
-              {/* Output node */}
               <div className="flex flex-col items-center gap-1.5 shrink-0">
                 <div className={`w-11 h-11 rounded-xl border border-border/50 flex items-center justify-center bg-background ${
                   mission.lastRunOk === true ? "border-status-online/30" :
@@ -234,12 +387,25 @@ export function WorkflowDetailSheet({ mission, open, onOpenChange, onDelete }: P
             </div>
           </div>
 
-          {/* ── Configuration panel ── */}
+          {/* ── Configuration panel — editable for custom ── */}
           <Section title="Configuração" icon={Settings2}>
-            <Row label="ID" value={mission.id} mono />
-            <Row label="Trigger" value={trig.label} />
-            <Row label="Categoria" value={cat.label} />
-            {mission.cronMatch && <Row label="Cron Match" value={mission.cronMatch} mono />}
+            {mission.isCustom ? (
+              <>
+                <EditableField label="Nome" value={mission.name} onSave={(v) => handleFieldSave("name", v)} placeholder="Nome do workflow" />
+                <EditableField label="Descrição" value={mission.description} onSave={(v) => handleFieldSave("description", v)} placeholder="Descrição" />
+                <EditableField label="Cron Match" value={mission.cronMatch ?? ""} onSave={(v) => handleFieldSave("cronMatch", v)} placeholder="Ex: sync-leads" mono />
+                <Row label="ID" value={mission.id} mono />
+                <Row label="Trigger" value={trig.label} />
+                <Row label="Categoria" value={cat.label} />
+              </>
+            ) : (
+              <>
+                <Row label="ID" value={mission.id} mono />
+                <Row label="Trigger" value={trig.label} />
+                <Row label="Categoria" value={cat.label} />
+                {mission.cronMatch && <Row label="Cron Match" value={mission.cronMatch} mono />}
+              </>
+            )}
           </Section>
 
           {/* ── Live data panel (only if matched) ── */}
@@ -288,9 +454,7 @@ export function WorkflowDetailSheet({ mission, open, onOpenChange, onDelete }: P
                     <AlertTriangle className="h-3.5 w-3.5 text-status-critical/60" />
                     <h4 className="text-xs font-mono uppercase tracking-wider text-status-critical/50">Erro</h4>
                   </div>
-                  <p className="text-xs font-mono text-status-critical/70 whitespace-pre-wrap break-words leading-relaxed">
-                    {cron.error}
-                  </p>
+                  <p className="text-xs font-mono text-status-critical/70 whitespace-pre-wrap break-words leading-relaxed">{cron.error}</p>
                 </div>
               )}
 
@@ -315,6 +479,11 @@ export function WorkflowDetailSheet({ mission, open, onOpenChange, onDelete }: P
                   </div>
                 </div>
               </Section>
+
+              <Separator className="bg-border/30" />
+
+              {/* ── Execution History ── */}
+              <RunHistorySection cronJobId={cron.id} />
 
               <Separator className="bg-border/30" />
 
@@ -390,4 +559,4 @@ function Row({ label, value, mono }: { label: string; value: string; mono?: bool
   );
 }
 
-export type { MissionForSheet };
+export type { MissionForSheet, WorkflowUpdate };
