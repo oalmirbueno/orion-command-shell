@@ -74,9 +74,10 @@ export function ResourceGauges({ gauges = [] }: Props) {
       </div>
       <div className="p-5">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {gauges.map((g) => (
-          <CircularGauge key={g.label} data={g} />
-        ))}
+          {gauges.map((g) => (
+            <CircularGauge key={g.label} data={g} />
+          ))}
+        </div>
       </div>
     </section>
   );
