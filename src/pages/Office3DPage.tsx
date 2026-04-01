@@ -46,6 +46,7 @@ const Office3DPage = () => {
   const [tooltipPos, setTooltipPos] = useState<{ x: number; y: number } | null>(null);
   const [meetingAgents, setMeetingAgents] = useState<AgentView[]>([]);
   const [meetingActive, setMeetingActive] = useState(false);
+  const [squadsOpen, setSquadsOpen] = useState(false);
 
   // Get all agents for meeting bar
   const { data: allAgents } = useOrionData<AgentView[]>({
