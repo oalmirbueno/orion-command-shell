@@ -29,6 +29,7 @@ import TimelinePage from "./pages/TimelinePage.tsx";
 import RemindersPage from "./pages/RemindersPage.tsx";
 import SettingsPage from "./pages/SettingsPage.tsx";
 import LoginPage from "./pages/LoginPage.tsx";
+import ResetPasswordPage from "./pages/ResetPasswordPage.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import { PageTransition } from "./components/PageTransition.tsx";
 
@@ -65,6 +66,7 @@ function AppShell() {
           <Routes>
             {/* Public */}
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
 
             {/* Protected with Error Boundaries */}
             <Route path="/" element={<EB title="Dashboard"><Index /></EB>} />

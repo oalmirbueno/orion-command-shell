@@ -1,14 +1,26 @@
-import { Search, LogOut, User } from "lucide-react";
+import { Search, LogOut, User, Shield } from "lucide-react";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { NotificationCenter } from "@/components/notifications/NotificationCenter";
 import { useAuth } from "@/hooks/useAuth";
+import { useProfile } from "@/hooks/useProfile";
+import { useUserRole, type AppRole } from "@/hooks/useUserRole";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+
+const ROLE_BADGES: Record<AppRole, { label: string; cls: string }> = {
+  admin:    { label: "Admin",    cls: "bg-primary/10 text-primary border-primary/20" },
+  operator: { label: "Operator", cls: "bg-status-warning/10 text-status-warning border-status-warning/20" },
+  viewer:   { label: "Viewer",   cls: "bg-muted text-muted-foreground border-border" },
+};
 
 export function OrionTopBar({ title = "Comando" }: { title?: string }) {
   const navigate = useNavigate();
   const { user, configured, signOut } = useAuth();
+  const { profile } = useProfile();
+  const { role } = useUserRole();
+  const displayLabel = profile?.display_name || user?.email?.split("@")[0] || user?.email || "";
+  const roleBadge = ROLE_BADGES[role];
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -57,7 +69,8 @@ export function OrionTopBar({ title = "Comando" }: { title?: string }) {
             <TooltipTrigger asChild>
               <button onClick={handleSignOut} className="flex items-center gap-1.5 px-2 py-1.5 rounded-md text-muted-foreground/50 hover:text-foreground hover:bg-accent/40 transition-colors">
                 <User className="h-3.5 w-3.5" />
-                <span className="text-[10px] font-mono hidden lg:inline max-w-[100px] truncate">{user.email}</span>
+                <span className="text-[10px] font-mono hidden lg:inline max-w-[100px] truncate">{displayLabel}</span>
+                <span className={`text-[8px] font-mono px-1.5 py-0.5 rounded border hidden lg:inline ${roleBadge.cls}`}>{roleBadge.label}</span>
                 <LogOut className="h-3 w-3 ml-1" />
               </button>
             </TooltipTrigger>
