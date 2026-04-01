@@ -68,7 +68,7 @@ function AppShell() {
             <Route path="/reminders" element={<RemindersPage />} />
             <Route path="/pipelines" element={<PipelinesPage />} />
             <Route path="/office3d" element={<Office3DPage />} />
-            <Route path="/settings" element={<PlaceholderPage title="Configurações" description="Módulo Configurações — Em desenvolvimento" />} />
+            <Route path="/settings" element={<SettingsPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </PageTransition>
