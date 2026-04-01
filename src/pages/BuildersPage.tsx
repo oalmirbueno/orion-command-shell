@@ -101,15 +101,14 @@ async function fetchSessions(): Promise<RealSession[]> {
   return Array.isArray(data) ? data : data?.sessions ?? [];
 }
 
-async function fetchSquads(): Promise<SkillItem[]> {
-  const res = await fetch(`${API_BASE_URL}/skills`, {
+async function fetchSquads(): Promise<AioxSquad[]> {
+  const res = await fetch(`${API_BASE_URL}/builders/aiox-squads`, {
     headers: { Accept: "application/json" },
     signal: AbortSignal.timeout(12_000),
   });
   if (!res.ok) return [];
   const data = await res.json();
-  const skills: SkillItem[] = Array.isArray(data) ? data : data?.skills ?? [];
-  return skills.filter(isAioxSquad);
+  return Array.isArray(data) ? data : data?.squads ?? [];
 }
 
 /* ── Helpers ── */
