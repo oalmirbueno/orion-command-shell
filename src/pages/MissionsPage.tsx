@@ -15,7 +15,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger,
 } from "@/components/ui/dialog";
-import { CronDetailSheet } from "@/components/sheets/CronDetailSheet";
+import { WorkflowDetailSheet } from "@/components/sheets/WorkflowDetailSheet";
+import type { MissionForSheet } from "@/components/sheets/WorkflowDetailSheet";
 import { API_BASE_URL } from "@/domains/api";
 import type { CronJob, JobStatus } from "@/domains/cron/types";
 
