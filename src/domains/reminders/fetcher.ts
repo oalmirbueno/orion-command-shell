@@ -40,7 +40,7 @@ function formatTime(ts: string | number): string {
 
 export const fetchRemindersPage: DomainFetcher<RemindersPageData> = async (): Promise<DomainResult<RemindersPageData>> => {
   const results = await Promise.allSettled([
-    fetchAlerts(),
+    fetchAlertsPage(),
     fetchCronPage(),
     fetchActivityPage(),
     fetchOperationsPage(),
