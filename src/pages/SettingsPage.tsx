@@ -17,6 +17,8 @@ import { apiUrl } from "@/domains/api";
 import { sseDiagnostics } from "@/hooks/sseDiagnostics";
 import { cn } from "@/lib/utils";
 import { NotificationHistory } from "@/components/notifications/NotificationHistory";
+import { TrendsDashboard } from "@/components/analytics/TrendsDashboard";
+import { DegradationAlerts } from "@/components/analytics/DegradationAlerts";
 
 /* ── Domain labels ── */
 const DOMAIN_LABELS: Record<DomainKey, string> = {
