@@ -1,9 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import { Hammer, Bot, Activity, ChevronRight, Terminal, Zap, Layers, Package } from "lucide-react";
+import { Hammer, Bot, Activity, ChevronRight, Terminal, Zap, Package, Server } from "lucide-react";
 import { API_BASE_URL } from "@/domains/api";
 
-/* ── Types ── */
 interface RealAgent {
   id: string;
   name: string;
@@ -17,27 +16,20 @@ interface RealAgent {
 interface AioxSquad {
   id: string;
   name: string;
-  description?: string;
-  source?: string;
   status?: string;
-  agents?: string[];
   files?: number | string[];
-  category?: string;
 }
 
-type BuilderCategory = "claude-code" | "aiox" | "other";
+type BuilderDomain = "openclaw" | "claude-code" | "aiox";
 
-const CATEGORY_KEYWORDS: Record<Exclude<BuilderCategory, "other">, string[]> = {
-  "claude-code": ["claude", "anthropic", "claude-code", "sonnet", "opus", "haiku"],
-  aiox: ["aiox", "aio", "openai", "gpt", "squad"],
-};
+const CLAUDE_KW = ["claude", "anthropic", "sonnet", "opus", "haiku", "claude-code"];
+const AIOX_KW = ["aiox", "aio-x", "squad"];
 
-function classify(agent: RealAgent): BuilderCategory {
+function classify(agent: RealAgent): BuilderDomain {
   const h = `${agent.name} ${agent.model || ""} ${agent.id}`.toLowerCase();
-  for (const [cat, kws] of Object.entries(CATEGORY_KEYWORDS) as [Exclude<BuilderCategory, "other">, string[]][]) {
-    if (kws.some((k) => h.includes(k))) return cat;
-  }
-  return "other";
+  if (CLAUDE_KW.some((k) => h.includes(k))) return "claude-code";
+  if (AIOX_KW.some((k) => h.includes(k))) return "aiox";
+  return "openclaw";
 }
 
 function timeAgo(iso?: string): string {
@@ -48,16 +40,16 @@ function timeAgo(iso?: string): string {
   return `${Math.round(mins / 60)}h`;
 }
 
-const CAT_META: Record<BuilderCategory, { label: string; icon: React.ElementType; accent: string }> = {
-  "claude-code": { label: "Claude Code", icon: Terminal, accent: "text-primary" },
+const DOMAIN_META: Record<BuilderDomain, { label: string; icon: React.ElementType; accent: string }> = {
+  openclaw: { label: "OpenClaw", icon: Server, accent: "text-primary" },
+  "claude-code": { label: "Claude Code", icon: Terminal, accent: "text-purple-400" },
   aiox: { label: "AIOX", icon: Zap, accent: "text-amber-400" },
-  other: { label: "Outros", icon: Bot, accent: "text-muted-foreground" },
 };
 
 export function BuildersWidget() {
   const navigate = useNavigate();
 
-  const { data: agents = [], isLoading: loadingAgents } = useQuery<RealAgent[]>({
+  const { data: agents = [], isLoading } = useQuery<RealAgent[]>({
     queryKey: ["builders-widget"],
     queryFn: async () => {
       const res = await fetch(`${API_BASE_URL}/agents`, {
@@ -89,13 +81,11 @@ export function BuildersWidget() {
     placeholderData: (prev) => prev,
   });
 
-  const isLoading = loadingAgents;
-
-  const grouped: Record<BuilderCategory, RealAgent[]> = { "claude-code": [], aiox: [], other: [] };
+  const grouped: Record<BuilderDomain, RealAgent[]> = { openclaw: [], "claude-code": [], aiox: [] };
   agents.forEach((a) => grouped[classify(a)].push(a));
 
   const online = agents.filter((a) => a.status === "online").length;
-  const totalSessions = agents.reduce((s, a) => s + (a.activeSessions ?? 0), 0);
+  const activeSquads = squads.filter((s) => s.status === "active").length;
 
   return (
     <div className="rounded-lg border border-border bg-card">
@@ -114,13 +104,12 @@ export function BuildersWidget() {
         </div>
       </div>
 
-      {/* Metrics strip */}
-      <div className="grid grid-cols-4 border-b border-border divide-x divide-border">
+      {/* Metrics */}
+      <div className="grid grid-cols-3 border-b border-border divide-x divide-border">
         {[
-          { label: "Ambientes", value: agents.length, icon: Layers, color: "text-primary" },
-          { label: "Online", value: online, icon: Activity, color: "text-emerald-400" },
-          { label: "Sessões", value: totalSessions, icon: Terminal, color: "text-muted-foreground" },
-          { label: "Squads", value: squads.length, icon: Package, color: "text-amber-400" },
+          { label: "OpenClaw", value: grouped.openclaw.length, icon: Server, color: "text-primary" },
+          { label: "Claude Code", value: grouped["claude-code"].length, icon: Terminal, color: "text-purple-400" },
+          { label: "AIOX Squads", value: `${activeSquads}/${squads.length}`, icon: Package, color: "text-amber-400" },
         ].map((m) => (
           <div key={m.label} className="flex items-center gap-1.5 px-2.5 py-2">
             <m.icon className={`h-3 w-3 ${m.color} shrink-0`} />
@@ -132,7 +121,7 @@ export function BuildersWidget() {
         ))}
       </div>
 
-      {/* Content */}
+      {/* Domain previews */}
       <div className="p-3 space-y-3">
         {isLoading && !agents.length ? (
           <div className="space-y-2">
@@ -144,41 +133,25 @@ export function BuildersWidget() {
           <p className="text-xs text-muted-foreground/40 text-center py-3">Aguardando dados de builders</p>
         ) : (
           <>
-            {/* Builder categories */}
-            {(["claude-code", "aiox", "other"] as BuilderCategory[]).map((cat) => {
-              const items = grouped[cat];
+            {(["openclaw", "claude-code", "aiox"] as BuilderDomain[]).map((domain) => {
+              const items = grouped[domain];
               if (!items.length) return null;
-              const meta = CAT_META[cat];
+              const meta = DOMAIN_META[domain];
               return (
-                <div key={cat} className="space-y-1.5">
+                <div key={domain} className="space-y-1.5">
                   <div className="flex items-center gap-1.5 px-1">
                     <meta.icon className={`h-3 w-3 ${meta.accent}`} />
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60">
-                      {meta.label}
-                    </span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60">{meta.label}</span>
                     <span className="text-[10px] font-mono text-muted-foreground/40">({items.length})</span>
                   </div>
                   {items.slice(0, 2).map((a) => {
                     const isOnline = a.status === "online";
                     return (
-                      <div
-                        key={a.id}
-                        className="flex items-center justify-between rounded-md border border-border bg-muted/10 px-3 py-2"
-                      >
+                      <div key={a.id} className="flex items-center justify-between rounded-md border border-border bg-muted/10 px-3 py-2">
                         <div className="flex items-center gap-2 truncate">
-                          {a.emoji ? (
-                            <span className="text-sm">{a.emoji}</span>
-                          ) : (
-                            <meta.icon className={`h-3.5 w-3.5 ${meta.accent}/50`} />
-                          )}
-                          <span className="text-xs font-medium text-foreground/80 truncate max-w-[120px]">
-                            {a.name}
-                          </span>
-                          <div
-                            className={`w-1.5 h-1.5 rounded-full ${
-                              isOnline ? "bg-emerald-400" : "bg-muted-foreground/30"
-                            }`}
-                          />
+                          {a.emoji ? <span className="text-sm">{a.emoji}</span> : <meta.icon className={`h-3.5 w-3.5 ${meta.accent}/50`} />}
+                          <span className="text-xs font-medium text-foreground/80 truncate max-w-[120px]">{a.name}</span>
+                          <div className={`w-1.5 h-1.5 rounded-full ${isOnline ? "bg-emerald-400" : "bg-muted-foreground/30"}`} />
                         </div>
                         <div className="flex items-center gap-2 text-[10px] font-mono text-muted-foreground/50">
                           {(a.activeSessions ?? 0) > 0 && <span>{a.activeSessions}s</span>}
@@ -187,9 +160,7 @@ export function BuildersWidget() {
                       </div>
                     );
                   })}
-                  {items.length > 2 && (
-                    <p className="text-[10px] text-muted-foreground/40 font-mono px-1">+{items.length - 2} mais</p>
-                  )}
+                  {items.length > 2 && <p className="text-[10px] text-muted-foreground/40 font-mono px-1">+{items.length - 2} mais</p>}
                 </div>
               );
             })}
@@ -199,27 +170,23 @@ export function BuildersWidget() {
               <div className="space-y-1.5 pt-1 border-t border-border">
                 <div className="flex items-center gap-1.5 px-1">
                   <Package className="h-3 w-3 text-amber-400" />
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60">
-                    Squads Instalados
-                  </span>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60">Squads Instalados</span>
                   <span className="text-[10px] font-mono text-muted-foreground/40">({squads.length})</span>
                 </div>
                 {squads.slice(0, 3).map((sq) => (
-                  <div
-                    key={sq.id}
-                    className="flex items-center justify-between rounded-md border border-amber-400/10 bg-amber-400/5 px-3 py-1.5"
-                  >
-                    <span className="text-xs font-medium text-foreground/80 truncate max-w-[160px]">
-                      {sq.name}
-                    </span>
-                    <span className="text-[10px] font-mono text-muted-foreground/50">
-                      {Array.isArray(sq.files) ? sq.files.length : sq.files ?? 0} arquivos
-                    </span>
+                  <div key={sq.id} className="flex items-center justify-between rounded-md border border-amber-400/10 bg-amber-400/5 px-3 py-1.5">
+                    <span className="text-xs font-medium text-foreground/80 truncate max-w-[160px]">{sq.name}</span>
+                    <div className="flex items-center gap-2">
+                      {sq.status === "active" && (
+                        <span className="text-[9px] font-mono px-1 py-0.5 rounded bg-emerald-400/10 text-emerald-400">ativo</span>
+                      )}
+                      <span className="text-[10px] font-mono text-muted-foreground/50">
+                        {Array.isArray(sq.files) ? sq.files.length : sq.files ?? 0} arq
+                      </span>
+                    </div>
                   </div>
                 ))}
-                {squads.length > 3 && (
-                  <p className="text-[10px] text-muted-foreground/40 font-mono px-1">+{squads.length - 3} mais</p>
-                )}
+                {squads.length > 3 && <p className="text-[10px] text-muted-foreground/40 font-mono px-1">+{squads.length - 3} mais</p>}
               </div>
             )}
           </>
