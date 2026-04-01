@@ -233,7 +233,7 @@ function ServerRack({ position, color = "#6ee7b7" }: { position: [number, number
     <group position={position}>
       <mesh position={[0, 0.7, 0]} castShadow>
         <boxGeometry args={[0.5, 1.4, 0.38]} />
-        <meshStandardMaterial color="#3a3a58" roughness={0.2} metalness={0.65} />
+        <meshStandardMaterial color="#505078" roughness={0.2} metalness={0.65} />
       </mesh>
       {[0.2, 0.5, 0.8, 1.1].map((y, i) => (
         <mesh key={i} position={[0, y, 0.195]}>
