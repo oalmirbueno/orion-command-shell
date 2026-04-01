@@ -145,7 +145,7 @@ function Pillar({ position, height = 3, radius = 0.07 }: {
       </mesh>
       <mesh position={[0, 0.012, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <circleGeometry args={[radius * 2.2, 16]} />
-        <meshStandardMaterial color="#606080" roughness={0.3} metalness={0.5} />
+        <meshStandardMaterial color="#7878a0" roughness={0.3} metalness={0.5} />
       </mesh>
     </group>
   );
