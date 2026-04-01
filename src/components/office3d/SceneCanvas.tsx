@@ -121,7 +121,7 @@ function AgentNode3D({ position, agent, onClick, onHover }: {
         {/* Name label */}
         <Billboard follow lockX={false} lockY={false} lockZ={false}>
           <Text
-            position={[0, scale * 0.65, 0]}
+            position={[0, baseScale * 0.65, 0]}
             fontSize={0.18}
             color="white"
             anchorX="center"
