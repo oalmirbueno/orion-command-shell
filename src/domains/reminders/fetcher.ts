@@ -47,7 +47,7 @@ export const fetchRemindersPage: DomainFetcher<RemindersPageData> = async (): Pr
     fetchSessions(),
   ]);
 
-  const emptyAlerts = { data: { alerts: [], summary: { critical: 0, warning: 0, info: 0, resolved: 0 } }, source: "fallback" as DataSource, timestamp: new Date() };
+  const emptyAlerts = { data: { alerts: [], summary: { critical: 0, warning: 0, info: 0, resolved: 0 } } as AlertsPageData, source: "fallback" as DataSource, timestamp: new Date() };
   const emptyCron = { data: { jobs: [], summary: { active: 0, healthy: 0, failed: 0, disabled: 0 } }, source: "fallback" as DataSource, timestamp: new Date() };
   const emptyActivity = { data: { events: [], summary: { total: 0, critical: 0, warning: 0, resolved: 0 } }, source: "fallback" as DataSource, timestamp: new Date() };
   const emptyOps = { data: { tasks: [], timeline: [], liveOps: [], summary: { total: 0, running: 0, queued: 0, done: 0, failed: 0, criticalActive: 0 } }, source: "fallback" as DataSource, timestamp: new Date() };
