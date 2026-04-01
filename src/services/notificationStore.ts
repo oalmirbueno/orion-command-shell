@@ -110,7 +110,9 @@ class NotificationStore {
         read: true,
         updated_at: new Date().toISOString(),
       }));
-      await supabase.from("notifications").upsert(rows, { onConflict: "id" }).catch(() => {});
+      try {
+        await supabase.from("notifications").upsert(rows, { onConflict: "id" });
+      } catch { /* ignore */ }
     }
   }
 
