@@ -10,7 +10,7 @@ import { API_BASE_URL, isUsingLocalBackend } from "@/domains/api";
 import {
   Settings, Server, Wifi, WifiOff, Activity, Clock, Database,
   Radio, Shield, Eye, Lock, RefreshCw, CheckCircle2, AlertTriangle, XCircle, Loader2,
-  Zap, ArrowDown
+  Zap, ArrowDown, Bell
 } from "lucide-react";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { apiUrl } from "@/domains/api";
