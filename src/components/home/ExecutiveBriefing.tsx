@@ -95,7 +95,7 @@ export function ExecutiveBriefing({ items = [] }: ExecutiveBriefingProps) {
           <p className="text-[10px] font-mono text-muted-foreground/25 mt-1">Eventos aparecerão conforme o sistema operar</p>
         </div>
       ) : (
-        <div className="divide-y divide-border/20">
+        <div className="divide-y divide-border/20 max-h-[360px] overflow-y-auto">
           {items.map((item, i) => (
             <div
               key={i}

@@ -68,7 +68,7 @@ export function AttentionRequired({ items = [] }: AttentionRequiredProps) {
           <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/30" />
         </div>
       </div>
-      <div className="divide-y divide-border/30">
+      <div className="divide-y divide-border/30 max-h-[320px] overflow-y-auto">
         {items.map((item) => {
           const config = priorityConfig[item.priority];
           const Icon = config.icon;

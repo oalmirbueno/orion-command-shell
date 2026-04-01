@@ -41,7 +41,7 @@ export function LiveOperations({ operations = [] }: LiveOperationsProps) {
           <span className="text-xs font-mono text-status-online font-semibold">{runningCount} ativas</span>
         </div>
       </div>
-      <div className="divide-y divide-border/25">
+      <div className="divide-y divide-border/25 max-h-[320px] overflow-y-auto">
         {operations.map(op => {
           const isPaused = op.status === "paused";
           const isHigh = op.priority === "high";
