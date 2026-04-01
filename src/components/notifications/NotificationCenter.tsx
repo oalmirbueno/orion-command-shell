@@ -1,12 +1,15 @@
 import { useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import {
-  Bell, AlertTriangle, AlertCircle, Clock, CheckCircle2,
-  Bot, Terminal, Cpu, ChevronRight, Zap, Info
+  Bell, AlertTriangle, Clock, CheckCircle2,
+  Bot, Terminal, Cpu, ChevronRight, Zap, X, Check, Eye
 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useState, useMemo } from "react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { useState, useMemo, useEffect, useSyncExternalStore } from "react";
+import { notificationStore } from "@/services/notificationStore";
+import { useAuth } from "@/hooks/useAuth";
 
 export type NotifType = "alert" | "cron" | "session" | "operation" | "builder" | "system" | "agent";
 export type NotifSeverity = "critical" | "warning" | "success" | "info";
@@ -59,12 +62,6 @@ function deriveNotifications(queryClient: ReturnType<typeof useQueryClient>): Op
     const hrs = Math.round(mins / 60);
     if (hrs < 24) return `${hrs}h`;
     return `${Math.round(hrs / 24)}d`;
-  };
-
-  const formatTime = (ts: string | number) => {
-    const d = typeof ts === "number" ? new Date(ts) : new Date(ts);
-    if (isNaN(d.getTime())) return "—";
-    return d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
   };
 
   // ── From Activity events ──
@@ -121,7 +118,7 @@ function deriveNotifications(queryClient: ReturnType<typeof useQueryClient>): Op
     }
   }
 
-  // ── From Sessions (running/failed) ──
+  // ── From Sessions (failed/aborted) ──
   const sessionsCache = queryClient.getQueryData<any>(["orion", "sessions-page"]);
   const sessions = sessionsCache?.data || [];
   const sessionsList = Array.isArray(sessions) ? sessions : sessions?.sessions || [];
@@ -175,7 +172,7 @@ function deriveNotifications(queryClient: ReturnType<typeof useQueryClient>): Op
     });
   }
 
-  // Sort: critical first, then warning, then by recency
+  // Sort: critical first, then warning
   const sevOrder: Record<NotifSeverity, number> = { critical: 0, warning: 1, success: 2, info: 3 };
   notifications.sort((a, b) => sevOrder[a.severity] - sevOrder[b.severity]);
 
@@ -186,24 +183,52 @@ export function NotificationCenter() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
+  const { user } = useAuth();
 
-  const notifications = useMemo(
-    () => (open ? deriveNotifications(queryClient) : []),
-    [open, queryClient]
+  // Sync store with auth state
+  useEffect(() => {
+    notificationStore.init(user?.id ?? null);
+  }, [user?.id]);
+
+  // Subscribe to store changes
+  const storeState = useSyncExternalStore(
+    notificationStore.subscribe,
+    () => notificationStore.getSnapshot()
   );
 
-  const criticalCount = notifications.filter(n => n.severity === "critical").length;
-  const warningCount = notifications.filter(n => n.severity === "warning").length;
-  const totalBadge = criticalCount + warningCount;
+  const allNotifications = useMemo(
+    () => (open ? deriveNotifications(queryClient) : []),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [open, queryClient, storeState.readCount, storeState.dismissedCount]
+  );
+
+  const notifications = notificationStore.filterActive(allNotifications);
+  const unreadCount = notificationStore.countUnread(notifications);
+  const criticalCount = notifications.filter(n => n.severity === "critical" && !notificationStore.isRead(n.id)).length;
+
+  const handleMarkAllRead = () => {
+    notificationStore.markAllRead(notifications.map(n => n.id));
+  };
+
+  const handleDismiss = (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    notificationStore.dismiss(id);
+  };
+
+  const handleClick = (notif: OperationalNotification) => {
+    notificationStore.markRead(notif.id);
+    setOpen(false);
+    navigate(notif.route);
+  };
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <button className="p-2 rounded-md text-muted-foreground/50 hover:text-foreground hover:bg-accent/40 transition-colors relative">
           <Bell className="h-4 w-4" />
-          {totalBadge > 0 ? (
+          {unreadCount > 0 ? (
             <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 rounded-full bg-status-critical text-[9px] font-mono text-primary-foreground flex items-center justify-center px-1 animate-pulse">
-              {totalBadge}
+              {unreadCount}
             </span>
           ) : (
             <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 rounded-full bg-surface-2 border border-border text-[9px] font-mono text-muted-foreground/50 flex items-center justify-center px-1">
@@ -217,18 +242,43 @@ export function NotificationCenter() {
         <div className="flex items-center justify-between px-4 py-3 border-b border-border">
           <div className="flex items-center gap-2">
             <h3 className="text-sm font-semibold text-foreground">Notificações</h3>
-            {totalBadge > 0 && (
+            {criticalCount > 0 && (
               <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-status-critical/10 text-status-critical">
-                {criticalCount > 0 ? `${criticalCount} crítico` : `${warningCount} atenção`}
+                {criticalCount} crítico
               </span>
             )}
+            {/* Persistence mode indicator */}
+            <Tooltip>
+              <TooltipTrigger>
+                <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-surface-2 text-muted-foreground/40">
+                  {storeState.mode === "supabase" ? "💾" : "⚡"}
+                </span>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">
+                <p className="text-xs">
+                  {storeState.mode === "supabase"
+                    ? "Persistência ativa (Supabase)"
+                    : "Modo memória — notificações reiniciam ao recarregar"}
+                </p>
+              </TooltipContent>
+            </Tooltip>
           </div>
-          <button
-            onClick={() => { setOpen(false); navigate("/activity"); }}
-            className="text-[10px] font-mono text-muted-foreground/50 hover:text-foreground transition-colors"
-          >
-            Ver tudo →
-          </button>
+          <div className="flex items-center gap-2">
+            {unreadCount > 0 && (
+              <button
+                onClick={handleMarkAllRead}
+                className="text-[10px] font-mono text-primary/60 hover:text-primary transition-colors flex items-center gap-1"
+              >
+                <Eye className="h-3 w-3" /> Marcar lidas
+              </button>
+            )}
+            <button
+              onClick={() => { setOpen(false); navigate("/activity"); }}
+              className="text-[10px] font-mono text-muted-foreground/50 hover:text-foreground transition-colors"
+            >
+              Ver tudo →
+            </button>
+          </div>
         </div>
 
         {/* Notification list */}
@@ -245,11 +295,12 @@ export function NotificationCenter() {
                 const cfg = typeConfig[notif.type];
                 const sev = severityStyles[notif.severity];
                 const Icon = cfg.icon;
+                const isRead = notificationStore.isRead(notif.id);
                 return (
                   <div
                     key={notif.id}
-                    className={`flex items-start gap-3 px-4 py-3 border-l-2 ${sev.border} cursor-pointer hover:bg-accent/20 transition-colors group`}
-                    onClick={() => { setOpen(false); navigate(notif.route); }}
+                    className={`flex items-start gap-3 px-4 py-3 border-l-2 ${sev.border} cursor-pointer hover:bg-accent/20 transition-colors group ${isRead ? "opacity-60" : ""}`}
+                    onClick={() => handleClick(notif)}
                   >
                     <div className="mt-0.5 shrink-0">
                       <Icon className="h-4 w-4 text-muted-foreground/50" />
@@ -258,13 +309,23 @@ export function NotificationCenter() {
                       <div className="flex items-center gap-2 mb-0.5">
                         <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground/40">{cfg.label}</span>
                         <div className={`w-1.5 h-1.5 rounded-full ${sev.dot}`} />
+                        {!isRead && <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />}
                       </div>
                       <p className="text-xs font-medium text-foreground truncate">{notif.title}</p>
                       <p className="text-[10px] font-mono text-muted-foreground/40 truncate mt-0.5">{notif.detail}</p>
                     </div>
                     <div className="shrink-0 flex flex-col items-end gap-1">
                       <span className="text-[10px] font-mono text-muted-foreground/30">{notif.timeAgo}</span>
-                      <ChevronRight className="h-3 w-3 text-muted-foreground/20 group-hover:text-muted-foreground/50 transition-colors" />
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={(e) => handleDismiss(e, notif.id)}
+                          className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 rounded hover:bg-accent/40"
+                          title="Dispensar"
+                        >
+                          <X className="h-3 w-3 text-muted-foreground/30 hover:text-muted-foreground" />
+                        </button>
+                        <ChevronRight className="h-3 w-3 text-muted-foreground/20 group-hover:text-muted-foreground/50 transition-colors" />
+                      </div>
                     </div>
                   </div>
                 );
@@ -278,6 +339,7 @@ export function NotificationCenter() {
           <div className="border-t border-border px-4 py-2 flex items-center justify-between">
             <span className="text-[10px] font-mono text-muted-foreground/30">
               {notifications.length} evento{notifications.length !== 1 ? "s" : ""}
+              {storeState.dismissedCount > 0 && ` · ${storeState.dismissedCount} dispensada${storeState.dismissedCount !== 1 ? "s" : ""}`}
             </span>
             <button
               onClick={() => { setOpen(false); navigate("/timeline"); }}
