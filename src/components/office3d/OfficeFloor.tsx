@@ -247,25 +247,7 @@ function ServerRack({ position, color = "#6ee7b7" }: { position: [number, number
   );
 }
 
-/* ── Ceiling Light — slim, warm ── */
-function CeilingLight({ position, length = 3, color = "#f0f0ff", width = 0.15 }: {
-  position: [number, number, number]; length?: number; color?: string; width?: number;
-}) {
-  return (
-    <group position={position}>
-      <mesh>
-        <boxGeometry args={[length, 0.03, width + 0.08]} />
-        <meshStandardMaterial color="#505070" roughness={0.3} metalness={0.5} />
-      </mesh>
-      <mesh position={[0, -0.018, 0]}>
-        <boxGeometry args={[length - 0.06, 0.006, width]} />
-        <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.4} transparent opacity={0.6} />
-      </mesh>
-      <rectAreaLight width={length} height={width} intensity={2} color={color}
-        position={[0, -0.03, 0]} rotation={[Math.PI / 2, 0, 0]} />
-    </group>
-  );
-}
+/* CeilingLight removed — was causing visual clutter and shadow acne */
 
 /* ── Meeting Table ── */
 function MeetingTable() {
