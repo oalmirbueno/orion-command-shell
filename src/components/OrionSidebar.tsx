@@ -15,6 +15,7 @@ import {
   FolderOpen,
   Search,
   Zap,
+  Hammer,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import {
@@ -41,6 +42,7 @@ const operationsItems = [
   { title: "Arquivos", url: "/files", icon: FolderOpen },
   { title: "Busca", url: "/search", icon: Search },
   { title: "Skills", url: "/skills", icon: Zap },
+  { title: "Builders", url: "/builders", icon: Hammer },
 ];
 
 const systemItems = [
