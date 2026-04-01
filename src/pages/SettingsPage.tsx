@@ -244,6 +244,9 @@ const SettingsPage = () => {
           </SectionCard>
         </div>
 
+        {/* SSE Diagnostics */}
+        <SSEDiagnosticsSection />
+
         {/* Notas operacionais */}
         <SectionCard title="Notas Operacionais" icon={Clock}>
           <div className="space-y-2 text-xs text-muted-foreground">
