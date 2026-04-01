@@ -30,6 +30,9 @@ VITE_SUPABASE_PUBLISHABLE_KEY=eyJhbGciOiJIUzI1NiIs...
 - Reset de senha por email
 - Proteção de rotas (redirect para `/login`)
 - Indicador de usuário + logout na TopBar
+- Persistência de notificações (marcar como lida, dispensar)
+
+**Migration de notificações:** `docs/migrations/001_notifications.sql`
 
 ---
 
@@ -39,6 +42,7 @@ VITE_SUPABASE_PUBLISHABLE_KEY=eyJhbGciOiJIUzI1NiIs...
 src/
 ├── domains/          # Camada de dados — fetchers real-first + fallback
 ├── hooks/            # useOrionData, useOrionStream (SSE), useDomainHealth, useAuth
+├── services/         # notificationStore, domainAnalytics (persistência + métricas)
 ├── components/
 │   ├── auth/         # ProtectedRoute (com fallback modo aberto)
 │   ├── filters/      # AdvancedFilters (tipo + status + período)
@@ -47,42 +51,43 @@ src/
 ├── integrations/
 │   └── supabase/     # Cliente Supabase com detecção de configuração
 ├── pages/            # Rotas do painel
-├── test/             # Testes automatizados (Vitest)
+├── test/             # Testes automatizados (Vitest — 19 testes)
 └── lib/              # Utilitários
 ```
 
 **Padrão de dados:** `createRealFirstFetcher` — tenta API real primeiro, fallback honesto em caso de falha.  
-**Estado global:** React Query + SSE stream (`useOrionStream`) + `DomainHealthStore`.  
-**Auth:** `AuthProvider` com detecção honesta — modo aberto quando não configurado.
+**Estado global:** React Query + SSE stream (`useOrionStream`) + `DomainHealthStore` + `DomainAnalyticsStore`.  
+**Auth:** `AuthProvider` com detecção honesta — modo aberto quando não configurado.  
+**Resiliência:** Error boundaries por módulo — falha isolada não derruba o painel.
 
 ---
 
 ## Módulos — Status Real
 
-### ✅ Concluídos (V1.1)
+### ✅ Concluídos (V1.2)
 
 | Módulo | Rota | Domínio | Descrição |
 |--------|------|---------|-----------|
-| **Comando (Home)** | `/` | `home` | Dashboard executivo clicável — métricas, atenção, operações, agentes, saúde, briefing, weather, skills, builders |
-| **Agentes** | `/agents` | `agents` | Lista + Centro de Controle Operacional (abas: Visão Geral, Configuração, Operação, Logs). Restart e toggle de estado |
+| **Comando (Home)** | `/` | `home` | Dashboard executivo — métricas, atenção, operações, agentes, saúde, briefing com tendências, weather, skills, builders, **gargalos** |
+| **Agentes** | `/agents` | `agents` | Lista + Centro de Controle Operacional. Restart e toggle de estado |
 | **Sessões** | `/sessions` | `sessions` | Sessões ativas com status derivado, tokens, progresso |
 | **Operações** | `/operations` | `operations` | Kanban + timeline + seções por status |
-| **Atividade** | `/activity` | `activity` | Feed de atividades + resumo |
+| **Atividade** | `/activity` | `activity` | Feed + resumo + **filtros avançados** |
 | **Memória** | `/memory` | `memory` | Snapshots de memória + busca |
-| **Alertas** | `/alerts` | `alerts` | Lista com severidade + resumo + **filtros avançados (tipo + período)** |
+| **Alertas** | `/alerts` | `alerts` | Lista com severidade + resumo + **filtros avançados** |
 | **Cron** | `/cron` | `cron` | Jobs cron com status de saúde |
-| **Sistema** | `/system` | `system` | Infra health — CPU/RAM/disco, uptime, serviços, cron health, sinais de estabilidade |
+| **Sistema** | `/system` | `system` | Infra health — CPU/RAM/disco, uptime, serviços, cron health |
 | **Arquivos** | `/files` | `files` | Navegador de arquivos |
 | **Skills** | `/skills` | — | Catálogo de skills com detalhes expandidos |
 | **Builders** | `/builders` | — | Central de execução — OpenClaw / Claude Code / AIOX |
 | **Missões** | `/missions` | — | Dashboard de workflows com "Run Now" |
-| **Timeline** | `/timeline` | `timeline` | Linha do tempo unificada + **filtros avançados (tipo + status + período)** |
-| **Lembretes** | `/reminders` | `reminders` | Lembretes + notícias derivados |
-| **Pipelines** | `/pipelines` | `pipelines` | Fluxos derivados de cron + operations, painel de detalhe + "Executar Agora" |
-| **Configurações** | `/settings` | — | Status global, domínios live/fallback, diagnóstico SSE em tempo real |
+| **Timeline** | `/timeline` | `timeline` | Linha do tempo unificada + **filtros avançados** |
+| **Lembretes** | `/reminders` | `reminders` | Lembretes + notícias + **filtros avançados** |
+| **Pipelines** | `/pipelines` | `pipelines` | Fluxos derivados de cron + operations, detalhe + "Executar Agora" |
+| **Configurações** | `/settings` | — | Status global, domínios, diagnóstico SSE com **histórico de reconexões** |
 | **Busca** | `/search` | — | Busca global |
-| **Notificações** | TopBar | — | Centro derivado do cache React Query, deep-links para módulos |
-| **Login** | `/login` | — | Email + senha, cadastro, reset. Estado honesto quando Supabase não configurado |
+| **Notificações** | TopBar | — | Centro com **read/dismiss persistente**, deep-links, indicador de modo |
+| **Login** | `/login` | — | Email + senha, cadastro, reset |
 | **Office 3D** | `/office3d` | — | Visualização 3D com tooltip de hover e click-to-detail |
 
 ---
@@ -92,17 +97,17 @@ src/
 | Componente | Status | Descrição |
 |------------|--------|-----------|
 | `AuthProvider` + `ProtectedRoute` | ✅ | Auth com modo aberto quando sem Supabase |
-| `AdvancedFilters` | ✅ | Filtros reutilizáveis (tipo + status + date range) |
+| `ErrorBoundary` | ✅ | Catch isolado por módulo — falha não propaga |
+| `AdvancedFilters` | ✅ | Filtros reutilizáveis em **4 módulos** (Timeline, Alerts, Activity, Reminders) |
+| `NotificationStore` | ✅ | Persistência híbrida (Supabase + memória) — read/dismiss |
+| `DomainAnalyticsStore` | ✅ | Métricas de latência/erro por domínio — sparklines e tendências |
 | `OrionLayout` | ✅ | Sidebar + TopBar (com user/logout) + StatusBar |
 | `OrionDataWrapper` | ✅ | Loading/error/empty states padronizados |
 | `DomainHealthStore` | ✅ | Saúde por domínio (live/stale/loading/offline) |
 | `useOrionStream` (SSE) | ✅ | Stream real-time para cache React Query |
-| `sseDiagnostics` | ✅ | Diagnóstico SSE — status, reconexões, log de eventos |
+| `sseDiagnostics` | ✅ | Diagnóstico SSE — status, uptime, **reconnect history**, **last error** |
 | `createRealFirstFetcher` | ✅ | Padrão real-first + fallback |
-| `PageTransition` | ✅ | Transições animadas entre rotas |
-| Skeletons por domínio | ✅ | Loading states específicos |
-| Sheets de detalhe | ✅ | Painéis laterais por domínio |
-| Testes automatizados | ✅ | Vitest — auth, client, filtros (base mínima) |
+| Testes automatizados | ✅ | Vitest — **19 testes** (auth, client, filtros, notificações, SSE, error boundary) |
 
 ---
 
@@ -139,16 +144,31 @@ src/
 
 ## Changelog
 
+### V1.2 — Robustez + Inteligência Operacional (Abril 2026)
+
+**Bloco A — Robustez Técnica:**
+- ✅ Persistência de notificações — `NotificationStore` híbrido (Supabase quando configurado, memória como fallback). Marcar como lida, dispensar, contagem de não-lidas. Migration SQL pronta.
+- ✅ React Router future flags — `v7_startTransition` e `v7_relativeSplatPath` ativadas. 0 warnings no build.
+- ✅ Error boundaries por módulo — todas as 19 rotas protegidas com catch isolado. Falha em um domínio não derruba outros.
+- ✅ SSE reconnect observability — uptime, último erro, histórico de reconexões e buffer de eventos no Settings.
+- ✅ Cobertura de testes ampliada — de 4 para **19 testes** (NotificationStore, SSE Diagnostics, ErrorBoundary, Auth, Filtros).
+
+**Bloco B — Inteligência Operacional:**
+- ✅ Analytics de gargalos — `DomainAnalyticsStore` acumula latência e erros por domínio em cada fetch. Widget no dashboard com sparklines de tendência.
+- ✅ Filtros avançados expandidos — Atividade (tipo + prioridade + período) e Lembretes (status + origem + período). Total: 4 módulos com filtros.
+- ✅ Briefing executivo enriquecido — faixa de resumo com domínios live, latência global e indicadores de tendência (↑↓→).
+
+**Fix crítico:**
+- ✅ Corrigido loop infinito no Dashboard causado por `useSyncExternalStore` + `getSnapshot` sem memoização no `NotificationStore`.
+
 ### V1.1 — Robustez (Abril 2026)
 
 - ✅ Autenticação email + senha (Supabase externo, modo aberto honesto)
 - ✅ Proteção de rotas com redirect para `/login`
 - ✅ Indicador de usuário + logout na TopBar
-- ✅ Filtros avançados multi-critério na Timeline (tipo + status + período)
-- ✅ Filtros avançados na tela de Alertas (severidade + período)
+- ✅ Filtros avançados multi-critério na Timeline e Alertas
 - ✅ Componente `AdvancedFilters` reutilizável com date picker
 - ✅ Base de testes automatizados (Vitest — 4 testes)
-- ✅ Documentação de configuração Supabase externo
 
 ### V1.0 — Command Center (Março–Abril 2026)
 
@@ -163,15 +183,15 @@ src/
 
 ---
 
-## Próximos Passos — V1.2
+## Próximos Passos — V1.3
 
-- [ ] Persistência de notificações (marcar como lida, histórico)
 - [ ] Página `/reset-password` funcional para completar fluxo de auth
-- [ ] Filtros avançados em Lembretes e Atividade
-- [ ] Cobertura de testes expandida (componentes visuais, hooks)
+- [ ] Persistência real de notificações via tabela Supabase (executar migration)
+- [ ] Cobertura de testes expandida — componentes visuais, hooks, fetchers
 - [ ] PWA / suporte offline básico
 - [ ] i18n formal (UI em PT-BR mas sem framework dedicado)
+- [ ] Filtros avançados em Sessions e Operations
 
 ---
 
-*Última revisão: abril 2026 — V1.1*
+*Última revisão: abril 2026 — V1.2*
