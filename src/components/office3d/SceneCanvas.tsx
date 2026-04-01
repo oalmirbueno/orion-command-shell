@@ -13,7 +13,7 @@ import * as THREE from "three";
 import { AlertTriangle, Loader2, WifiOff } from "lucide-react";
 import { OfficeFloor } from "./OfficeFloor";
 import { AgentDesk } from "./AgentDesk";
-import { ConnectionLine } from "./OfficeConnections";
+import { FlowConnection } from "./OfficeConnections";
 import { assignDesks, TIER_COLORS } from "./OfficeLayout";
 import { getMeetingPositions } from "./MeetingRoom";
 
