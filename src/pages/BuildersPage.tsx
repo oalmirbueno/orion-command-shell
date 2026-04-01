@@ -3,18 +3,8 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { OrionLayout } from "@/components/OrionLayout";
 import { OrionBreadcrumb } from "@/components/orion";
 import {
-  Hammer,
-  RefreshCw,
-  Cpu,
-  Activity,
-  Clock,
-  Inbox,
-  AlertCircle,
-  Bot,
-  Zap,
-  Terminal,
-  Layers,
-  MonitorSmartphone,
+  Hammer, RefreshCw, Cpu, Activity, Clock, Inbox, AlertCircle, Bot,
+  Zap, Terminal, Layers, MonitorSmartphone, Package, FileText, ChevronDown, ChevronRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -50,6 +40,17 @@ interface RealSession {
   aborted: boolean;
 }
 
+interface SkillItem {
+  id: string;
+  name: string;
+  description?: string;
+  source?: string;
+  status?: string;
+  agents?: string[];
+  files?: number | string[];
+  tags?: string[];
+}
+
 /* ── Builder classification ── */
 type BuilderCategory = "claude-code" | "aiox" | "other";
 
@@ -68,6 +69,11 @@ function classifyBuilder(agent: RealAgent): BuilderCategory {
   return "other";
 }
 
+function isAioxSquad(skill: SkillItem): boolean {
+  const h = `${skill.name} ${skill.description || ""} ${skill.source || ""}`.toLowerCase();
+  return ["aiox", "aio", "squad", "openai", "gpt"].some((k) => h.includes(k));
+}
+
 const CATEGORY_META: Record<BuilderCategory, { label: string; icon: React.ElementType; accent: string }> = {
   "claude-code": { label: "Claude Code", icon: Terminal, accent: "text-primary" },
   aiox: { label: "AIOX", icon: Zap, accent: "text-amber-400" },
@@ -82,9 +88,7 @@ async function fetchAgents(): Promise<RealAgent[]> {
   });
   if (!res.ok) throw new Error(`agents ${res.status}`);
   const data = await res.json();
-  if (Array.isArray(data)) return data;
-  if (data?.agents) return data.agents;
-  return [];
+  return Array.isArray(data) ? data : data?.agents ?? [];
 }
 
 async function fetchSessions(): Promise<RealSession[]> {
@@ -94,9 +98,18 @@ async function fetchSessions(): Promise<RealSession[]> {
   });
   if (!res.ok) throw new Error(`sessions ${res.status}`);
   const data = await res.json();
-  if (Array.isArray(data)) return data;
-  if (data?.sessions) return data.sessions;
-  return [];
+  return Array.isArray(data) ? data : data?.sessions ?? [];
+}
+
+async function fetchSquads(): Promise<SkillItem[]> {
+  const res = await fetch(`${API_BASE_URL}/skills`, {
+    headers: { Accept: "application/json" },
+    signal: AbortSignal.timeout(12_000),
+  });
+  if (!res.ok) return [];
+  const data = await res.json();
+  const skills: SkillItem[] = Array.isArray(data) ? data : data?.skills ?? [];
+  return skills.filter(isAioxSquad);
 }
 
 /* ── Helpers ── */
@@ -136,25 +149,15 @@ interface BuilderView {
 export default function BuildersPage() {
   const qc = useQueryClient();
   const [expandedBuilder, setExpandedBuilder] = useState<string | null>(null);
+  const [showAllSquads, setShowAllSquads] = useState(false);
 
-  const agentsQ = useQuery({
-    queryKey: ["builders-agents"],
-    queryFn: fetchAgents,
-    staleTime: 30_000,
-    refetchInterval: 60_000,
-    placeholderData: (prev) => prev,
-  });
-
-  const sessionsQ = useQuery({
-    queryKey: ["builders-sessions"],
-    queryFn: fetchSessions,
-    staleTime: 30_000,
-    refetchInterval: 60_000,
-    placeholderData: (prev) => prev,
-  });
+  const agentsQ = useQuery({ queryKey: ["builders-agents"], queryFn: fetchAgents, staleTime: 30_000, refetchInterval: 60_000, placeholderData: (prev) => prev });
+  const sessionsQ = useQuery({ queryKey: ["builders-sessions"], queryFn: fetchSessions, staleTime: 30_000, refetchInterval: 60_000, placeholderData: (prev) => prev });
+  const squadsQ = useQuery({ queryKey: ["builders-squads"], queryFn: fetchSquads, staleTime: 60_000, refetchInterval: 120_000, placeholderData: (prev) => prev });
 
   const isLoading = agentsQ.isLoading || sessionsQ.isLoading;
   const isError = agentsQ.isError && sessionsQ.isError;
+  const squads = squadsQ.data ?? [];
 
   const builders = useMemo<BuilderView[]>(() => {
     const agents = agentsQ.data ?? [];
@@ -166,14 +169,10 @@ export default function BuildersPage() {
                s.key?.toLowerCase().includes(a.name?.toLowerCase() || "___")
       );
       return {
-        id: a.id,
-        name: a.name,
-        model: a.model || "—",
-        status: a.status || "unknown",
+        id: a.id, name: a.name, model: a.model || "—", status: a.status || "unknown",
         category: cat,
         activeSessions: a.activeSessions ?? agentSessions.filter((s) => !s.aborted && s.ageMs < 300_000).length,
-        lastActivity: timeAgo(a.lastActivity),
-        lastActivityRaw: a.lastActivity || "",
+        lastActivity: timeAgo(a.lastActivity), lastActivityRaw: a.lastActivity || "",
         sessions: agentSessions,
         totalTokens: agentSessions.reduce((sum, s) => sum + (s.totalTokens || 0), 0),
         emoji: a.emoji,
@@ -192,11 +191,13 @@ export default function BuildersPage() {
     online: builders.filter((b) => b.status === "online").length,
     activeSessions: builders.reduce((s, b) => s + b.activeSessions, 0),
     totalTokens: builders.reduce((s, b) => s + b.totalTokens, 0),
-  }), [builders]);
+    squads: squads.length,
+  }), [builders, squads]);
 
   const handleRefresh = () => {
     qc.invalidateQueries({ queryKey: ["builders-agents"] });
     qc.invalidateQueries({ queryKey: ["builders-sessions"] });
+    qc.invalidateQueries({ queryKey: ["builders-squads"] });
   };
 
   return (
@@ -215,10 +216,7 @@ export default function BuildersPage() {
             </p>
           </div>
           <Button
-            variant="outline"
-            size="sm"
-            onClick={handleRefresh}
-            disabled={isLoading}
+            variant="outline" size="sm" onClick={handleRefresh} disabled={isLoading}
             className="border-border text-muted-foreground hover:text-foreground"
           >
             <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? "animate-spin" : ""}`} />
@@ -227,17 +225,15 @@ export default function BuildersPage() {
         </div>
 
         {/* Summary cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
           {[
             { label: "Total Builders", value: stats.total, icon: Layers, color: "text-primary" },
             { label: "Online", value: stats.online, icon: Activity, color: "text-emerald-400" },
             { label: "Sessões Ativas", value: stats.activeSessions, icon: MonitorSmartphone, color: "text-amber-400" },
             { label: "Tokens Hoje", value: formatTokens(stats.totalTokens), icon: Cpu, color: "text-primary" },
+            { label: "Squads AIOX", value: stats.squads, icon: Package, color: "text-amber-400" },
           ].map((m) => (
-            <div
-              key={m.label}
-              className="rounded-lg border border-border bg-card p-4 flex items-center gap-3"
-            >
+            <div key={m.label} className="rounded-lg border border-border bg-card p-4 flex items-center gap-3">
               <div className="w-9 h-9 rounded-md bg-muted/50 flex items-center justify-center">
                 <m.icon className={`h-4 w-4 ${m.color}`} />
               </div>
@@ -252,9 +248,7 @@ export default function BuildersPage() {
         {/* Loading */}
         {isLoading && !builders.length && (
           <div className="space-y-4">
-            {[1, 2, 3].map((i) => (
-              <Skeleton key={i} className="h-32 w-full rounded-lg" />
-            ))}
+            {[1, 2, 3].map((i) => <Skeleton key={i} className="h-32 w-full rounded-lg" />)}
           </div>
         )}
 
@@ -268,12 +262,81 @@ export default function BuildersPage() {
         )}
 
         {/* Empty */}
-        {!isLoading && !isError && builders.length === 0 && (
+        {!isLoading && !isError && builders.length === 0 && squads.length === 0 && (
           <div className="rounded-lg border border-border bg-card p-12 text-center space-y-3">
             <Inbox className="h-10 w-10 text-muted-foreground/40 mx-auto" />
             <p className="text-sm text-muted-foreground">Nenhum builder encontrado</p>
             <p className="text-xs text-muted-foreground/60">Aguardando dados de /api/agents</p>
           </div>
+        )}
+
+        {/* AIOX Squads Section */}
+        {squads.length > 0 && (
+          <section className="space-y-3">
+            <div className="flex items-center justify-between border-b border-border pb-2">
+              <div className="flex items-center gap-2">
+                <Package className="h-4 w-4 text-amber-400" />
+                <h2 className="text-sm font-bold uppercase tracking-wider text-foreground">
+                  Squads AIOX Instalados
+                </h2>
+                <span className="text-xs font-mono text-muted-foreground/50 ml-1">({squads.length})</span>
+              </div>
+              {squads.length > 6 && (
+                <Button
+                  variant="ghost" size="sm"
+                  onClick={() => setShowAllSquads(!showAllSquads)}
+                  className="text-xs text-muted-foreground"
+                >
+                  {showAllSquads ? "Mostrar menos" : "Ver todos"}
+                  {showAllSquads ? <ChevronDown className="h-3 w-3 ml-1" /> : <ChevronRight className="h-3 w-3 ml-1" />}
+                </Button>
+              )}
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+              {(showAllSquads ? squads : squads.slice(0, 6)).map((sq) => {
+                const fileCount = Array.isArray(sq.files) ? sq.files.length : (sq.files ?? 0);
+                const agentCount = sq.agents?.length ?? 0;
+                return (
+                  <div
+                    key={sq.id}
+                    className="rounded-lg border border-amber-400/15 bg-amber-400/5 hover:border-amber-400/30 transition-colors p-4 space-y-2"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Package className="h-4 w-4 text-amber-400" />
+                        <span className="font-semibold text-sm text-foreground truncate max-w-[200px]">{sq.name}</span>
+                      </div>
+                      {sq.status && (
+                        <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded ${
+                          sq.status === "active" ? "bg-emerald-400/10 text-emerald-400" : "bg-muted text-muted-foreground"
+                        }`}>
+                          {sq.status === "active" ? "ativo" : sq.status}
+                        </span>
+                      )}
+                    </div>
+                    {sq.description && (
+                      <p className="text-xs text-muted-foreground/70 line-clamp-2">{sq.description}</p>
+                    )}
+                    <div className="flex items-center gap-4 text-[10px] font-mono text-muted-foreground/50">
+                      <span className="flex items-center gap-1">
+                        <FileText className="h-3 w-3" />
+                        {fileCount} arquivos
+                      </span>
+                      {agentCount > 0 && (
+                        <span className="flex items-center gap-1">
+                          <Bot className="h-3 w-3" />
+                          {agentCount} agentes
+                        </span>
+                      )}
+                      {sq.source && (
+                        <span className="text-amber-400/60">{sq.source}</span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
         )}
 
         {/* Grouped builder sections */}
@@ -286,14 +349,9 @@ export default function BuildersPage() {
               <section key={cat} className="space-y-3">
                 <div className="flex items-center gap-2 border-b border-border pb-2">
                   <meta.icon className={`h-4 w-4 ${meta.accent}`} />
-                  <h2 className="text-sm font-bold uppercase tracking-wider text-foreground">
-                    {meta.label}
-                  </h2>
-                  <span className="text-xs font-mono text-muted-foreground/50 ml-1">
-                    ({items.length})
-                  </span>
+                  <h2 className="text-sm font-bold uppercase tracking-wider text-foreground">{meta.label}</h2>
+                  <span className="text-xs font-mono text-muted-foreground/50 ml-1">({items.length})</span>
                 </div>
-
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
                   {items.map((b) => {
                     const isExpanded = expandedBuilder === b.id;
@@ -304,32 +362,19 @@ export default function BuildersPage() {
                         onClick={() => setExpandedBuilder(isExpanded ? null : b.id)}
                         className="rounded-lg border border-border bg-card hover:border-primary/30 transition-colors cursor-pointer"
                       >
-                        {/* Card header */}
                         <div className="p-4 space-y-3">
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
-                              {b.emoji ? (
-                                <span className="text-lg">{b.emoji}</span>
-                              ) : (
-                                <Bot className={`h-5 w-5 ${meta.accent}`} />
-                              )}
-                              <span className="font-semibold text-sm text-foreground truncate max-w-[180px]">
-                                {b.name}
-                              </span>
+                              {b.emoji ? <span className="text-lg">{b.emoji}</span> : <Bot className={`h-5 w-5 ${meta.accent}`} />}
+                              <span className="font-semibold text-sm text-foreground truncate max-w-[180px]">{b.name}</span>
                             </div>
                             <div className="flex items-center gap-1.5">
-                              <div
-                                className={`w-2 h-2 rounded-full ${
-                                  isOnline ? "bg-emerald-400 animate-pulse" : "bg-muted-foreground/30"
-                                }`}
-                              />
+                              <div className={`w-2 h-2 rounded-full ${isOnline ? "bg-emerald-400 animate-pulse" : "bg-muted-foreground/30"}`} />
                               <span className={`text-xs font-mono ${isOnline ? "text-emerald-400" : "text-muted-foreground/50"}`}>
                                 {isOnline ? "online" : b.status || "—"}
                               </span>
                             </div>
                           </div>
-
-                          {/* Metrics row */}
                           <div className="grid grid-cols-3 gap-2 text-xs">
                             <div className="space-y-0.5">
                               <div className="text-muted-foreground/50 font-mono uppercase text-[10px]">Modelo</div>
@@ -344,8 +389,6 @@ export default function BuildersPage() {
                               <div className="text-foreground/80 font-medium">{b.lastActivity}</div>
                             </div>
                           </div>
-
-                          {/* Tokens bar */}
                           {b.totalTokens > 0 && (
                             <div className="flex items-center gap-2 text-[10px] text-muted-foreground/50 font-mono">
                               <Cpu className="h-3 w-3" />
@@ -353,21 +396,14 @@ export default function BuildersPage() {
                             </div>
                           )}
                         </div>
-
-                        {/* Expanded: recent sessions */}
                         {isExpanded && (
                           <div className="border-t border-border p-3 space-y-2 bg-muted/10">
-                            <div className="text-[10px] uppercase tracking-wider text-muted-foreground/50 font-mono">
-                              Sessões recentes
-                            </div>
+                            <div className="text-[10px] uppercase tracking-wider text-muted-foreground/50 font-mono">Sessões recentes</div>
                             {b.sessions.length === 0 ? (
                               <p className="text-xs text-muted-foreground/40 italic">Nenhuma sessão vinculada</p>
                             ) : (
                               b.sessions.slice(0, 5).map((s) => (
-                                <div
-                                  key={s.id}
-                                  className="flex items-center justify-between text-xs rounded-md bg-card border border-border px-3 py-2"
-                                >
+                                <div key={s.id} className="flex items-center justify-between text-xs rounded-md bg-card border border-border px-3 py-2">
                                   <div className="flex items-center gap-2 truncate">
                                     <span>{s.typeEmoji || "💬"}</span>
                                     <span className="text-foreground/80 truncate max-w-[160px]">{s.key}</span>
@@ -375,9 +411,7 @@ export default function BuildersPage() {
                                   <div className="flex items-center gap-3 text-muted-foreground/60 font-mono">
                                     <span>{formatTokens(s.totalTokens)} tk</span>
                                     <span>{timeAgo(s.updatedAt)}</span>
-                                    {s.aborted && (
-                                      <span className="text-destructive text-[10px]">abortada</span>
-                                    )}
+                                    {s.aborted && <span className="text-destructive text-[10px]">abortada</span>}
                                   </div>
                                 </div>
                               ))
