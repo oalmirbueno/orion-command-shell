@@ -62,7 +62,7 @@ export function OperationalHealth({ services = [] }: OperationalHealthProps) {
         <span className="w-20 text-right">Disponib.</span>
       </div>
 
-      <div className="divide-y divide-border/20 max-h-[280px] overflow-y-auto">
+      <div className="divide-y divide-border/20 max-h-[200px] overflow-y-auto orion-thin-scroll">
         {services.map((svc) => (
           <div
             key={svc.name}
