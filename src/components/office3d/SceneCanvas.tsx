@@ -76,6 +76,28 @@ export function SceneCanvas({
     return pairs;
   }, [agentList, deskMap]);
 
+  // Squad connections: agents linked via dependsOn/feeds form squads
+  const squadPairs = useMemo(() => {
+    const pairs: { from: [number, number, number]; to: [number, number, number]; active: boolean }[] = [];
+    const seen = new Set<string>();
+    agentList.forEach(agent => {
+      const aDesk = deskMap.get(agent.id);
+      if (!aDesk) return;
+      const linkedIds = [...(agent.dependsOn || []), ...(agent.feeds || [])];
+      linkedIds.forEach(otherId => {
+        const key = [agent.id, otherId].sort().join("-");
+        if (seen.has(key)) return;
+        seen.add(key);
+        const bDesk = deskMap.get(otherId);
+        if (!bDesk) return;
+        const otherAgent = agentList.find(a => a.id === otherId);
+        const isActive = agent.status === "active" || (otherAgent?.status === "active");
+        pairs.push({ from: aDesk.position, to: bDesk.position, active: isActive });
+      });
+    });
+    return pairs;
+  }, [agentList, deskMap]);
+
   if (state === "loading" || state === "error" || state === "empty") {
     return <SceneOverlay state={state} error={error} onRetry={refetch} />;
   }
@@ -143,10 +165,16 @@ export function SceneCanvas({
           meetingPos={mPos} onClick={onAgentClick} onHover={onAgentHover} />;
       })}
 
-      {/* ════ FLOW CONNECTIONS ════ */}
+      {/* ════ FLOW CONNECTIONS (orchestrator → agents) ════ */}
       {connectionPairs.map((cp, i) => (
-        <FlowConnection key={i} from={cp.from} to={cp.to} color={cp.color}
+        <FlowConnection key={`orch-${i}`} from={cp.from} to={cp.to} color={cp.color}
           active={cp.active} particleCount={cp.active ? 2 : 0} />
+      ))}
+
+      {/* ════ SQUAD CONNECTIONS (dependsOn/feeds) ════ */}
+      {squadPairs.map((sp, i) => (
+        <FlowConnection key={`squad-${i}`} from={sp.from} to={sp.to}
+          color="#f59e0b" active={sp.active} particleCount={sp.active ? 3 : 0} />
       ))}
 
       {/* ════ CAMERA ════ */}
