@@ -3,7 +3,7 @@
  * Sophisticated command-center with physical materials, warm lighting,
  * reduced FX, and premium architectural mass.
  */
-import { useRef } from "react";
+import { useRef, useMemo } from "react";
 import { Text, Billboard } from "@react-three/drei";
 import * as THREE from "three";
 import { SECTOR_META, MEETING_POSITION } from "./OfficeLayout";
