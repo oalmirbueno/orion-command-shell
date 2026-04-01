@@ -236,7 +236,32 @@ export default function BuildersPage() {
     [builders, squads],
   );
 
-  const handleRefresh = () => {
+  /* ── Token chart: 6 × 4h buckets over last 24h ── */
+  const tokenChartData = useMemo(() => {
+    const now = Date.now();
+    const bucketSize = 4 * 60 * 60_000;
+    const buckets: { label: string; OpenClaw: number; "Claude Code": number; AIOX: number }[] = [];
+    for (let i = 5; i >= 0; i--) {
+      const hS = new Date(now - (i + 1) * bucketSize).getHours();
+      const hE = new Date(now - i * bucketSize).getHours();
+      buckets.push({ label: `${String(hS).padStart(2, "0")}–${String(hE).padStart(2, "0")}h`, OpenClaw: 0, "Claude Code": 0, AIOX: 0 });
+    }
+    const h24 = 24 * 60 * 60_000;
+    builders.forEach((b) => {
+      const key = b.domain === "openclaw" ? "OpenClaw" : b.domain === "claude-code" ? "Claude Code" : "AIOX";
+      b.sessions.forEach((s) => {
+        const ts = typeof s.updatedAt === "number" ? s.updatedAt : new Date(s.updatedAt).getTime();
+        if (ts < now - h24 || ts > now) return;
+        const idx = 5 - Math.min(5, Math.floor((now - ts) / bucketSize));
+        if (idx >= 0 && idx < 6) buckets[idx][key] += s.totalTokens || 0;
+      });
+    });
+    return buckets;
+  }, [builders]);
+
+  const hasTokenData = tokenChartData.some((d) => d.OpenClaw > 0 || d["Claude Code"] > 0 || d.AIOX > 0);
+
+
     qc.invalidateQueries({ queryKey: ["builders-agents"] });
     qc.invalidateQueries({ queryKey: ["builders-sessions"] });
     qc.invalidateQueries({ queryKey: ["builders-aiox-squads"] });
