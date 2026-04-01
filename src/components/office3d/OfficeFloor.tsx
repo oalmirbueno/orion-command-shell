@@ -33,21 +33,20 @@ function useTileTexture() {
     const ctx = canvas.getContext("2d")!;
 
     // Light warm-grey base
-    ctx.fillStyle = "#4a4a68";
+    ctx.fillStyle = "#6a6a88";
     ctx.fillRect(0, 0, size, size);
 
-    // 4x4 tiles with subtle variation
     const ts = size / 4;
     for (let x = 0; x < 4; x++) {
       for (let y = 0; y < 4; y++) {
-        const b = 68 + Math.floor(Math.random() * 12);
-        ctx.fillStyle = `rgb(${b - 4}, ${b - 4}, ${b + 8})`;
+        const b = 100 + Math.floor(Math.random() * 14);
+        ctx.fillStyle = `rgb(${b - 2}, ${b - 2}, ${b + 10})`;
         ctx.fillRect(x * ts + 1.5, y * ts + 1.5, ts - 3, ts - 3);
       }
     }
 
-    // Grout — slightly darker
-    ctx.strokeStyle = "#3a3a58";
+    ctx.strokeStyle = "#585878";
+    ctx.lineWidth = 2;
     ctx.lineWidth = 2;
     for (let i = 0; i <= 4; i++) {
       ctx.beginPath(); ctx.moveTo(i * ts, 0); ctx.lineTo(i * ts, size); ctx.stroke();
