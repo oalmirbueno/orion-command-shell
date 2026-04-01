@@ -49,7 +49,7 @@ function AgentNode3D({ position, agent, onClick }: {
   return (
     <Float speed={1.5} rotationIntensity={0.2} floatIntensity={0.3}>
       <group position={position}>
-        <mesh castShadow>
+        <mesh castShadow onClick={(e) => { e.stopPropagation(); onClick?.(agent); }} onPointerOver={(e) => { e.stopPropagation(); document.body.style.cursor = "pointer"; }} onPointerOut={() => { document.body.style.cursor = "auto"; }}>
           <octahedronGeometry args={[scale * 0.35, 0]} />
           <meshStandardMaterial
             color={color}
