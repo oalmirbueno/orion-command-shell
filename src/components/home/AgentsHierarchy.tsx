@@ -55,7 +55,7 @@ export function AgentsHierarchy({ agents = [] }: AgentsHierarchyProps) {
         </div>
       </div>
 
-      <div className="p-4 space-y-4">
+      <div className="p-4 space-y-4 max-h-[320px] overflow-y-auto">
         {tiers.map((tier) => {
           const tierAgents = agents.filter(a => a.tier === tier);
           if (tierAgents.length === 0) return null;
