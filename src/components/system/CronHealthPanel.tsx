@@ -25,6 +25,7 @@ export function CronHealthPanel({ jobs, summary }: CronHealthPanelProps) {
         </span>
       </div>
 
+      <div className="p-4">
       {/* Summary strip */}
       <div className="grid grid-cols-4 gap-3 mb-4">
         {[
