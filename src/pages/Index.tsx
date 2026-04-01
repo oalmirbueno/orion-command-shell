@@ -25,6 +25,7 @@ const Index = () => {
 
   return (
     <OrionLayout title="Comando">
+      <MetricsRecorder />
       <OrionDataWrapper state={state} source={source} lastUpdated={lastUpdated} onRetry={refetch} compact hideSource skeleton={<HomeSkeleton />}>
         {data && (
           <div className="space-y-5">
