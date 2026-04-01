@@ -1,27 +1,34 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Filter, Inbox } from "lucide-react";
+import { Inbox } from "lucide-react";
 import { OrionLayout } from "@/components/OrionLayout";
 import { OrionBreadcrumb } from "@/components/orion";
 import { OrionDataWrapper } from "@/components/orion/DataWrapper";
 import { useOrionData } from "@/hooks/useOrionData";
 import { fetchTimelinePage } from "@/domains/timeline/fetcher";
-import { cn } from "@/lib/utils";
 import { TimelineSummary } from "@/components/timeline/TimelineSummary";
 import { TimelineCenterRow } from "@/components/timeline/TimelineCenterRow";
 import { TimelineBlockLabel } from "@/components/timeline/TimelineBlockLabel";
 import { TimelineSkeleton } from "@/components/timeline/TimelineSkeleton";
-import type { TimelinePageData, TimelineItem, TimelineItemType } from "@/domains/timeline/types";
+import { AdvancedFilters, type FilterState } from "@/components/filters/AdvancedFilters";
+import type { TimelinePageData, TimelineItem } from "@/domains/timeline/types";
 
-// ── Filters ──
-type FilterKey = "all" | TimelineItemType;
-const filters: { key: FilterKey; label: string }[] = [
+const typeOptions = [
   { key: "all", label: "Todos" },
   { key: "session", label: "Sessões" },
   { key: "cron", label: "Cron" },
   { key: "alert", label: "Alertas" },
   { key: "agent", label: "Agentes" },
   { key: "system", label: "Sistema" },
+];
+
+const statusOptions = [
+  { key: "all", label: "Todos" },
+  { key: "running", label: "Ativo" },
+  { key: "completed", label: "Concluído" },
+  { key: "failed", label: "Falha" },
+  { key: "scheduled", label: "Agendado" },
+  { key: "critical", label: "Crítico" },
 ];
 
 // ── Group by time block ──
