@@ -21,7 +21,7 @@ export function SceneOverlay({ state, error, onRetry }: {
   state: "loading" | "error" | "empty"; error?: string | null; onRetry?: () => void;
 }) {
   return (
-    <div className="w-full h-full flex items-center justify-center bg-[#0c0c24]">
+    <div className="w-full h-full flex items-center justify-center bg-[#252545]">
       <div className="text-center space-y-3">
         {state === "loading" && (
           <><Loader2 className="h-6 w-6 text-primary/40 animate-spin mx-auto" />
