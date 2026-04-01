@@ -184,16 +184,19 @@ function AlertsSkeleton() {
 /* ── Page ── */
 const AlertsPage = () => {
   const queryClient = useQueryClient();
+  const [isRefreshing, setIsRefreshing] = React.useState(false);
 
-  const { data, isLoading, isError, error } = useQuery<AlertsResponse>({
+  const { data, isLoading, isError, error, isFetching } = useQuery<AlertsResponse>({
     queryKey: ["alerts-page"],
     queryFn: fetchAlerts,
     refetchInterval: 30_000,
     placeholderData: (prev) => prev,
   });
 
-  const handleRefresh = () => {
-    queryClient.invalidateQueries({ queryKey: ["alerts-page"] });
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await queryClient.refetchQueries({ queryKey: ["alerts-page"] });
+    setIsRefreshing(false);
   };
 
   return (
