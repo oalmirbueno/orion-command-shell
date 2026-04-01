@@ -262,7 +262,7 @@ export default function BuildersPage() {
   const hasTokenData = tokenChartData.some((d) => d.OpenClaw > 0 || d["Claude Code"] > 0 || d.AIOX > 0);
 
 
-    qc.invalidateQueries({ queryKey: ["builders-agents"] });
+    const handleRefresh = () => {
     qc.invalidateQueries({ queryKey: ["builders-sessions"] });
     qc.invalidateQueries({ queryKey: ["builders-aiox-squads"] });
   };
