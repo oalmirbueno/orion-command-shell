@@ -13,6 +13,7 @@ import { ExecutiveBriefing } from "@/components/home/ExecutiveBriefing";
 import { WeatherContext } from "@/components/home/WeatherContext";
 import { SkillsWidget } from "@/components/home/SkillsWidget";
 import { BuildersWidget } from "@/components/home/BuildersWidget";
+import { BottlenecksWidget } from "@/components/home/BottlenecksWidget";
 
 const Index = () => {
   const { state, data, source, lastUpdated, refetch } = useOrionData<HomePageData>({
@@ -26,7 +27,7 @@ const Index = () => {
       <OrionDataWrapper state={state} source={source} lastUpdated={lastUpdated} onRetry={refetch} compact hideSource skeleton={<HomeSkeleton />}>
         {data && (
           <div className="space-y-5">
-            {/* Tier 1: Status + Weather side by side */}
+            {/* Tier 1: Status + Weather */}
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
               <CommandStatus data={data.command} />
               <WeatherContext />
@@ -45,10 +46,11 @@ const Index = () => {
               </div>
             </div>
 
-            {/* Tier 4: Context — health + skills + briefing */}
+            {/* Tier 4: Context — health + bottlenecks + skills + briefing */}
             <div className="grid grid-cols-1 xl:grid-cols-5 gap-5">
               <div className="xl:col-span-2 space-y-5">
                 <OperationalHealth services={data.health} />
+                <BottlenecksWidget />
                 <SkillsWidget />
                 <BuildersWidget />
               </div>
