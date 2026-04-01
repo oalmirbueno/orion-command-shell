@@ -542,7 +542,12 @@ const MissionsPage = () => {
         )}
       </div>
 
-      <CronDetailSheet job={selectedCronJob} open={sheetOpen} onOpenChange={setSheetOpen} />
+      <WorkflowDetailSheet
+        mission={selectedMission}
+        open={sheetOpen}
+        onOpenChange={setSheetOpen}
+        onDelete={handleDeleteWorkflow}
+      />
     </OrionLayout>
   );
 };
