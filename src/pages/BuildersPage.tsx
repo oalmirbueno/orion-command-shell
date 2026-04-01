@@ -149,6 +149,7 @@ interface BuilderView {
 export default function BuildersPage() {
   const qc = useQueryClient();
   const [expandedBuilder, setExpandedBuilder] = useState<string | null>(null);
+  const [expandedSquad, setExpandedSquad] = useState<string | null>(null);
   const [showAllSquads, setShowAllSquads] = useState(false);
 
   const agentsQ = useQuery({ queryKey: ["builders-agents"], queryFn: fetchAgents, staleTime: 30_000, refetchInterval: 60_000, placeholderData: (prev) => prev });
