@@ -1,17 +1,17 @@
 import { OrionLayout } from "@/components/OrionLayout";
 import { OrionBreadcrumb } from "@/components/orion";
-import { Box, Eye, Maximize2, Users, AlertTriangle } from "lucide-react";
+import { Box, Eye, Maximize2, Users, AlertTriangle, Network } from "lucide-react";
 import { Suspense, useState, useCallback, Component, type ReactNode } from "react";
 import { SceneCanvas, SceneOverlay } from "@/components/office3d/SceneCanvas";
 import { AgentCommandPanel } from "@/components/office3d/AgentCommandPanel";
 import { MeetingBar } from "@/components/office3d/MeetingBar";
 import { OfficeMinimap } from "@/components/office3d/OfficeMinimap";
+import { SquadsPanel } from "@/components/office3d/SquadsPanel";
 import { AgentDetailSheet } from "@/components/sheets/AgentDetailSheet";
 import { useOrionData } from "@/hooks/useOrionData";
 import { fetchAgents } from "@/domains/agents/fetcher";
 import type { AgentView } from "@/domains/agents/types";
-import { SECTOR_META } from "@/components/office3d/OfficeLayout";
-import { STATUS_VISUAL } from "@/components/office3d/OfficeLayout";
+import { SECTOR_META, STATUS_VISUAL } from "@/components/office3d/OfficeLayout";
 
 /* ── WebGL Error Boundary ── */
 class WebGLErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean; error: string }> {
