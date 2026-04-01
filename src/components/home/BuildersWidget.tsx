@@ -14,7 +14,7 @@ interface RealAgent {
   lastActivity?: string;
 }
 
-interface SkillItem {
+interface AioxSquad {
   id: string;
   name: string;
   description?: string;
@@ -22,6 +22,7 @@ interface SkillItem {
   status?: string;
   agents?: string[];
   files?: number | string[];
+  category?: string;
 }
 
 type BuilderCategory = "claude-code" | "aiox" | "other";
