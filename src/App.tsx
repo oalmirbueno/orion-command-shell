@@ -21,6 +21,7 @@ import OperationsPage from "./pages/OperationsPage.tsx";
 import FilesPage from "./pages/FilesPage.tsx";
 import SearchPage from "./pages/SearchPage.tsx";
 import SkillsPage from "./pages/SkillsPage.tsx";
+import BuildersPage from "./pages/BuildersPage.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import { PageTransition } from "./components/PageTransition.tsx";
 
