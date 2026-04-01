@@ -10,6 +10,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { useState, useMemo, useEffect, useSyncExternalStore } from "react";
 import { notificationStore } from "@/services/notificationStore";
 import { useAuth } from "@/hooks/useAuth";
+import { useAuditLog } from "@/hooks/useAuditLog";
 
 export type NotifType = "alert" | "cron" | "session" | "operation" | "builder" | "system" | "agent";
 export type NotifSeverity = "critical" | "warning" | "success" | "info";
