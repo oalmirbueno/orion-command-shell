@@ -1,11 +1,14 @@
-import { Search } from "lucide-react";
+import { Search, LogOut, User } from "lucide-react";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { NotificationCenter } from "@/components/notifications/NotificationCenter";
+import { useAuth } from "@/hooks/useAuth";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 export function OrionTopBar({ title = "Comando" }: { title?: string }) {
   const navigate = useNavigate();
+  const { user, configured, signOut } = useAuth();
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -17,6 +20,11 @@ export function OrionTopBar({ title = "Comando" }: { title?: string }) {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [navigate]);
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/login");
+  };
 
   return (
     <header className="h-12 flex items-center justify-between border-b border-border px-5 surface-1 shrink-0 select-none">
@@ -42,6 +50,26 @@ export function OrionTopBar({ title = "Comando" }: { title?: string }) {
         </button>
 
         <NotificationCenter />
+
+        {/* Auth indicator */}
+        {configured && user ? (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button onClick={handleSignOut} className="flex items-center gap-1.5 px-2 py-1.5 rounded-md text-muted-foreground/50 hover:text-foreground hover:bg-accent/40 transition-colors">
+                <User className="h-3.5 w-3.5" />
+                <span className="text-[10px] font-mono hidden lg:inline max-w-[100px] truncate">{user.email}</span>
+                <LogOut className="h-3 w-3 ml-1" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom">
+              <p className="text-xs">Sair — {user.email}</p>
+            </TooltipContent>
+          </Tooltip>
+        ) : configured && !user ? (
+          <button onClick={() => navigate("/login")} className="text-[10px] font-mono text-primary/70 hover:text-primary px-2 py-1.5 transition-colors">
+            Login
+          </button>
+        ) : null}
       </div>
     </header>
   );

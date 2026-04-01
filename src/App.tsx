@@ -5,6 +5,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { LastUpdatedProvider } from "@/hooks/useLastUpdated";
 import { DomainHealthProvider } from "@/hooks/useDomainHealth";
+import { AuthProvider } from "@/hooks/useAuth";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { useOrionStream } from "@/hooks/useOrionStream";
 import Index from "./pages/Index.tsx";
 import PlaceholderPage from "./pages/PlaceholderPage.tsx";
@@ -26,6 +28,7 @@ import BuildersPage from "./pages/BuildersPage.tsx";
 import TimelinePage from "./pages/TimelinePage.tsx";
 import RemindersPage from "./pages/RemindersPage.tsx";
 import SettingsPage from "./pages/SettingsPage.tsx";
+import LoginPage from "./pages/LoginPage.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import { PageTransition } from "./components/PageTransition.tsx";
 
@@ -50,25 +53,29 @@ function AppShell() {
       <BrowserRouter>
         <PageTransition>
           <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/agents" element={<AgentsPage />} />
-            <Route path="/missions" element={<MissionsPage />} />
-            <Route path="/sessions" element={<SessionsPage />} />
-            <Route path="/activity" element={<ActivityPage />} />
-            <Route path="/memory" element={<MemoryPage />} />
-            <Route path="/system" element={<SystemPage />} />
-            <Route path="/cron" element={<CronPage />} />
-            <Route path="/alerts" element={<AlertsPage />} />
-            <Route path="/operations" element={<OperationsPage />} />
-            <Route path="/files" element={<FilesPage />} />
-            <Route path="/search" element={<SearchPage />} />
-            <Route path="/skills" element={<SkillsPage />} />
-            <Route path="/builders" element={<BuildersPage />} />
-            <Route path="/timeline" element={<TimelinePage />} />
-            <Route path="/reminders" element={<RemindersPage />} />
-            <Route path="/pipelines" element={<PipelinesPage />} />
-            <Route path="/office3d" element={<Office3DPage />} />
-            <Route path="/settings" element={<SettingsPage />} />
+            {/* Public */}
+            <Route path="/login" element={<LoginPage />} />
+
+            {/* Protected */}
+            <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+            <Route path="/agents" element={<ProtectedRoute><AgentsPage /></ProtectedRoute>} />
+            <Route path="/missions" element={<ProtectedRoute><MissionsPage /></ProtectedRoute>} />
+            <Route path="/sessions" element={<ProtectedRoute><SessionsPage /></ProtectedRoute>} />
+            <Route path="/activity" element={<ProtectedRoute><ActivityPage /></ProtectedRoute>} />
+            <Route path="/memory" element={<ProtectedRoute><MemoryPage /></ProtectedRoute>} />
+            <Route path="/system" element={<ProtectedRoute><SystemPage /></ProtectedRoute>} />
+            <Route path="/cron" element={<ProtectedRoute><CronPage /></ProtectedRoute>} />
+            <Route path="/alerts" element={<ProtectedRoute><AlertsPage /></ProtectedRoute>} />
+            <Route path="/operations" element={<ProtectedRoute><OperationsPage /></ProtectedRoute>} />
+            <Route path="/files" element={<ProtectedRoute><FilesPage /></ProtectedRoute>} />
+            <Route path="/search" element={<ProtectedRoute><SearchPage /></ProtectedRoute>} />
+            <Route path="/skills" element={<ProtectedRoute><SkillsPage /></ProtectedRoute>} />
+            <Route path="/builders" element={<ProtectedRoute><BuildersPage /></ProtectedRoute>} />
+            <Route path="/timeline" element={<ProtectedRoute><TimelinePage /></ProtectedRoute>} />
+            <Route path="/reminders" element={<ProtectedRoute><RemindersPage /></ProtectedRoute>} />
+            <Route path="/pipelines" element={<ProtectedRoute><PipelinesPage /></ProtectedRoute>} />
+            <Route path="/office3d" element={<ProtectedRoute><Office3DPage /></ProtectedRoute>} />
+            <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </PageTransition>
@@ -79,13 +86,15 @@ function AppShell() {
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <LastUpdatedProvider>
-      <DomainHealthProvider>
-        <TooltipProvider>
-          <AppShell />
-        </TooltipProvider>
-      </DomainHealthProvider>
-    </LastUpdatedProvider>
+    <AuthProvider>
+      <LastUpdatedProvider>
+        <DomainHealthProvider>
+          <TooltipProvider>
+            <AppShell />
+          </TooltipProvider>
+        </DomainHealthProvider>
+      </LastUpdatedProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 
