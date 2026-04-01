@@ -1,17 +1,17 @@
 import { OrionLayout } from "@/components/OrionLayout";
 import { OrionBreadcrumb } from "@/components/orion";
-import { Box, Eye, Maximize2, Users, AlertTriangle } from "lucide-react";
+import { Box, Eye, Maximize2, Users, AlertTriangle, Network } from "lucide-react";
 import { Suspense, useState, useCallback, Component, type ReactNode } from "react";
 import { SceneCanvas, SceneOverlay } from "@/components/office3d/SceneCanvas";
 import { AgentCommandPanel } from "@/components/office3d/AgentCommandPanel";
 import { MeetingBar } from "@/components/office3d/MeetingBar";
 import { OfficeMinimap } from "@/components/office3d/OfficeMinimap";
+import { SquadsPanel } from "@/components/office3d/SquadsPanel";
 import { AgentDetailSheet } from "@/components/sheets/AgentDetailSheet";
 import { useOrionData } from "@/hooks/useOrionData";
 import { fetchAgents } from "@/domains/agents/fetcher";
 import type { AgentView } from "@/domains/agents/types";
-import { SECTOR_META } from "@/components/office3d/OfficeLayout";
-import { STATUS_VISUAL } from "@/components/office3d/OfficeLayout";
+import { SECTOR_META, STATUS_VISUAL } from "@/components/office3d/OfficeLayout";
 
 /* ── WebGL Error Boundary ── */
 class WebGLErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean; error: string }> {
@@ -46,6 +46,7 @@ const Office3DPage = () => {
   const [tooltipPos, setTooltipPos] = useState<{ x: number; y: number } | null>(null);
   const [meetingAgents, setMeetingAgents] = useState<AgentView[]>([]);
   const [meetingActive, setMeetingActive] = useState(false);
+  const [squadsOpen, setSquadsOpen] = useState(false);
 
   // Get all agents for meeting bar
   const { data: allAgents } = useOrionData<AgentView[]>({
@@ -122,6 +123,12 @@ const Office3DPage = () => {
               </div>
             </div>
             <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => setSquadsOpen(s => !s)}
+                className={`text-xs font-mono px-2.5 py-1 rounded bg-card border transition-colors flex items-center gap-1 ${squadsOpen ? "border-amber-400/40 text-amber-400" : "border-border/30 text-muted-foreground hover:text-amber-400 hover:border-amber-400/30"}`}
+              >
+                <Network className="h-3 w-3" /> Squads
+              </button>
               {!meetingActive && (
                 <button
                   onClick={() => setMeetingActive(true)}
@@ -195,11 +202,20 @@ const Office3DPage = () => {
               />
             )}
 
+            {/* Squads panel */}
+            <SquadsPanel
+              agents={allAgents || []}
+              open={squadsOpen}
+              onClose={() => setSquadsOpen(false)}
+              onAgentClick={handleAgentClick}
+            />
+
             {/* Minimap */}
             {!commandAgent && (
               <OfficeMinimap
                 agents={allAgents || []}
                 meetingAgentIds={meetingAgentIds}
+                onAgentClick={handleAgentClick}
               />
             )}
           </div>
