@@ -1,12 +1,15 @@
 import { useState, useEffect } from "react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
   GitBranch, Timer, Bot, Clock, CheckCircle2, XCircle, CalendarClock,
   Zap, ArrowRight, Activity, AlertTriangle, FileText, Hash, BarChart3,
+  Play, Loader2,
 } from "lucide-react";
 import { apiUrl } from "@/domains/api";
+import { toast } from "@/hooks/use-toast";
 import type { Pipeline, PipelineStep, PipelineStatus, StepStatus } from "@/domains/pipelines/types";
 
 /* ── Types ── */
@@ -141,6 +144,30 @@ function RunRow({ run }: { run: CronRunEntry }) {
 export function PipelineDetailSheet({ pipeline, open, onOpenChange }: Props) {
   const [runs, setRuns] = useState<CronRunEntry[]>([]);
   const [loadingRuns, setLoadingRuns] = useState(false);
+  const [triggering, setTriggering] = useState(false);
+
+  const isCronBased = pipeline?.origin === "cron" || pipeline?.origin === "mixed";
+
+  async function handleRunNow() {
+    if (!pipeline || !isCronBased) return;
+    setTriggering(true);
+    try {
+      const res = await fetch(apiUrl("/cron/run"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({ jobId: pipeline.id }),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body?.error || `${res.status}`);
+      }
+      toast({ title: "Pipeline disparado", description: `${pipeline.name} iniciado com sucesso.` });
+    } catch (err: any) {
+      toast({ title: "Erro ao executar", description: err?.message || "Falha ao disparar pipeline", variant: "destructive" });
+    } finally {
+      setTriggering(false);
+    }
+  }
 
   // Fetch cron run history when a cron-origin pipeline is selected
   useEffect(() => {
@@ -159,7 +186,7 @@ export function PipelineDetailSheet({ pipeline, open, onOpenChange }: Props) {
       try {
         const ctrl = new AbortController();
         const timer = setTimeout(() => ctrl.abort(), 10000);
-        const res = await fetch(apiUrl(`/cron/runs?jobId=${pipeline.id}`), {
+        const res = await fetch(apiUrl(`/cron/runs/${pipeline.id}`), {
           signal: ctrl.signal,
           headers: { Accept: "application/json" },
         });
@@ -211,6 +238,20 @@ export function PipelineDetailSheet({ pipeline, open, onOpenChange }: Props) {
               {cfg.label}
             </Badge>
           </div>
+
+          {/* Run Now button */}
+          {isCronBased && (
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={triggering || pipeline.status === "disabled"}
+              onClick={handleRunNow}
+              className="w-full gap-2"
+            >
+              {triggering ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Play className="h-3.5 w-3.5" />}
+              {triggering ? "Executando..." : "Executar Agora"}
+            </Button>
+          )}
 
           {/* Quick metrics */}
           <div className="grid grid-cols-3 gap-2">
