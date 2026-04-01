@@ -68,7 +68,8 @@ function FloorPlane() {
     <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.02, 1]} receiveShadow>
       <planeGeometry args={[22, 20]} />
       <meshPhysicalMaterial map={tileMap} roughness={0.4} metalness={0.18}
-        clearcoat={0.1} clearcoatRoughness={0.5} />
+        clearcoat={0.1} clearcoatRoughness={0.5}
+        polygonOffset polygonOffsetFactor={2} polygonOffsetUnits={2} />
     </mesh>
   );
 }
@@ -81,7 +82,8 @@ function SectorFloor({ position, size, color, elevated = false }: {
     return (
       <mesh position={[position[0], 0.02, position[2]]} castShadow receiveShadow>
         <boxGeometry args={[size[0], 0.04, size[1]]} />
-        <meshStandardMaterial color="#454568" roughness={0.35} metalness={0.3} />
+        <meshStandardMaterial color="#454568" roughness={0.35} metalness={0.3}
+          polygonOffset polygonOffsetFactor={1} polygonOffsetUnits={1} />
       </mesh>
     );
   }
@@ -89,7 +91,8 @@ function SectorFloor({ position, size, color, elevated = false }: {
   return (
     <mesh position={[position[0], 0.005, position[2]]}>
       <boxGeometry args={[size[0], 0.01, size[1]]} />
-      <meshStandardMaterial color={color} transparent opacity={0.12} roughness={0.7} />
+      <meshStandardMaterial color={color} transparent opacity={0.12} roughness={0.7}
+        polygonOffset polygonOffsetFactor={-1} polygonOffsetUnits={-1} />
     </mesh>
   );
 }
@@ -247,25 +250,7 @@ function ServerRack({ position, color = "#6ee7b7" }: { position: [number, number
   );
 }
 
-/* ── Ceiling Light — slim, warm ── */
-function CeilingLight({ position, length = 3, color = "#f0f0ff", width = 0.15 }: {
-  position: [number, number, number]; length?: number; color?: string; width?: number;
-}) {
-  return (
-    <group position={position}>
-      <mesh>
-        <boxGeometry args={[length, 0.03, width + 0.08]} />
-        <meshStandardMaterial color="#505070" roughness={0.3} metalness={0.5} />
-      </mesh>
-      <mesh position={[0, -0.018, 0]}>
-        <boxGeometry args={[length - 0.06, 0.006, width]} />
-        <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.4} transparent opacity={0.6} />
-      </mesh>
-      <rectAreaLight width={length} height={width} intensity={2} color={color}
-        position={[0, -0.03, 0]} rotation={[Math.PI / 2, 0, 0]} />
-    </group>
-  );
-}
+/* CeilingLight removed — was causing visual clutter and shadow acne */
 
 /* ── Meeting Table ── */
 function MeetingTable() {
@@ -376,13 +361,6 @@ export function OfficeFloor() {
       <ServerRack position={[5.8, 0, 3]} color="#6ee7b7" />
 
       {/* ══ CEILING LIGHTS (no heavy beams) ══ */}
-      <CeilingLight position={[0, 3.5, -1]} length={4.5} color="#e8e0ff" width={0.2} />
-      <CeilingLight position={[-2.5, 3.5, 2]} length={4} color="#d8e8ff" width={0.18} />
-      <CeilingLight position={[2.5, 3.5, 2]} length={4} color="#d8e8ff" width={0.18} />
-      <CeilingLight position={[0, 3.5, 3.5]} length={7} color="#d8e8ff" width={0.18} />
-      <CeilingLight position={[5.5, 3.5, 1]} length={2.5} color="#d0f0e0" width={0.15} />
-      <CeilingLight position={[-5.5, 3.5, 1]} length={2.5} color="#d0f0e0" width={0.15} />
-      <CeilingLight position={[0, 3.2, -4.5]} length={3.5} color="#fff0d0" width={0.18} />
     </group>
   );
 }

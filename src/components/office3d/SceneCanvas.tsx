@@ -117,8 +117,8 @@ export function SceneCanvas({
       <fog attach="fog" args={["#252545", 22, 50]} />
 
       {/* ════ LIGHTING — bright, architectural, legible ════ */}
-      <hemisphereLight args={["#8888c0", "#404060", 0.8]} />
-      <ambientLight intensity={0.7} color="#e0e0f0" />
+      <hemisphereLight args={["#9999cc", "#505070", 1.0]} />
+      <ambientLight intensity={0.9} color="#e0e0f0" />
 
       {/* Key light — strong, warm */}
       <directionalLight position={[8, 14, 8]} intensity={0.9} castShadow
