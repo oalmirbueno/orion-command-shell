@@ -25,6 +25,7 @@ import SkillsPage from "./pages/SkillsPage.tsx";
 import BuildersPage from "./pages/BuildersPage.tsx";
 import TimelinePage from "./pages/TimelinePage.tsx";
 import RemindersPage from "./pages/RemindersPage.tsx";
+import SettingsPage from "./pages/SettingsPage.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import { PageTransition } from "./components/PageTransition.tsx";
 
@@ -67,7 +68,7 @@ function AppShell() {
             <Route path="/reminders" element={<RemindersPage />} />
             <Route path="/pipelines" element={<PipelinesPage />} />
             <Route path="/office3d" element={<Office3DPage />} />
-            <Route path="/settings" element={<PlaceholderPage title="Configurações" description="Módulo Configurações — Em desenvolvimento" />} />
+            <Route path="/settings" element={<SettingsPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </PageTransition>
