@@ -464,7 +464,7 @@ const SkillsPage = () => {
           <div>
             <h1 className="text-xl font-bold text-foreground">Skills</h1>
             <p className="text-sm text-muted-foreground/60 mt-1">
-              Capacidades e base de conhecimento dos agentes
+              Central de capacidades, conhecimento e ferramentas disponíveis para os agentes do ecossistema. Mostra quais skills estão ativas, quantos agentes as utilizam e o histórico de uso.
             </p>
           </div>
           <Button variant="outline" size="sm" onClick={handleRefresh} disabled={isRefreshing || isFetching} className="gap-2">
