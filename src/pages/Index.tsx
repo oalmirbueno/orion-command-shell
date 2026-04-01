@@ -11,6 +11,7 @@ import { AgentsHierarchy } from "@/components/home/AgentsHierarchy";
 import { OperationalHealth } from "@/components/home/OperationalHealth";
 import { ExecutiveBriefing } from "@/components/home/ExecutiveBriefing";
 import { WeatherContext } from "@/components/home/WeatherContext";
+import { SkillsWidget } from "@/components/home/SkillsWidget";
 
 const Index = () => {
   const { state, data, source, lastUpdated, refetch } = useOrionData<HomePageData>({
@@ -43,10 +44,11 @@ const Index = () => {
               </div>
             </div>
 
-            {/* Tier 4: Context — health + briefing */}
+            {/* Tier 4: Context — health + skills + briefing */}
             <div className="grid grid-cols-1 xl:grid-cols-5 gap-5">
-              <div className="xl:col-span-2">
+              <div className="xl:col-span-2 space-y-5">
                 <OperationalHealth services={data.health} />
+                <SkillsWidget />
               </div>
               <div className="xl:col-span-3">
                 <ExecutiveBriefing items={data.briefing} />
