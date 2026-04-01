@@ -1,15 +1,36 @@
 import { OrionLayout } from "@/components/OrionLayout";
-import { OrionBreadcrumb, OrionSectionHeader } from "@/components/orion";
-import { Box, Eye, RotateCcw, Maximize2, Layers } from "lucide-react";
-import { Suspense, useState } from "react";
-import { SceneCanvas } from "@/components/office3d/SceneCanvas";
+import { OrionBreadcrumb } from "@/components/orion";
+import { Box, Eye, Maximize2, Layers, AlertTriangle } from "lucide-react";
+import { Suspense, useState, Component, type ReactNode } from "react";
+import { SceneCanvas, SceneOverlay } from "@/components/office3d/SceneCanvas";
 
-const layerItems = [
-  { label: "Agentes", color: "bg-primary/60", active: true },
-  { label: "Conexões", color: "bg-accent-foreground/40", active: true },
-  { label: "Sessões", color: "bg-status-online/60", active: false },
-  { label: "Pipelines", color: "bg-status-warning/60", active: false },
-];
+/* ── WebGL Error Boundary ── */
+class WebGLErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean; error: string }> {
+  state = { hasError: false, error: "" };
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error: error.message };
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="w-full h-full flex items-center justify-center bg-background">
+          <div className="text-center space-y-3">
+            <AlertTriangle className="h-6 w-6 text-status-error/60 mx-auto" />
+            <p className="text-xs font-mono text-muted-foreground/60">WebGL indisponível</p>
+            <p className="text-[10px] text-muted-foreground/40 max-w-xs">{this.state.error}</p>
+            <button
+              onClick={() => this.setState({ hasError: false, error: "" })}
+              className="text-xs text-primary hover:text-primary/80 transition-colors"
+            >
+              Tentar novamente
+            </button>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 const Office3DPage = () => {
   const [fullscreen, setFullscreen] = useState(false);
@@ -27,10 +48,10 @@ const Office3DPage = () => {
           <div className="flex-1">
             <div className="flex items-center gap-2.5">
               <h2 className="text-sm font-semibold text-foreground">Visão 3D — Arquitetura Operacional</h2>
-              <span className="orion-badge orion-badge-success">Ativo</span>
+              <span className="orion-badge orion-badge-success">Live</span>
             </div>
             <p className="text-xs font-mono text-muted-foreground mt-0.5">
-              Representação espacial dos agentes, conexões e fluxo operacional
+              Agentes reais do ecossistema · Status e tarefa atual
             </p>
           </div>
         </div>
@@ -60,18 +81,11 @@ const Office3DPage = () => {
 
           {/* Canvas */}
           <div style={{ height: fullscreen ? "calc(100vh - 41px)" : "520px" }}>
-            <Suspense
-              fallback={
-                <div className="w-full h-full flex items-center justify-center bg-background">
-                  <div className="text-center space-y-3">
-                    <RotateCcw className="h-6 w-6 text-primary/40 animate-spin mx-auto" />
-                    <p className="text-xs font-mono text-muted-foreground/40">Carregando viewport…</p>
-                  </div>
-                </div>
-              }
-            >
-              <SceneCanvas />
-            </Suspense>
+            <WebGLErrorBoundary>
+              <Suspense fallback={<SceneOverlay state="loading" />}>
+                <SceneCanvas />
+              </Suspense>
+            </WebGLErrorBoundary>
           </div>
         </div>
 
@@ -81,10 +95,15 @@ const Office3DPage = () => {
             {/* Layers */}
             <div className="orion-card p-4">
               <h3 className="text-xs font-mono text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-1.5">
-                <Layers className="h-3.5 w-3.5" /> Camadas
+                <Layers className="h-3.5 w-3.5" /> Camadas Ativas
               </h3>
               <div className="space-y-2">
-                {layerItems.map((layer) => (
+                {[
+                  { label: "Agentes (API)", color: "bg-primary/60", active: true },
+                  { label: "Conexões", color: "bg-accent-foreground/40", active: true },
+                  { label: "Status live", color: "bg-status-online/60", active: true },
+                  { label: "Tarefa atual", color: "bg-status-warning/60", active: true },
+                ].map((layer) => (
                   <div key={layer.label} className="flex items-center gap-2.5 py-1">
                     <div className={`w-2.5 h-2.5 rounded-full ${layer.color} ${layer.active ? "" : "opacity-25"}`} />
                     <span className={`text-xs ${layer.active ? "text-foreground/80" : "text-muted-foreground/40 line-through"}`}>
@@ -105,7 +124,6 @@ const Office3DPage = () => {
                 <p>Arrastar → Orbitar câmera</p>
                 <p>Scroll → Zoom (4x – 16x)</p>
                 <p>Shift + Arrastar → Pan</p>
-                <p>Duplo-clique → Focar nó</p>
                 <p className="text-primary/40 pt-1">Auto-rotação ativa</p>
               </div>
             </div>
@@ -115,9 +133,9 @@ const Office3DPage = () => {
               <h3 className="text-xs font-mono text-muted-foreground uppercase tracking-wider mb-3">Legenda</h3>
               <div className="space-y-2">
                 {[
-                  { label: "Orquestrador", color: "bg-primary/60", desc: "Coordenação central" },
-                  { label: "Núcleo", color: "bg-accent-foreground/40", desc: "Execução principal" },
-                  { label: "Suporte", color: "bg-status-online/60", desc: "Ferramentas e recursos" },
+                  { label: "Orquestrador", color: "bg-[#a78bfa]", desc: "Coordenação central" },
+                  { label: "Núcleo", color: "bg-[#60a5fa]", desc: "Execução principal" },
+                  { label: "Suporte", color: "bg-[#6ee7b7]", desc: "Ferramentas e recursos" },
                 ].map((item) => (
                   <div key={item.label} className="flex items-center gap-2.5">
                     <div className={`w-2.5 h-2.5 rounded-sm ${item.color}`} />
@@ -127,10 +145,18 @@ const Office3DPage = () => {
                     </div>
                   </div>
                 ))}
-                <div className="pt-1.5 border-t border-border/20 mt-2">
+                <div className="pt-1.5 border-t border-border/20 mt-2 space-y-1.5">
                   <div className="flex items-center gap-2">
-                    <div className="w-4 h-px bg-muted-foreground/20" />
-                    <span className="text-xs text-muted-foreground/30">Linhas = dependências</span>
+                    <div className="w-1.5 h-1.5 rounded-full bg-[#a3e635]" />
+                    <span className="text-xs text-muted-foreground/50">Ativo — com tarefa</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-[#fbbf24]" />
+                    <span className="text-xs text-muted-foreground/50">Idle — sem tarefa</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-[#6b7280]" />
+                    <span className="text-xs text-muted-foreground/50">Offline</span>
                   </div>
                 </div>
               </div>
