@@ -361,13 +361,6 @@ export function OfficeFloor() {
       <ServerRack position={[5.8, 0, 3]} color="#6ee7b7" />
 
       {/* ══ CEILING LIGHTS (no heavy beams) ══ */}
-      <CeilingLight position={[0, 3.5, -1]} length={4.5} color="#e8e0ff" width={0.2} />
-      <CeilingLight position={[-2.5, 3.5, 2]} length={4} color="#d8e8ff" width={0.18} />
-      <CeilingLight position={[2.5, 3.5, 2]} length={4} color="#d8e8ff" width={0.18} />
-      <CeilingLight position={[0, 3.5, 3.5]} length={7} color="#d8e8ff" width={0.18} />
-      <CeilingLight position={[5.5, 3.5, 1]} length={2.5} color="#d0f0e0" width={0.15} />
-      <CeilingLight position={[-5.5, 3.5, 1]} length={2.5} color="#d0f0e0" width={0.15} />
-      <CeilingLight position={[0, 3.2, -4.5]} length={3.5} color="#fff0d0" width={0.18} />
     </group>
   );
 }
