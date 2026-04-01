@@ -202,11 +202,20 @@ const Office3DPage = () => {
               />
             )}
 
+            {/* Squads panel */}
+            <SquadsPanel
+              agents={allAgents || []}
+              open={squadsOpen}
+              onClose={() => setSquadsOpen(false)}
+              onAgentClick={handleAgentClick}
+            />
+
             {/* Minimap */}
             {!commandAgent && (
               <OfficeMinimap
                 agents={allAgents || []}
                 meetingAgentIds={meetingAgentIds}
+                onAgentClick={handleAgentClick}
               />
             )}
           </div>
