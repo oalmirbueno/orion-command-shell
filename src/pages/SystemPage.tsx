@@ -29,8 +29,8 @@ const SystemPage = () => {
 
   const page = data;
 
-  const runningServices = page?.services.filter(s => s.status === "running").length ?? 0;
-  const totalServices = page?.services.length ?? 0;
+  const runningServices = page?.services?.filter(s => s.status === "running").length ?? 0;
+  const totalServices = page?.services?.length ?? 0;
 
   return (
     <OrionLayout title="Infraestrutura">
