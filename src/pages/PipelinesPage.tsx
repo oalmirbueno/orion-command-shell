@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { OrionLayout } from "@/components/OrionLayout";
 import { OrionDataWrapper, OrionBreadcrumb } from "@/components/orion";
 import { useOrionData } from "@/hooks/useOrionData";
@@ -10,6 +11,7 @@ import {
   ChevronRight, Zap, Bot, CalendarClock, ArrowRight, Circle,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { PipelineDetailSheet } from "@/components/sheets/PipelineDetailSheet";
 
 /* ── Skeleton ── */
 function PipelinesSkeleton() {
@@ -106,7 +108,7 @@ function StepFlow({ steps }: { steps: PipelineStep[] }) {
 }
 
 /* ── Pipeline Card ── */
-function PipelineCard({ pipeline }: { pipeline: Pipeline }) {
+function PipelineCard({ pipeline, onSelect }: { pipeline: Pipeline; onSelect: (p: Pipeline) => void }) {
   const navigate = useNavigate();
   const cfg = statusConfig[pipeline.status];
   const Icon = cfg.icon;
@@ -120,7 +122,8 @@ function PipelineCard({ pipeline }: { pipeline: Pipeline }) {
 
   return (
     <div
-      className={`rounded-lg border bg-card/60 hover:bg-card/80 transition-colors ${
+      onClick={() => onSelect(pipeline)}
+      className={`rounded-lg border bg-card/60 hover:bg-card/80 transition-colors cursor-pointer ${
         pipeline.status === "failed" ? "border-red-500/30" :
         pipeline.status === "running" ? "border-blue-500/30" :
         "border-border/40"
@@ -224,6 +227,7 @@ function EmptyState() {
 
 /* ── Page ── */
 const PipelinesPage = () => {
+  const [selected, setSelected] = useState<Pipeline | null>(null);
   const { state, data, source, lastUpdated, refetch } = useOrionData<PipelinesPageData>({
     key: "pipelines-page",
     fetcher: fetchPipelinesPage,
@@ -233,6 +237,7 @@ const PipelinesPage = () => {
   return (
     <OrionLayout title="Pipelines">
       <OrionBreadcrumb items={["Pipelines"]} />
+      <PipelineDetailSheet pipeline={selected} open={!!selected} onOpenChange={(o) => !o && setSelected(null)} />
       <OrionDataWrapper state={state} source={source} lastUpdated={lastUpdated} onRetry={refetch} compact hideSource skeleton={<PipelinesSkeleton />}>
         {data && (
           data.pipelines.length === 0 ? <EmptyState /> : (
@@ -248,7 +253,7 @@ const PipelinesPage = () => {
                   </h2>
                   <div className="space-y-3">
                     {data.pipelines.filter(p => p.status === "running").map(p => (
-                      <PipelineCard key={p.id} pipeline={p} />
+                      <PipelineCard key={p.id} pipeline={p} onSelect={setSelected} />
                     ))}
                   </div>
                 </div>
@@ -263,7 +268,7 @@ const PipelinesPage = () => {
                   </h2>
                   <div className="space-y-3">
                     {data.pipelines.filter(p => p.status === "failed").map(p => (
-                      <PipelineCard key={p.id} pipeline={p} />
+                      <PipelineCard key={p.id} pipeline={p} onSelect={setSelected} />
                     ))}
                   </div>
                 </div>
@@ -278,7 +283,7 @@ const PipelinesPage = () => {
                   </h2>
                   <div className="space-y-3">
                     {data.pipelines.filter(p => p.status === "healthy" || p.status === "idle").map(p => (
-                      <PipelineCard key={p.id} pipeline={p} />
+                      <PipelineCard key={p.id} pipeline={p} onSelect={setSelected} />
                     ))}
                   </div>
                 </div>
@@ -293,7 +298,7 @@ const PipelinesPage = () => {
                   </h2>
                   <div className="space-y-3">
                     {data.pipelines.filter(p => p.status === "disabled").map(p => (
-                      <PipelineCard key={p.id} pipeline={p} />
+                      <PipelineCard key={p.id} pipeline={p} onSelect={setSelected} />
                     ))}
                   </div>
                 </div>
