@@ -283,7 +283,7 @@ function MeetingTable() {
             </mesh>
             <mesh position={[0, 0.46, -0.12]}>
               <boxGeometry args={[0.26, 0.32, 0.03]} />
-              <meshStandardMaterial color="#484868" roughness={0.3} metalness={0.45} />
+              <meshStandardMaterial color="#606090" roughness={0.3} metalness={0.45} />
             </mesh>
             <mesh position={[0, 0.14, 0]}>
               <cylinderGeometry args={[0.02, 0.02, 0.28, 6]} />
