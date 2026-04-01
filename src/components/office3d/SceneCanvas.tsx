@@ -165,10 +165,16 @@ export function SceneCanvas({
           meetingPos={mPos} onClick={onAgentClick} onHover={onAgentHover} />;
       })}
 
-      {/* ════ FLOW CONNECTIONS ════ */}
+      {/* ════ FLOW CONNECTIONS (orchestrator → agents) ════ */}
       {connectionPairs.map((cp, i) => (
-        <FlowConnection key={i} from={cp.from} to={cp.to} color={cp.color}
+        <FlowConnection key={`orch-${i}`} from={cp.from} to={cp.to} color={cp.color}
           active={cp.active} particleCount={cp.active ? 2 : 0} />
+      ))}
+
+      {/* ════ SQUAD CONNECTIONS (dependsOn/feeds) ════ */}
+      {squadPairs.map((sp, i) => (
+        <FlowConnection key={`squad-${i}`} from={sp.from} to={sp.to}
+          color="#f59e0b" active={sp.active} particleCount={sp.active ? 3 : 0} />
       ))}
 
       {/* ════ CAMERA ════ */}
