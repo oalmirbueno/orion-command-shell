@@ -16,6 +16,7 @@ import {
   Search,
   Zap,
   Hammer,
+  GitMerge,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import {
@@ -43,6 +44,7 @@ const operationsItems = [
   { title: "Busca", url: "/search", icon: Search },
   { title: "Skills", url: "/skills", icon: Zap },
   { title: "Builders", url: "/builders", icon: Hammer },
+  { title: "Timeline", url: "/timeline", icon: GitMerge },
 ];
 
 const systemItems = [
