@@ -3,6 +3,8 @@ import { OrionBreadcrumb } from "@/components/orion";
 import { Box, Eye, Maximize2, Layers, AlertTriangle } from "lucide-react";
 import { Suspense, useState, Component, type ReactNode } from "react";
 import { SceneCanvas, SceneOverlay } from "@/components/office3d/SceneCanvas";
+import { AgentDetailSheet } from "@/components/sheets/AgentDetailSheet";
+import type { AgentView } from "@/domains/agents/types";
 
 /* ── WebGL Error Boundary ── */
 class WebGLErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean; error: string }> {
