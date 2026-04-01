@@ -109,7 +109,7 @@ function RemindersList({ reminders }: { reminders: Reminder[] }) {
               <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground/50">{cfg.label}</span>
               <span className="text-[10px] font-mono text-muted-foreground/30">({items.length})</span>
             </div>
-            <div className="divide-y divide-border/20">
+            <div className="divide-y divide-border/20 max-h-[400px] overflow-y-auto">
               {items.map((rem) => {
                 const SrcIcon = sourceIcons[rem.source] || Info;
                 return (
