@@ -50,16 +50,20 @@ const Index = () => {
 
             {/* Tier 4: Context — health + bottlenecks + skills + briefing */}
             <div className="grid grid-cols-1 xl:grid-cols-5 gap-5">
-              <div className="xl:col-span-2 space-y-5">
+              <div className="xl:col-span-2">
                 <OperationalHealth services={data.health} />
+              </div>
+              <div className="xl:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-5">
                 <BottlenecksWidget />
                 <SkillsWidget />
-                <BuildersWidget />
-              </div>
-              <div className="xl:col-span-3">
-                <ExecutiveBriefing items={data.briefing} />
               </div>
             </div>
+
+            {/* Tier 5: Builders full width */}
+            <BuildersWidget />
+
+            {/* Tier 6: Executive Briefing full width */}
+            <ExecutiveBriefing items={data.briefing} />
           </div>
         )}
       </OrionDataWrapper>

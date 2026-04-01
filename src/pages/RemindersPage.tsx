@@ -284,8 +284,12 @@ const RemindersPage = () => {
             />
           </div>
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-5 mt-5">
-            <RemindersList reminders={filteredReminders} />
-            <NewsList items={filteredNews} />
+            <div className="max-h-[calc(100vh-320px)] overflow-y-auto orion-thin-scroll rounded-lg">
+              <RemindersList reminders={filteredReminders} />
+            </div>
+            <div className="max-h-[calc(100vh-320px)] overflow-y-auto orion-thin-scroll rounded-lg">
+              <NewsList items={filteredNews} />
+            </div>
           </div>
         </OrionDataWrapper>
       </div>
