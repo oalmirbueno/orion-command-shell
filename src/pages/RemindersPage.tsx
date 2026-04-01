@@ -172,7 +172,7 @@ function NewsList({ items }: { items: NewsItem[] }) {
           <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/20" />
         </div>
       </div>
-      <div className="divide-y divide-border/20">
+      <div className="divide-y divide-border/20 max-h-[400px] overflow-y-auto">
         {items.map((item) => {
           const pcfg = priorityConfig[item.priority] || priorityConfig.info;
           return (
