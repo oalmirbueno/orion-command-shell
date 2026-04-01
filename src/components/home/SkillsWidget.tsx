@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import { Zap, Layers, Bot, ChevronRight } from "lucide-react";
+import { Zap, Layers, Bot, ChevronRight, Globe, Wrench } from "lucide-react";
 import { API_BASE_URL } from "@/domains/api";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -50,6 +50,7 @@ export function SkillsWidget() {
   const total = skills.length;
   const active = skills.filter(isActive).length;
   const workspace = skills.filter((s) => s.source !== "system").length;
+  const system = total - workspace;
 
   return (
     <div
@@ -67,7 +68,7 @@ export function SkillsWidget() {
 
       {/* Metrics */}
       <div className="px-5 py-4">
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-4 gap-3">
           <div>
             <p className="text-xl font-bold text-foreground leading-none">{total}</p>
             <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground/40 mt-1">Total</span>
@@ -80,16 +81,25 @@ export function SkillsWidget() {
             <p className="text-xl font-bold text-primary leading-none">{workspace}</p>
             <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground/40 mt-1">Workspace</span>
           </div>
+          <div>
+            <p className="text-xl font-bold text-muted-foreground/60 leading-none">{system}</p>
+            <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground/40 mt-1">Sistema</span>
+          </div>
         </div>
 
-        {/* Top skills preview */}
+        {/* Top skills preview — scrollable */}
         {skills.length > 0 && (
-          <div className="mt-4 pt-3 border-t border-border/30 space-y-1.5">
-            {skills.slice(0, 3).map((s) => (
+          <div className="mt-4 pt-3 border-t border-border/30 space-y-1.5 max-h-[140px] overflow-y-auto orion-thin-scroll">
+            {skills.slice(0, 5).map((s) => (
               <div key={s.id} className="flex items-center justify-between">
                 <div className="flex items-center gap-2 min-w-0">
-                  <Layers className="h-3 w-3 text-muted-foreground/30 shrink-0" />
+                  {s.source === "system" ? (
+                    <Wrench className="h-3 w-3 text-muted-foreground/25 shrink-0" />
+                  ) : (
+                    <Globe className="h-3 w-3 text-primary/40 shrink-0" />
+                  )}
                   <span className="text-xs text-foreground/60 truncate">{s.name}</span>
+                  {isActive(s) && <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />}
                 </div>
                 <div className="flex items-center gap-1.5 text-[10px] font-mono text-muted-foreground/30 shrink-0">
                   <Bot className="h-2.5 w-2.5" />
@@ -97,9 +107,9 @@ export function SkillsWidget() {
                 </div>
               </div>
             ))}
-            {skills.length > 3 && (
+            {skills.length > 5 && (
               <p className="text-[10px] font-mono text-muted-foreground/25 text-right">
-                +{skills.length - 3} mais
+                +{skills.length - 5} mais
               </p>
             )}
           </div>
