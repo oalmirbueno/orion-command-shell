@@ -118,7 +118,7 @@ export function AgentDesk({ agent, desk, inMeeting, meetingPos, onClick, onHover
           {[[-0.5, 0.12, -0.28], [0.5, 0.12, -0.28], [-0.5, 0.12, 0.28], [0.5, 0.12, 0.28]].map((p, i) => (
             <mesh key={i} position={p as [number, number, number]} castShadow>
               <cylinderGeometry args={[0.02, 0.02, 0.24, 8]} />
-              <meshStandardMaterial color="#606085" roughness={0.2} metalness={0.55} />
+              <meshStandardMaterial color="#7878a8" roughness={0.2} metalness={0.55} />
             </mesh>
           ))}
           {/* Primary monitor */}
