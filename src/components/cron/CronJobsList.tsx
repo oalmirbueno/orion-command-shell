@@ -135,10 +135,12 @@ export function CronJobsList({ jobs = [], refetchList }: Props) {
         <div className="orion-panel-header">
           <div className="flex items-center gap-3"><div className="w-6 h-0.5 bg-muted-foreground/40 rounded-full" /><h2 className="orion-panel-title">Registro de Jobs</h2></div>
         </div>
-        <div className="flex flex-col items-center justify-center py-16 text-center">
-          <div className="w-12 h-12 rounded-lg bg-surface-2 border border-border flex items-center justify-center mb-4"><Inbox className="h-6 w-6 text-muted-foreground/30" /></div>
-          <p className="text-sm font-medium text-muted-foreground/50">Nenhum job registrado</p>
-          <p className="text-xs font-mono text-muted-foreground/30 mt-1.5">Aguardando conexão com API</p>
+        <div className="orion-empty">
+          <div className="orion-empty-icon">
+            <Inbox className="h-5 w-5 text-muted-foreground/30" />
+          </div>
+          <p className="orion-empty-title">Nenhum job registrado</p>
+          <p className="orion-empty-subtitle">Aguardando conexão com API</p>
         </div>
       </section>
     );

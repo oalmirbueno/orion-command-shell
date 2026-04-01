@@ -367,6 +367,29 @@
   .orion-dimmed-light {
     @apply opacity-60 hover:opacity-80;
   }
+
+  /* ── Standardized Empty States ── */
+
+  .orion-empty {
+    @apply px-5 py-8 text-center flex flex-col items-center gap-2;
+  }
+
+  .orion-empty-icon {
+    @apply w-10 h-10 rounded-lg flex items-center justify-center mb-1;
+    background-color: hsl(var(--surface-2));
+    border: 1px solid hsl(var(--border));
+  }
+
+  .orion-empty-title {
+    @apply text-sm font-medium;
+    color: hsl(var(--muted-foreground) / 0.5);
+  }
+
+  .orion-empty-subtitle {
+    @apply text-[10px] font-mono;
+    color: hsl(var(--muted-foreground) / 0.3);
+    font-family: var(--font-mono);
+  }
 }
 
 /* ═══════════════════════════════════════════════════

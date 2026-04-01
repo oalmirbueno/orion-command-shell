@@ -25,8 +25,12 @@ export function OperationalHealth({ services = [] }: OperationalHealthProps) {
           </div>
           <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/30" />
         </div>
-        <div className="px-5 py-8 text-center">
-          <p className="text-sm text-muted-foreground/50 font-mono">Aguardando conexão com API</p>
+        <div className="orion-empty">
+          <div className="orion-empty-icon">
+            <Clock className="h-5 w-5 text-muted-foreground/30" />
+          </div>
+          <p className="orion-empty-title">Aguardando conexão com API</p>
+          <p className="orion-empty-subtitle">Serviços serão monitorados automaticamente</p>
         </div>
       </section>
     );

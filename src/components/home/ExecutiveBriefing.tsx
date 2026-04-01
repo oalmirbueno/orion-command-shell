@@ -89,10 +89,12 @@ export function ExecutiveBriefing({ items = [] }: ExecutiveBriefingProps) {
       </div>
 
       {items.length === 0 ? (
-        <div className="px-5 py-6 text-center flex flex-col items-center">
-          <Clock className="h-5 w-5 text-muted-foreground/20 mb-2" />
-          <p className="text-sm text-muted-foreground/50 font-mono">Sem registros recentes</p>
-          <p className="text-[10px] font-mono text-muted-foreground/25 mt-1">Eventos aparecerão conforme o sistema operar</p>
+        <div className="orion-empty">
+          <div className="orion-empty-icon">
+            <Clock className="h-5 w-5 text-muted-foreground/30" />
+          </div>
+          <p className="orion-empty-title">Sem registros recentes</p>
+          <p className="orion-empty-subtitle">Eventos aparecerão conforme o sistema operar</p>
         </div>
       ) : (
         <div className="divide-y divide-border/20 max-h-[360px] overflow-y-auto">

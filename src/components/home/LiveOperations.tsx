@@ -18,10 +18,12 @@ export function LiveOperations({ operations = [] }: LiveOperationsProps) {
             <h2 className="orion-panel-title">Operações em Andamento</h2>
           </div>
         </div>
-        <div className="px-5 py-8 text-center flex flex-col items-center">
-          <CheckCircle2 className="h-5 w-5 text-status-online/40 mb-2" />
-          <p className="text-sm text-muted-foreground/50 font-mono">Nenhuma operação ativa</p>
-          <p className="text-[10px] font-mono text-muted-foreground/25 mt-1">Sistema em estado nominal</p>
+        <div className="orion-empty">
+          <div className="orion-empty-icon">
+            <CheckCircle2 className="h-5 w-5 text-status-online/40" />
+          </div>
+          <p className="orion-empty-title">Nenhuma operação ativa</p>
+          <p className="orion-empty-subtitle">Sistema em estado nominal</p>
         </div>
       </section>
     );
