@@ -34,9 +34,23 @@ class WebGLErrorBoundary extends Component<{ children: ReactNode }, { hasError: 
   }
 }
 
+const TIER_LABEL: Record<string, string> = { orchestrator: "Orquestrador", core: "Núcleo", support: "Suporte" };
+const STATUS_LABEL: Record<string, { label: string; color: string }> = {
+  active: { label: "Ativo", color: "bg-status-online" },
+  idle: { label: "Ocioso", color: "bg-status-warning" },
+  offline: { label: "Offline", color: "bg-muted-foreground/40" },
+};
+
 const Office3DPage = () => {
   const [fullscreen, setFullscreen] = useState(false);
   const [selectedAgent, setSelectedAgent] = useState<AgentView | null>(null);
+  const [hoveredAgent, setHoveredAgent] = useState<AgentView | null>(null);
+  const [tooltipPos, setTooltipPos] = useState<{ x: number; y: number } | null>(null);
+
+  const handleHover = (agent: AgentView | null, pos?: { x: number; y: number }) => {
+    setHoveredAgent(agent);
+    setTooltipPos(pos ?? null);
+  };
 
   return (
     <OrionLayout title="Office 3D">
@@ -83,12 +97,36 @@ const Office3DPage = () => {
           </div>
 
           {/* Canvas */}
-          <div style={{ height: fullscreen ? "calc(100vh - 41px)" : "520px" }}>
+          <div className="relative" style={{ height: fullscreen ? "calc(100vh - 41px)" : "520px" }}>
             <WebGLErrorBoundary>
               <Suspense fallback={<SceneOverlay state="loading" />}>
-                <SceneCanvas onAgentClick={setSelectedAgent} />
+                <SceneCanvas onAgentClick={setSelectedAgent} onAgentHover={handleHover} />
               </Suspense>
             </WebGLErrorBoundary>
+
+            {/* Hover tooltip */}
+            {hoveredAgent && tooltipPos && (
+              <div
+                className="fixed z-[60] pointer-events-none animate-in fade-in-0 duration-150"
+                style={{ left: tooltipPos.x + 14, top: tooltipPos.y - 10 }}
+              >
+                <div className="bg-card/95 backdrop-blur-md border border-border/60 rounded-lg px-3.5 py-2.5 shadow-xl max-w-[220px]">
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <div className={`w-2 h-2 rounded-full ${STATUS_LABEL[hoveredAgent.status]?.color}`} />
+                    <span className="text-xs font-semibold text-foreground truncate">{hoveredAgent.name}</span>
+                  </div>
+                  <div className="space-y-0.5 text-[10px] font-mono text-muted-foreground">
+                    <p>{TIER_LABEL[hoveredAgent.tier] ?? hoveredAgent.tier} · {STATUS_LABEL[hoveredAgent.status]?.label}</p>
+                    <p className="text-muted-foreground/60">{hoveredAgent.role}</p>
+                    {hoveredAgent.currentTask && hoveredAgent.currentTask !== "Sem tarefa ativa" && (
+                      <p className="text-primary/70 truncate pt-0.5">⚡ {hoveredAgent.currentTask}</p>
+                    )}
+                    <p className="text-muted-foreground/40 pt-1">Carga: {hoveredAgent.load}% · {hoveredAgent.tokensToday} tokens</p>
+                  </div>
+                  <p className="text-[9px] text-muted-foreground/30 mt-1.5 border-t border-border/20 pt-1">Clique para detalhes</p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
