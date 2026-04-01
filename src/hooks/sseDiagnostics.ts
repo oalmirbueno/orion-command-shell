@@ -28,7 +28,17 @@ class SSEDiagnosticStore {
   private _lastError: string | null = null;
   private _lastErrorAt: Date | null = null;
   private listeners = new Set<() => void>();
-  private _cachedSnapshot: Record<string, unknown> | null = null;
+  private _cachedSnapshot: {
+    status: StreamStatus;
+    connectedAt: Date | null;
+    uptimeSeconds: number | null;
+    reconnects: number;
+    reconnectHistory: ReconnectEntry[];
+    lastError: string | null;
+    lastErrorAt: Date | null;
+    eventCount: number;
+    events: SSEEvent[];
+  } | null = null;
 
   get status() { return this._status; }
   get events() { return this._events; }
