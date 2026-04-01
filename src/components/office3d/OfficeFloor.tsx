@@ -197,7 +197,7 @@ function CommandConsole() {
       {[-1.75, 1.75].map((x, i) => (
         <mesh key={i} position={[x, 0.2, 0]} castShadow>
           <boxGeometry args={[0.07, 0.42, 0.85]} />
-          <meshStandardMaterial color="#404065" roughness={0.2} metalness={0.55} />
+          <meshStandardMaterial color="#555585" roughness={0.2} metalness={0.55} />
         </mesh>
       ))}
       {/* Large display */}
