@@ -1,12 +1,12 @@
 /**
  * Agents Domain — Fetchers (real-first + fallback-safe)
  *
- * Real API shape: { agents: [{ id, name, emoji, color, model, status, lastActivity, activeSessions }] }
- * Missing fields from canonical are filled with sensible defaults.
+ * Fully dynamic — no hardcoded agent names or IDs.
+ * Backend provides structuralStatus, official, lifecycle, etc.
  */
 
 import { createRealFirstFetcher } from "../createRealFirstFetcher";
-import type { AgentInfo, AgentView, AgentNode, AgentStatus, AgentTier } from "./types";
+import type { AgentInfo, AgentView, AgentNode, AgentStatus, AgentTier, AgentStructuralStatus, AgentLifecycle } from "./types";
 import type { DomainFetcher, DomainResult } from "../types";
 
 // ═══════════════════════════════════════════════════════
@@ -25,6 +25,21 @@ interface RealAgent {
   lastActivity?: string;
   activeSessions?: number;
   allowAgents?: string[];
+  // Dynamic discovery fields
+  role?: string;
+  exposure?: string;
+  level?: string;
+  parentAgent?: string | null;
+  topicId?: string | null;
+  topicIds?: string[];
+  official?: boolean;
+  lifecycle?: string;
+  structuralStatus?: string;
+  runtimeStatus?: string;
+  lastHandoff?: string | null;
+  lastNextStep?: string | null;
+  bindingStatus?: string;
+  tier?: string;
 }
 
 interface AgentsApiResponse {
@@ -32,21 +47,57 @@ interface AgentsApiResponse {
 }
 
 // ═══════════════════════════════════════════════════════
-// Transform real → canonical
+// Transform real → canonical (fully dynamic)
 // ═══════════════════════════════════════════════════════
+
+function inferTier(raw: RealAgent): AgentTier {
+  if (raw.tier) {
+    const t = raw.tier.toLowerCase();
+    if (t === "orchestrator") return "orchestrator";
+    if (t === "support") return "support";
+    return "core";
+  }
+  // Infer from level/role if tier not provided
+  if (raw.level === "orchestrator" || raw.role?.toLowerCase().includes("supervisor")) return "orchestrator";
+  if (raw.level === "support" || raw.role?.toLowerCase().includes("suporte")) return "support";
+  return "core";
+}
+
+function inferStructuralStatus(raw: RealAgent): AgentStructuralStatus {
+  if (raw.structuralStatus) {
+    const s = raw.structuralStatus.toLowerCase();
+    if (s === "active" || s === "official") return "active";
+    if (s === "legacy" || s === "deprecated") return "legacy";
+  }
+  if (raw.official === true) return "active";
+  if (raw.official === false) return "legacy";
+  if (raw.lifecycle === "deprecated") return "legacy";
+  // Default: active
+  return "active";
+}
+
+function inferLifecycle(raw: RealAgent): AgentLifecycle {
+  if (raw.lifecycle) {
+    const l = raw.lifecycle.toLowerCase();
+    if (l === "production") return "production";
+    if (l === "staging") return "staging";
+    if (l === "deprecated") return "deprecated";
+  }
+  return "unknown";
+}
 
 function realToAgentInfo(raw: RealAgent): AgentInfo {
   return {
     id: raw.id,
     name: raw.name,
-    role: raw.model?.split("/")[0] || "agent",
-    tier: "core" as AgentTier,
+    role: raw.role || raw.model?.split("/")[0] || "agent",
+    tier: inferTier(raw),
     model: raw.model || "unknown",
     enabled: true,
-    online: raw.status === "online",
+    online: raw.status === "online" || raw.runtimeStatus === "online",
     activeSessions: raw.activeSessions || 0,
     totalTokensToday: 0,
-    uptimePercent: raw.status === "online" ? 99.9 : 0,
+    uptimePercent: (raw.status === "online" || raw.runtimeStatus === "online") ? 99.9 : 0,
     cpuPercent: 0,
     lastActivityAt: raw.lastActivity || new Date().toISOString(),
     currentTask: null,
@@ -54,6 +105,19 @@ function realToAgentInfo(raw: RealAgent): AgentInfo {
     dependsOn: [],
     feeds: [],
     alertCount: 0,
+    // Dynamic discovery fields
+    exposure: raw.exposure || "unknown",
+    level: raw.level || "unknown",
+    parentAgent: raw.parentAgent || null,
+    topicId: raw.topicId || null,
+    topicIds: raw.topicIds || [],
+    official: raw.official ?? true,
+    lifecycle: inferLifecycle(raw),
+    structuralStatus: inferStructuralStatus(raw),
+    runtimeStatus: raw.runtimeStatus || raw.status || "unknown",
+    lastHandoff: raw.lastHandoff || null,
+    lastNextStep: raw.lastNextStep || null,
+    bindingStatus: raw.bindingStatus || "unknown",
   };
 }
 
@@ -108,6 +172,17 @@ function toAgentView(a: AgentInfo): AgentView {
     dependsOn: a.dependsOn,
     feeds: a.feeds,
     alertCount: a.alertCount,
+    // Dynamic discovery fields
+    official: a.official ?? true,
+    structuralStatus: a.structuralStatus || "active",
+    lifecycle: a.lifecycle || "unknown",
+    parentAgent: a.parentAgent || null,
+    exposure: a.exposure || "unknown",
+    level: a.level || "unknown",
+    topicId: a.topicId || null,
+    bindingStatus: a.bindingStatus || "unknown",
+    lastHandoff: a.lastHandoff || null,
+    lastNextStep: a.lastNextStep || null,
   };
 }
 
@@ -116,7 +191,7 @@ export const fetchAgents: DomainFetcher<AgentView[]> = async (): Promise<DomainR
     endpoint: "/agents",
     fallbackData: [],
     transform: (raw) => {
-      if (Array.isArray(raw)) return raw;
+      if (Array.isArray(raw)) return raw.map(r => realToAgentInfo(r as any));
       if (raw && typeof raw === "object" && "agents" in raw) {
         return (raw as AgentsApiResponse).agents.map(realToAgentInfo);
       }
@@ -135,11 +210,18 @@ export const fetchAgents: DomainFetcher<AgentView[]> = async (): Promise<DomainR
 export const fetchAgentTree: DomainFetcher<AgentNode[]> = async (): Promise<DomainResult<AgentNode[]>> => {
   const result = await fetchAgents();
   const nodes: AgentNode[] = result.data.map(a => ({
+    id: a.id,
     name: a.name,
     role: a.role,
     tier: a.tier,
     status: a.status,
     load: a.load,
+    official: a.official,
+    structuralStatus: a.structuralStatus,
+    parentAgent: a.parentAgent,
+    exposure: a.exposure,
+    level: a.level,
+    activeSessions: a.sessions,
   }));
   return { data: nodes, source: result.source, timestamp: result.timestamp };
 };
