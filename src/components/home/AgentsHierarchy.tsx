@@ -42,9 +42,11 @@ export function AgentsHierarchy({ agents = [] }: AgentsHierarchyProps) {
     );
   }
 
+  // Only show official agents in hierarchy; legacy are secondary
+  const officialAgents = agents.filter(a => a.official !== false && a.structuralStatus !== "legacy");
   const tiers: AgentTier[] = ["orchestrator", "core", "support"];
-  const activeCount = agents.filter(a => a.status === "active").length;
-  const total = agents.length;
+  const activeCount = officialAgents.filter(a => a.status === "active").length;
+  const total = officialAgents.length;
 
   return (
     <section className="rounded-lg border border-border overflow-hidden h-full">
@@ -61,7 +63,7 @@ export function AgentsHierarchy({ agents = [] }: AgentsHierarchyProps) {
 
       <div className="p-4 space-y-4 max-h-[320px] overflow-y-auto">
         {tiers.map((tier) => {
-          const tierAgents = agents.filter(a => a.tier === tier);
+          const tierAgents = officialAgents.filter(a => a.tier === tier);
           if (tierAgents.length === 0) return null;
           const cfg = tierConfig[tier];
           const TierIcon = cfg.icon;
@@ -77,7 +79,7 @@ export function AgentsHierarchy({ agents = [] }: AgentsHierarchyProps) {
               <div className="space-y-1">
                 {tierAgents.map((agent) => (
                   <div
-                    key={agent.name}
+                    key={agent.id}
                     className={`flex items-center gap-3 px-4 py-2.5 rounded-md hover:bg-accent/20 transition-colors cursor-pointer ${agent.status === "offline" ? "opacity-35" : ""} ${tier === "orchestrator" ? "border-l-2 border-l-primary/40 bg-primary/[0.03]" : ""}`}
                     onClick={() => navigate("/agents")}
                   >

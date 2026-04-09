@@ -2,7 +2,7 @@
  * Agents Domain — Tipos Canônicos
  *
  * Shape baseado na rota local do OpenClaw (/api/agents).
- * Este é o formato de referência do projeto-base.
+ * Totalmente dinâmico — sem hardcode de agentes específicos.
  */
 
 // ═══════════════════════════════════════════════════════
@@ -10,6 +10,8 @@
 // ═══════════════════════════════════════════════════════
 
 export type AgentTier = "orchestrator" | "core" | "support";
+export type AgentStructuralStatus = "active" | "legacy" | "unknown";
+export type AgentLifecycle = "production" | "staging" | "deprecated" | "unknown";
 
 /** /api/agents — dados brutos de cada agente */
 export interface AgentInfo {
@@ -30,15 +32,36 @@ export interface AgentInfo {
   dependsOn: string[];
   feeds: string[];
   alertCount: number;
+  // Dynamic discovery fields from backend
+  exposure?: string;
+  level?: string;
+  parentAgent?: string | null;
+  topicId?: string | null;
+  topicIds?: string[];
+  official?: boolean;
+  lifecycle?: AgentLifecycle;
+  structuralStatus?: AgentStructuralStatus;
+  runtimeStatus?: string;
+  lastHandoff?: string | null;
+  lastNextStep?: string | null;
+  bindingStatus?: string;
 }
 
 /** /api/agents/tree — shape simplificado para mapa */
 export interface AgentNode {
+  id: string;
   name: string;
   role: string;
   tier: AgentTier;
   status: AgentStatus;
   load: number;
+  // Dynamic fields
+  official: boolean;
+  structuralStatus: AgentStructuralStatus;
+  parentAgent: string | null;
+  exposure?: string;
+  level?: string;
+  activeSessions: number;
 }
 
 // ═══════════════════════════════════════════════════════
@@ -52,7 +75,6 @@ export type AgentScopeType = "global" | "dm" | "topic" | "mixed";
 
 /**
  * GET /api/agents/:id — perfil/configuração completa do agente.
- * Shape canônico para leitura e escrita (PUT /api/agents/:id).
  */
 export interface AgentProfile {
   id: string;
@@ -90,4 +112,15 @@ export interface AgentView {
   dependsOn: string[];
   feeds: string[];
   alertCount: number;
+  // Dynamic discovery fields
+  official: boolean;
+  structuralStatus: AgentStructuralStatus;
+  lifecycle: AgentLifecycle;
+  parentAgent: string | null;
+  exposure: string;
+  level: string;
+  topicId: string | null;
+  bindingStatus: string;
+  lastHandoff: string | null;
+  lastNextStep: string | null;
 }

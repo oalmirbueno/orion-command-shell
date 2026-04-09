@@ -272,11 +272,18 @@ export const fetchHomePage: DomainFetcher<HomePageData> = async (): Promise<Doma
 
   // ── Agents Hierarchy (de Agents — transformar AgentView → AgentNode) ──
   const agents: AgentNode[] = (agentsResult.data || []).map((a: any) => ({
+    id: a.id || a.name,
     name: a.name,
     role: a.role,
     tier: a.tier,
     status: a.status,
     load: a.load,
+    official: a.official ?? true,
+    structuralStatus: a.structuralStatus || "active",
+    parentAgent: a.parentAgent || null,
+    exposure: a.exposure,
+    level: a.level,
+    activeSessions: a.sessions || 0,
   }));
 
   // ── Health Services (de System — processos como health proxy) ──

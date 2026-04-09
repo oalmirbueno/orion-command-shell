@@ -5,19 +5,15 @@ interface AgentsSummaryBarProps {
   agents: AgentView[];
 }
 
-// Detect legacy agents by name
-function isLegacy(name: string): boolean {
-  return name.toLowerCase().includes("legacy");
-}
-
 export function AgentsSummaryBar({ agents = [] }: AgentsSummaryBarProps) {
   const isEmpty = agents.length === 0;
   const total = agents.length;
   const active = agents.filter(a => a.status === "active").length;
   const idle = agents.filter(a => a.status === "idle").length;
   const offline = agents.filter(a => a.status === "offline").length;
-  const official = agents.filter(a => !isLegacy(a.name)).length;
-  const legacy = agents.filter(a => isLegacy(a.name)).length;
+  // Dynamic: use structuralStatus from backend instead of name matching
+  const official = agents.filter(a => a.official !== false && a.structuralStatus !== "legacy").length;
+  const legacy = agents.filter(a => a.official === false || a.structuralStatus === "legacy").length;
   const totalTokens = agents.reduce((sum, a) => {
     const num = parseFloat(a.tokensToday.replace("k", ""));
     return sum + (isNaN(num) ? 0 : num);
