@@ -107,6 +107,24 @@ export function SessionsList({ sessions = [] }: Props) {
   const order: Record<SessionStatus, number> = { running: 0, paused: 1, failed: 2, completed: 3 };
   const sorted = [...sessions].sort((a, b) => order[a.status] - order[b.status]);
   const runningCount = sessions.filter(s => s.status === "running").length;
+  const failedCount = sessions.filter(s => s.status === "failed").length;
+
+  // Group by agent for better readability
+  const byAgent = new Map<string, SessionView[]>();
+  for (const s of sorted) {
+    const key = s.agent || "—";
+    if (!byAgent.has(key)) byAgent.set(key, []);
+    byAgent.get(key)!.push(s);
+  }
+
+  // Sort groups: agents with running sessions first
+  const groupEntries = [...byAgent.entries()].sort((a, b) => {
+    const aHasRunning = a[1].some(s => s.status === "running");
+    const bHasRunning = b[1].some(s => s.status === "running");
+    if (aHasRunning && !bHasRunning) return -1;
+    if (!aHasRunning && bHasRunning) return 1;
+    return 0;
+  });
 
   return (
     <section className="rounded-lg border border-border overflow-hidden">
@@ -117,14 +135,29 @@ export function SessionsList({ sessions = [] }: Props) {
         </div>
         <div className="flex items-center gap-3">
           {runningCount > 0 && (
-            <span className="text-xs font-mono text-status-online font-semibold">{runningCount} em execução</span>
+            <span className="text-xs font-mono text-status-online font-semibold">{runningCount} ativas</span>
+          )}
+          {failedCount > 0 && (
+            <span className="text-xs font-mono text-status-critical font-semibold">{failedCount} falhas</span>
           )}
           <span className="text-xs font-mono text-muted-foreground/30">{sessions.length} total</span>
         </div>
       </div>
-      <div className="space-y-2.5 max-h-[calc(100vh-280px)] overflow-y-auto orion-thin-scroll pr-1">
-        {sorted.map((session) => (
-          <SessionRow key={session.id} session={session} onClick={() => setSelected(session)} />
+      <div className="max-h-[calc(100vh-280px)] overflow-y-auto orion-thin-scroll">
+        {groupEntries.map(([agentName, agentSessions]) => (
+          <div key={agentName}>
+            <div className="flex items-center gap-2 px-5 py-2 bg-surface-2/50 border-b border-border/20">
+              <Bot className="h-3.5 w-3.5 text-muted-foreground/30" />
+              <span className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground/40 font-semibold">{agentName}</span>
+              <span className="text-[10px] font-mono text-muted-foreground/25">{agentSessions.length} sessões</span>
+              <div className="flex-1 h-px bg-border/15" />
+            </div>
+            <div className="space-y-2.5 p-1">
+              {agentSessions.map((session) => (
+                <SessionRow key={session.id} session={session} onClick={() => setSelected(session)} />
+              ))}
+            </div>
+          </div>
         ))}
       </div>
       <SessionDetailSheet session={selected} open={!!selected} onOpenChange={(o) => !o && setSelected(null)} />

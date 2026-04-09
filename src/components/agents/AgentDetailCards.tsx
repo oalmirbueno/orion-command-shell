@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Bot, Cpu, Zap, AlertTriangle, Crown, Users, ArrowRight, Activity, Inbox } from "lucide-react";
+import { Bot, Cpu, Zap, AlertTriangle, Crown, Users, ArrowRight, Activity, Inbox, Archive, Link2 } from "lucide-react";
 import type { AgentView, AgentStatus, AgentTier } from "@/domains/agents/types";
 import { AgentDetailSheet } from "@/components/sheets/AgentDetailSheet";
 
@@ -39,14 +39,35 @@ function LoadGauge({ value }: { value: number }) {
   );
 }
 
+// Known Phase 1 structural classification
+const STRUCTURAL_MAP: Record<string, { structural: "active" | "legacy"; linkedTo?: string }> = {
+  "factory": { structural: "active", linkedTo: "Orion Core" },
+  "orion core": { structural: "active" },
+  "orion projects": { structural: "active" },
+  "orion advisor": { structural: "active" },
+  "orion core legacy": { structural: "legacy" },
+  "orion projects legacy": { structural: "legacy" },
+  "orion advisor legacy": { structural: "legacy" },
+};
+
+function getStructural(name: string): { structural: "active" | "legacy"; linkedTo?: string } | null {
+  const lower = name.toLowerCase();
+  for (const [key, val] of Object.entries(STRUCTURAL_MAP)) {
+    if (lower.includes(key)) return val;
+  }
+  return null;
+}
+
 function AgentCard({ agent, onClick }: { agent: AgentView; onClick: () => void }) {
   const cfg = statusConfig[agent.status];
   const tier = tierConfig[agent.tier];
   const isOrch = agent.tier === "orchestrator";
   const isOffline = agent.status === "offline";
+  const structural = getStructural(agent.name);
+  const isLegacy = structural?.structural === "legacy";
 
   return (
-    <div onClick={onClick} className={`rounded-lg border border-border/40 border-l-[3px] ${cfg.border} ${cfg.bg} ${isOrch ? "bg-primary/[0.03] border-primary/25" : ""} ${isOffline ? "opacity-50" : ""} hover:bg-accent/20 transition-all cursor-pointer group`}>
+    <div onClick={onClick} className={`rounded-lg border border-border/40 border-l-[3px] ${cfg.border} ${cfg.bg} ${isOrch ? "bg-primary/[0.03] border-primary/25" : ""} ${isOffline ? "opacity-50" : ""} ${isLegacy ? "opacity-40 hover:opacity-60" : ""} hover:bg-accent/20 transition-all cursor-pointer group`}>
       <div className="px-6 py-5">
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-3">
@@ -62,10 +83,22 @@ function AgentCard({ agent, onClick }: { agent: AgentView; onClick: () => void }
                 </span>
                 <span className={`text-xs font-mono uppercase ${cfg.text}`}>{cfg.label}</span>
               </div>
-              <p className="text-xs text-muted-foreground/40 mt-0.5">{agent.role} · <span className="text-muted-foreground/30">{agent.model}</span></p>
+              <div className="flex items-center gap-2 mt-0.5">
+                <p className="text-xs text-muted-foreground/40">{agent.role} · <span className="text-muted-foreground/30">{agent.model}</span></p>
+              </div>
             </div>
           </div>
-          <div className="flex items-center gap-2 mt-1">
+          <div className="flex items-center gap-2 mt-1 flex-wrap justify-end">
+            {/* Structural badge */}
+            {structural && (
+              <span className={`text-[10px] font-mono uppercase px-2 py-0.5 rounded border ${
+                isLegacy
+                  ? "bg-muted-foreground/10 text-muted-foreground/50 border-muted-foreground/15"
+                  : "bg-status-online/10 text-status-online border-status-online/20"
+              }`}>
+                {isLegacy ? "Legado" : "Ativo Oficial"}
+              </span>
+            )}
             {agent.alertCount > 0 && (
               <div className="flex items-center gap-1.5 px-2 py-1 rounded bg-status-warning/10 border border-status-warning/20">
                 <AlertTriangle className="h-3.5 w-3.5 text-status-warning" />
@@ -75,6 +108,14 @@ function AgentCard({ agent, onClick }: { agent: AgentView; onClick: () => void }
             <span className={`orion-badge ${tier.badgeClass}`}>{tier.label}</span>
           </div>
         </div>
+
+        {/* Linked info */}
+        {structural?.linkedTo && (
+          <div className="flex items-center gap-1.5 ml-[52px] mb-2 text-[10px] font-mono text-muted-foreground/30">
+            <Link2 className="h-3 w-3" />
+            <span>Vinculado a {structural.linkedTo}</span>
+          </div>
+        )}
 
         <div className="flex items-start gap-3 mb-4 ml-[52px]">
           <Activity className="h-3.5 w-3.5 text-muted-foreground/25 shrink-0 mt-0.5" />
