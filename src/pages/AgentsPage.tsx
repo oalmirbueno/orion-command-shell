@@ -9,10 +9,6 @@ import { OrionDataWrapper } from "@/components/orion/DataWrapper";
 import { AgentsSkeleton } from "@/components/skeletons/DomainSkeletons";
 import type { AgentView } from "@/domains/agents/types";
 
-function isLegacy(name: string): boolean {
-  return name.toLowerCase().includes("legacy");
-}
-
 const AgentsPage = () => {
   const { state, data, source, lastUpdated, refetch } = useOrionData<AgentView[]>({
     key: "agents",
@@ -21,8 +17,9 @@ const AgentsPage = () => {
   });
 
   const agents = data || [];
-  const officialAgents = agents.filter(a => !isLegacy(a.name));
-  const legacyAgents = agents.filter(a => isLegacy(a.name));
+  // Dynamic: use structuralStatus/official from backend
+  const officialAgents = agents.filter(a => a.official !== false && a.structuralStatus !== "legacy");
+  const legacyAgents = agents.filter(a => a.official === false || a.structuralStatus === "legacy");
 
   return (
     <OrionLayout title="Agentes">
