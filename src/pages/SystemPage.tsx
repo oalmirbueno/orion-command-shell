@@ -47,13 +47,21 @@ const SystemPage = () => {
         >
           {page && (
             <>
+              {/* Infra notice */}
+              <div className="rounded-lg border border-border/30 bg-surface-2/50 px-5 py-3 flex items-center gap-3 text-xs text-muted-foreground/50">
+                <span className="font-mono uppercase tracking-wider font-semibold text-muted-foreground/40">Nota</span>
+                <span>Esta página é estritamente infra/service. A trilha operacional oficial está em <a href="/activity" className="text-primary hover:underline font-medium">/activity</a>.</span>
+              </div>
+
               {/* Health Banner with Subsystems */}
-              <InfraHealthBanner
-                header={page.header}
-                cronSummary={cronData?.summary ?? null}
-                serviceCount={totalServices}
-                runningServices={runningServices}
-              />
+              <div className="mt-4">
+                <InfraHealthBanner
+                  header={page.header}
+                  cronSummary={cronData?.summary ?? null}
+                  serviceCount={totalServices}
+                  runningServices={runningServices}
+                />
+              </div>
 
               {/* Resource Gauges */}
               <div className="mt-8">
