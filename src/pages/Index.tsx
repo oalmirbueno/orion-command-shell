@@ -5,6 +5,7 @@ import { HomeSkeleton } from "@/components/skeletons/DomainSkeletons";
 import { fetchHomePage } from "@/domains/home/fetcher";
 import type { HomePageData } from "@/domains/home/types";
 import { CommandStatus } from "@/components/home/CommandStatus";
+import { PhaseArchitecture } from "@/components/home/PhaseArchitecture";
 import { AttentionRequired } from "@/components/home/AttentionRequired";
 import { LiveOperations } from "@/components/home/LiveOperations";
 import { AgentsHierarchy } from "@/components/home/AgentsHierarchy";
@@ -29,6 +30,9 @@ const Index = () => {
       <OrionDataWrapper state={state} source={source} lastUpdated={lastUpdated} onRetry={refetch} compact hideSource skeleton={<HomeSkeleton />}>
         {data && (
           <div className="space-y-5">
+            {/* Tier 0: Phase 1 Architecture — above the fold */}
+            <PhaseArchitecture agents={data.agents} />
+
             {/* Tier 1: Status + Weather */}
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
               <CommandStatus data={data.command} />
@@ -48,7 +52,7 @@ const Index = () => {
               </div>
             </div>
 
-            {/* Tier 4: Context — health + bottlenecks + skills + briefing */}
+            {/* Tier 4: Context — health + bottlenecks + skills */}
             <div className="grid grid-cols-1 xl:grid-cols-5 gap-5">
               <div className="xl:col-span-2">
                 <OperationalHealth services={data.health} />

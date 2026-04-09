@@ -1,8 +1,13 @@
-import { Bot, Zap, Pause, WifiOff, Crown, Cpu } from "lucide-react";
+import { Bot, Zap, Pause, WifiOff, Crown, Cpu, Archive } from "lucide-react";
 import type { AgentView } from "@/domains/agents/types";
 
 interface AgentsSummaryBarProps {
   agents: AgentView[];
+}
+
+// Detect legacy agents by name
+function isLegacy(name: string): boolean {
+  return name.toLowerCase().includes("legacy");
 }
 
 export function AgentsSummaryBar({ agents = [] }: AgentsSummaryBarProps) {
@@ -11,7 +16,8 @@ export function AgentsSummaryBar({ agents = [] }: AgentsSummaryBarProps) {
   const active = agents.filter(a => a.status === "active").length;
   const idle = agents.filter(a => a.status === "idle").length;
   const offline = agents.filter(a => a.status === "offline").length;
-  const orchestrators = agents.filter(a => a.tier === "orchestrator").length;
+  const official = agents.filter(a => !isLegacy(a.name)).length;
+  const legacy = agents.filter(a => isLegacy(a.name)).length;
   const totalTokens = agents.reduce((sum, a) => {
     const num = parseFloat(a.tokensToday.replace("k", ""));
     return sum + (isNaN(num) ? 0 : num);
@@ -21,9 +27,9 @@ export function AgentsSummaryBar({ agents = [] }: AgentsSummaryBarProps) {
   const items = [
     { label: "Total", value: isEmpty ? "—" : total, icon: Bot, color: "text-foreground", dotClass: "bg-foreground/30" },
     { label: "Ativos", value: isEmpty ? "—" : active, icon: Zap, color: "text-status-online", dotClass: "status-online" },
-    { label: "Ociosos", value: isEmpty ? "—" : idle, icon: Pause, color: "text-muted-foreground", dotClass: "bg-muted-foreground/40" },
+    { label: "Oficiais", value: isEmpty ? "—" : official, icon: Crown, color: "text-primary", dotClass: "bg-primary/50" },
+    { label: "Legados", value: isEmpty ? "—" : legacy, icon: Archive, color: "text-muted-foreground", dotClass: "bg-muted-foreground/40" },
     { label: "Offline", value: isEmpty ? "—" : offline, icon: WifiOff, color: "text-status-critical", dotClass: "status-critical" },
-    { label: "Orquestrador", value: isEmpty ? "—" : orchestrators, icon: Crown, color: "text-primary", dotClass: "bg-primary/50" },
     { label: "Tokens Hoje", value: tokensLabel, icon: Cpu, color: "text-foreground", dotClass: "bg-foreground/30" },
   ];
 
