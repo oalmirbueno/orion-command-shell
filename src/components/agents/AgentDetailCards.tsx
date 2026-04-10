@@ -1,141 +1,162 @@
 import { useState } from "react";
-import { Bot, Cpu, Zap, AlertTriangle, Crown, Users, ArrowRight, Activity, Inbox, Link2 } from "lucide-react";
+import { Bot, Cpu, Zap, AlertTriangle, Crown, Users, Activity, Inbox, Link2 } from "lucide-react";
 import type { AgentView, AgentStatus, AgentTier } from "@/domains/agents/types";
 import { AgentDetailSheet } from "@/components/sheets/AgentDetailSheet";
 
 interface AgentDetailCardsProps { agents: AgentView[]; }
 
+/* ── Status configs ── */
+
 const statusConfig: Record<AgentStatus, { label: string; dotClass: string; text: string; border: string; bg: string; pulse: boolean }> = {
-  active: { label: "Ativo", dotClass: "bg-status-online", text: "text-status-online", border: "border-l-status-online", bg: "", pulse: true },
-  idle: { label: "Ocioso", dotClass: "bg-muted-foreground/40", text: "text-muted-foreground", border: "border-l-muted-foreground/30", bg: "", pulse: false },
-  offline: { label: "Offline", dotClass: "bg-status-critical", text: "text-status-critical", border: "border-l-status-critical", bg: "bg-status-critical/[0.03]", pulse: false },
+  active: { label: "Online", dotClass: "bg-status-online", text: "text-status-online", border: "border-l-status-online", bg: "", pulse: true },
+  idle: { label: "Idle", dotClass: "bg-muted-foreground/40", text: "text-muted-foreground", border: "border-l-muted-foreground/30", bg: "", pulse: false },
+  offline: { label: "Offline", dotClass: "bg-status-critical", text: "text-status-critical", border: "border-l-status-critical", bg: "bg-status-critical/[0.02]", pulse: false },
 };
 
-const tierConfig: Record<AgentTier, { label: string; icon: React.ElementType; badgeClass: string; description: string }> = {
-  orchestrator: { label: "Orquestrador", icon: Crown, badgeClass: "orion-badge-info", description: "Ponto central de decisão e distribuição" },
-  core: { label: "Núcleo", icon: Cpu, badgeClass: "orion-badge-success", description: "Execução primária de tarefas de negócio" },
-  support: { label: "Suporte", icon: Users, badgeClass: "orion-badge-neutral", description: "Infraestrutura e operações auxiliares" },
+const tierConfig: Record<AgentTier, { label: string; icon: React.ElementType; description: string }> = {
+  orchestrator: { label: "Orquestrador", icon: Crown, description: "Decisão e distribuição" },
+  core: { label: "Núcleo", icon: Cpu, description: "Execução primária" },
+  support: { label: "Suporte", icon: Users, description: "Infraestrutura e auxiliar" },
 };
 
+/* ── Ordered badge renderer ── */
+function AgentBadges({ agent }: { agent: AgentView }) {
+  const badges: { label: string; className: string }[] = [];
+
+  // 1. lifecycle
+  if (agent.lifecycle && agent.lifecycle !== "unknown") {
+    const cls = agent.lifecycle === "production"
+      ? "bg-status-online/8 text-status-online/70 border-status-online/15"
+      : agent.lifecycle === "deprecated"
+        ? "bg-muted-foreground/8 text-muted-foreground/50 border-muted-foreground/15"
+        : "bg-status-warning/8 text-status-warning/70 border-status-warning/15";
+    badges.push({ label: agent.lifecycle, className: cls });
+  }
+
+  // 2. official / structural
+  if (agent.structuralStatus === "legacy" || agent.official === false) {
+    badges.push({ label: "Legado", className: "bg-muted-foreground/8 text-muted-foreground/50 border-muted-foreground/15" });
+  }
+
+  // 3. binding
+  if (agent.bindingStatus && agent.bindingStatus !== "unknown") {
+    badges.push({ label: agent.bindingStatus, className: "bg-primary/8 text-primary/60 border-primary/15" });
+  }
+
+  // 4. exposure
+  if (agent.exposure && agent.exposure !== "unknown") {
+    badges.push({ label: agent.exposure, className: "bg-primary/8 text-primary/60 border-primary/15" });
+  }
+
+  if (badges.length === 0) return null;
+
+  return (
+    <div className="flex items-center gap-1.5 flex-wrap">
+      {badges.map((b, i) => (
+        <span key={i} className={`text-[9px] font-mono uppercase px-1.5 py-0.5 rounded border ${b.className}`}>
+          {b.label}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+/* ── Load gauge ── */
 function LoadGauge({ value }: { value: number }) {
   const color = value > 85 ? "text-status-critical" : value > 60 ? "text-status-warning" : "text-status-online";
   const bgColor = value > 85 ? "bg-status-critical" : value > 60 ? "bg-status-warning" : "bg-status-online";
-  const radius = 16;
+  const radius = 15;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (value / 100) * circumference;
 
   return (
-    <div className="relative w-11 h-11 shrink-0">
-      <svg className="w-full h-full -rotate-90" viewBox="0 0 40 40">
-        <circle cx="20" cy="20" r={radius} fill="none" strokeWidth="3" className="stroke-muted/20" />
-        <circle cx="20" cy="20" r={radius} fill="none" strokeWidth="3" strokeLinecap="round"
+    <div className="relative w-10 h-10 shrink-0">
+      <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
+        <circle cx="18" cy="18" r={radius} fill="none" strokeWidth="2.5" className="stroke-muted/15" />
+        <circle cx="18" cy="18" r={radius} fill="none" strokeWidth="2.5" strokeLinecap="round"
           className={`${bgColor.replace("bg-", "stroke-")} transition-all duration-700`}
           strokeDasharray={circumference} strokeDashoffset={offset} />
       </svg>
-      <span className={`absolute inset-0 flex items-center justify-center text-[10px] font-mono font-bold ${color}`}>
+      <span className={`absolute inset-0 flex items-center justify-center text-[9px] font-mono font-bold ${color}`}>
         {value}
       </span>
     </div>
   );
 }
 
+/* ── Agent card ── */
 function AgentCard({ agent, onClick }: { agent: AgentView; onClick: () => void }) {
   const cfg = statusConfig[agent.status];
-  const tier = tierConfig[agent.tier];
   const isOrch = agent.tier === "orchestrator";
   const isOffline = agent.status === "offline";
   const isLegacy = agent.structuralStatus === "legacy" || agent.official === false;
 
   return (
-    <div onClick={onClick} className={`rounded-lg border border-border/40 border-l-[3px] ${cfg.border} ${cfg.bg} ${isOrch ? "bg-primary/[0.03] border-primary/25" : ""} ${isOffline ? "opacity-50" : ""} ${isLegacy ? "opacity-40 hover:opacity-60" : ""} hover:bg-accent/20 transition-all cursor-pointer group`}>
-      <div className="px-6 py-5">
-        <div className="flex items-start justify-between mb-3">
-          <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 rounded-lg border flex items-center justify-center ${isOrch ? "bg-primary/10 border-primary/25" : "bg-surface-2 border-border/40"}`}>
-              <Bot className={`h-5 w-5 ${isOrch ? "text-primary" : "text-muted-foreground/50"}`} />
+    <div onClick={onClick} className={`rounded-lg border border-border/30 border-l-[3px] ${cfg.border} ${cfg.bg} ${isOrch ? "bg-primary/[0.02]" : ""} ${isOffline ? "opacity-40" : ""} ${isLegacy ? "opacity-40 hover:opacity-60" : ""} hover:bg-accent/20 transition-all cursor-pointer group`}>
+      <div className="px-5 py-4">
+        {/* Header: name + runtime status */}
+        <div className="flex items-start justify-between mb-2">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className={`w-9 h-9 rounded-lg border flex items-center justify-center shrink-0 ${isOrch ? "bg-primary/8 border-primary/20" : "bg-surface-2 border-border/30"}`}>
+              <Bot className={`h-4 w-4 ${isOrch ? "text-primary/70" : "text-muted-foreground/40"}`} />
             </div>
-            <div>
-              <div className="flex items-center gap-2.5">
-                <h3 className={`text-sm font-semibold ${isOrch ? "text-primary" : "text-foreground"}`}>{agent.name}</h3>
-                <span className={`relative flex h-2.5 w-2.5`}>
-                  {cfg.pulse && <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${cfg.dotClass} opacity-40`} />}
-                  <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${cfg.dotClass}`} />
-                </span>
-                <span className={`text-xs font-mono uppercase ${cfg.text}`}>{cfg.label}</span>
-              </div>
-              <div className="flex items-center gap-2 mt-0.5">
-                <p className="text-xs text-muted-foreground/40">{agent.role} · <span className="text-muted-foreground/30">{agent.model}</span></p>
-              </div>
+            <div className="min-w-0">
+              <h3 className={`text-sm font-semibold truncate ${isOrch ? "text-primary" : "text-foreground"}`}>{agent.name}</h3>
+              <p className="text-[11px] text-muted-foreground/35 mt-0.5">{agent.role} · {agent.model}</p>
             </div>
           </div>
-          <div className="flex items-center gap-2 mt-1 flex-wrap justify-end">
-            {/* Dynamic structural badge */}
-            <span className={`text-[10px] font-mono uppercase px-2 py-0.5 rounded border ${
-              isLegacy
-                ? "bg-muted-foreground/10 text-muted-foreground/50 border-muted-foreground/15"
-                : "bg-status-online/10 text-status-online border-status-online/20"
-            }`}>
-              {isLegacy ? "Legado" : "Ativo Oficial"}
+          <div className="flex items-center gap-2 shrink-0 ml-3">
+            <span className={`relative flex h-2 w-2`}>
+              {cfg.pulse && <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${cfg.dotClass} opacity-30`} />}
+              <span className={`relative inline-flex rounded-full h-2 w-2 ${cfg.dotClass}`} />
             </span>
-            {agent.exposure && agent.exposure !== "unknown" && (
-              <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded border bg-primary/10 text-primary border-primary/20">
-                {agent.exposure}
-              </span>
-            )}
-            {agent.alertCount > 0 && (
-              <div className="flex items-center gap-1.5 px-2 py-1 rounded bg-status-warning/10 border border-status-warning/20">
-                <AlertTriangle className="h-3.5 w-3.5 text-status-warning" />
-                <span className="text-xs font-mono text-status-warning">{agent.alertCount}</span>
-              </div>
-            )}
-            <span className={`orion-badge ${tier.badgeClass}`}>{tier.label}</span>
+            <span className={`text-[10px] font-mono ${cfg.text}`}>{cfg.label}</span>
           </div>
         </div>
 
-        {/* Dynamic parent link */}
+        {/* Badges row — standardized order */}
+        <div className="ml-[46px] mb-2">
+          <AgentBadges agent={agent} />
+        </div>
+
+        {/* Parent link */}
         {agent.parentAgent && (
-          <div className="flex items-center gap-1.5 ml-[52px] mb-2 text-[10px] font-mono text-muted-foreground/30">
-            <Link2 className="h-3 w-3" />
+          <div className="flex items-center gap-1.5 ml-[46px] mb-2 text-[10px] font-mono text-muted-foreground/25">
+            <Link2 className="h-2.5 w-2.5" />
             <span>Vinculado a {agent.parentAgent}</span>
           </div>
         )}
 
-        <div className="flex items-start gap-3 mb-4 ml-[52px]">
-          <Activity className="h-3.5 w-3.5 text-muted-foreground/25 shrink-0 mt-0.5" />
-          <span className="text-xs text-foreground/55 leading-relaxed">{agent.currentTask}</span>
-          <span className="text-[10px] font-mono text-muted-foreground/25 shrink-0 ml-auto">{agent.currentTaskAge}</span>
-        </div>
+        {/* Alert count */}
+        {agent.alertCount > 0 && (
+          <div className="flex items-center gap-1.5 ml-[46px] mb-2 px-2 py-1 rounded bg-status-warning/8 border border-status-warning/15 w-fit">
+            <AlertTriangle className="h-3 w-3 text-status-warning/70" />
+            <span className="text-[10px] font-mono text-status-warning/70">{agent.alertCount} alertas</span>
+          </div>
+        )}
 
-        {(agent.dependsOn.length > 0 || agent.feeds.length > 0) && (
-          <div className="flex items-center gap-4 mb-4 ml-[52px] flex-wrap">
-            {agent.dependsOn.length > 0 && (
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] font-mono text-muted-foreground/30 uppercase">Recebe de</span>
-                {agent.dependsOn.map(dep => <span key={dep} className="text-[10px] font-mono px-2 py-0.5 rounded bg-surface-2 border border-border/30 text-foreground/50">{dep}</span>)}
-              </div>
-            )}
-            {agent.feeds.length > 0 && (
-              <div className="flex items-center gap-2">
-                <ArrowRight className="h-3.5 w-3.5 text-muted-foreground/15" />
-                <span className="text-[10px] font-mono text-muted-foreground/30 uppercase">Alimenta</span>
-                {agent.feeds.map(f => <span key={f} className="text-[10px] font-mono px-2 py-0.5 rounded bg-surface-2 border border-border/30 text-foreground/50">{f}</span>)}
-              </div>
+        {/* Current task */}
+        {agent.currentTask && (
+          <div className="flex items-start gap-2 mb-3 ml-[46px]">
+            <Activity className="h-3 w-3 text-muted-foreground/20 shrink-0 mt-0.5" />
+            <span className="text-[11px] text-foreground/45 leading-relaxed line-clamp-2">{agent.currentTask}</span>
+            {agent.currentTaskAge && (
+              <span className="text-[9px] font-mono text-muted-foreground/20 shrink-0 ml-auto">{agent.currentTaskAge}</span>
             )}
           </div>
         )}
 
-        {/* Metrics bar with load gauge */}
-        <div className="flex items-center gap-4 pt-3 border-t border-border/15 ml-[52px]">
+        {/* Metrics bar */}
+        <div className="flex items-center gap-3 pt-3 border-t border-border/10 ml-[46px]">
           {agent.status !== "offline" && agent.load > 0 && (
             <LoadGauge value={Number(agent.load)} />
           )}
-          <div className="flex items-center gap-4 flex-wrap flex-1">
-            <MetricPill icon={Zap} label="Sessões" value={String(agent.sessions)} highlight={agent.sessions > 0} />
-            <MetricPill label="Tokens" value={String(agent.tokensToday)} />
-            <MetricPill label="Disponib." value={String(agent.availability)} warn={parseFloat(String(agent.availability)) < 99} />
-            {agent.bindingStatus && agent.bindingStatus !== "unknown" && (
-              <MetricPill label="Binding" value={agent.bindingStatus} />
+          <div className="flex items-center gap-3 flex-wrap flex-1 text-[10px] font-mono text-muted-foreground/40">
+            {agent.sessions > 0 && (
+              <span><Zap className="h-3 w-3 inline mr-1 text-muted-foreground/20" />{agent.sessions} sessões</span>
             )}
+            <span>{agent.tokensToday} tokens</span>
+            <span>{agent.availability} up</span>
           </div>
         </div>
       </div>
@@ -143,18 +164,7 @@ function AgentCard({ agent, onClick }: { agent: AgentView; onClick: () => void }
   );
 }
 
-function MetricPill({ icon: Icon, label, value, highlight, warn }: {
-  icon?: React.ElementType; label: string; value: string; highlight?: boolean; warn?: boolean;
-}) {
-  return (
-    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-muted/15 border border-border/20">
-      {Icon && <Icon className="h-3 w-3 text-muted-foreground/25" />}
-      <span className="text-[10px] font-mono text-muted-foreground/40">{label}</span>
-      <span className={`text-xs font-mono font-medium ${warn ? "text-status-warning" : highlight ? "text-foreground" : "text-foreground/70"}`}>{value}</span>
-    </div>
-  );
-}
-
+/* ── Main export ── */
 export function AgentDetailCards({ agents = [] }: AgentDetailCardsProps) {
   const [selected, setSelected] = useState<AgentView | null>(null);
 
@@ -164,10 +174,10 @@ export function AgentDetailCards({ agents = [] }: AgentDetailCardsProps) {
         <div className="orion-panel-header">
           <div className="flex items-center gap-3"><div className="w-6 h-0.5 bg-muted-foreground/40 rounded-full" /><h2 className="orion-panel-title">Detalhe Operacional</h2></div>
         </div>
-        <div className="flex flex-col items-center justify-center py-16 text-center">
-          <div className="w-12 h-12 rounded-lg bg-surface-2 border border-border flex items-center justify-center mb-4"><Inbox className="h-6 w-6 text-muted-foreground/30" /></div>
-          <p className="text-sm font-medium text-muted-foreground/50">Nenhum agente registrado</p>
-          <p className="text-xs font-mono text-muted-foreground/30 mt-1.5">Aguardando conexão com API</p>
+        <div className="orion-empty">
+          <div className="orion-empty-icon"><Inbox className="h-5 w-5 text-muted-foreground/30" /></div>
+          <p className="orion-empty-title">Nenhum agente registrado</p>
+          <p className="orion-empty-subtitle">Aguardando conexão com API</p>
         </div>
       </section>
     );
@@ -182,9 +192,9 @@ export function AgentDetailCards({ agents = [] }: AgentDetailCardsProps) {
           <div className="w-6 h-0.5 bg-muted-foreground/40 rounded-full" />
           <h2 className="orion-panel-title">Detalhe Operacional</h2>
         </div>
-        <span className="text-xs font-mono text-muted-foreground/40">{agents.length} agentes</span>
+        <span className="text-[10px] font-mono text-muted-foreground/30">{agents.length} agentes</span>
       </div>
-      <div className="space-y-6">
+      <div className="space-y-5 p-1">
         {tiers.map(tier => {
           const tierAgents = agents.filter(a => a.tier === tier);
           if (tierAgents.length === 0) return null;
@@ -193,14 +203,13 @@ export function AgentDetailCards({ agents = [] }: AgentDetailCardsProps) {
           const activeCount = tierAgents.filter(a => a.status === "active").length;
           return (
             <div key={tier}>
-              <div className="flex items-center gap-3 mb-3">
-                <TierIcon className="h-4 w-4 text-muted-foreground/40" />
-                <span className="text-xs font-mono uppercase tracking-widest text-muted-foreground/40">{cfg.label}</span>
-                <span className="text-xs font-mono text-muted-foreground/20">{activeCount}/{tierAgents.length}</span>
-                <span className="text-[10px] text-muted-foreground/25 ml-1">— {cfg.description}</span>
-                <div className="flex-1 h-px bg-border/15" />
+              <div className="flex items-center gap-2 mb-2 px-2">
+                <TierIcon className="h-3.5 w-3.5 text-muted-foreground/30" />
+                <span className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground/35">{cfg.label}</span>
+                <span className="text-[9px] font-mono text-muted-foreground/20">{activeCount}/{tierAgents.length}</span>
+                <div className="flex-1 h-px bg-border/10" />
               </div>
-              <div className="space-y-2.5">
+              <div className="space-y-2">
                 {tierAgents.map(agent => <AgentCard key={agent.id} agent={agent} onClick={() => setSelected(agent)} />)}
               </div>
             </div>
