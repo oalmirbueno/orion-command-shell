@@ -1,27 +1,21 @@
 import { useNavigate } from "react-router-dom";
-import { Bot, Crown, Cpu, Link2, Archive, ChevronRight, Zap, WifiOff } from "lucide-react";
+import { Bot, Crown, Archive, ChevronRight, Link2 } from "lucide-react";
 import type { AgentNode } from "@/domains/agents/types";
-
-/**
- * Phase Architecture — fully dynamic from backend discovery.
- * No hardcoded agent IDs or names.
- * Groups by structural status (official vs legacy) and shows parentAgent links.
- */
 
 interface PhaseArchitectureProps {
   agents: AgentNode[];
 }
 
-const runtimeDot: Record<string, { dot: string; label: string }> = {
+const runtimeLabel: Record<string, { dot: string; label: string }> = {
   online: { dot: "bg-status-online", label: "Online" },
-  active: { dot: "bg-status-online", label: "Online" },
-  idle: { dot: "bg-status-online", label: "Idle" },
+  idle: { dot: "bg-muted-foreground/40", label: "Idle" },
   offline: { dot: "bg-status-critical", label: "Offline" },
-  "no-data": { dot: "bg-muted-foreground/30", label: "Sem dados" },
+  "no-data": { dot: "bg-muted-foreground/20", label: "Sem dados" },
 };
 
 function getRuntimeKey(agent: AgentNode): string {
-  if (agent.status === "active" || agent.status === "idle") return "online";
+  if (agent.status === "active") return "online";
+  if (agent.status === "idle") return "idle";
   if (agent.status === "offline") return "offline";
   return "no-data";
 }
@@ -61,28 +55,27 @@ export function PhaseArchitecture({ agents = [] }: PhaseArchitectureProps) {
           <div className="w-6 h-0.5 bg-primary rounded-full" />
           <h2 className="orion-panel-title">Arquitetura de Agentes</h2>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-mono text-primary/60">
-            {officialAgents.length} ativos · {legacyAgents.length} legados
+        <div className="flex items-center gap-3">
+          <span className="text-[10px] font-mono text-muted-foreground/40">
+            {officialAgents.length} oficiais · {legacyAgents.length} legados
           </span>
           <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/30" />
         </div>
       </div>
 
-      <div className="p-4 space-y-4">
+      <div className="p-4 space-y-3">
         {/* Official agents */}
         {officialAgents.length > 0 && (
           <div>
-            <div className="flex items-center gap-2 mb-2.5 px-1">
-              <Crown className="h-3.5 w-3.5 text-primary" />
-              <span className="text-[10px] font-mono uppercase tracking-widest text-primary/60 font-semibold">Ativos Oficiais</span>
-              <div className="flex-1 h-px bg-border/20" />
+            <div className="flex items-center gap-2 mb-2 px-1">
+              <Crown className="h-3 w-3 text-primary/60" />
+              <span className="text-[10px] font-mono uppercase tracking-widest text-primary/50 font-medium">Oficiais</span>
+              <div className="flex-1 h-px bg-border/15" />
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {officialAgents.map((agent) => {
                 const rKey = getRuntimeKey(agent);
-                const rdot = runtimeDot[rKey] || runtimeDot["no-data"];
-                const hasParent = !!agent.parentAgent;
+                const rt = runtimeLabel[rKey] || runtimeLabel["no-data"];
                 const parentName = agent.parentAgent
                   ? agents.find(a => a.id === agent.parentAgent)?.name || agent.parentAgent
                   : null;
@@ -92,35 +85,32 @@ export function PhaseArchitecture({ agents = [] }: PhaseArchitectureProps) {
                     key={agent.id}
                     className={`rounded-lg border px-4 py-3 cursor-pointer hover:bg-accent/20 transition-colors ${
                       agent.tier === "orchestrator"
-                        ? "border-primary/20 bg-primary/[0.03]"
-                        : "border-border/40"
+                        ? "border-primary/20 bg-primary/[0.02]"
+                        : "border-border/30"
                     }`}
                     onClick={() => navigate("/agents")}
                   >
-                    <div className="flex items-center gap-2.5 mb-1">
-                      <div className={`w-2 h-2 rounded-full ${rdot.dot}`} />
-                      <span className="text-sm font-semibold text-foreground">{agent.name}</span>
-                      {agent.exposure && agent.exposure !== "unknown" && (
-                        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-primary/10 text-primary border border-primary/20 ml-auto">
-                          {agent.exposure}
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-xs text-muted-foreground/50 ml-[18px]">{agent.role}</p>
-                    <div className="flex items-center gap-2 mt-1.5 ml-[18px]">
-                      <span className={`text-[10px] font-mono ${rKey === "online" ? "text-status-online" : rKey === "offline" ? "text-status-critical" : "text-muted-foreground/30"}`}>
-                        {rdot.label}
+                    <div className="flex items-center gap-2 mb-1">
+                      <div className={`w-2 h-2 rounded-full shrink-0 ${rt.dot}`} />
+                      <span className="text-sm font-semibold text-foreground truncate">{agent.name}</span>
+                      <span className={`text-[10px] font-mono ml-auto shrink-0 ${rKey === "online" ? "text-status-online/70" : rKey === "offline" ? "text-status-critical/70" : "text-muted-foreground/30"}`}>
+                        {rt.label}
                       </span>
-                      {agent.activeSessions > 0 && (
-                        <span className="text-[10px] font-mono text-primary/60">{agent.activeSessions} sessões</span>
-                      )}
-                      {parentName && (
-                        <div className="flex items-center gap-1 text-[10px] font-mono text-muted-foreground/30">
-                          <Link2 className="h-3 w-3" />
-                          <span>→ {parentName}</span>
-                        </div>
-                      )}
                     </div>
+                    <p className="text-[11px] text-muted-foreground/45 ml-4 leading-relaxed">{agent.role}</p>
+                    {(agent.activeSessions > 0 || parentName) && (
+                      <div className="flex items-center gap-3 mt-1.5 ml-4">
+                        {agent.activeSessions > 0 && (
+                          <span className="text-[10px] font-mono text-primary/50">{agent.activeSessions} sessões</span>
+                        )}
+                        {parentName && (
+                          <div className="flex items-center gap-1 text-[10px] font-mono text-muted-foreground/25">
+                            <Link2 className="h-2.5 w-2.5" />
+                            <span>{parentName}</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 );
               })}
@@ -128,29 +118,26 @@ export function PhaseArchitecture({ agents = [] }: PhaseArchitectureProps) {
           </div>
         )}
 
-        {/* Legacy agents */}
+        {/* Legacy agents — compact */}
         {legacyAgents.length > 0 && (
           <div>
-            <div className="flex items-center gap-2 mb-2.5 px-1">
-              <Archive className="h-3.5 w-3.5 text-muted-foreground/40" />
-              <span className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground/30 font-semibold">Legados</span>
-              <div className="flex-1 h-px bg-border/15" />
+            <div className="flex items-center gap-2 mb-2 px-1">
+              <Archive className="h-3 w-3 text-muted-foreground/30" />
+              <span className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground/25 font-medium">Legados</span>
+              <div className="flex-1 h-px bg-border/10" />
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            <div className="flex flex-wrap gap-2">
               {legacyAgents.map((agent) => {
                 const rKey = getRuntimeKey(agent);
-                const rdot = runtimeDot[rKey] || runtimeDot["no-data"];
+                const rt = runtimeLabel[rKey] || runtimeLabel["no-data"];
                 return (
                   <div
                     key={agent.id}
-                    className="rounded-lg border border-border/25 px-3 py-2.5 opacity-50 hover:opacity-70 transition-opacity cursor-pointer"
+                    className="flex items-center gap-2 rounded-md border border-border/20 px-3 py-1.5 opacity-40 hover:opacity-60 transition-opacity cursor-pointer"
                     onClick={() => navigate("/agents")}
                   >
-                    <div className="flex items-center gap-2 mb-0.5">
-                      <div className={`w-1.5 h-1.5 rounded-full ${rdot.dot}`} />
-                      <span className="text-xs font-medium text-foreground/60 truncate">{agent.name}</span>
-                    </div>
-                    <p className="text-[10px] text-muted-foreground/30 ml-[14px]">{agent.role}</p>
+                    <div className={`w-1.5 h-1.5 rounded-full ${rt.dot}`} />
+                    <span className="text-[11px] font-medium text-foreground/50">{agent.name}</span>
                   </div>
                 );
               })}
