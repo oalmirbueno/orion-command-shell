@@ -548,6 +548,11 @@ else { setLogs(filtered.map((a: any) => ({ ts: a.timestamp || "", level: a.statu
             </Sec>
           </TabsContent>
 
+          {/* ═══════ TAB: Handoffs ═══════ */}
+          <TabsContent value="handoffs" className="px-6 py-5 mt-0">
+            <HandoffsPanel agentId={agent.id} variant="compact" />
+          </TabsContent>
+
           {/* ═══════ TAB: Logs ═══════ */}
           <TabsContent value="logs" className="px-6 py-5 space-y-4 mt-0">
             <div className="flex items-center justify-between">
