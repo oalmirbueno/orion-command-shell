@@ -13,6 +13,9 @@ import { fetchAgents } from "@/domains/agents/fetcher";
 import type { AgentView } from "@/domains/agents/types";
 import { SECTOR_META, STATUS_VISUAL } from "@/components/office3d/OfficeLayout";
 import { WebGLFallback, detectWebGL } from "@/components/office3d/WebGLFallback";
+import { FloorSelector } from "@/components/office3d/FloorSelector";
+import { getFloor, type FloorId } from "@/components/office3d/OfficeFloors";
+import { HandoffsPanel } from "@/components/handoffs/HandoffsPanel";
 
 /* ── WebGL Error Boundary — promove fallback 2D em vez de tela vazia ── */
 class WebGLErrorBoundary extends Component<
@@ -40,6 +43,7 @@ const Office3DPage = () => {
   const [meetingAgents, setMeetingAgents] = useState<AgentView[]>([]);
   const [meetingActive, setMeetingActive] = useState(false);
   const [squadsOpen, setSquadsOpen] = useState(false);
+  const [activeFloor, setActiveFloor] = useState<FloorId>("all");
 
   // Detect WebGL support once on mount — switch to premium 2D fallback if missing.
   const webgl = useMemo(() => detectWebGL(), []);
@@ -77,6 +81,15 @@ const Office3DPage = () => {
   }, []);
 
   const meetingAgentIds = meetingActive ? meetingAgents.map(a => a.id) : [];
+
+  // Resolve floor → IDs visíveis + alvo de câmera. "all" desativa o filtro.
+  const floor = getFloor(activeFloor);
+  const floorFilterIds = useMemo<string[] | undefined>(() => {
+    if (activeFloor === "all") return undefined;
+    if (activeFloor === "meeting") return meetingAgentIds;
+    const list = allAgents || [];
+    return list.filter(floor.match).map(a => a.id);
+  }, [activeFloor, allAgents, meetingAgentIds, floor]);
 
   return (
     <OrionLayout title="Office 3D">
@@ -150,8 +163,16 @@ const Office3DPage = () => {
             </div>
           </div>
 
+          {/* Floor selector — derived from tier+status, no backend "floor" concept */}
+          <FloorSelector
+            active={activeFloor}
+            onChange={setActiveFloor}
+            agents={allAgents || []}
+            meetingAgentIds={meetingAgentIds}
+          />
+
           {/* Canvas */}
-          <div className="relative" style={{ height: fullscreen ? "calc(100vh - 37px)" : "560px" }}>
+          <div className="relative" style={{ height: fullscreen ? "calc(100vh - 73px)" : "560px" }}>
             {webgl.supported ? (
               <WebGLErrorBoundary onAgentClick={handleAgentClick}>
                 <Suspense fallback={<SceneOverlay state="loading" />}>
@@ -159,6 +180,9 @@ const Office3DPage = () => {
                     onAgentClick={handleAgentClick}
                     onAgentHover={handleHover}
                     meetingAgentIds={meetingAgentIds}
+                    floorFilter={floorFilterIds}
+                    cameraTarget={floor.cameraTarget}
+                    cameraDistance={floor.cameraDistance}
                   />
                 </Suspense>
               </WebGLErrorBoundary>
@@ -254,6 +278,10 @@ const Office3DPage = () => {
             })}
           </div>
         )}
+
+        {/* Handoffs — colaboração remota / passagem de tarefa entre agentes */}
+        {!fullscreen && <HandoffsPanel />}
+
 
         {/* Controls help */}
         {!fullscreen && (

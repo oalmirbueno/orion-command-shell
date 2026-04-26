@@ -44,18 +44,26 @@ export function SceneOverlay({ state, error, onRetry }: {
 
 /* ── Main Canvas ── */
 export function SceneCanvas({
-  onAgentClick, onAgentHover, meetingAgentIds,
+  onAgentClick, onAgentHover, meetingAgentIds, floorFilter, cameraTarget, cameraDistance,
 }: {
   onAgentClick?: (agent: AgentView) => void;
   onAgentHover?: (agent: AgentView | null, screenPos?: { x: number; y: number }) => void;
   meetingAgentIds?: string[];
+  /** Lista de IDs visíveis. Se omitido, mostra todos. */
+  floorFilter?: string[];
+  cameraTarget?: [number, number, number];
+  cameraDistance?: number;
 }) {
   const { data: agents, state, error, refetch } = useOrionData<AgentView[]>({
     key: "agents-page", fetcher: fetchAgents, refreshInterval: 30_000,
   });
 
-  const agentList = agents || [];
-  const deskMap = useMemo(() => assignDesks(agentList), [agentList]);
+  const allAgents = agents || [];
+  // Mantém posições de mesa estáveis baseadas em TODOS os agentes,
+  // independente do andar selecionado.
+  const deskMap = useMemo(() => assignDesks(allAgents), [allAgents]);
+  const visibleSet = floorFilter ? new Set(floorFilter) : null;
+  const agentList = visibleSet ? allAgents.filter(a => visibleSet.has(a.id)) : allAgents;
   const meetingIds = new Set(meetingAgentIds || []);
   const meetingPositions = useMemo(() => getMeetingPositions(meetingIds.size), [meetingIds.size]);
 
@@ -168,8 +176,11 @@ export function SceneCanvas({
       ))}
 
       {/* ════ CAMERA ════ */}
-      <OrbitControls enableDamping dampingFactor={0.05} minDistance={5} maxDistance={24}
-        maxPolarAngle={Math.PI / 2.15} autoRotate autoRotateSpeed={0.1} target={[0, 0.5, 0.5]} />
+      <OrbitControls enableDamping dampingFactor={0.05}
+        minDistance={Math.max(3, (cameraDistance ?? 14) - 8)}
+        maxDistance={Math.max((cameraDistance ?? 14) + 8, 24)}
+        maxPolarAngle={Math.PI / 2.15} autoRotate autoRotateSpeed={0.1}
+        target={cameraTarget ?? [0, 0.5, 0.5]} />
     </Canvas>
   );
 }

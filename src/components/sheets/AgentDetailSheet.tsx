@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { apiUrl } from "@/domains/api";
 import { toast } from "@/hooks/use-toast";
+import { HandoffsPanel } from "@/components/handoffs/HandoffsPanel";
 import type { AgentView, AgentProfile, AgentOperationalStatus, AgentScopeType } from "@/domains/agents/types";
 import { fetchAgentProfile, saveAgentProfile, type ProfileSource } from "@/domains/agents/profileStore";
 
@@ -296,6 +297,7 @@ else { setLogs(filtered.map((a: any) => ({ ts: a.timestamp || "", level: a.statu
             <TabsTrigger value="overview" className="text-xs font-mono data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">Visão Geral</TabsTrigger>
             <TabsTrigger value="config" className="text-xs font-mono data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">Configuração</TabsTrigger>
             <TabsTrigger value="operation" className="text-xs font-mono data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">Operação</TabsTrigger>
+            <TabsTrigger value="handoffs" className="text-xs font-mono data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">Handoffs</TabsTrigger>
             <TabsTrigger value="logs" className="text-xs font-mono data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">Logs</TabsTrigger>
           </TabsList>
 
@@ -545,6 +547,11 @@ else { setLogs(filtered.map((a: any) => ({ ts: a.timestamp || "", level: a.statu
                 </div>
               )}
             </Sec>
+          </TabsContent>
+
+          {/* ═══════ TAB: Handoffs ═══════ */}
+          <TabsContent value="handoffs" className="px-6 py-5 mt-0">
+            <HandoffsPanel agentId={agent.id} variant="compact" />
           </TabsContent>
 
           {/* ═══════ TAB: Logs ═══════ */}
