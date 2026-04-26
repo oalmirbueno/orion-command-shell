@@ -296,6 +296,7 @@ else { setLogs(filtered.map((a: any) => ({ ts: a.timestamp || "", level: a.statu
             <TabsTrigger value="overview" className="text-xs font-mono data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">Visão Geral</TabsTrigger>
             <TabsTrigger value="config" className="text-xs font-mono data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">Configuração</TabsTrigger>
             <TabsTrigger value="operation" className="text-xs font-mono data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">Operação</TabsTrigger>
+            <TabsTrigger value="handoffs" className="text-xs font-mono data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">Handoffs</TabsTrigger>
             <TabsTrigger value="logs" className="text-xs font-mono data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">Logs</TabsTrigger>
           </TabsList>
 
