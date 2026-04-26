@@ -59,8 +59,11 @@ export function SceneCanvas({
   });
 
   const allAgents = agents || [];
-  const agentList = floorFilter ? allAgents.filter(a => floorFilter.includes(a.id)) : allAgents;
-  const deskMap = useMemo(() => assignDesks(agentList), [agentList]);
+  // Mantém posições de mesa estáveis baseadas em TODOS os agentes,
+  // independente do andar selecionado.
+  const deskMap = useMemo(() => assignDesks(allAgents), [allAgents]);
+  const visibleSet = floorFilter ? new Set(floorFilter) : null;
+  const agentList = visibleSet ? allAgents.filter(a => visibleSet.has(a.id)) : allAgents;
   const meetingIds = new Set(meetingAgentIds || []);
   const meetingPositions = useMemo(() => getMeetingPositions(meetingIds.size), [meetingIds.size]);
 
