@@ -13,6 +13,8 @@ import { fetchAgents } from "@/domains/agents/fetcher";
 import type { AgentView } from "@/domains/agents/types";
 import { SECTOR_META, STATUS_VISUAL } from "@/components/office3d/OfficeLayout";
 import { WebGLFallback, detectWebGL } from "@/components/office3d/WebGLFallback";
+import { FloorSelector } from "@/components/office3d/FloorSelector";
+import { OFFICE_FLOORS, getFloor, type FloorId } from "@/components/office3d/OfficeFloors";
 
 /* ── WebGL Error Boundary — promove fallback 2D em vez de tela vazia ── */
 class WebGLErrorBoundary extends Component<
@@ -40,6 +42,7 @@ const Office3DPage = () => {
   const [meetingAgents, setMeetingAgents] = useState<AgentView[]>([]);
   const [meetingActive, setMeetingActive] = useState(false);
   const [squadsOpen, setSquadsOpen] = useState(false);
+  const [activeFloor, setActiveFloor] = useState<FloorId>("all");
 
   // Detect WebGL support once on mount — switch to premium 2D fallback if missing.
   const webgl = useMemo(() => detectWebGL(), []);
