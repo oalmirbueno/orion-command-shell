@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { apiUrl } from "@/domains/api";
 import { toast } from "@/hooks/use-toast";
+import { HandoffsPanel } from "@/components/handoffs/HandoffsPanel";
 import type { AgentView, AgentProfile, AgentOperationalStatus, AgentScopeType } from "@/domains/agents/types";
 import { fetchAgentProfile, saveAgentProfile, type ProfileSource } from "@/domains/agents/profileStore";
 
