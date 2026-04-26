@@ -14,6 +14,7 @@ import {
 import { apiUrl } from "@/domains/api";
 import { toast } from "@/hooks/use-toast";
 import { HandoffsPanel } from "@/components/handoffs/HandoffsPanel";
+import { AgentUploadsPanel } from "@/components/uploads/AgentUploadsPanel";
 import type { AgentView, AgentProfile, AgentOperationalStatus, AgentScopeType } from "@/domains/agents/types";
 import { fetchAgentProfile, saveAgentProfile, type ProfileSource } from "@/domains/agents/profileStore";
 
@@ -298,6 +299,7 @@ else { setLogs(filtered.map((a: any) => ({ ts: a.timestamp || "", level: a.statu
             <TabsTrigger value="config" className="text-xs font-mono data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">Configuração</TabsTrigger>
             <TabsTrigger value="operation" className="text-xs font-mono data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">Operação</TabsTrigger>
             <TabsTrigger value="handoffs" className="text-xs font-mono data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">Handoffs</TabsTrigger>
+            <TabsTrigger value="uploads" className="text-xs font-mono data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">Anexos</TabsTrigger>
             <TabsTrigger value="logs" className="text-xs font-mono data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">Logs</TabsTrigger>
           </TabsList>
 
@@ -552,6 +554,11 @@ else { setLogs(filtered.map((a: any) => ({ ts: a.timestamp || "", level: a.statu
           {/* ═══════ TAB: Handoffs ═══════ */}
           <TabsContent value="handoffs" className="px-6 py-5 mt-0">
             <HandoffsPanel agentId={agent.id} variant="compact" />
+          </TabsContent>
+
+          {/* ═══════ TAB: Anexos ═══════ */}
+          <TabsContent value="uploads" className="px-6 py-5 mt-0">
+            <AgentUploadsPanel agentId={agent.id} agentName={agent.name} />
           </TabsContent>
 
           {/* ═══════ TAB: Logs ═══════ */}
