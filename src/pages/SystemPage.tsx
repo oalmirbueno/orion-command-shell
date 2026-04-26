@@ -12,9 +12,10 @@ import { UptimeTimeline } from "@/components/system/UptimeTimeline";
 import { CronHealthPanel } from "@/components/system/CronHealthPanel";
 import { RuntimeProfilesPanel } from "@/components/system/RuntimeProfilesPanel";
 import { DoctorPanel } from "@/components/system/DoctorPanel";
+import { SecurityPanel } from "@/components/security/SecurityPanel";
 import { SystemSkeleton } from "@/components/skeletons/DomainSkeletons";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Activity, Radio, Stethoscope } from "lucide-react";
+import { Activity, Radio, Stethoscope, Shield } from "lucide-react";
 import type { SystemPageData } from "@/domains/system/types";
 import type { CronPageData } from "@/domains/cron/types";
 
@@ -54,6 +55,10 @@ const SystemPage = () => {
             <TabsTrigger value="doctor" className="text-xs font-mono data-[state=active]:bg-primary/10 data-[state=active]:text-primary px-3 py-1.5 flex items-center gap-1.5">
               <Stethoscope className="h-3 w-3" />
               Diagnóstico
+            </TabsTrigger>
+            <TabsTrigger value="security" className="text-xs font-mono data-[state=active]:bg-primary/10 data-[state=active]:text-primary px-3 py-1.5 flex items-center gap-1.5">
+              <Shield className="h-3 w-3" />
+              Segurança
             </TabsTrigger>
           </TabsList>
 
@@ -122,6 +127,10 @@ const SystemPage = () => {
 
           <TabsContent value="doctor" className="mt-0">
             <DoctorPanel />
+          </TabsContent>
+
+          <TabsContent value="security" className="mt-0">
+            <SecurityPanel />
           </TabsContent>
         </Tabs>
       </div>
