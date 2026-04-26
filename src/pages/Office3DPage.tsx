@@ -162,8 +162,16 @@ const Office3DPage = () => {
             </div>
           </div>
 
+          {/* Floor selector — derived from tier+status, no backend "floor" concept */}
+          <FloorSelector
+            active={activeFloor}
+            onChange={setActiveFloor}
+            agents={allAgents || []}
+            meetingAgentIds={meetingAgentIds}
+          />
+
           {/* Canvas */}
-          <div className="relative" style={{ height: fullscreen ? "calc(100vh - 37px)" : "560px" }}>
+          <div className="relative" style={{ height: fullscreen ? "calc(100vh - 73px)" : "560px" }}>
             {webgl.supported ? (
               <WebGLErrorBoundary onAgentClick={handleAgentClick}>
                 <Suspense fallback={<SceneOverlay state="loading" />}>
@@ -171,6 +179,9 @@ const Office3DPage = () => {
                     onAgentClick={handleAgentClick}
                     onAgentHover={handleHover}
                     meetingAgentIds={meetingAgentIds}
+                    floorFilter={floorFilterIds}
+                    cameraTarget={floor.cameraTarget}
+                    cameraDistance={floor.cameraDistance}
                   />
                 </Suspense>
               </WebGLErrorBoundary>
