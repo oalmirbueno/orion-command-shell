@@ -152,15 +152,19 @@ const Office3DPage = () => {
 
           {/* Canvas */}
           <div className="relative" style={{ height: fullscreen ? "calc(100vh - 37px)" : "560px" }}>
-            <WebGLErrorBoundary>
-              <Suspense fallback={<SceneOverlay state="loading" />}>
-                <SceneCanvas
-                  onAgentClick={handleAgentClick}
-                  onAgentHover={handleHover}
-                  meetingAgentIds={meetingAgentIds}
-                />
-              </Suspense>
-            </WebGLErrorBoundary>
+            {webgl.supported ? (
+              <WebGLErrorBoundary onAgentClick={handleAgentClick}>
+                <Suspense fallback={<SceneOverlay state="loading" />}>
+                  <SceneCanvas
+                    onAgentClick={handleAgentClick}
+                    onAgentHover={handleHover}
+                    meetingAgentIds={meetingAgentIds}
+                  />
+                </Suspense>
+              </WebGLErrorBoundary>
+            ) : (
+              <WebGLFallback reason={webgl.reason} onAgentClick={handleAgentClick} />
+            )}
 
             {/* Command panel */}
             {commandAgent && (
