@@ -87,12 +87,19 @@ const Office3DPage = () => {
       <div className="space-y-4">
         <OrionBreadcrumb items={["Mission Control", "Office 3D"]} />
 
-        {/* Header */}
-        <div className="flex items-center gap-4 px-5 py-3.5 rounded-lg border border-primary/15 bg-primary/5">
-          <div className="w-9 h-9 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center">
+        {/* Header — premium visual concept reference */}
+        <div
+          className="relative flex items-center gap-4 px-5 py-3.5 rounded-lg border border-primary/15 bg-primary/5 overflow-hidden"
+          style={{
+            backgroundImage: "linear-gradient(90deg, hsl(var(--background)/0.85) 0%, hsl(var(--background)/0.55) 60%, hsl(var(--background)/0.2) 100%), url(/orion-assets/orion-office-3d-visual-concept.png)",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
+        >
+          <div className="w-9 h-9 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center backdrop-blur-sm">
             <Box className="h-4.5 w-4.5 text-primary" />
           </div>
-          <div className="flex-1">
+          <div className="flex-1 relative z-10">
             <div className="flex items-center gap-2.5">
               <h2 className="text-sm font-semibold text-foreground">Escritório Operacional 3D</h2>
               <span className="orion-badge orion-badge-success">Live</span>
@@ -103,7 +110,7 @@ const Office3DPage = () => {
               )}
             </div>
             <p className="text-xs font-mono text-muted-foreground mt-0.5">
-              Equipe materializada · Status em tempo real · Comando espacial
+              Equipe materializada · Status real via API · Sem simulação
             </p>
           </div>
         </div>
