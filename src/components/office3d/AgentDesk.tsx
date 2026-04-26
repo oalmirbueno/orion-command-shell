@@ -81,8 +81,11 @@ export function AgentDesk({ agent, desk, inMeeting, meetingPos, onClick, onHover
   const groupRef = useRef<THREE.Group>(null);
   const ringRef = useRef<THREE.Mesh>(null);
   const targetPos = inMeeting && meetingPos ? meetingPos : desk.position;
-  const isActive = agent.status === "active";
-  const hasTask = agent.currentTask !== "Sem tarefa ativa";
+  // Real-data only: avoid simulating work when API doesn't confirm activity.
+  const hasTask = !!agent.currentTask && agent.currentTask !== "Sem tarefa ativa" && agent.currentTask !== "—";
+  const isActive = agent.status === "active" && hasTask;
+  const isIdle = agent.status === "idle";
+  const isOffline = agent.status === "offline";
 
   useFrame((_, delta) => {
     if (!groupRef.current) return;
@@ -124,8 +127,8 @@ export function AgentDesk({ agent, desk, inMeeting, meetingPos, onClick, onHover
           {/* Primary monitor */}
           <mesh position={[0, 0.5, -0.18]} castShadow>
             <boxGeometry args={[0.5, 0.35, 0.012]} />
-            <meshStandardMaterial color={tierColor} emissive={tierColor}
-              emissiveIntensity={isActive ? 0.2 : 0.06} transparent opacity={0.5} roughness={0.1} />
+            <meshStandardMaterial color={isOffline ? "#3a3a55" : tierColor} emissive={isOffline ? "#000000" : tierColor}
+              emissiveIntensity={isActive ? 0.22 : isIdle ? 0.04 : 0} transparent opacity={isOffline ? 0.25 : 0.5} roughness={0.1} />
           </mesh>
           <mesh position={[0, 0.5, -0.195]} castShadow>
             <boxGeometry args={[0.54, 0.39, 0.012]} />
@@ -138,8 +141,8 @@ export function AgentDesk({ agent, desk, inMeeting, meetingPos, onClick, onHover
           {/* Secondary monitor */}
           <mesh position={[0.35, 0.45, -0.15]} rotation={[0, -0.3, 0]}>
             <boxGeometry args={[0.3, 0.22, 0.01]} />
-            <meshStandardMaterial color={tierColor} emissive={tierColor}
-              emissiveIntensity={isActive ? 0.15 : 0.04} transparent opacity={0.4} roughness={0.15} />
+            <meshStandardMaterial color={isOffline ? "#3a3a55" : tierColor} emissive={isOffline ? "#000000" : tierColor}
+              emissiveIntensity={isActive ? 0.16 : isIdle ? 0.03 : 0} transparent opacity={isOffline ? 0.2 : 0.4} roughness={0.15} />
           </mesh>
           {/* Keyboard */}
           <mesh position={[0, 0.275, 0.1]}>
@@ -221,24 +224,24 @@ export function AgentDesk({ agent, desk, inMeeting, meetingPos, onClick, onHover
         </Text>
       </Billboard>
 
-      {/* ── STATUS / TASK ── */}
+      {/* ── STATUS / TASK — show real task only when active with real task ── */}
       <Billboard position={[0, 0.64, 0]} follow lockX={false} lockY={false} lockZ={false}>
         <Text fontSize={0.07} color={sv.color} anchorX="center" anchorY="bottom"
           outlineWidth={0.01} outlineColor="#2a2a48" font={undefined} maxWidth={1.6} fillOpacity={0.85}>
-          {isActive && hasTask ? `⚡ ${agent.currentTask.slice(0, 30)}` : sv.label}
+          {isActive ? `⚡ ${agent.currentTask.slice(0, 30)}` : sv.label}
         </Text>
       </Billboard>
 
-      {/* ── PARTICLES ── */}
+      {/* ── PARTICLES — only when actually working ── */}
       {isActive && <ActiveParticles color={tierColor} count={3} />}
 
       {/* ── ALERT ── */}
       <AlertBadge count={agent.alertCount} />
 
-      {/* ── DESK LIGHT ── */}
-      {agent.status !== "offline" && (
+      {/* ── DESK LIGHT — only when actively working ── */}
+      {isActive && (
         <pointLight position={[0, 1.0, 0]} color={tierColor}
-          intensity={isActive ? 0.18 : 0.06} distance={1.5} decay={2} />
+          intensity={0.18} distance={1.5} decay={2} />
       )}
     </group>
   );
