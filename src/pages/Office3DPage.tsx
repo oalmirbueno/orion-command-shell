@@ -41,6 +41,9 @@ const Office3DPage = () => {
   const [meetingActive, setMeetingActive] = useState(false);
   const [squadsOpen, setSquadsOpen] = useState(false);
 
+  // Detect WebGL support once on mount — switch to premium 2D fallback if missing.
+  const webgl = useMemo(() => detectWebGL(), []);
+
   // Get all agents for meeting bar
   const { data: allAgents } = useOrionData<AgentView[]>({
     key: "agents-page",
