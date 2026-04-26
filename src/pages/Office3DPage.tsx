@@ -1,7 +1,7 @@
 import { OrionLayout } from "@/components/OrionLayout";
 import { OrionBreadcrumb } from "@/components/orion";
-import { Box, Eye, Maximize2, Users, AlertTriangle, Network } from "lucide-react";
-import { Suspense, useState, useCallback, Component, type ReactNode } from "react";
+import { Box, Eye, Maximize2, Users, Network } from "lucide-react";
+import { Suspense, useState, useCallback, useMemo, Component, type ReactNode } from "react";
 import { SceneCanvas, SceneOverlay } from "@/components/office3d/SceneCanvas";
 import { AgentCommandPanel } from "@/components/office3d/AgentCommandPanel";
 import { MeetingBar } from "@/components/office3d/MeetingBar";
@@ -12,27 +12,20 @@ import { useOrionData } from "@/hooks/useOrionData";
 import { fetchAgents } from "@/domains/agents/fetcher";
 import type { AgentView } from "@/domains/agents/types";
 import { SECTOR_META, STATUS_VISUAL } from "@/components/office3d/OfficeLayout";
+import { WebGLFallback, detectWebGL } from "@/components/office3d/WebGLFallback";
 
-/* ── WebGL Error Boundary ── */
-class WebGLErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean; error: string }> {
+/* ── WebGL Error Boundary — promove fallback 2D em vez de tela vazia ── */
+class WebGLErrorBoundary extends Component<
+  { children: ReactNode; onAgentClick?: (a: AgentView) => void },
+  { hasError: boolean; error: string }
+> {
   state = { hasError: false, error: "" };
   static getDerivedStateFromError(error: Error) {
     return { hasError: true, error: error.message };
   }
   render() {
     if (this.state.hasError) {
-      return (
-        <div className="w-full h-full flex items-center justify-center bg-background">
-          <div className="text-center space-y-3">
-            <AlertTriangle className="h-6 w-6 text-status-error/60 mx-auto" />
-            <p className="text-xs font-mono text-muted-foreground/60">WebGL indisponível</p>
-            <p className="text-[10px] text-muted-foreground/40 max-w-xs">{this.state.error}</p>
-            <button onClick={() => this.setState({ hasError: false, error: "" })} className="text-xs text-primary hover:text-primary/80 transition-colors">
-              Tentar novamente
-            </button>
-          </div>
-        </div>
-      );
+      return <WebGLFallback reason={this.state.error} onAgentClick={this.props.onAgentClick} />;
     }
     return this.props.children;
   }
@@ -47,6 +40,9 @@ const Office3DPage = () => {
   const [meetingAgents, setMeetingAgents] = useState<AgentView[]>([]);
   const [meetingActive, setMeetingActive] = useState(false);
   const [squadsOpen, setSquadsOpen] = useState(false);
+
+  // Detect WebGL support once on mount — switch to premium 2D fallback if missing.
+  const webgl = useMemo(() => detectWebGL(), []);
 
   // Get all agents for meeting bar
   const { data: allAgents } = useOrionData<AgentView[]>({
@@ -156,15 +152,19 @@ const Office3DPage = () => {
 
           {/* Canvas */}
           <div className="relative" style={{ height: fullscreen ? "calc(100vh - 37px)" : "560px" }}>
-            <WebGLErrorBoundary>
-              <Suspense fallback={<SceneOverlay state="loading" />}>
-                <SceneCanvas
-                  onAgentClick={handleAgentClick}
-                  onAgentHover={handleHover}
-                  meetingAgentIds={meetingAgentIds}
-                />
-              </Suspense>
-            </WebGLErrorBoundary>
+            {webgl.supported ? (
+              <WebGLErrorBoundary onAgentClick={handleAgentClick}>
+                <Suspense fallback={<SceneOverlay state="loading" />}>
+                  <SceneCanvas
+                    onAgentClick={handleAgentClick}
+                    onAgentHover={handleHover}
+                    meetingAgentIds={meetingAgentIds}
+                  />
+                </Suspense>
+              </WebGLErrorBoundary>
+            ) : (
+              <WebGLFallback reason={webgl.reason} onAgentClick={handleAgentClick} />
+            )}
 
             {/* Command panel */}
             {commandAgent && (

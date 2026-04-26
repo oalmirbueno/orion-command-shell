@@ -10,7 +10,11 @@ import { ServicesTable } from "@/components/system/ServicesTable";
 import { StabilitySignals } from "@/components/system/StabilitySignals";
 import { UptimeTimeline } from "@/components/system/UptimeTimeline";
 import { CronHealthPanel } from "@/components/system/CronHealthPanel";
+import { RuntimeProfilesPanel } from "@/components/system/RuntimeProfilesPanel";
+import { DoctorPanel } from "@/components/system/DoctorPanel";
 import { SystemSkeleton } from "@/components/skeletons/DomainSkeletons";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Activity, Radio, Stethoscope } from "lucide-react";
 import type { SystemPageData } from "@/domains/system/types";
 import type { CronPageData } from "@/domains/cron/types";
 
@@ -34,64 +38,92 @@ const SystemPage = () => {
 
   return (
     <OrionLayout title="Infraestrutura">
-      <div className="space-y-8">
+      <div className="space-y-6">
         <OrionBreadcrumb items={["Mission Control", "Saúde da Infraestrutura"]} />
-        <OrionDataWrapper
-          state={state}
-          source={source}
-          lastUpdated={lastUpdated}
-          onRetry={refetch}
-          emptyTitle="Dados do sistema indisponíveis"
-          emptyDescription="Aguardando conexão com o backend de monitoramento"
-          skeleton={<SystemSkeleton />}
-        >
-          {page && (
-            <>
-              {/* Infra notice */}
-              <div className="rounded-lg border border-border/30 bg-surface-2/50 px-5 py-3 flex items-center gap-3 text-xs text-muted-foreground/50">
-                <span className="font-mono uppercase tracking-wider font-semibold text-muted-foreground/40">Nota</span>
-                <span>Esta página é estritamente infra/service. A trilha operacional oficial está em <a href="/activity" className="text-primary hover:underline font-medium">/activity</a>.</span>
-              </div>
 
-              {/* Health Banner with Subsystems */}
-              <div className="mt-4">
-                <InfraHealthBanner
-                  header={page.header}
-                  cronSummary={cronData?.summary ?? null}
-                  serviceCount={totalServices}
-                  runningServices={runningServices}
-                />
-              </div>
+        <Tabs defaultValue="infra" className="space-y-4">
+          <TabsList className="bg-card border border-border/30 p-1 h-auto">
+            <TabsTrigger value="infra" className="text-xs font-mono data-[state=active]:bg-primary/10 data-[state=active]:text-primary px-3 py-1.5 flex items-center gap-1.5">
+              <Activity className="h-3 w-3" />
+              Infraestrutura
+            </TabsTrigger>
+            <TabsTrigger value="profiles" className="text-xs font-mono data-[state=active]:bg-primary/10 data-[state=active]:text-primary px-3 py-1.5 flex items-center gap-1.5">
+              <Radio className="h-3 w-3" />
+              Perfis de Execução
+            </TabsTrigger>
+            <TabsTrigger value="doctor" className="text-xs font-mono data-[state=active]:bg-primary/10 data-[state=active]:text-primary px-3 py-1.5 flex items-center gap-1.5">
+              <Stethoscope className="h-3 w-3" />
+              Diagnóstico
+            </TabsTrigger>
+          </TabsList>
 
-              {/* Resource Gauges */}
-              <div className="mt-8">
-                <ResourceGauges gauges={page.gauges} />
-              </div>
+          <TabsContent value="infra" className="space-y-0 mt-0">
+            <OrionDataWrapper
+              state={state}
+              source={source}
+              lastUpdated={lastUpdated}
+              onRetry={refetch}
+              emptyTitle="Dados do sistema indisponíveis"
+              emptyDescription="Aguardando conexão com o backend de monitoramento"
+              skeleton={<SystemSkeleton />}
+            >
+              {page && (
+                <>
+                  {/* Infra notice */}
+                  <div className="rounded-lg border border-border/30 bg-surface-2/50 px-5 py-3 flex items-center gap-3 text-xs text-muted-foreground/50">
+                    <span className="font-mono uppercase tracking-wider font-semibold text-muted-foreground/40">Nota</span>
+                    <span>Esta página é estritamente infra/service. A trilha operacional oficial está em <a href="/activity" className="text-primary hover:underline font-medium">/activity</a>.</span>
+                  </div>
 
-              {/* Services + Stability + Cron Health */}
-              <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 mt-8">
-                <ServicesTable services={page.services} />
-                {cronData && cronData.jobs.length > 0 ? (
-                  <CronHealthPanel jobs={cronData.jobs} summary={cronData.summary} />
-                ) : (
-                  <StabilitySignals signals={page.signals} />
-                )}
-              </div>
+                  {/* Health Banner with Subsystems */}
+                  <div className="mt-4">
+                    <InfraHealthBanner
+                      header={page.header}
+                      cronSummary={cronData?.summary ?? null}
+                      serviceCount={totalServices}
+                      runningServices={runningServices}
+                    />
+                  </div>
 
-              {/* If we have cron AND stability, show stability below */}
-              {cronData && cronData.jobs.length > 0 && page.signals.length > 0 && (
-                <div className="mt-8">
-                  <StabilitySignals signals={page.signals} />
-                </div>
+                  {/* Resource Gauges */}
+                  <div className="mt-8">
+                    <ResourceGauges gauges={page.gauges} />
+                  </div>
+
+                  {/* Services + Stability + Cron Health */}
+                  <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 mt-8">
+                    <ServicesTable services={page.services} />
+                    {cronData && cronData.jobs.length > 0 ? (
+                      <CronHealthPanel jobs={cronData.jobs} summary={cronData.summary} />
+                    ) : (
+                      <StabilitySignals signals={page.signals} />
+                    )}
+                  </div>
+
+                  {/* If we have cron AND stability, show stability below */}
+                  {cronData && cronData.jobs.length > 0 && page.signals.length > 0 && (
+                    <div className="mt-8">
+                      <StabilitySignals signals={page.signals} />
+                    </div>
+                  )}
+
+                  {/* Uptime */}
+                  <div className="mt-8">
+                    <UptimeTimeline days={page.uptimeDays} uptimePercent={page.uptimePercent} />
+                  </div>
+                </>
               )}
+            </OrionDataWrapper>
+          </TabsContent>
 
-              {/* Uptime */}
-              <div className="mt-8">
-                <UptimeTimeline days={page.uptimeDays} uptimePercent={page.uptimePercent} />
-              </div>
-            </>
-          )}
-        </OrionDataWrapper>
+          <TabsContent value="profiles" className="mt-0">
+            <RuntimeProfilesPanel />
+          </TabsContent>
+
+          <TabsContent value="doctor" className="mt-0">
+            <DoctorPanel />
+          </TabsContent>
+        </Tabs>
       </div>
     </OrionLayout>
   );
