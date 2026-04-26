@@ -278,6 +278,10 @@ const Office3DPage = () => {
           </div>
         )}
 
+        {/* Handoffs — colaboração remota / passagem de tarefa entre agentes */}
+        {!fullscreen && <HandoffsPanel />}
+
+
         {/* Controls help */}
         {!fullscreen && (
           <div className="orion-card p-3.5">
