@@ -176,8 +176,11 @@ export function SceneCanvas({
       ))}
 
       {/* ════ CAMERA ════ */}
-      <OrbitControls enableDamping dampingFactor={0.05} minDistance={5} maxDistance={24}
-        maxPolarAngle={Math.PI / 2.15} autoRotate autoRotateSpeed={0.1} target={[0, 0.5, 0.5]} />
+      <OrbitControls enableDamping dampingFactor={0.05}
+        minDistance={Math.max(3, (cameraDistance ?? 14) - 8)}
+        maxDistance={Math.max((cameraDistance ?? 14) + 8, 24)}
+        maxPolarAngle={Math.PI / 2.15} autoRotate autoRotateSpeed={0.1}
+        target={cameraTarget ?? [0, 0.5, 0.5]} />
     </Canvas>
   );
 }
