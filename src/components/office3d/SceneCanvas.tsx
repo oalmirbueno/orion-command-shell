@@ -44,17 +44,22 @@ export function SceneOverlay({ state, error, onRetry }: {
 
 /* ── Main Canvas ── */
 export function SceneCanvas({
-  onAgentClick, onAgentHover, meetingAgentIds,
+  onAgentClick, onAgentHover, meetingAgentIds, floorFilter, cameraTarget, cameraDistance,
 }: {
   onAgentClick?: (agent: AgentView) => void;
   onAgentHover?: (agent: AgentView | null, screenPos?: { x: number; y: number }) => void;
   meetingAgentIds?: string[];
+  /** Lista de IDs visíveis. Se omitido, mostra todos. */
+  floorFilter?: string[];
+  cameraTarget?: [number, number, number];
+  cameraDistance?: number;
 }) {
   const { data: agents, state, error, refetch } = useOrionData<AgentView[]>({
     key: "agents-page", fetcher: fetchAgents, refreshInterval: 30_000,
   });
 
-  const agentList = agents || [];
+  const allAgents = agents || [];
+  const agentList = floorFilter ? allAgents.filter(a => floorFilter.includes(a.id)) : allAgents;
   const deskMap = useMemo(() => assignDesks(agentList), [agentList]);
   const meetingIds = new Set(meetingAgentIds || []);
   const meetingPositions = useMemo(() => getMeetingPositions(meetingIds.size), [meetingIds.size]);
