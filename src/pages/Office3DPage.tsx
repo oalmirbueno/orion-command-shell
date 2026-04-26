@@ -14,7 +14,7 @@ import type { AgentView } from "@/domains/agents/types";
 import { SECTOR_META, STATUS_VISUAL } from "@/components/office3d/OfficeLayout";
 import { WebGLFallback, detectWebGL } from "@/components/office3d/WebGLFallback";
 import { FloorSelector } from "@/components/office3d/FloorSelector";
-import { OFFICE_FLOORS, getFloor, type FloorId } from "@/components/office3d/OfficeFloors";
+import { getFloor, type FloorId } from "@/components/office3d/OfficeFloors";
 
 /* ── WebGL Error Boundary — promove fallback 2D em vez de tela vazia ── */
 class WebGLErrorBoundary extends Component<
