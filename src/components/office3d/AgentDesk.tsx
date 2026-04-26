@@ -81,8 +81,11 @@ export function AgentDesk({ agent, desk, inMeeting, meetingPos, onClick, onHover
   const groupRef = useRef<THREE.Group>(null);
   const ringRef = useRef<THREE.Mesh>(null);
   const targetPos = inMeeting && meetingPos ? meetingPos : desk.position;
-  const isActive = agent.status === "active";
-  const hasTask = agent.currentTask !== "Sem tarefa ativa";
+  // Real-data only: avoid simulating work when API doesn't confirm activity.
+  const hasTask = !!agent.currentTask && agent.currentTask !== "Sem tarefa ativa" && agent.currentTask !== "—";
+  const isActive = agent.status === "active" && hasTask;
+  const isIdle = agent.status === "idle";
+  const isOffline = agent.status === "offline";
 
   useFrame((_, delta) => {
     if (!groupRef.current) return;
