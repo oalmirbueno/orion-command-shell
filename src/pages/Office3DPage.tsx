@@ -81,6 +81,15 @@ const Office3DPage = () => {
 
   const meetingAgentIds = meetingActive ? meetingAgents.map(a => a.id) : [];
 
+  // Resolve floor → IDs visíveis + alvo de câmera. "all" desativa o filtro.
+  const floor = getFloor(activeFloor);
+  const floorFilterIds = useMemo<string[] | undefined>(() => {
+    if (activeFloor === "all") return undefined;
+    if (activeFloor === "meeting") return meetingAgentIds;
+    const list = allAgents || [];
+    return list.filter(floor.match).map(a => a.id);
+  }, [activeFloor, allAgents, meetingAgentIds, floor]);
+
   return (
     <OrionLayout title="Office 3D">
       <div className="space-y-4">
